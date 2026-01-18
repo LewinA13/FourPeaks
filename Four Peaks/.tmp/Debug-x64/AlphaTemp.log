@@ -1,6 +1,13 @@
-﻿  graphics.cpp
-  AlphaTemp.vcxproj -> C:\Users\arunl\Desktop\FourPeaks\Four Peaks\bin\Debug-x64\AlphaTemp.exe
-  8 File(s) copied
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1129,5): warning MSB8027: Two or more files with the name of main.cpp will produce outputs to the same location. This can lead to an incorrect build result.  The files involved are ..\Source\main.cpp, main.cpp.
+  main.cpp
+  gamestate.cpp
+  graphics.cpp
+  main.cpp
+  player.cpp
+  Generating Code...
+C:\CSD_1401\FourPeaks\Four Peaks\.tmp\Debug-x64\main.obj : warning LNK4042: object specified more than once; extras ignored
+  AlphaTemp.vcxproj -> C:\CSD_1401\FourPeaks\Four Peaks\bin\Debug-x64\AlphaTemp.exe
+  25 File(s) copied
   1 File(s) copied
   1 File(s) copied
   1 File(s) copied

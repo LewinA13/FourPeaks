@@ -1,13 +1,25 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\arunl\\Desktop\\FourPeaks\\Four Peaks\\",
+  "WorkspaceRootPath": "C:\\CSD_1401\\FourPeaks\\Four Peaks\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|C:\\Users\\arunl\\Desktop\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\player.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|solutionrelative:AlphaTemp\\player.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\gamestate.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|solutionrelative:AlphaTemp\\gamestate.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|solutionrelative:AlphaTemp\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|solutionrelative:AlphaTemp\\graphics.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|C:\\Users\\arunl\\Desktop\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{3EBB401E-29F4-4DD6-895C-AA9B43AA39D2}|AlphaTemp\\AlphaTemp.vcxproj|solutionrelative:AlphaTemp\\graphics.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
@@ -18,30 +30,68 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\main.cpp",
+              "RelativeDocumentMoniker": "AlphaTemp\\main.cpp",
+              "ToolTip": "C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\main.cpp",
+              "RelativeToolTip": "AlphaTemp\\main.cpp",
+              "ViewState": "AgIAACkAAAAAAAAAAAAAABQAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-01-18T06:06:12.312Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "graphics.hpp",
-              "DocumentMoniker": "C:\\Users\\arunl\\Desktop\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.hpp",
-              "RelativeDocumentMoniker": "AlphaTemp\\graphics.hpp",
-              "ToolTip": "C:\\Users\\arunl\\Desktop\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.hpp",
-              "RelativeToolTip": "AlphaTemp\\graphics.hpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAQAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-01-16T13:52:13.29Z",
+              "Title": "gamestate.cpp",
+              "DocumentMoniker": "C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\gamestate.cpp",
+              "RelativeDocumentMoniker": "AlphaTemp\\gamestate.cpp",
+              "ToolTip": "C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\gamestate.cpp",
+              "RelativeToolTip": "AlphaTemp\\gamestate.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-01-18T06:06:09.536Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "player.cpp",
+              "DocumentMoniker": "C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\player.cpp",
+              "RelativeDocumentMoniker": "AlphaTemp\\player.cpp",
+              "ToolTip": "C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\player.cpp",
+              "RelativeToolTip": "AlphaTemp\\player.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-01-18T06:06:05.953Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "graphics.hpp",
+              "DocumentMoniker": "C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.hpp",
+              "RelativeDocumentMoniker": "AlphaTemp\\graphics.hpp",
+              "ToolTip": "C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.hpp",
+              "RelativeToolTip": "AlphaTemp\\graphics.hpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-01-16T13:52:13.29Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "graphics.cpp",
-              "DocumentMoniker": "C:\\Users\\arunl\\Desktop\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.cpp",
+              "DocumentMoniker": "C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.cpp",
               "RelativeDocumentMoniker": "AlphaTemp\\graphics.cpp",
-              "ToolTip": "C:\\Users\\arunl\\Desktop\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.cpp",
+              "ToolTip": "C:\\CSD_1401\\FourPeaks\\Four Peaks\\AlphaTemp\\graphics.cpp",
               "RelativeToolTip": "AlphaTemp\\graphics.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAoAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-01-16T13:51:57.717Z",
               "EditorCaption": ""
