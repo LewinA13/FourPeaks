@@ -1,85 +1,20 @@
 #include "player.hpp"
+#include "graphics.hpp"
 
 
 void PlayerInit(Player& p)
 {
     p.pos = { 100.0f, 100.0f };
-    p.size = { 400.0f, 400.0f };
+    p.size = { 40.0f, 40.0f };
+    p.speed = 200.0f;
+    p.size = { 230.0f, 180.0f };
     p.speed = 400.0f;
 
     p.velY = 0.0f;
     p.grounded = false;
 
-    //hy test
-    p.horzSpeed = 0.0f;
-
-
-    p.gravity = -2000.0f;     
-    p.terminalVel = -1200.0f; 
-}
-
-void PlayerUpdate(Player& p, float dt) {
-    (void)dt;
-
-
-
-    // ===================== HORIZONTAL INPUT (A/D) =====================
-    float moveX = 0.0f;
-
-    if (AEInputCheckCurr(AEVK_A)) moveX -= 1.0f;
-    if (AEInputCheckCurr(AEVK_D)) moveX += 1.0f;
-
-    // ===================== Horizontal Movement (Acce/Decel) (Ground/Air) =====================
-    // Apply different acceleration/deceleration on ground/air
-    float accel = p.grounded ? 8.0f : 4.0f;
-    float decel = p.grounded ? 4.0f : 2.0f;
-
-    // Set a speed limit to clamp horinzontal speed
-    float maxHorzSpeed = 2.0f;
-    float minHorzSpeed = -2.0f;
-
-
-    // if user pressing A/D, accelerate
-    if (moveX != 0.0f) {
-        p.horzSpeed += moveX * accel * dt;
-    }
-    else {
-        // if user not pressing, decelerate
-        if (p.horzSpeed > 0) {
-            p.horzSpeed -= decel * dt;
-            /*
-                avoid p.horzSpeed stuck at some value greater than 0 but after calculating less than 0, and never equal 0
-                E.X: p.horzSpeed = 0.1, 
-                       0.1 -= 3.0f*0.0167, get -0.067
-            */
-            if (p.horzSpeed < 0) p.horzSpeed = 0;  
-        }
-        else if (p.horzSpeed < 0) {
-            p.horzSpeed += decel * dt;
-            /*
-                avoid p.horzSpeed stuck at some value less than 0 but after calculating greater than 0, and never equal 0
-                E.X: p.horzSpeed = -0.1,
-                        -0.1 += 3.0f*0.0167, get 0.0499
-            */
-            if (p.horzSpeed > 0) p.horzSpeed = 0;  
-        }
-    }
-
-    // Clamp horzSpeed between in maxHorzSpeed and minHorzSpeed
-    if (p.horzSpeed > maxHorzSpeed) {
-        p.horzSpeed = maxHorzSpeed;
-    }
-    else if (p.horzSpeed < minHorzSpeed){
-        p.horzSpeed = minHorzSpeed;
-    }
-
-    p.pos.x += p.horzSpeed * p.speed * dt;
-
-
-
-
-    // ===================== GRAVITY (VERTICAL) =====================
-    p.gravity = -2000.0f;     
+    p.gravity = -2000.0f;
+    p.terminalVel = -1200.0f;
     p.terminalVel = -1200.0f;
 
     p.jumpVel = 950.0f;
@@ -104,7 +39,7 @@ void PlayerUpdate(Player& p, float dt) {
     p.runFrame = 0;
     p.runFrameCount = 10;     // run sheet has 10 frames
     p.runAnimTimer = 0.0f;
-    p.runFrameTime = 0.08f;   // faster than idle
+    p.runFrameTime = 0.1f;   // faster than idle
 
     p.facing = 1;
 
@@ -124,7 +59,11 @@ void PlayerUpdate(Player& p, float dt) {
     p.fallAnimTimer = 0.0f;
     p.fallFrameTime = 0.08f;   // can change
 
+    //hy test
+    p.horzSpeed = 0.0f;
 }
+
+
 
 void PlayerUpdate(Player& p, float dt) {
 
@@ -141,7 +80,51 @@ void PlayerUpdate(Player& p, float dt) {
         p.facing = 1;
     }
 
-    p.pos.x += moveX * p.speed * dt;
+    // ===================== Horizontal Movement (Acce/Decel) (Ground/Air) =====================
+    // Apply different acceleration/deceleration on ground/air
+    float accel = p.grounded ? 10.0f : 8.0f;
+    float decel = p.grounded ? 8.0f : 4.0f;
+
+    // Set a speed limit to clamp horinzontal speed
+    float maxHorzSpeed = 2.0f;
+    float minHorzSpeed = -2.0f;
+
+
+    // if user pressing A/D, accelerate
+    if (moveX != 0.0f) {
+        p.horzSpeed += moveX * accel * dt;
+    }
+    else {
+        // if user not pressing, decelerate
+        if (p.horzSpeed > 0) {
+            p.horzSpeed -= decel * dt;
+            /*
+                avoid p.horzSpeed stuck at some value greater than 0 but after calculating less than 0, and never equal 0
+                E.X: p.horzSpeed = 0.1,
+                       0.1 -= 3.0f*0.0167, get -0.067
+            */
+            if (p.horzSpeed < 0) p.horzSpeed = 0;
+        }
+        else if (p.horzSpeed < 0) {
+            p.horzSpeed += decel * dt;
+            /*
+                avoid p.horzSpeed stuck at some value less than 0 but after calculating greater than 0, and never equal 0
+                E.X: p.horzSpeed = -0.1,
+                        -0.1 += 3.0f*0.0167, get 0.0499
+            */
+            if (p.horzSpeed > 0) p.horzSpeed = 0;
+        }
+    }
+
+    // Clamp horzSpeed between in maxHorzSpeed and minHorzSpeed
+    if (p.horzSpeed > maxHorzSpeed) {
+        p.horzSpeed = maxHorzSpeed;
+    }
+    else if (p.horzSpeed < minHorzSpeed) {
+        p.horzSpeed = minHorzSpeed;
+    }
+
+    p.pos.x += p.horzSpeed * p.speed * dt;
 
     // ===================== GRAVITY (VERTICAL) =====================
 
@@ -337,7 +320,9 @@ void PlayerDraw(Player& p)
         u1 = tmp;
     }
 
-    gfx::drawSprite(tex, p.pos, 0.0f, p.size, u0, 0.0f, u1, 1.0f);
+    
+    //gfx::drawRectangle(p.pos, 0.0f, p.size, 0xFFFF0000);
+    gfx::drawSprite(tex, p.pos, 0.0f, p.size, u0, 0.3f, u1, 0.6f);
 }
 
 void PlayerShutdown(Player& p)
