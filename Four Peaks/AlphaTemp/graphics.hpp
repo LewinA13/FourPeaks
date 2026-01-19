@@ -29,4 +29,7 @@ namespace gfx
     void drawRectangle(Vec2 position, f32 rotationRad, Vec2 size, u32 color);
     void drawTriangle(Vec2 position, f32 rotationRad, Vec2 size, u32 color);
     void drawCircle(Vec2 position, f32 rotationRad, f32 radius, u32 color, int segments = 0);
+
+    // draw player sprite
+    void drawSprite(AEGfxTexture* tex, Vec2 position, f32 rotationRad, Vec2 size, f32 u0, f32 v0, f32 u1, f32 v1);
 }

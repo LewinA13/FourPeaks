@@ -11,6 +11,9 @@ namespace gfx
     static AEGfxVertexList* triMesh = nullptr;
     static AEGfxVertexList* circleMesh = nullptr;
 
+    // player sprite mesh
+    static AEGfxVertexList* spriteMesh = nullptr;
+
     static int circleSegments = 40;
 
     // ============================================
@@ -111,6 +114,27 @@ namespace gfx
         return AEGfxMeshEnd();
     }
 
+    static AEGfxVertexList* buildSpriteMesh(f32 u0, f32 v0, f32 u1, f32 v1)
+    {
+        AEGfxMeshStart();
+        const u32 white = 0xFFFFFFFF;
+
+        // 2 triangles, unit quad centered at origin
+        AEGfxTriAdd(
+            -0.5f, -0.5f, white, u0, v1,
+            0.5f, -0.5f, white, u1, v1,
+            -0.5f, 0.5f, white, u0, v0
+        );
+
+        AEGfxTriAdd(
+            0.5f, -0.5f, white, u1, v1,
+            0.5f, 0.5f, white, u1, v0,
+            -0.5f, 0.5f, white, u0, v0
+        );
+
+        return AEGfxMeshEnd();
+    }
+
     // ============================================
     // Public API
     // ============================================
@@ -129,6 +153,7 @@ namespace gfx
         if (rectMesh) { AEGfxMeshFree(rectMesh); rectMesh = nullptr; }
         if (triMesh) { AEGfxMeshFree(triMesh); triMesh = nullptr; }
         if (circleMesh) { AEGfxMeshFree(circleMesh); circleMesh = nullptr; }
+        if (spriteMesh) { AEGfxMeshFree(spriteMesh); spriteMesh = nullptr; }
     }
 
     f32 degToRad(f32 degrees)
@@ -190,5 +215,27 @@ namespace gfx
 
         Vec2 scale{ radius * 2.0f, radius * 2.0f };
         drawMesh(circleMesh, makeTransform(position, rotationRad, scale));
+    }
+
+    void drawSprite(AEGfxTexture* tex, Vec2 position, f32 rotationRad, Vec2 size,
+        f32 u0, f32 v0, f32 u1, f32 v1)
+    {
+        if (!tex) return;
+
+        // rebuild mesh for these UVs (simple + clear for now)
+        if (spriteMesh) { AEGfxMeshFree(spriteMesh); spriteMesh = nullptr; }
+        spriteMesh = buildSpriteMesh(u0, v0, u1, v1);
+
+        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+        AEGfxSetTransparency(1.0f);
+
+        // White = no tint
+        AEGfxSetColorToMultiply(1, 1, 1, 1);
+        AEGfxSetColorToAdd(0, 0, 0, 0);
+
+        AEGfxTextureSet(tex, 0, 0);
+
+        drawMesh(spriteMesh, makeTransform(position, rotationRad, size));
     }
 }
