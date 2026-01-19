@@ -17,6 +17,7 @@ struct Player
     f32 gravity;     // units/sec^2  (negative if +Y is up)
     f32 terminalVel; // max falling speed (negative)
 
+    f32 horzSpeed;
     f32 jumpVel; // jump velocity
 
     f32 coyoteTime;   // how long coyote lasts
