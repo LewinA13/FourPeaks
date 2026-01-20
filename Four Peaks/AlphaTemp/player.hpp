@@ -17,13 +17,58 @@ struct Player
     f32 gravity;     // units/sec^2  (negative if +Y is up)
     f32 terminalVel; // max falling speed (negative)
 
-    f32 horzSpeed;
+    f32 jumpVel; // jump velocity
+
+    f32 coyoteTime;   // how long coyote lasts
+    f32 coyoteTimer;  // counts down after leaving ground
+
+    f32 jumpCutMult; // extra gravity when jump not held
+
+    // ======== IDLE ANIMATION ==========
+    AEGfxTexture* idleTex;
+
+    int idleFrame;
+    int idleFrameCount;
+
+    f32 idleAnimTimer;
+    f32 idleFrameTime; // seconds per frame (e.g. 0.10f)
+
+    // ======== RUN ANIMATION ==========
+    AEGfxTexture* runTex;
+
+    int runFrame;
+    int runFrameCount;
+
+    f32 runAnimTimer;
+    f32 runFrameTime;
+
+    // Facing direction: +1 = right, -1 = left
+    int facing;
+
+    // ======== JUMP ANIMATION ==========
+    AEGfxTexture* jumpTex;
+
+    int jumpFrame;
+    int jumpFrameCount;
+
+    f32 jumpAnimTimer;
+    f32 jumpFrameTime;
+
+    // ======== FALL ANIMATION ==========
+    AEGfxTexture* fallTex;
+
+    int fallFrame;
+    int fallFrameCount;
+
+    f32 fallAnimTimer;
+    f32 fallFrameTime;
 };
 
 // function declarations (NO function bodies here)
 void PlayerInit(Player& p);
 void PlayerUpdate(Player& p, float dt);
 void PlayerDraw(Player& p);
+void PlayerShutdown(Player& p);
 
 #endif
 

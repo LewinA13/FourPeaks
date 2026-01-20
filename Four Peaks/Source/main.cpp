@@ -3,7 +3,7 @@
 
 #include <crtdbg.h> // To check for memory leaks
 #include "AEEngine.h"
-
+#include "graphics.hpp"
 
 
 // ---------------------------------------------------------------------------
@@ -26,6 +26,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	// Using custom window procedure
 	AESysInit(hInstance, nCmdShow, 1600, 900, 1, 60, false, NULL);
+	gfx::init();
 
 	// Changing the window title
 	AESysSetWindowTitle("My New Demo!");
@@ -50,6 +51,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 		// Your own rendering logic goes here
+
+
 
 
 		// Informing the system about the loop's end
