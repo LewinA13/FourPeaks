@@ -15,6 +15,7 @@
     <ClCompile Include="..\..\..\..\Downloads\main.cpp" />
     <ClCompile Include="..\..\..\..\Downloads\mainmenu.cpp" />
     <ClCompile Include="..\..\..\..\Downloads\summer_s1.cpp" />
+    <ClCompile Include="sprite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Downloads\graphics.hpp" />
