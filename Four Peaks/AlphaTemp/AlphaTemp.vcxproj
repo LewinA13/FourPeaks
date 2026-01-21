@@ -11,16 +11,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\Downloads\graphics.cpp" />
-    <ClCompile Include="..\..\..\..\Downloads\main.cpp" />
-    <ClCompile Include="..\..\..\..\Downloads\mainmenu.cpp" />
-    <ClCompile Include="..\..\..\..\Downloads\summer_s1.cpp" />
+    <ClCompile Include="graphics.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="mainmenu.cpp" />
     <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="summer_s1.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Downloads\graphics.hpp" />
-    <ClInclude Include="..\..\..\..\Downloads\mainmenu.hpp" />
-    <ClInclude Include="..\..\..\..\Downloads\summer_s1.hpp" />
+    <ClInclude Include="graphics.hpp" />
+    <ClInclude Include="mainmenu.hpp" />
+    <ClInclude Include="summer_s1.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
