@@ -27,4 +27,9 @@ namespace gfx
     void drawRectangle(Vec2 position, f32 rotationRad, Vec2 size, u32 color);
     void drawTriangle(Vec2 position, f32 rotationRad, Vec2 size, u32 color);
     void drawCircle(Vec2 position, f32 rotationRad, f32 radius, u32 color, int segments = 0);
+
+    // Draw a textured quad (sprite) using UVs in [0..1].
+    // u0,v0 = top-left, u1,v1 = bottom-right.
+    void drawSprite(AEGfxTexture* tex, Vec2 position, f32 rotationRad, Vec2 size,
+        f32 u0, f32 v0, f32 u1, f32 v1);
 }

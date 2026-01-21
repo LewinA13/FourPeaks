@@ -4,13 +4,12 @@
 
 #include "summer_s1.hpp"
 #include "AEEngine.h"
+#include "AEFrameRateController.h"
 #include "graphics.hpp"
 #include <cstdint>
 
 typedef uint32_t u32;
 extern s8 gFontId;
-
-
 
 namespace game
 {
@@ -25,15 +24,16 @@ namespace game
         AEGfxPrint(gFontId, text, x, y, scale, r, g, b, a);
     }
 
-    u32 game::SummerS1::getTileColor(int tileType) const {
-        switch (tileType) {
+    u32 SummerS1::getTileColor(int tileType) const
+    {
+        switch (tileType)
+        {
         case 1: return 0xFF224B94u;
-        case 2: return 0xFFA3B013u;  // Spikes: red
-        case 3: return 0xFF808080u;  // Wall: gray
+        case 2: return 0xFFA3B013u;
+        case 3: return 0xFF808080u;
         default: return 0x00000000u;
         }
     }
-
 
     // -------------------------------------------------------------------
     // Constructor - Design your 32x20 level here!
@@ -42,12 +42,7 @@ namespace game
         : gridVisible(true)
         , tileMap{}
     {
-        // LEVEL DESIGN: 0 = empty, 1 = solid block
-        // 32 columns wide, 20 rows tall
-        // Bottom row = Row 0, Top row = Row 19
-
         int levelLayout[gridRows][gridCols] = {
-            // Row 0 (bottom ground)
             {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
             {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
             {0,0,0,0,0,1,0,0,0,0,0,0,1,2,2,2,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0},
@@ -64,35 +59,38 @@ namespace game
             {1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0},
             {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1,1,0},
             {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
-            // Row 16-19 (empty sky)
             {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
             {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0},
             {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0},
             {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0}
         };
 
-        // Copy layout into member tileMap.
         for (int row = 0; row < gridRows; ++row)
             for (int col = 0; col < gridCols; ++col)
                 tileMap[row][col] = levelLayout[row][col];
+
+        // Spawn / initialise player for this level
+        PlayerInit(player);
     }
 
-    SummerS1::~SummerS1() = default;
+    SummerS1::~SummerS1()
+    {
+        PlayerShutdown(player);
+    }
 
     // -------------------------------------------------------------------
     // update
     // -------------------------------------------------------------------
     int SummerS1::update()
     {
+        float dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
+        PlayerUpdate(player, dt);
+
         if (AEInputCheckTriggered(AEVK_G))
-        {
             gridVisible = !gridVisible;
-        }
 
         if (AEInputCheckTriggered(AEVK_ESCAPE))
-        {
             return 2;
-        }
 
         return 0;
     }
@@ -109,10 +107,11 @@ namespace game
 
         drawTiles();
 
+        // Player on top of tiles
+        PlayerDraw(player);
+
         if (gridVisible)
-        {
             drawGrid();
-        }
 
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
@@ -122,9 +121,7 @@ namespace game
     // -------------------------------------------------------------------
     // gridToWorld
     // -------------------------------------------------------------------
-    void SummerS1::gridToWorld(int col, int row,
-        float& xWorld, float& yWorld,
-        float& cellW, float& cellH) const
+    void SummerS1::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
     {
         float minX = AEGfxGetWinMinX();
         float maxX = AEGfxGetWinMaxX();
@@ -138,32 +135,26 @@ namespace game
         yWorld = minY + row * cellH;
     }
 
-
-
-    // -------------------------------------------------------------------
-    // drawTiles
-    // -------------------------------------------------------------------
-    void game::SummerS1::drawTiles() const {
-        for (int row = 0; row < gridRows; ++row) {
-            for (int col = 0; col < gridCols; ++col) {
+    void SummerS1::drawTiles() const
+    {
+        for (int row = 0; row < gridRows; ++row)
+        {
+            for (int col = 0; col < gridCols; ++col)
+            {
                 int tileType = tileMap[row][col];
-                if (tileType > 0) {
-                    u32 tileColor = getTileColor(tileType);
-                    float xWorld, yWorld, cellW, cellH;
-                    gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
-                    gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
-                    gfx::Vec2 size{ cellW, cellH };
-                    gfx::drawRectangle(pos, 0.0f, size, tileColor);
-                }
+                if (tileType <= 0) continue;
+
+                u32 tileColor = getTileColor(tileType);
+                float xWorld, yWorld, cellW, cellH;
+                gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
+
+                gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
+                gfx::Vec2 size{ cellW, cellH };
+                gfx::drawRectangle(pos, 0.0f, size, tileColor);
             }
         }
     }
 
-
-
-    // -------------------------------------------------------------------
-    // drawGrid
-    // -------------------------------------------------------------------
     void SummerS1::drawGrid() const
     {
         const u32 gridColor = 0x80FFFFFF;
@@ -178,7 +169,6 @@ namespace game
 
         float thickness = (cellW < cellH ? cellW : cellH) * 0.04f;
 
-        // Vertical lines.
         for (int col = 0; col <= gridCols; ++col)
         {
             float x = minX + col * cellW;
@@ -187,7 +177,6 @@ namespace game
             gfx::drawRectangle(pos, 0.0f, size, gridColor);
         }
 
-        // Horizontal lines.
         for (int row = 0; row <= gridRows; ++row)
         {
             float y = minY + row * cellH;

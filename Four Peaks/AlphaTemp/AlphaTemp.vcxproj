@@ -14,6 +14,7 @@
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainmenu.cpp" />
+    <ClCompile Include="player.cpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="summer_s1.cpp" />
   </ItemGroup>
@@ -21,6 +22,9 @@
     <ClInclude Include="graphics.hpp" />
     <ClInclude Include="mainmenu.hpp" />
     <ClInclude Include="summer_s1.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="player.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

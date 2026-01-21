@@ -1,12 +1,8 @@
-
-
 // Only the .cpp includes AEGraphics.h
 #include "graphics.hpp"
-#include "AEEngine.h"   
+#include "AEEngine.h"
 #include <cmath>
 #include <cstdint>
-
-
 
 #ifndef AE_PI
 #define AE_PI 3.14159265358979323846f
@@ -20,6 +16,11 @@ namespace gfx
         AEGfxVertexList* triMesh{};
         AEGfxVertexList* circleMesh{};
         int circleSegmentsBuilt{};
+
+        // Sprite mesh (unit quad centered at origin). We rebuild only when UVs change.
+        AEGfxVertexList* spriteMesh{};
+        f32 spriteU0{}, spriteV0{}, spriteU1{}, spriteV1{};
+        bool spriteUvValid{};
     }
 
     f32 degToRad(f32 degrees)
@@ -45,19 +46,6 @@ namespace gfx
         return result;
     }
 
-    static u8 getA(u32 c) { return static_cast<u8>((c >> 24) & 0xFF); }
-    static u8 getR(u32 c) { return static_cast<u8>((c >> 16) & 0xFF); }
-    static u8 getG(u32 c) { return static_cast<u8>((c >> 8) & 0xFF); }
-    static u8 getB(u32 c) { return static_cast<u8>((c >> 0) & 0xFF); }
-
-    static u32 toAERGBA(u32 argb)
-    {
-        return (static_cast<u32>(getR(argb)) << 24) |
-            (static_cast<u32>(getG(argb)) << 16) |
-            (static_cast<u32>(getB(argb)) << 8) |
-            (static_cast<u32>(getA(argb)) << 0);
-    }
-
     void init()
     {
         // Rectangle mesh (unit square centered at origin)
@@ -80,29 +68,59 @@ namespace gfx
         // Circle mesh built lazily (first drawCircle call)
         circleMesh = nullptr;
         circleSegmentsBuilt = 0;
+
+        // Sprite mesh built lazily (first drawSprite call)
+        spriteMesh = nullptr;
+        spriteUvValid = false;
     }
 
     void shutdown()
     {
-        if (rectMesh) AEGfxMeshFree(rectMesh);
-        if (triMesh) AEGfxMeshFree(triMesh);
+        if (rectMesh)   AEGfxMeshFree(rectMesh);
+        if (triMesh)    AEGfxMeshFree(triMesh);
         if (circleMesh) AEGfxMeshFree(circleMesh);
+        if (spriteMesh) AEGfxMeshFree(spriteMesh);
 
         rectMesh = nullptr;
         triMesh = nullptr;
         circleMesh = nullptr;
         circleSegmentsBuilt = 0;
+
+        spriteMesh = nullptr;
+        spriteUvValid = false;
     }
 
     namespace
     {
         void setTintColor(u32 color)
         {
-            u8 a = static_cast<u8>((color >> 24) & 0xFF);  // Alpha
-            u8 r = static_cast<u8>((color >> 16) & 0xFF);  // Red
-            u8 g = static_cast<u8>((color >> 8) & 0xFF);   // Green
-            u8 b = static_cast<u8>((color >> 0) & 0xFF);   // Blue
+            u8 a = static_cast<u8>((color >> 24) & 0xFF);
+            u8 r = static_cast<u8>((color >> 16) & 0xFF);
+            u8 g = static_cast<u8>((color >> 8) & 0xFF);
+            u8 b = static_cast<u8>((color >> 0) & 0xFF);
+
             AEGfxSetBlendColor(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+        }
+
+        // Build a unit sprite quad mesh centered at origin using given UVs.
+        AEGfxVertexList* buildSpriteMesh(f32 u0, f32 v0, f32 u1, f32 v1)
+        {
+            AEGfxMeshStart();
+            const u32 white = 0xFFFFFFFF;
+
+            // 2 triangles, unit quad centered at origin
+            // Note: v0 is top, v1 is bottom.
+            AEGfxTriAdd(
+                -0.5f, -0.5f, white, u0, v1,
+                0.5f, -0.5f, white, u1, v1,
+                -0.5f, 0.5f, white, u0, v0);
+
+            AEGfxTriAdd(
+                0.5f, -0.5f, white, u1, v1,
+                0.5f, 0.5f, white, u1, v0,
+                -0.5f, 0.5f, white, u0, v0);
+
+            return AEGfxMeshEnd();
         }
     }
 
@@ -123,7 +141,6 @@ namespace gfx
         AEGfxSetTransform(m.m);
         AEGfxMeshDraw(rectMesh, AE_GFX_MDM_TRIANGLES);
     }
-
 
     void drawTriangle(Vec2 position, f32 rotationRad, Vec2 size, u32 color)
     {
@@ -177,5 +194,37 @@ namespace gfx
 
         setTintColor(color);
         AEGfxMeshDraw(circleMesh, AE_GFX_MDM_TRIANGLES);
+    }
+
+    void drawSprite(AEGfxTexture* tex, Vec2 position, f32 rotationRad, Vec2 size,
+        f32 u0, f32 v0, f32 u1, f32 v1)
+    {
+        if (!tex) return;
+
+        // Rebuild mesh only if UVs changed
+        if (!spriteUvValid || u0 != spriteU0 || v0 != spriteV0 || u1 != spriteU1 || v1 != spriteV1)
+        {
+            if (spriteMesh) AEGfxMeshFree(spriteMesh);
+            spriteMesh = buildSpriteMesh(u0, v0, u1, v1);
+
+            spriteU0 = u0; spriteV0 = v0; spriteU1 = u1; spriteV1 = v1;
+            spriteUvValid = true;
+        }
+
+        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+        AEGfxSetTransparency(1.0f);
+
+        // White = no tint
+        AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+        AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+
+        // Bind texture
+        AEGfxTextureSet(tex, 0, 0);
+
+        // Transform and draw
+        AEMtx33 m = makeTransform(position, rotationRad, size);
+        AEGfxSetTransform(m.m);
+        AEGfxMeshDraw(spriteMesh, AE_GFX_MDM_TRIANGLES);
     }
 }
