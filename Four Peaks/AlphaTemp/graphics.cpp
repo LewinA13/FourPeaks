@@ -1,4 +1,4 @@
-
+﻿
 
 // Only the .cpp includes AEGraphics.h
 #include "graphics.hpp"
@@ -38,10 +38,7 @@ namespace gfx
         }
     }
 
-    f32 degToRad(f32 degrees)
-    {
-        return degrees * (static_cast<f32>(AE_PI) / 180.0f);
-    }
+
 
     AEMtx33 makeTransform(Vec2 position, f32 rotationRad, Vec2 scale)
     {
@@ -74,41 +71,6 @@ namespace gfx
             (static_cast<u32>(getA(argb)) << 0);
     }
 
-    void init()
-    {
-        // Rectangle mesh (unit square centered at origin)
-        AEGfxMeshStart();
-        AEGfxTriAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f,
-            0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
-            0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 1.0f);
-        AEGfxTriAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f,
-            0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
-            -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 1.0f);
-        rectMesh = AEGfxMeshEnd();
-
-        // Triangle mesh
-        AEGfxMeshStart();
-        AEGfxTriAdd(0.0f, 0.5f, 0xFFFFFFFF, 0.5f, 1.0f,
-            -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f,
-            0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 0.0f);
-        triMesh = AEGfxMeshEnd();
-
-        // Circle mesh built lazily (first drawCircle call)
-        circleMesh = nullptr;
-        circleSegmentsBuilt = 0;
-    }
-
-    void shutdown()
-    {
-        if (rectMesh) AEGfxMeshFree(rectMesh);
-        if (triMesh) AEGfxMeshFree(triMesh);
-        if (circleMesh) AEGfxMeshFree(circleMesh);
-
-        rectMesh = nullptr;
-        triMesh = nullptr;
-        circleMesh = nullptr;
-        circleSegmentsBuilt = 0;
-    }
 
     static AEGfxVertexList* buildSpriteMesh(f32 u0, f32 v0, f32 u1, f32 v1)
     {
@@ -137,11 +99,26 @@ namespace gfx
 
     void init()
     {
-        if (rectMesh) return;
+        // Rectangle mesh (unit square centered at origin)
+        AEGfxMeshStart();
+        AEGfxTriAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f,
+            0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
+            0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 1.0f);
+        AEGfxTriAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f,
+            0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
+            -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 1.0f);
+        rectMesh = AEGfxMeshEnd();
 
-        rectMesh = buildRectangleMesh();
-        triMesh = buildTriangleMesh();
-        circleMesh = buildCircleMesh(circleSegments);
+        // Triangle mesh
+        AEGfxMeshStart();
+        AEGfxTriAdd(0.0f, 0.5f, 0xFFFFFFFF, 0.5f, 1.0f,
+            -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f,
+            0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 0.0f);
+        triMesh = AEGfxMeshEnd();
+
+        // Circle mesh built lazily (first drawCircle call)
+        circleMesh = nullptr;
+        circleSegmentsBuilt = 0;
     }
 
     void shutdown()
@@ -250,6 +227,9 @@ namespace gfx
 
         AEGfxTextureSet(tex, 0, 0);
 
-        drawMesh(spriteMesh, makeTransform(position, rotationRad, size));
+        // ✅ MISSING PART (THIS IS THE BUG)
+        AEMtx33 m = makeTransform(position, rotationRad, size);
+        AEGfxSetTransform(m.m);
+        AEGfxMeshDraw(spriteMesh, AE_GFX_MDM_TRIANGLES);
     }
 }

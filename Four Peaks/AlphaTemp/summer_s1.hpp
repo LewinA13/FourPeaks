@@ -12,7 +12,7 @@ namespace game {
         SummerS1();
         ~SummerS1();
         SummerS1(const SummerS1&) = delete;
-        int update();
+        int update(float dt);
         void draw() const;
 
     private:

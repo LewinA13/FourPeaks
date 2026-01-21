@@ -42,7 +42,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Initialise the graphics helper.
     gfx::init();
-    PlayerInit(gGame.player);
+
     // Load font once and share it.
     // Make sure this path points to a valid .ttf in your Assets folder.
     gFontId = AEGfxCreateFont("Assets/Super Mellow.ttf", 24);
@@ -64,10 +64,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     GameState currentState = GameState::MainMenu;
 
     // Game Loop
+    PlayerInit(gGame.player);
     while (gGameRunning)
     {
+
         // Begin frame.
         AESysFrameStart();
+
+        f32 dt = (f32)AEFrameRateControllerGetFrameTime();
 
         // Optionally let the window close terminate the game.
         if (AESysDoesWindowExist() == 0)
@@ -103,15 +107,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         case GameState::SummerS1:
         {
             // Update and draw the first summer stage.
-            action = summerStage.update();
+            action = summerStage.update(dt);
             summerStage.draw();
 
-			// =========================================================   GAME UPDATE  ===================================================================================
-			PlayerUpdate(gGame.player, dt);
 
-
-			// ========================================================= GAME RENDERING ===================================================================================
-			PlayerDraw(gGame.player);
 
             if (action == 2)
             {

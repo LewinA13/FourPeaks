@@ -5,7 +5,9 @@
 #include "summer_s1.hpp"
 #include "AEEngine.h"
 #include "graphics.hpp"
+#include "player.hpp"
 #include <cstdint>
+#include "gamestate.hpp"
 
 typedef uint32_t u32;
 extern s8 gFontId;
@@ -82,7 +84,7 @@ namespace game
     // -------------------------------------------------------------------
     // update
     // -------------------------------------------------------------------
-    int SummerS1::update()
+    int SummerS1::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))
         {
@@ -93,6 +95,8 @@ namespace game
         {
             return 2;
         }
+
+        PlayerUpdate(gGame.player, dt);
 
         return 0;
     }
@@ -117,6 +121,8 @@ namespace game
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
+        PlayerDraw(gGame.player);
     }
 
     // -------------------------------------------------------------------
