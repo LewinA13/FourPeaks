@@ -27,8 +27,8 @@ void PlayerInit(Player& p)
     p.idleFrameCount = 10;
 
     p.idleAnimTimer = 0.0f;
-    p.idleFrameTime = 0.10f; // 10 FPS idle animation
-
+    p.idleFrameTime = 0.1f; // 10 FPS idle animation
+    
     // running sprite initialisation
     p.runTex = AEGfxTextureLoad("Assets/player/male_hero-run.png");
 
@@ -71,6 +71,50 @@ void PlayerUpdate(Player& p, float dt) {
         moveX += 1.0f;
         p.facing = 1;
     }
+
+    // ===================== Horizontal Movement (Acce/Decel) (Ground/Air) =====================
+   // Apply different acceleration/deceleration on ground/air
+    float accel = p.grounded ? 16.0f : 8.0f;
+    float decel = p.grounded ? 8.0f : 4.0f;
+
+    // Set a speed limit to clamp horinzontal speed
+    float maxHorzSpeed = 2.0f;
+    float minHorzSpeed = -2.0f;
+
+
+    // if user pressing A/D, accelerate
+    if (moveX != 0.0f) {
+        p.horzSpeed += moveX * accel * dt;
+    }
+    else {
+        // if user not pressing, decelerate
+        if (p.horzSpeed > 0) { // if p.horzSpeed in (0, 2.0f]
+            p.horzSpeed -= decel * dt;
+            /*
+                avoid p.horzSpeed stuck at some value greater than 0 
+                but after calculating less than 0, and never equal 0
+            */
+            if (p.horzSpeed < 0) p.horzSpeed = 0;
+        }
+        else if (p.horzSpeed < 0) { // if p.horzSpeed in [-2.0f, 0)
+            p.horzSpeed += decel * dt;
+            /*
+                avoid p.horzSpeed stuck at some value less than 0 
+                but after calculating greater than 0, and never equal 0
+            */
+            if (p.horzSpeed > 0) p.horzSpeed = 0;
+        }
+    }
+
+    // Clamp horzSpeed between in maxHorzSpeed and minHorzSpeed
+    if (p.horzSpeed > maxHorzSpeed) {
+        p.horzSpeed = maxHorzSpeed;
+    }
+    else if (p.horzSpeed < minHorzSpeed) {
+        p.horzSpeed = minHorzSpeed;
+    }
+
+    p.pos.x += p.horzSpeed * p.speed * dt;
 
     p.pos.x += moveX * p.speed * dt;
 
