@@ -17,7 +17,7 @@ struct Player
     f32 gravity;     // units/sec^2  (negative if +Y is up)
     f32 terminalVel; // max falling speed (negative)
 
-    f32 horzSpeed;
+    f32 horzSpeed; // horizontal movement speed with acceleration-based smoothing
     f32 jumpVel; // jump velocity
 
     f32 coyoteTime;   // how long coyote lasts
@@ -25,7 +25,6 @@ struct Player
 
     f32 jumpCutMult; // extra gravity when jump not held
 
-    f32 horzSpeed; // horizontal movement speed with acceleration-based smoothing
 
     // ======== IDLE ANIMATION ==========
     AEGfxTexture* idleTex;
