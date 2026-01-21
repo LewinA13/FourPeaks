@@ -1,16 +1,18 @@
 #include "player.hpp"
+#include "graphics.hpp"
 
 
 void PlayerInit(Player& p)
 {
     p.pos = { 100.0f, 100.0f };
-    p.size = { 400.0f, 400.0f };
-    p.speed = 400.0f;
+    p.size = { 100.0f, 90.0f };
+    p.speed = 200.0f;
 
     p.velY = 0.0f;
     p.grounded = false;
 
-    p.gravity = -2000.0f;     
+    p.gravity = -2000.0f;
+    p.terminalVel = -1200.0f;
     p.terminalVel = -1200.0f;
 
     p.jumpVel = 950.0f;
@@ -35,7 +37,7 @@ void PlayerInit(Player& p)
     p.runFrame = 0;
     p.runFrameCount = 10;     // run sheet has 10 frames
     p.runAnimTimer = 0.0f;
-    p.runFrameTime = 0.08f;   // faster than idle
+    p.runFrameTime = 0.1f;   // faster than idle
 
     p.facing = 1;
 
@@ -51,11 +53,22 @@ void PlayerInit(Player& p)
     p.fallTex = AEGfxTextureLoad("Assets/player/male_hero-fall_loop.png");
 
     p.fallFrame = 0;
-    p.fallFrameCount = 3;      // 384x128 => 3 frames
+    p.fallFrameCount = 3;      //
     p.fallAnimTimer = 0.0f;
     p.fallFrameTime = 0.08f;   // can change
 
+    //hy test
+    p.horzSpeed = 0.0f;
+
+
+    // collider box
+    p.colliderSize = { 45.0f, 45.0f };  // literally size of collider box
+    p.spriteSize = { 140.0f, 140.0f };  // player is square sprite
+
+    p.spriteOffsetY = -50.0f;
 }
+
+
 
 void PlayerUpdate(Player& p, float dt) {
 
@@ -73,8 +86,8 @@ void PlayerUpdate(Player& p, float dt) {
     }
 
     // ===================== Horizontal Movement (Acce/Decel) (Ground/Air) =====================
-   // Apply different acceleration/deceleration on ground/air
-    float accel = p.grounded ? 16.0f : 8.0f;
+    // Apply different acceleration/deceleration on ground/air
+    float accel = p.grounded ? 10.0f : 8.0f;
     float decel = p.grounded ? 8.0f : 4.0f;
 
     // Set a speed limit to clamp horinzontal speed
@@ -88,19 +101,21 @@ void PlayerUpdate(Player& p, float dt) {
     }
     else {
         // if user not pressing, decelerate
-        if (p.horzSpeed > 0) { // if p.horzSpeed in (0, 2.0f]
+        if (p.horzSpeed > 0) {
             p.horzSpeed -= decel * dt;
             /*
-                avoid p.horzSpeed stuck at some value greater than 0 
-                but after calculating less than 0, and never equal 0
+                avoid p.horzSpeed stuck at some value greater than 0 but after calculating less than 0, and never equal 0
+                E.X: p.horzSpeed = 0.1,
+                       0.1 -= 3.0f*0.0167, get -0.067
             */
             if (p.horzSpeed < 0) p.horzSpeed = 0;
         }
-        else if (p.horzSpeed < 0) { // if p.horzSpeed in [-2.0f, 0)
+        else if (p.horzSpeed < 0) {
             p.horzSpeed += decel * dt;
             /*
-                avoid p.horzSpeed stuck at some value less than 0 
-                but after calculating greater than 0, and never equal 0
+                avoid p.horzSpeed stuck at some value less than 0 but after calculating greater than 0, and never equal 0
+                E.X: p.horzSpeed = -0.1,
+                        -0.1 += 3.0f*0.0167, get 0.0499
             */
             if (p.horzSpeed > 0) p.horzSpeed = 0;
         }
@@ -115,8 +130,6 @@ void PlayerUpdate(Player& p, float dt) {
     }
 
     p.pos.x += p.horzSpeed * p.speed * dt;
-
-    p.pos.x += moveX * p.speed * dt;
 
     // ===================== GRAVITY (VERTICAL) =====================
 
@@ -236,10 +249,11 @@ void PlayerUpdate(Player& p, float dt) {
     // Integrate velocity into position
     p.pos.y += p.velY * dt;
 
-    // ===================== GROUNDED CHECK (FLOOR) (PLATFORM IN FUTURE) =====================
+
+    // ===================== GROUNDED CHECK (FLOOR)(COLLISION) (PLATFORM IN FUTURE) =====================
     static const float GROUND_Y = -450.0f;
 
-    float halfH = p.size.y * 0.5f;
+    float halfH = p.colliderSize.y * 0.5f;
     float feetY = p.pos.y - halfH;
 
     // If feet went below the ground, snap back up
@@ -311,7 +325,20 @@ void PlayerDraw(Player& p)
         u1 = tmp;
     }
 
-    gfx::drawSprite(tex, p.pos, 0.0f, p.size, u0, 0.0f, u1, 1.0f);
+    // new variable for collider box
+    gfx::Vec2 feetWorld = { p.pos.x, p.pos.y - (p.colliderSize.y * 0.5f) };
+
+    // sprite center position so the sprite bottom sits on feetWorld
+    gfx::Vec2 drawPos;
+    drawPos.x = feetWorld.x;
+    drawPos.y = feetWorld.y + (p.spriteSize.y * 0.5f) + p.spriteOffsetY;
+
+    // collider box
+    gfx::drawRectangle(p.pos, 0.0f, p.colliderSize, 0xAA00FF00); // green collider
+    // drawing sprite mesh
+    //gfx::drawRectangle(p.pos, 0.0f, p.size, 0xFFFF0000);
+    // draw using spriteSize (visual), and full height UVs (v0=0, v1=1)
+    gfx::drawSprite(tex, drawPos, 0.0f, p.spriteSize, u0, 0.0f, u1, 1.0f);
 }
 
 void PlayerShutdown(Player& p)
