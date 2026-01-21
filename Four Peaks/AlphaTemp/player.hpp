@@ -63,6 +63,13 @@ struct Player
 
     f32 fallAnimTimer;
     f32 fallFrameTime;
+
+    // ======== COLLIDER BOX ==========
+    gfx::Vec2 colliderSize;  // physics box size (used for grounded/collision)
+    gfx::Vec2 spriteSize;    // visual size (used for drawing only)
+
+    // optional: small tweak if your art has padding
+    float spriteOffsetY;     // visual feet adjustment (usually a small number)
 };
 
 // function declarations (NO function bodies here)

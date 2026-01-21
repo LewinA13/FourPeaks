@@ -5,10 +5,8 @@
 void PlayerInit(Player& p)
 {
     p.pos = { 100.0f, 100.0f };
-    p.size = { 40.0f, 40.0f };
+    p.size = { 100.0f, 90.0f };
     p.speed = 200.0f;
-    p.size = { 230.0f, 180.0f };
-    p.speed = 400.0f;
 
     p.velY = 0.0f;
     p.grounded = false;
@@ -55,12 +53,19 @@ void PlayerInit(Player& p)
     p.fallTex = AEGfxTextureLoad("Assets/player/male_hero-fall_loop.png");
 
     p.fallFrame = 0;
-    p.fallFrameCount = 3;      // 384x128 => 3 frames
+    p.fallFrameCount = 3;      //
     p.fallAnimTimer = 0.0f;
     p.fallFrameTime = 0.08f;   // can change
 
     //hy test
     p.horzSpeed = 0.0f;
+
+
+    // collider box
+    p.colliderSize = { 45.0f, 45.0f };  // literally size of collider box
+    p.spriteSize = { 140.0f, 140.0f };  // player is square sprite
+
+    p.spriteOffsetY = -50.0f;
 }
 
 
@@ -245,10 +250,10 @@ void PlayerUpdate(Player& p, float dt) {
     p.pos.y += p.velY * dt;
 
 
-    // ===================== GROUNDED CHECK (FLOOR) (PLATFORM IN FUTURE) =====================
+    // ===================== GROUNDED CHECK (FLOOR)(COLLISION) (PLATFORM IN FUTURE) =====================
     static const float GROUND_Y = -450.0f;
 
-    float halfH = p.size.y * 0.5f;
+    float halfH = p.colliderSize.y * 0.5f;
     float feetY = p.pos.y - halfH;
 
     // If feet went below the ground, snap back up
@@ -320,9 +325,20 @@ void PlayerDraw(Player& p)
         u1 = tmp;
     }
 
-    
+    // new variable for collider box
+    gfx::Vec2 feetWorld = { p.pos.x, p.pos.y - (p.colliderSize.y * 0.5f) };
+
+    // sprite center position so the sprite bottom sits on feetWorld
+    gfx::Vec2 drawPos;
+    drawPos.x = feetWorld.x;
+    drawPos.y = feetWorld.y + (p.spriteSize.y * 0.5f) + p.spriteOffsetY;
+
+    // collider box
+    gfx::drawRectangle(p.pos, 0.0f, p.colliderSize, 0xAA00FF00); // green collider
+    // drawing sprite mesh
     //gfx::drawRectangle(p.pos, 0.0f, p.size, 0xFFFF0000);
-    gfx::drawSprite(tex, p.pos, 0.0f, p.size, u0, 0.3f, u1, 0.6f);
+    // draw using spriteSize (visual), and full height UVs (v0=0, v1=1)
+    gfx::drawSprite(tex, drawPos, 0.0f, p.spriteSize, u0, 0.0f, u1, 1.0f);
 }
 
 void PlayerShutdown(Player& p)
