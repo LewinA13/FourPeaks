@@ -12,6 +12,7 @@ struct Player
     f32 speed;
 
     f32 velY;        // vertical velocity (units/sec)
+    f32 velX;
     bool grounded;   // are we on the floor?
 
     f32 gravity;     // units/sec^2  (negative if +Y is up)

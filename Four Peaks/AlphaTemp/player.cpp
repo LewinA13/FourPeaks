@@ -1,5 +1,8 @@
 #include "player.hpp"
 #include "graphics.hpp"
+#include "collision.hpp"
+
+#include <iostream>
 
 
 void PlayerInit(Player& p)
@@ -15,7 +18,8 @@ void PlayerInit(Player& p)
     p.terminalVel = -1200.0f;
     p.terminalVel = -1200.0f;
 
-    p.jumpVel = 950.0f;
+    //p.jumpVel = 950.0f;
+    p.jumpVel = 1500.0f;
 
     p.coyoteTime = 0.08f;  // tweak: 0.06 - 0.12 feels normal
     p.coyoteTimer = 0.0f;
@@ -53,19 +57,23 @@ void PlayerInit(Player& p)
     p.fallTex = AEGfxTextureLoad("Assets/player/male_hero-fall_loop.png");
 
     p.fallFrame = 0;
-    p.fallFrameCount = 3;      //
+    p.fallFrameCount = 3;      
     p.fallAnimTimer = 0.0f;
     p.fallFrameTime = 0.08f;   // can change
 
-    //hy test
     p.horzSpeed = 0.0f;
 
 
     // collider box
     p.colliderSize = { 45.0f, 45.0f };  // literally size of collider box
+    //p.spriteSize = { 300.0f, 300.0f };  // player is square sprite
+
     p.spriteSize = { 140.0f, 140.0f };  // player is square sprite
 
+
     p.spriteOffsetY = -50.0f;
+
+
 }
 
 
@@ -105,8 +113,6 @@ void PlayerUpdate(Player& p, float dt) {
             p.horzSpeed -= decel * dt;
             /*
                 avoid p.horzSpeed stuck at some value greater than 0 but after calculating less than 0, and never equal 0
-                E.X: p.horzSpeed = 0.1,
-                       0.1 -= 3.0f*0.0167, get -0.067
             */
             if (p.horzSpeed < 0) p.horzSpeed = 0;
         }
@@ -114,8 +120,6 @@ void PlayerUpdate(Player& p, float dt) {
             p.horzSpeed += decel * dt;
             /*
                 avoid p.horzSpeed stuck at some value less than 0 but after calculating greater than 0, and never equal 0
-                E.X: p.horzSpeed = -0.1,
-                        -0.1 += 3.0f*0.0167, get 0.0499
             */
             if (p.horzSpeed > 0) p.horzSpeed = 0;
         }
@@ -129,7 +133,11 @@ void PlayerUpdate(Player& p, float dt) {
         p.horzSpeed = minHorzSpeed;
     }
 
-    p.pos.x += p.horzSpeed * p.speed * dt;
+    p.velX = p.horzSpeed * p.speed;
+    //p.pos.x += p.horzSpeed * p.speed * dt;
+    p.pos.x += p.velX* dt;
+
+
 
     // ===================== GRAVITY (VERTICAL) =====================
 
@@ -268,6 +276,8 @@ void PlayerUpdate(Player& p, float dt) {
         p.grounded = false;
     }
 
+    // ===================== COLLISION CHECK =====================
+    CollisionUpdate(p,dt);
 }
 
 

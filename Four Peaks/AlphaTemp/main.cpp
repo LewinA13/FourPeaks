@@ -11,6 +11,7 @@
 #include "mainmenu.hpp"
 #include "summer_s1.hpp"
 
+
 // Global font handle used by all states
 s8 gFontId = -1;
 
@@ -30,6 +31,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Flag to determine if the game should continue running.
     int gGameRunning = 1;
+
 
     // Initialize the Alpha Engine.
     AESysInit(hInstance, nCmdShow, 1600, 900, 1, 60, false, NULL);
@@ -63,6 +65,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Start on the main menu.
     GameState currentState = GameState::MainMenu;
 
+ 
     // Game Loop
     PlayerInit(gGame.player);
     while (gGameRunning)
