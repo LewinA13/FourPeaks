@@ -2,14 +2,15 @@
 #include "player.hpp"
 #include <iostream>
 
-struct AABB {
-    float x, y;
-    float w, h;
-};
 
 const int mapRows = 20;
 const int mapColm = 32;
- 
+
+struct TileRange{
+    int colStart, colEnd;
+    int rowStart, rowEnd;
+};
+
  int tileW = 50;
  int tileH = 45;
 
@@ -38,13 +39,15 @@ int levelLayout[20][32] = {
     {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0}
 };
 
-bool CheckCollision(float centerX, float centerY, float width, float height) {
+TileRange calTileRange(f32 x, f32 y, f32 width, f32 height) {
 
-    // player collision box: left, right, top, bottom part coordinates
-    float left = centerX - (width / 2.0f) + 0.1f;
-    float right = centerX + (width / 2.0f) - 0.1f;
-    float top = centerY + (height / 2.0f) - 0.1f;
-    float bottom = centerY - (height / 2.0f) + 0.1f;
+    TileRange box{};
+
+    //! player collision box: left, right, top, bottom part coordinates
+    float left = x - (width / 2.0f) + 0.1f;
+    float right = x + (width / 2.0f) - 0.1f;
+    float top = y + (height / 2.0f) - 0.1f;
+    float bottom = y - (height / 2.0f) + 0.1f;
 
     /*!
         find out halfWinW and halfWinH and plus on(left, right, bottom and top),
@@ -55,36 +58,57 @@ bool CheckCollision(float centerX, float centerY, float width, float height) {
     float halfWinH = (float)AEGfxGetWindowHeight() / 2.0f;
 
     //! colStart/colEnd and rowStart/colEnd are which tile player are colliding
-    int colStart = static_cast<int>((left + halfWinW) / tileW);
-    int colEnd = static_cast<int>((right + halfWinW) / tileW);
-    int rowStart = static_cast<int>((bottom + halfWinH) / tileH);
-    int rowEnd = static_cast<int>((top + halfWinH) / tileH);
+    box.colStart = static_cast<int>((left + halfWinW) / tileW);
+    box.colEnd = static_cast<int>((right + halfWinW) / tileW);
+    box.rowStart = static_cast<int>((bottom + halfWinH) / tileH);
+    box.rowEnd = static_cast<int>((top + halfWinH) / tileH);
 
-    // clamp "colstart" and "colEnd" value in (0, mapColm] 
-    if (colStart < 0) colStart = 0;
-    if (colEnd >= mapColm) colEnd = mapColm - 1;
-    // clamp "rowStart" and "rowEnd" value in (0, mapRows] 
-    if (rowStart < 0) rowStart = 0;
-    if (rowEnd >= mapRows) rowEnd = mapRows - 1;
+    //! clamp "colstart" and "colEnd" value in (0, mapColm] 
+    if (box.colStart < 0) box.colStart = 0;
+    if (box.colEnd >= mapColm) box.colEnd = mapColm - 1;
+    //! clamp "rowStart" and "rowEnd" value in (0, mapRows] 
+    if (box.rowStart < 0) box.rowStart = 0;
+    if (box.rowEnd >= mapRows) box.rowEnd = mapRows - 1;
 
-    // check if player out of screen then take as no collision and return false
-    if (colStart >= mapColm || rowStart >= mapRows || colEnd < 0 || rowEnd < 0)
+    //! check if player out of screen then take as no collision and set all to -1
+    if (box.colStart >= mapColm || box.rowStart >= mapRows || box.colEnd < 0 || box.rowEnd < 0) {
+        box.colStart = box.colEnd = box.rowStart = box.rowEnd = -1;
+    }
+
+
+    return box;
+}
+
+
+
+bool checkMapCollision(TileRange box, int levelLayout[][mapColm]) {
+
+    //! return false once member in box equal to -1, means out of screen
+    if (box.colStart == -1) {
         return false;
+    }
 
-    // start checking, if not equal 0, means collision with solid block, return true
-    for (int r = rowStart; r <= rowEnd; r++) {
-        for (int c = colStart; c <= colEnd; c++) {
+    //! start checking, if not equal 0, means collision with solid block, return true
+    for (int r = box.rowStart; r <= box.rowEnd; r++) {
+        for (int c = box.colStart; c <= box.colEnd; c++) {
             if (levelLayout[r][c] != 0) {
                 return true;
             }
         }
     }
+
+    //! return false if not collision with solid block
     return false;
 }
 
+//! This function will get player tile and check collision with maps 
+bool checkPlayerCollision(Player& player, int levelLayout[][mapColm]) {
+    TileRange box = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+    return checkMapCollision(box, levelLayout);
+}
 
+void resolvePlayerCollision(Player &player, int levelLayout[][mapColm], f32 dt) {
 
-void CollisionUpdate(Player& player, f32 dt) {
     static const float GROUND_Y = -450.0f;
 
     float currentY = player.pos.y;
@@ -93,7 +117,7 @@ void CollisionUpdate(Player& player, f32 dt) {
     player.pos.y = oldY;  
 
     //! Check whether collide with solid block
-    if (CheckCollision(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y)) {
+    if (checkPlayerCollision(player, levelLayout)) {
 
         //! Check player moving left or right and determine "push" value
         f32 push = (player.velX > 0) ? -0.5f : 0.5f;
@@ -101,7 +125,7 @@ void CollisionUpdate(Player& player, f32 dt) {
         int pushCount = 0;
 
         //! use while loops to force push player until not detect collision with solid block
-        while (CheckCollision(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y) && pushCount < 100) {
+        while (checkPlayerCollision(player, levelLayout) && pushCount < 100) {
 
             player.pos.x += push;
             pushCount++;
@@ -114,11 +138,11 @@ void CollisionUpdate(Player& player, f32 dt) {
     //! Set back player y coordinates to this frame
     player.pos.y = currentY;
 
+
     float feetY = player.pos.y - player.colliderSize.y / 2.0f;
 
     if (feetY > GROUND_Y + 10.0f) {  //! Check player bottom whether greater than "GROUND_Y", if lower, "PlayerUpdate" will handle
-        if (CheckCollision(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y)) {
-
+        if (checkPlayerCollision(player, levelLayout)) {
 
             //! Check player moving up or down and determine "push" value
             f32 push = (player.velY > 0) ? -0.5f : 0.5f;
@@ -127,7 +151,7 @@ void CollisionUpdate(Player& player, f32 dt) {
             
 
             //! use while loops to force push player until not detect collision with solid block
-            while (CheckCollision(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y) && pushCount < 100) {
+            while (checkPlayerCollision(player, levelLayout) && pushCount < 100) {
 
                 player.pos.y += push;
                 pushCount++;
@@ -140,4 +164,10 @@ void CollisionUpdate(Player& player, f32 dt) {
 
         } //! end of checking collision
     }//! end of checking player bottom
+}
+
+void CollisionUpdate(Player& player, f32 dt) {
+
+    resolvePlayerCollision(player, levelLayout,dt);
+
 }
