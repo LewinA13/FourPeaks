@@ -53,5 +53,8 @@
     <ClInclude Include="summer_s1.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sprite.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

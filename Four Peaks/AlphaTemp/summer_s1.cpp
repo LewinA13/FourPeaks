@@ -8,6 +8,9 @@
 #include "player.hpp"
 #include <cstdint>
 #include "gamestate.hpp"
+#include "sprite.hpp"
+#include <cmath>
+
 
 typedef uint32_t u32;
 extern s8 gFontId;
@@ -50,21 +53,21 @@ namespace game
 
         int levelLayout[gridRows][gridCols] = {
             // Row 0 (bottom ground)
-            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
-            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0},
-            {0,0,0,0,0,1,0,0,0,0,0,0,1,2,2,2,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0},
-            {0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0},
-            {0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0},
-            {0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-            {1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0},
-            {1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0},
-            {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,0,0,0,0,0,0,0,0},
-            {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
-            {1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0},
-            {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1,1,0},
+            {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0},
+            {6,6,6,6,6,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0},
+            {0,0,0,0,0,4,0,0,0,0,0,0,4,2,2,2,4,4,4,0,4,4,4,4,4,4,4,0,0,0,0,0},
+            {0,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,4,4,4,0,4,4,4,4,4,4,4,0,0,0,0,0},
+            {0,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,4,4,4,0,4,4,4,4,4,4,4,0,0,0,0,0},
+            {0,0,0,0,0,6,6,6,6,6,6,6,6,0,0,0,4,4,4,0,4,4,4,4,4,4,4,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,0,4,4,4,4,4,4,4,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,2,2,2,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,0,0,0,0,0,0,0,0},
+            {1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,6,4,4,4,0,0,0,0,0,0,0,0},
+            {1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,0,0,0,0,0,4,4,4,0,0,0,0,0,0,0,0},
+            {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,2,2,0,0,0,0,0,0,0,0},
+            {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0},
+            {1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0},
+            {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,0,0,0,0,1,1,1,1,1,0},
             {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
             // Row 16-19 (empty sky)
             {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
@@ -106,17 +109,33 @@ namespace game
     // -------------------------------------------------------------------
     void SummerS1::draw() const
     {
-        AEGfxSetBackgroundColor(0.3f, 0.6f, 0.8f);
+        // optional: keep or change, it will be covered by the BG image anyway
+        AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 
+        // ---- DRAW BACKGROUND FIRST ----
+        AEGfxTexture* bg = sprite::background();
+        if (bg)
+        {
+            float minX = AEGfxGetWinMinX();
+            float maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY();
+            float maxY = AEGfxGetWinMaxY();
+
+            gfx::Vec2 center{ (minX + maxX) * 0.5f, (minY + maxY) * 0.5f };
+            gfx::Vec2 size{ (maxX - minX), (maxY - minY) };
+
+            // full UVs of the image
+            gfx::drawSprite(bg, center, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+        }
+
+        // ---- NOW DRAW YOUR LEVEL ----
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
 
         drawTiles();
 
         if (gridVisible)
-        {
             drawGrid();
-        }
 
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
@@ -124,6 +143,7 @@ namespace game
 
         PlayerDraw(gGame.player);
     }
+
 
     // -------------------------------------------------------------------
     // gridToWorld
@@ -149,21 +169,63 @@ namespace game
     // -------------------------------------------------------------------
     // drawTiles
     // -------------------------------------------------------------------
-    void game::SummerS1::drawTiles() const {
-        for (int row = 0; row < gridRows; ++row) {
-            for (int col = 0; col < gridCols; ++col) {
+    void game::SummerS1::drawTiles() const
+    {
+        for (int row = 0; row < gridRows; ++row)
+        {
+            for (int col = 0; col < gridCols; ++col)
+            {
                 int tileType = tileMap[row][col];
-                if (tileType > 0) {
+                if (tileType <= 0) continue;
+
+                float xWorld{}, yWorld{}, cellW{}, cellH{};
+                gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
+
+                gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
+                gfx::Vec2 size{ cellW, cellH };
+
+
+
+                pos.x = std::round(pos.x);
+                pos.y = std::round(pos.y);
+
+                // 1) Spikes tile: draw idle.png
+                if (tileType == 2)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        // Full image UVs (v0=top, v1=bottom)
+                        gfx::drawSprite(spikeTex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    }
+                    else
+                    {
+                        // fallback if texture missing
+                        u32 tileColor = getTileColor(tileType);
+                        gfx::drawRectangle(pos, 0.0f, size, tileColor);
+                    }
+
+                    continue; // important: don't also draw tileset/rect logic below
+                }
+
+                // 2) Normal tiles: draw from tileset if it has UVs
+                float u0{}, v0{}, u1{}, v1{};
+                AEGfxTexture* tex = sprite::tileset();
+
+                if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                {
+                    gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
+                }
+                else
+                {
                     u32 tileColor = getTileColor(tileType);
-                    float xWorld, yWorld, cellW, cellH;
-                    gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
-                    gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
-                    gfx::Vec2 size{ cellW, cellH };
                     gfx::drawRectangle(pos, 0.0f, size, tileColor);
                 }
+
             }
         }
     }
+
 
 
 

@@ -7,7 +7,7 @@
 #include "graphics.hpp"    // Graphics helper for shapes and initialization
 #include "player.hpp"
 #include "gamestate.hpp"
-
+#include "sprite.hpp"
 #include "mainmenu.hpp"
 #include "summer_s1.hpp"
 
@@ -42,6 +42,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Initialise the graphics helper.
     gfx::init();
+
+	// Initialize sprite system.    
+    sprite::init();
 
     // Load font once and share it.
     // Make sure this path points to a valid .ttf in your Assets folder.
@@ -92,7 +95,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             if (action == 1)
             {
                 // Go to Summer stage.
-                AESysReset();
+                // AESysReset();
                 currentState = GameState::SummerS1;
             }
             else if (action == 2)
@@ -115,7 +118,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             if (action == 2)
             {
                 // Return to main menu from level.
-                AESysReset();
+                // AESysReset();
                 currentState = GameState::MainMenu;
             }
             else if (action == 3)
@@ -140,6 +143,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         AEGfxDestroyFont(gFontId);
         gFontId = -1;
     }
+
+	// Shut down sprite helper.
+    sprite::shutdown();
 
     // Shut down graphics helper.
     gfx::shutdown();
