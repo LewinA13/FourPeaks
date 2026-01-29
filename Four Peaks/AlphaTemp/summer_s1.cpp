@@ -116,6 +116,7 @@ namespace game
         if (gridVisible)
         {
             drawGrid();
+            gfx::drawRectangle(gGame.player.pos, 0.0f, gGame.player.colliderSize, 0xAA00FF00); // 
         }
 
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");

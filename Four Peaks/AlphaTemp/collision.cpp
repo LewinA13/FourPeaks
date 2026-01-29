@@ -107,6 +107,12 @@ bool checkPlayerCollision(Player& player, int levelLayout[][mapColm]) {
     return checkMapCollision(box, levelLayout);
 }
 
+static bool checkAABBCollisionAt(float x, float y, float w, float h)
+{
+    TileRange box = calTileRange(x, y, w, h);
+    return checkMapCollision(box, levelLayout);
+}
+
 void resolvePlayerCollision(Player &player, int levelLayout[][mapColm], f32 dt) {
 
     static const float GROUND_Y = -450.0f;
@@ -170,4 +176,17 @@ void CollisionUpdate(Player& player, f32 dt) {
 
     resolvePlayerCollision(player, levelLayout,dt);
 
+}
+
+void CollisionUpdateWallFlags(Player& player)
+{
+    // Probe distance: small number in world units
+    const float PROBE = 2.0f;
+
+    float w = player.colliderSize.x;
+    float h = player.colliderSize.y;
+
+    // add little padding on left and right side, which checks if it overlaps with the solid tiles
+    player.onWallLeft = checkAABBCollisionAt(player.pos.x - PROBE, player.pos.y, w, h);
+    player.onWallRight = checkAABBCollisionAt(player.pos.x + PROBE, player.pos.y, w, h);
 }

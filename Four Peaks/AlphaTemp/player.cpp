@@ -1,4 +1,4 @@
-#include "player.hpp"
+﻿#include "player.hpp"
 #include "graphics.hpp"
 #include "collision.hpp"
 
@@ -9,17 +9,15 @@ void PlayerInit(Player& p)
 {
     p.pos = { 100.0f, 100.0f };
     p.size = { 100.0f, 90.0f };
-    p.speed = 200.0f;
+    p.speed = 160.0f;
 
     p.velY = 0.0f;
     p.grounded = false;
 
     p.gravity = -2000.0f;
     p.terminalVel = -1200.0f;
-    p.terminalVel = -1200.0f;
 
-    //p.jumpVel = 950.0f;
-    p.jumpVel = 1500.0f;
+    p.jumpVel = 900.0f;
 
     p.coyoteTime = 0.08f;  // tweak: 0.06 - 0.12 feels normal
     p.coyoteTimer = 0.0f;
@@ -53,6 +51,24 @@ void PlayerInit(Player& p)
     p.jumpAnimTimer = 0.0f;
     p.jumpFrameTime = 0.06f;   // can change
 
+    // wall jump
+    p.wallRegrabTimer = 0.0f;
+    p.wallRegrabTime = 0.55f;
+    p.wallHangBufferTime = 0.15f; // 
+    p.wallHangBufferTimer = 0.0f;
+    p.wallClimbSpeed = 260.0f;      // tweak
+    p.wallClimbDownSpeed = 180.0f;  // tweak
+
+    // wall slide sprite initialisation
+    p.wallSlideTex = AEGfxTextureLoad("Assets/player/male_hero-wall_slide.png");
+
+    p.wallSlideFrame = 0;
+    p.wallSlideFrameCount = 4;
+    p.wallSlideAnimTimer = 0.0f;
+    p.wallSlideFrameTime = 0.06f;
+
+
+
     // falling sprite initialisation
     p.fallTex = AEGfxTextureLoad("Assets/player/male_hero-fall_loop.png");
 
@@ -65,135 +81,380 @@ void PlayerInit(Player& p)
 
 
     // collider box
-    p.colliderSize = { 45.0f, 45.0f };  // literally size of collider box
+    p.colliderSize = { 35.0f, 45.0f };  // literally size of collider box
     //p.spriteSize = { 300.0f, 300.0f };  // player is square sprite
+    p.spriteOffsetX = 0.0f;
+    p.wallHangOffsetX = 10.0f;   // tweak until it "sticks" nicely
 
     p.spriteSize = { 140.0f, 140.0f };  // player is square sprite
-
-
     p.spriteOffsetY = -50.0f;
 
+    // wall detection
+    p.onWallLeft = false;   //player start not on the wall
+    p.onWallRight = false;
+
+    // wall movement
+    p.wallHanging = false;
+    p.wallSlideSpeed = 20.0f;       // 
+    p.wallHangGravityScale = 0.02f;  //
+    p.wallHangRequested = false;
+
+    // dashing
+    p.dashing = false;
+    p.dashTimer = 0.0f;
+    p.dashDuration = 0.15f;    // 0.12–0.18 feels good
+
+    p.dashSpeed = 950.0f;   // tweak later
+    p.dashDir = 1;
+
+    p.maxDashCount = 1;
+    p.dashCount = p.maxDashCount;
+
+    // dash animation
+    p.dashTex = AEGfxTextureLoad("Assets/player/male_hero-dash.png");
+
+    p.dashFrame = 0;
+    p.dashFrameCount = 5;      // IMPORTANT: set to the correct number of frames in the dash sheet
+    p.dashAnimTimer = 0.0f;
+    p.dashFrameTime = 0.04f;   // tweak feel later
 
 }
 
 
 
-void PlayerUpdate(Player& p, float dt) {
+void PlayerUpdate(Player& p, float dt)
+{
+    // =========================================================
+    // 0) SETUP
+    // =========================================================
+    const bool wasGrounded = p.grounded;
+    const bool jumpPressed = AEInputCheckTriggered(AEVK_SPACE);
+    const bool jumpHeld = AEInputCheckCurr(AEVK_SPACE);
 
+    const bool grabHeld = AEInputCheckCurr(AEVK_RBUTTON);
+    const bool dashPressed = AEInputCheckTriggered(AEVK_LSHIFT);
+
+    const bool pressUp = AEInputCheckCurr(AEVK_W);
+    const bool pressDown = AEInputCheckCurr(AEVK_S);
+
+    bool didWallJumpThisFrame = false;
+
+    // Safety to avoid giant dt spikes exploding physics
     if (dt > 0.05f) dt = 0.05f;
 
-    // ===================== HORIZONTAL INPUT (A/D) ===================================
+    // =========================================================
+    // 1) INPUT (read once)
+    // =========================================================
     f32 moveX = 0.0f;
-    if (AEInputCheckCurr(AEVK_A)) {
-        moveX -= 1.0f;
-        p.facing = -1;
-    }
-    if (AEInputCheckCurr(AEVK_D)) {
-        moveX += 1.0f;
-        p.facing = 1;
-    }
+    if (AEInputCheckCurr(AEVK_A)) { moveX -= 1.0f; }
+    if (AEInputCheckCurr(AEVK_D)) { moveX += 1.0f; }
 
-    // ===================== Horizontal Movement (Acce/Decel) (Ground/Air) =====================
-    // Apply different acceleration/deceleration on ground/air
-    float accel = p.grounded ? 10.0f : 8.0f;
-    float decel = p.grounded ? 8.0f : 4.0f;
-
-    // Set a speed limit to clamp horinzontal speed
-    float maxHorzSpeed = 2.0f;
-    float minHorzSpeed = -2.0f;
-
-
-    // if user pressing A/D, accelerate
-    if (moveX != 0.0f) {
-        p.horzSpeed += moveX * accel * dt;
-    }
-    else {
-        // if user not pressing, decelerate
-        if (p.horzSpeed > 0) {
-            p.horzSpeed -= decel * dt;
-            /*
-                avoid p.horzSpeed stuck at some value greater than 0 but after calculating less than 0, and never equal 0
-            */
-            if (p.horzSpeed < 0) p.horzSpeed = 0;
-        }
-        else if (p.horzSpeed < 0) {
-            p.horzSpeed += decel * dt;
-            /*
-                avoid p.horzSpeed stuck at some value less than 0 but after calculating greater than 0, and never equal 0
-            */
-            if (p.horzSpeed > 0) p.horzSpeed = 0;
-        }
-    }
-
-    // Clamp horzSpeed between in maxHorzSpeed and minHorzSpeed
-    if (p.horzSpeed > maxHorzSpeed) {
-        p.horzSpeed = maxHorzSpeed;
-    }
-    else if (p.horzSpeed < minHorzSpeed) {
-        p.horzSpeed = minHorzSpeed;
-    }
-
-    p.velX = p.horzSpeed * p.speed;
-    //p.pos.x += p.horzSpeed * p.speed * dt;
-    p.pos.x += p.velX* dt;
-
-
-
-    // ===================== GRAVITY (VERTICAL) =====================
-
-    // Coyote timer ------------ COYOTE JUMP ALLOWS PLAYER TO JUMP 0.08 SECOND AFTER FALLING OFF PLATFORM
-    if (p.grounded)
+    // dont update facing direction when wall hanging
+    if (!p.wallHanging && moveX != 0.0f)
     {
-        p.coyoteTimer = p.coyoteTime;   // refresh while on ground
+        p.facing = (moveX > 0.0f) ? 1 : -1;
+    }
+
+    
+
+    // =========================================================
+    // 2) TIMERS / BUFFERS / DASH
+    // =========================================================
+
+    // Wall regrab lockout (prevents instant re-hang after wall jump)
+    if (p.wallRegrabTimer > 0.0f)
+    {
+        p.wallRegrabTimer -= dt;
+        if (p.wallRegrabTimer < 0.0f) p.wallRegrabTimer = 0.0f;
+    }
+
+    // Coyote time + dash 
+    if (wasGrounded) // checks if you are on the ground LAST FRAME
+    {
+        p.coyoteTimer = p.coyoteTime;   // when on ground, constantly refresh coyote jump timer
+        p.dashCount = p.maxDashCount;   // refresh dash when on groud
     }
     else
     {
         p.coyoteTimer -= dt;
         if (p.coyoteTimer < 0.0f) p.coyoteTimer = 0.0f;
     }
+    const bool canCoyoteJump = (p.coyoteTimer > 0.0f);
 
-    bool canCoyoteJump = (p.coyoteTimer > 0.0f);
-
-    if (AEInputCheckTriggered(AEVK_SPACE) && (p.grounded || canCoyoteJump))
+    // =========================================================
+    // 3) DASH START (state only)
+    // =========================================================
+    if (!p.dashing && dashPressed && p.dashCount > 0) // check conditions for dash
     {
-        p.velY = p.jumpVel;
-        p.grounded = false;
-        p.coyoteTimer = 0.0f;
-        p.jumpFrame = 0;
-        p.jumpAnimTimer = 0.0f;
+        // initialize dash
+        p.dashFrame = 0;
+        p.dashAnimTimer = 0.0f;
+
+        p.dashing = true;
+        p.dashTimer = p.dashDuration;
+        p.dashCount--;
+
+        // dash direction
+        if (AEInputCheckCurr(AEVK_A))      p.dashDir = -1;
+        else if (AEInputCheckCurr(AEVK_D)) p.dashDir = +1;
+        else                              p.dashDir = p.facing;
+
+        // dash breaks wall hang
+        p.wallHanging = false;
     }
 
-    // If you're on ground and not moving up, keep velY at 0
-    if (p.grounded && p.velY <= 0.0f)
+    // =========================================================
+    // 4) HORIZONTAL MOVE (only if not dashing)
+    //    - This block owns p.horzSpeed which is used to get p.velX
+    // =========================================================
+    if (!p.dashing)
+    {
+        const f32 accel = p.grounded ? 10.0f : 8.0f;        // adjust this to make ice in winter
+        const f32 decel = p.grounded ? 8.0f : 4.0f;
+
+        const f32 maxHorzSpeed = 2.0f;
+        const f32 minHorzSpeed = -2.0f;
+
+        if (moveX != 0.0f)
+        {
+            p.horzSpeed += moveX * accel * dt;
+        }
+        else
+        {
+            if (p.horzSpeed > 0.0f)
+            {
+                p.horzSpeed -= decel * dt;
+                if (p.horzSpeed < 0.0f) p.horzSpeed = 0.0f;
+            }
+            else if (p.horzSpeed < 0.0f)
+            {
+                p.horzSpeed += decel * dt;
+                if (p.horzSpeed > 0.0f) p.horzSpeed = 0.0f;
+            }
+        }
+
+        if (p.horzSpeed > maxHorzSpeed) p.horzSpeed = maxHorzSpeed;
+        if (p.horzSpeed < minHorzSpeed) p.horzSpeed = minHorzSpeed;
+    }
+
+    // Convert to velocity used for integration
+    p.velX = p.horzSpeed * p.speed;
+
+    // =========================================================
+    // 5) JUMP (ground / coyote)
+    // coyote jump is allowing jump for a mini micro time even
+    // after player has left the platform. improves playability.
+    // =========================================================
+    if (!p.dashing)
+    {
+        if (jumpPressed && (p.grounded || canCoyoteJump))
+        {
+            p.velY = p.jumpVel;
+            p.grounded = false;
+            p.coyoteTimer = 0.0f;
+
+            // reset jump anim
+            p.jumpFrame = 0;
+            p.jumpAnimTimer = 0.0f;
+        }
+    }
+
+    // =========================================================
+    // 6) GRAVITY (vertical physics)
+    //    Note: wall hanging/climb will override velY later.
+    // =========================================================
+    if (!p.dashing)
+    {
+        float gravityScale = 1.0f;
+
+        // variable jump height rising but released jump
+        if (p.velY > 0.0f && !jumpHeld)
+        {
+            // Add extra downward pull
+            p.velY += p.gravity * (p.jumpCutMult - 1.0f) * dt;
+        }
+
+        // Apply gravity when not grounded
+        if (!p.grounded)
+        {
+            p.velY += p.gravity * gravityScale * dt;
+
+            if (p.velY < p.terminalVel)
+                p.velY = p.terminalVel;
+        }
+        else
+        {
+            if (p.velY < 0.0f) p.velY = 0.0f;
+        }
+    }
+
+    // =========================================================
+    // 7) DASH UPDATE (override everything)
+    // =========================================================
+    if (p.dashing)
+    {
+        p.dashTimer -= dt;
+
+        p.velX = p.dashDir * p.dashSpeed;
         p.velY = 0.0f;
 
-    // Apply gravity to velocity
-    p.velY += p.gravity * dt;
+        if (p.dashTimer <= 0.0f)
+            p.dashing = false;
+    }
 
+    // =========================================================
+    // 8) GROUND PROBE (prevents grounded flickering)
+    //   If we were grounded last frame and we're not doing a special move,
+    //   we push slightly downward so collision can "re-ground" reliably.
+    // =========================================================
+    const float GROUND_PROBE_SPEED = 60.0f;
+    const bool doingSpecialVertical = p.dashing || p.wallHanging || jumpPressed;
 
-    // ===================== IDLE ANIMATION  =====================
-    // only when not moving
-    bool isMoving = (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_D));
-
-    if (p.grounded && !isMoving)
+    if (wasGrounded && !doingSpecialVertical)
     {
-        p.idleAnimTimer += dt; // accumulate idle timer
-        while (p.idleAnimTimer >= p.idleFrameTime) // if idle timer is more than set frame time (0.10f)
+        if (p.velY <= 0.0f)
+            p.velY = -GROUND_PROBE_SPEED;
+    }
+
+    // =========================================================
+    // 9) INTEGRATE POSITION
+    // =========================================================
+    p.pos.x += p.velX * dt;
+    p.pos.y += p.velY * dt;
+
+    // =========================================================
+    // 10) COLLISION + WALL FLAGS
+    //    IMPORTANT: grounded must be recomputed each frame by collision
+    // =========================================================
+    p.grounded = false; // reset it and assume player not grounded. use collision to ensure everything is correct
+    CollisionUpdate(p, dt);
+    CollisionUpdateWallFlags(p);
+
+    const bool touchingWall = (p.onWallLeft || p.onWallRight);
+
+    // =========================================================
+    // 11) WALL HANG ENTER (after wall flags are correct)
+    // =========================================================
+    if (!p.dashing)
+    {
+        const bool canStick = (!p.grounded && touchingWall && p.wallRegrabTimer <= 0.0f);
+
+        if (!p.wallHanging && canStick && (grabHeld || p.wallHangBufferTimer > 0.0f))
         {
-            p.idleAnimTimer -= p.idleFrameTime; // minus frame timer
-            p.idleFrame = (p.idleFrame + 1) % p.idleFrameCount; // frame loop, adds 1 to advance loop
-        }                                                       // eg: if we on frame 8: 8 + 1 = 9, 9 % 10 = 9. if on frame 9, 9 + 1 = 10 % 10 = 0.
+            p.wallHanging = true;
+            p.wallHangBufferTimer = 0.0f; // consume buffer
+
+            if (p.onWallLeft && !p.onWallRight)
+                p.facing = 1;   // wall left only -> face right
+            else if (p.onWallRight && !p.onWallLeft)
+                p.facing = -1;  // wall right only -> face left
+        }
+    }
+
+    // =========================================================
+    // 12) WALL MOVEMENT (climb / constant slide)
+    //    - While hanging, this block OWNS velY.
+    // =========================================================
+    if (!p.dashing && p.wallHanging && !didWallJumpThisFrame)
+    {
+        // Exit conditions
+        if (!grabHeld || p.grounded || !touchingWall)
+        {
+            p.wallHanging = false;
+        }
+        else
+        {
+            if (pressUp && !pressDown)
+            {
+                p.velY = +p.wallClimbSpeed;
+            }
+            else if (pressDown && !pressUp)
+            {
+                p.velY = -p.wallClimbDownSpeed;
+            }
+            else
+            {
+                // Constant slide speed while hanging
+                p.velY = -p.wallSlideSpeed;
+            }
+        }
+    }
+
+    // =========================================================
+    // 13) WALL JUMP (works even if not hanging)
+    //    - Must run AFTER collision so onWall flags are accurate.
+    //    - Must run AFTER wall movement so jump doesn't get overwritten.
+    // =========================================================
+    if (!p.dashing && jumpPressed)
+    {
+        const bool canWallJump = (!p.grounded && touchingWall && p.wallRegrabTimer <= 0.0f);
+
+        if (canWallJump)
+        {
+            float jumpDir = 0.0f;
+            if (p.onWallLeft)       jumpDir = +1.0f;  // wall on left -> jump right
+            else if (p.onWallRight) jumpDir = -1.0f;  // wall on right -> jump left
+            else                    jumpDir = (float)p.facing;
+
+            p.velY = p.jumpVel;
+            didWallJumpThisFrame = true;
+
+            // Horizontal push (your existing tuning)
+            p.horzSpeed = jumpDir * 2.0f;
+            p.facing = (jumpDir > 0.0f) ? 1 : -1;
+            p.velX = p.horzSpeed * p.speed;
+
+            p.wallRegrabTimer = p.wallRegrabTime;
+            p.wallHanging = false;
+
+            p.grounded = false;
+            p.coyoteTimer = 0.0f;
+
+            // reset jump anim
+            p.jumpFrame = 0;
+            p.jumpAnimTimer = 0.0f;
+        }
+    }
+
+    // =========================================================
+    // 14) ANIMATION (based on final state)
+    // =========================================================
+    const bool isMoving = (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_D));
+
+
+    // Wall slide anim (only while wall hanging)
+    if (p.wallHanging)
+    {
+        p.wallSlideAnimTimer += dt;
+        while (p.wallSlideAnimTimer >= p.wallSlideFrameTime)
+        {
+            p.wallSlideAnimTimer -= p.wallSlideFrameTime;
+            p.wallSlideFrame = (p.wallSlideFrame + 1) % p.wallSlideFrameCount;
+        }
     }
     else
     {
-        // reset idle frame and idle timer
+        p.wallSlideFrame = 0;
+        p.wallSlideAnimTimer = 0.0f;
+    }
+
+    // Idle
+    if (p.grounded && !isMoving)
+    {
+        p.idleAnimTimer += dt;
+        while (p.idleAnimTimer >= p.idleFrameTime)
+        {
+            p.idleAnimTimer -= p.idleFrameTime;
+            p.idleFrame = (p.idleFrame + 1) % p.idleFrameCount;
+        }
+    }
+    else
+    {
         p.idleFrame = 0;
         p.idleAnimTimer = 0.0f;
     }
 
-    // ===================== RUN ANIMATION  =====================
-    isMoving = (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_D));
-
+    // Run
     if (p.grounded && isMoving)
     {
         p.runAnimTimer += dt;
@@ -209,24 +470,21 @@ void PlayerUpdate(Player& p, float dt) {
         p.runAnimTimer = 0.0f;
     }
 
-    // ===================== AIR ANIMATION (JUMP / FALL) =====================
+    // Air (jump/fall)
     if (!p.grounded)
     {
         if (p.velY > 0.0f)
         {
-            // JUMP: advance until last frame, then hold
             p.jumpAnimTimer += dt;
             while (p.jumpAnimTimer >= p.jumpFrameTime)
             {
                 p.jumpAnimTimer -= p.jumpFrameTime;
-
                 if (p.jumpFrame < p.jumpFrameCount - 1)
-                    p.jumpFrame += 1; // no loop
+                    p.jumpFrame += 1;
             }
         }
         else
         {
-            // FALL: loop frames
             p.fallAnimTimer += dt;
             while (p.fallAnimTimer >= p.fallFrameTime)
             {
@@ -237,48 +495,32 @@ void PlayerUpdate(Player& p, float dt) {
     }
     else
     {
-        // reset fall when on ground
         p.fallFrame = 0;
         p.fallAnimTimer = 0.0f;
     }
 
-    // ===================== VARIABLE JUMP HEIGHT =====================
-    // check if going up and if space is held
-    if (p.velY > 0.0f && !AEInputCheckCurr(AEVK_SPACE))
+    // dashing
+
+    if (p.dashing)
     {
-        // We've already applied 1x gravity. Apply extra gravity to make it cut.
-        p.velY += p.gravity * (p.jumpCutMult - 1.0f) * dt;
-    }
+        p.dashAnimTimer += dt;
+        while (p.dashAnimTimer >= p.dashFrameTime)
+        {
+            p.dashAnimTimer -= p.dashFrameTime;
 
-    // Clamp to terminal fall speed
-    if (p.velY < p.terminalVel)
-        p.velY = p.terminalVel;
-
-    // Integrate velocity into position
-    p.pos.y += p.velY * dt;
-
-
-    // ===================== GROUNDED CHECK (FLOOR)(COLLISION) (PLATFORM IN FUTURE) =====================
-    static const float GROUND_Y = -450.0f;
-
-    float halfH = p.colliderSize.y * 0.5f;
-    float feetY = p.pos.y - halfH;
-
-    // If feet went below the ground, snap back up
-    if (feetY <= GROUND_Y)
-    {
-        p.pos.y = GROUND_Y + halfH; // put feet exactly on ground
-        p.velY = 0.0f;
-        p.grounded = true;
+            // Usually dash anim should not loop; it should clamp at last frame.
+            if (p.dashFrame < p.dashFrameCount - 1)
+                p.dashFrame++;
+        }
     }
     else
     {
-        p.grounded = false;
+        p.dashFrame = 0;
+        p.dashAnimTimer = 0.0f;
     }
-
-    // ===================== COLLISION CHECK =====================
-    CollisionUpdate(p,dt);
 }
+
+
 
 
 void PlayerDraw(Player& p)
@@ -290,7 +532,19 @@ void PlayerDraw(Player& p)
     int frameCount = 1;
 
     // Priority: air states first
-    if (!p.grounded)
+
+    if (p.dashing)
+    {
+        tex = p.dashTex;
+        frame = p.dashFrame;
+        frameCount = p.dashFrameCount;
+    }else if (p.wallHanging)
+    {
+        tex = p.wallSlideTex;
+        frame = p.wallSlideFrame;
+        frameCount = p.wallSlideFrameCount;
+    }
+    else if (!p.grounded)
     {
         if (p.velY > 0.0f)
         {
@@ -338,21 +592,32 @@ void PlayerDraw(Player& p)
     // new variable for collider box
     gfx::Vec2 feetWorld = { p.pos.x, p.pos.y - (p.colliderSize.y * 0.5f) };
 
+
+
     // sprite center position so the sprite bottom sits on feetWorld
     gfx::Vec2 drawPos;
-    drawPos.x = feetWorld.x;
     drawPos.y = feetWorld.y + (p.spriteSize.y * 0.5f) + p.spriteOffsetY;
+    drawPos.x = feetWorld.x + p.spriteOffsetX;   // base X offset (usually 0)
 
-    // collider box
-    gfx::drawRectangle(p.pos, 0.0f, p.colliderSize, 0xAA00FF00); // green collider
-    // drawing sprite mesh
-    //gfx::drawRectangle(p.pos, 0.0f, p.size, 0xFFFF0000);
-    // draw using spriteSize (visual), and full height UVs (v0=0, v1=1)
+    // extra "stick to wall" offset
+    if (p.wallHanging)
+    {
+        if (p.onWallRight)
+            drawPos.x += p.wallHangOffsetX;  // push sprite right into right wall
+        else if (p.onWallLeft)
+            drawPos.x -= p.wallHangOffsetX;  // push sprite left into left wall
+    }
+
     gfx::drawSprite(tex, drawPos, 0.0f, p.spriteSize, u0, 0.0f, u1, 1.0f);
 }
 
 void PlayerShutdown(Player& p)
 {
+    if (p.wallSlideTex)
+    {
+        AEGfxTextureUnload(p.wallSlideTex);
+        p.wallSlideTex = nullptr;
+    }
     if (p.idleTex)
     {
         AEGfxTextureUnload(p.idleTex);
@@ -372,5 +637,10 @@ void PlayerShutdown(Player& p)
     {
         AEGfxTextureUnload(p.fallTex);
         p.fallTex = nullptr;
+    }
+    if (p.dashTex)
+    {
+        AEGfxTextureUnload(p.dashTex);
+        p.dashTex = nullptr;
     }
 }
