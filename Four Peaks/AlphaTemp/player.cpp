@@ -24,6 +24,8 @@ void PlayerInit(Player& p)
 
     p.jumpCutMult = 2.5f; // tweak: 2.0 - 4.0
 
+    bool alive = true;
+
     // sprite initialisation
     p.idleTex = AEGfxTextureLoad("Assets/player/male_hero-idle.png");
 
@@ -209,7 +211,7 @@ void PlayerUpdate(Player& p, float dt)
     // =========================================================
     if (!p.dashing)
     {
-        const f32 accel = p.grounded ? 10.0f : 8.0f;        // adjust this to make ice in winter
+        const f32 accel = p.grounded ? 10.0f : 8.0f; // adjust this to make ice in winter
         const f32 decel = p.grounded ? 8.0f : 4.0f;
 
         const f32 maxHorzSpeed = 2.0f;

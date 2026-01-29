@@ -26,6 +26,8 @@ struct Player
 
     f32 jumpCutMult; // extra gravity when jump not held
 
+    bool alive;
+
     // ======== IDLE ANIMATION ==========
     AEGfxTexture* idleTex;
 
