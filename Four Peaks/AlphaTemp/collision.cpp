@@ -113,6 +113,36 @@ static bool checkAABBCollisionAt(float x, float y, float w, float h)
     return checkMapCollision(box, levelLayout);
 }
 
+void CollisionResolveSpawn(Player& player) // justin function
+{
+    const float step = 0.5f;
+
+    // 1) Move UP until not colliding (no horizontal drift)
+    for (int i = 0; i < 200 && checkPlayerCollision(player, levelLayout); ++i)
+        player.pos.y += step;
+
+    // 2) Snap DOWN a small distance only (prevents falling into holes)
+    const float maxSnapDown = 10.0f;
+    const int maxSteps = (int)(maxSnapDown / step);
+
+    bool landed = false;
+    for (int i = 0; i < maxSteps; ++i)
+    {
+        player.pos.y -= step;
+        if (checkPlayerCollision(player, levelLayout))
+        {
+            player.pos.y += step;
+            landed = true;
+            break;
+        }
+    }
+
+    player.grounded = landed;
+    player.velX = 0.0f;
+    player.velY = 0.0f;
+    player.horzSpeed = 0.0f;
+}
+
 void resolvePlayerCollision(Player &player, int levelLayout[][mapColm], f32 dt) {
 
     static const float GROUND_Y = -450.0f;
@@ -122,6 +152,7 @@ void resolvePlayerCollision(Player &player, int levelLayout[][mapColm], f32 dt) 
     //! Set player y coordinates to coordinates before this frame, to seperately handling horizontal and vertical collision
     player.pos.y = oldY;  
 
+    /*
     //! Check whether collide with solid block
     if (checkPlayerCollision(player, levelLayout)) {
 
@@ -139,6 +170,25 @@ void resolvePlayerCollision(Player &player, int levelLayout[][mapColm], f32 dt) 
         }
 
         player.velX = 0;
+    }
+    */
+
+
+    // Horizontal collision resolution:
+    // Only resolve X when the player actually moved in X this frame.
+    if (player.velX != 0.0f && checkPlayerCollision(player, levelLayout))
+    {
+        const float step = 0.5f;
+        float push = (player.velX > 0.0f) ? -step : +step;
+
+        int pushCount = 0;
+        while (checkPlayerCollision(player, levelLayout) && pushCount < 200)
+        {
+            player.pos.x += push;
+            pushCount++;
+        }
+
+        player.velX = 0.0f;
     }
 
     //! Set back player y coordinates to this frame

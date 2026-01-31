@@ -5,11 +5,113 @@
 #include <iostream>
 
 
+// =========================================================
+// HELPER FUNCTIONS (RESPAWN DIE)
+// =========================================================
+
+gfx::Vec2 PlayerGetFeetWorld(const Player& p)
+{
+    // feet point directly under collider center
+    return { p.pos.x, p.pos.y - (p.colliderSize.y * 0.5f) };
+}
+
+void PlayerSetFeetWorld(Player& p, gfx::Vec2 feetWorld)
+{
+    // place collider so its bottom sits on feetWorld
+    p.pos.x = feetWorld.x;
+    p.pos.y = feetWorld.y + (p.colliderSize.y * 0.5f);
+}
+
+void PlayerSetRespawn(Player& p, gfx::Vec2 pos) // PlayerSetRespawn(gGame.p, gfx::Vec2 pos)
+{
+    p.respawnPos = pos;
+}
+
+void PlayerRespawn(Player& p)
+{
+    // Restore core life state
+    p.hp = p.maxHp;
+    p.alive = true;
+    p.dead = false;
+    p.deadTimer = 0.0f;
+
+    // Teleport to respawn point
+    PlayerSetFeetWorld(p, p.respawnPos);
+    p.justRespawned = true;
+
+    p.grounded = true;   // prevents brief fall animation frame
+    p.velY = 0.0f;
+
+    // Reset motion
+    p.velX = 0.0f;
+    p.velY = 0.0f;
+    p.horzSpeed = 0.0f;
+
+    // Reset common states that are initialized in player_init
+    p.grounded = false;
+    p.wallHanging = false;
+    p.onWallLeft = false;
+    p.onWallRight = false;
+
+    p.dashing = false;
+    p.dashTimer = 0.0f;
+    p.dashCount = p.maxDashCount;
+
+    // reset anim frames so it looks consistent
+    p.idleFrame = p.runFrame = p.jumpFrame = p.fallFrame = p.wallSlideFrame = p.dashFrame = 0;
+    p.idleAnimTimer = p.runAnimTimer = p.jumpAnimTimer = p.fallAnimTimer = p.wallSlideAnimTimer = p.dashAnimTimer = 0.0f;
+
+    // Start respawn animation: play death backwards from last frame to 0
+    p.respawning = true;
+    p.respawnTimer = p.respawnDuration;
+
+    p.respawnFrame = p.deathFrameCount - 1;   // start from last death frame
+    p.respawnAnimTimer = 0.0f;
+}
+
+void PlayerKill(Player& p) // PlayerKill(gGame.player)
+{
+    if (p.dead) return; // already dead, ignore repeated kills
+
+    p.hp = 0;
+    p.alive = false;
+    p.dead = true;
+
+    // Start death delay timer
+    p.deadTimer = p.deadDuration;
+
+    // reset death animation playback
+    p.deathFrame = 0;
+    p.deathAnimTimer = 0.0f;
+
+    // Freeze motion immediately
+    p.velX = 0.0f;
+    p.velY = 0.0f;
+    p.horzSpeed = 0.0f;
+
+    // Cancel special states
+    p.dashing = false;
+    p.wallHanging = false;
+}
+
+void PlayerDamage(Player& p, int dmg)
+{
+    if (p.dead) return;
+    if (dmg <= 0) return;
+
+    p.hp -= dmg;
+    if (p.hp <= 0)
+    {
+        PlayerKill(p);
+    }
+}
+
+
 void PlayerInit(Player& p)
 {
     p.pos = { 100.0f, 100.0f };
     p.size = { 100.0f, 90.0f };
-    p.speed = 160.0f;
+    p.speed = 120.0f;
 
     p.velY = 0.0f;
     p.grounded = false;
@@ -24,7 +126,39 @@ void PlayerInit(Player& p)
 
     p.jumpCutMult = 2.5f; // tweak: 2.0 - 4.0
 
-    bool alive = true;
+    // player kill/respawn
+    p.maxHp = 1;
+    p.hp = p.maxHp;
+
+    p.alive = true;
+    p.dead = false;
+
+    p.respawnPos = p.pos;      // default respawn = start position
+    p.justRespawned = false;
+
+
+    p.deadDuration = 0.50f;    // tweak later (0.0f = instant respawn)
+    p.deadTimer = 0.0f;
+
+    // death animation
+    p.deathTex = AEGfxTextureLoad("Assets/player/male_hero-death.png");
+
+    p.deathFrame = 0;
+    p.deathFrameCount = 23;
+
+    p.deathAnimTimer = 0.0f;
+    p.deathFrameTime = 0.04f;     // tweak: 0.03–0.06 feels good
+
+    p.deadDuration = p.deathFrameCount * p.deathFrameTime;
+
+    // respawn animation
+    p.respawning = false;
+    p.respawnDuration = p.deathFrameCount * p.deathFrameTime; // matches death length
+    p.respawnTimer = 0.0f;
+
+    p.respawnFrame = 0;
+    p.respawnAnimTimer = 0.0f;
+    p.respawnFrameTime = p.deathFrameTime; // keep consistent
 
     // sprite initialisation
     p.idleTex = AEGfxTextureLoad("Assets/player/male_hero-idle.png");
@@ -41,7 +175,7 @@ void PlayerInit(Player& p)
     p.runFrame = 0;
     p.runFrameCount = 10;     // run sheet has 10 frames
     p.runAnimTimer = 0.0f;
-    p.runFrameTime = 0.1f;   // faster than idle
+    p.runFrameTime = 0.07f;   // faster than idle
 
     p.facing = 1;
 
@@ -143,6 +277,60 @@ void PlayerUpdate(Player& p, float dt)
 
     // Safety to avoid giant dt spikes exploding physics
     if (dt > 0.05f) dt = 0.05f;
+
+    // =========================================================
+    // 1) Dead state (if dead, the rest dont matter)
+    // =========================================================
+    if (p.dead)
+    {
+        // advance death animation (clamp at last frame)
+        p.deathAnimTimer += dt;
+        while (p.deathAnimTimer >= p.deathFrameTime)
+        {
+            p.deathAnimTimer -= p.deathFrameTime;
+            if (p.deathFrame < p.deathFrameCount - 1)
+                p.deathFrame++;
+        }
+
+        // countdown to respawn
+        p.deadTimer -= dt;
+        if (p.deadTimer <= 0.0f)
+        {
+            PlayerRespawn(p);
+        }
+
+        return; // do not run movement/physics while dead
+    }
+
+    if (p.respawning)
+    {
+        // advance respawn animation backwards
+        p.respawnAnimTimer += dt;
+        while (p.respawnAnimTimer >= p.respawnFrameTime)
+        {
+            p.respawnAnimTimer -= p.respawnFrameTime;
+            if (p.respawnFrame > 0)
+                p.respawnFrame--;
+        }
+
+        // lock movement (but let collision settle)
+        p.velX = 0.0f;
+        p.velY = 0.0f;
+        p.horzSpeed = 0.0f;
+
+        CollisionUpdate(p, dt);
+        CollisionUpdateWallFlags(p);
+
+        // end respawn once we reach frame 0 (or timer ends)
+        p.respawnTimer -= dt;
+        if (p.respawnTimer <= 0.0f || p.respawnFrame == 0)
+        {
+            p.respawning = false;
+            p.respawnTimer = 0.0f;
+        }
+
+        return;
+    }
 
     // =========================================================
     // 1) INPUT (read once)
@@ -329,6 +517,28 @@ void PlayerUpdate(Player& p, float dt)
     //    IMPORTANT: grounded must be recomputed each frame by collision
     // =========================================================
     p.grounded = false; // reset it and assume player not grounded. use collision to ensure everything is correct
+    // DEBUG: press K to kill player and test respawn
+    if (AEInputCheckTriggered(AEVK_H))
+    {
+        gfx::Vec2 feet = PlayerGetFeetWorld(p);
+        feet.y += 1.0f;     // +Y is up in your project
+        PlayerSetRespawn(p, feet);
+
+        // If grounded, lift the saved respawn a tiny bit so we don't respawn intersecting tiles.
+        if (p.grounded)
+        {
+            // Choose direction depending on your coordinate system:
+            // If +Y is UP in your game, use feet.y += 1.0f;
+            // If +Y is DOWN (screen space), use feet.y -= 1.0f;
+            feet.y += 1.0f; // <-- adjust sign if needed
+        }
+
+        PlayerSetRespawn(p, feet);
+    }
+    if (AEInputCheckTriggered(AEVK_K))
+    {
+        PlayerKill(p);
+    }
     CollisionUpdate(p, dt);
     CollisionUpdateWallFlags(p);
 
@@ -527,6 +737,66 @@ void PlayerUpdate(Player& p, float dt)
 
 void PlayerDraw(Player& p)
 {
+
+    if (p.dead)
+    {
+        AEGfxTexture* tex = p.deathTex;
+        int frame = p.deathFrame;
+        int frameCount = p.deathFrameCount;
+
+        // Compute UV slice for the chosen frame
+        f32 frameW = 1.0f / (f32)frameCount;
+        f32 u0 = frame * frameW;
+        f32 u1 = u0 + frameW;
+
+        // If you DON'T want flipping during death, comment this out.
+        if (p.facing < 0)
+        {
+            f32 tmp = u0;
+            u0 = u1;
+            u1 = tmp;
+        }
+
+        // same drawPos logic as normal draw
+        gfx::Vec2 feetWorld = { p.pos.x, p.pos.y - (p.colliderSize.y * 0.5f) };
+
+        gfx::Vec2 drawPos;
+        drawPos.y = feetWorld.y + (p.spriteSize.y * 0.5f) + p.spriteOffsetY;
+        drawPos.x = feetWorld.x + p.spriteOffsetX;
+
+        // No wall hang offset during death (prevents weird shifts)
+        gfx::drawSprite(tex, drawPos, 0.0f, p.spriteSize, u0, 0.0f, u1, 1.0f);
+        return;
+    }
+
+    if (p.respawning)
+    {
+        AEGfxTexture* tex = p.deathTex;       // reuse death texture
+        int frame = p.respawnFrame;
+        int frameCount = p.deathFrameCount;
+
+        f32 frameW = 1.0f / (f32)frameCount;
+        f32 u0 = frame * frameW;
+        f32 u1 = u0 + frameW;
+
+        // optional: flip based on facing
+        if (p.facing < 0)
+        {
+            f32 tmp = u0;
+            u0 = u1;
+            u1 = tmp;
+        }
+
+        gfx::Vec2 feetWorld = { p.pos.x, p.pos.y - (p.colliderSize.y * 0.5f) };
+
+        gfx::Vec2 drawPos;
+        drawPos.y = feetWorld.y + (p.spriteSize.y * 0.5f) + p.spriteOffsetY;
+        drawPos.x = feetWorld.x + p.spriteOffsetX;
+
+        gfx::drawSprite(tex, drawPos, 0.0f, p.spriteSize, u0, 0.0f, u1, 1.0f);
+        return;
+    }
+
     bool isMoving = (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_D));
 
     AEGfxTexture* tex = nullptr;
@@ -644,5 +914,10 @@ void PlayerShutdown(Player& p)
     {
         AEGfxTextureUnload(p.dashTex);
         p.dashTex = nullptr;
+    }
+    if (p.deathTex)
+    {
+        AEGfxTextureUnload(p.deathTex);
+        p.deathTex = nullptr;
     }
 }

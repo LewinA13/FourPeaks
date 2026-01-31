@@ -26,7 +26,37 @@ struct Player
 
     f32 jumpCutMult; // extra gravity when jump not held
 
+    // ======== LIFE / RESPAWN ==========
+    int hp;
+    int maxHp;
     bool alive;
+
+    // Respawn point (world position)
+    gfx::Vec2 respawnPos;
+    bool justRespawned;
+
+    // Simple death delay (for now: allows “dead for 0.5s then respawn”)
+    bool dead;
+    f32 deadTimer;
+    f32 deadDuration;
+
+    // ======== DEATH ANIMATION ==========
+    AEGfxTexture* deathTex;
+
+    int deathFrame;
+    int deathFrameCount;
+
+    f32 deathAnimTimer;
+    f32 deathFrameTime;
+
+    // ======== RESPAWN (reverse death anim) ==========
+    bool respawning;
+    f32 respawnTimer;
+    f32 respawnDuration;
+
+    int respawnFrame;        // index into death sheet (counts down)
+    f32 respawnAnimTimer;
+    f32 respawnFrameTime;
 
     // ======== IDLE ANIMATION ==========
     AEGfxTexture* idleTex;
@@ -98,6 +128,7 @@ struct Player
     float spriteOffsetX;        // default (usually 0)
     float wallHangOffsetX;
 
+
     // ======== WALL DETECTION && MOVEMENT ==========
     bool onWallLeft;
     bool onWallRight;
@@ -133,6 +164,16 @@ void PlayerInit(Player& p);
 void PlayerUpdate(Player& p, float dt);
 void PlayerDraw(Player& p);
 void PlayerShutdown(Player& p);
+
+// player kill and respawn
+void PlayerKill(Player& p);
+void PlayerRespawn(Player& p);
+void PlayerDamage(Player& p, int dmg);
+void PlayerSetRespawn(Player& p, gfx::Vec2 pos);
+
+// get coordinates of playerfeet
+gfx::Vec2 PlayerGetFeetWorld(const Player& p);
+void      PlayerSetFeetWorld(Player& p, gfx::Vec2 feetWorld);
 
 #endif
 
