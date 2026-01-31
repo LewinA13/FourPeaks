@@ -406,8 +406,8 @@ void PlayerUpdate(Player& p, float dt)
             switch (p.currGroundType) {
 
             case Player::GroundType::Normal:
-                accel = 20.0f;
-                decel = 0.5f;
+                accel = 8.0f;
+                decel = 8.0f;
                 break;
 
             case Player::GroundType::Spikes:
