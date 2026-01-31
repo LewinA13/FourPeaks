@@ -26,6 +26,9 @@ struct Player
 
     f32 jumpCutMult; // extra gravity when jump not held
 
+    f32 accel{};
+    f32 decel{};
+
     // ======== LIFE / RESPAWN ==========
     int hp;
     int maxHp;

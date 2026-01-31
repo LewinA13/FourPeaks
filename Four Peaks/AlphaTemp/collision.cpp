@@ -92,6 +92,8 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 		for (int c = box.colStart; c <= box.colEnd; c++) {
 			switch (levelLayout[r][c]) {
 			case 1:
+			case 4:
+			case 6:
 				player.currGroundType = Player::GroundType::Normal;
 				break;
 
@@ -214,8 +216,40 @@ void resolvePlayerCollision(Player &player, int levelLayout[][mapColm], f32 dt) 
 
 }
 
+void applyGroundPhysics(Player& player) {
+	switch (player.currGroundType) {
+	case Player::GroundType::Normal:
+		player.accel = 20.0f;
+		player.decel = 0.5f;
+		break;
+
+	case Player::GroundType::Spikes:
+		PlayerKill(player);
+		break;
+
+		//! can change to "Spikes" to see the effect first
+	case Player::GroundType::Ice:
+		player.accel = 5.0f;
+		player.decel = 2.0f;
+		break;
+
+	default:
+		break;
+	}
+}
+
+
 void CollisionUpdate(Player& player, f32 dt) {
 	resolvePlayerCollision(player, g_currentMap, dt);
+
+	if (player.grounded) {
+		applyGroundPhysics(player);
+	}
+	else {
+		player.accel = 8.0f;
+		player.decel = 4.0f;
+	}
+	
 }
 
 

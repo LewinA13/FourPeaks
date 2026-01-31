@@ -399,55 +399,23 @@ void PlayerUpdate(Player& p, float dt)
     // =========================================================
     if (!p.dashing)
     {
-        f32 accel{};
-        f32 decel{};
-
-        if (p.grounded) {
-            switch (p.currGroundType) {
-
-            case Player::GroundType::Normal:
-                accel = 20.0f;
-                decel = 0.5f;
-                break;
-
-            case Player::GroundType::Spikes:
-                PlayerKill(p);
-                break;
-            
-            //! can change to "Spikes" to see the effect first
-            case Player::GroundType::Ice:
-                accel = 5.0f;
-                decel = 2.0f;
-                break;
-
-            default:
-                break;
-            }
-        }
-
-        else {
-            accel = 8.0f;
-            decel = 4.0f;
-        }
-
-
         const f32 maxHorzSpeed = 2.0f;
         const f32 minHorzSpeed = -2.0f;
 
         if (moveX != 0.0f)
         {
-            p.horzSpeed += moveX * accel * dt;
+            p.horzSpeed += moveX * p.accel * dt;
         }
         else
         {
             if (p.horzSpeed > 0.0f)
             {
-                p.horzSpeed -= decel * dt;
+                p.horzSpeed -= p.decel * dt;
                 if (p.horzSpeed < 0.0f) p.horzSpeed = 0.0f;
             }
             else if (p.horzSpeed < 0.0f)
             {
-                p.horzSpeed += decel * dt;
+                p.horzSpeed += p.decel * dt;
                 if (p.horzSpeed > 0.0f) p.horzSpeed = 0.0f;
             }
         }
