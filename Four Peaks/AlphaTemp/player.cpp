@@ -406,9 +406,12 @@ void PlayerUpdate(Player& p, float dt)
             switch (p.currGroundType) {
 
             case Player::GroundType::Normal:
-            case Player::GroundType::Spikes:
                 accel = 20.0f;
-                decel = 4.0f;
+                decel = 0.5f;
+                break;
+
+            case Player::GroundType::Spikes:
+                PlayerKill(p);
                 break;
             
             //! can change to "Spikes" to see the effect first

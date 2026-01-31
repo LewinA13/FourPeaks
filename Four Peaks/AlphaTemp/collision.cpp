@@ -131,7 +131,7 @@ void CollisionResolveSpawn(Player& player) // justin function
     const float step = 0.5f;
 
     // 1) Move UP until not colliding (no horizontal drift)
-    for (int i = 0; i < 200 && checkPlayerCollision(player, levelLayout); ++i)
+    for (int i = 0; i < 200 && checkPlayerCollision(player, g_currentMap); ++i)
         player.pos.y += step;
 
     // 2) Snap DOWN a small distance only (prevents falling into holes)
@@ -142,7 +142,7 @@ void CollisionResolveSpawn(Player& player) // justin function
     for (int i = 0; i < maxSteps; ++i)
     {
         player.pos.y -= step;
-        if (checkPlayerCollision(player, levelLayout))
+        if (checkPlayerCollision(player, g_currentMap))
         {
             player.pos.y += step;
             landed = true;
@@ -165,26 +165,6 @@ void resolvePlayerCollision(Player &player, int levelLayout[][mapColm], f32 dt) 
 
 	//! Set player y coordinates to coordinates before this frame, to seperately handling horizontal and vertical collision
 	player.pos.y = oldY;
-
-    /*
-    //! Check whether collide with solid block
-    if (checkPlayerCollision(player, levelLayout)) {
-
-		//! Check player moving left or right and determine "push" value
-		f32 push = (player.velX > 0) ? -0.5f : 0.5f;
-
-		//! Set "pushCount" to 0 in case happens infinity loops
-		int pushCount = 0;
-
-		//! use while loops to force push player until not detect collision with solid block
-		while (checkPlayerCollision(player, levelLayout) && pushCount < 100) {
-			player.pos.x += push;
-			pushCount++;
-		}
-
-        player.velX = 0;
-    }
-    */
 
 
     // Horizontal collision resolution:
