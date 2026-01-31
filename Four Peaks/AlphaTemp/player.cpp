@@ -219,8 +219,8 @@ void PlayerUpdate(Player& p, float dt)
 
             case Player::GroundType::Normal:
             case Player::GroundType::Spikes:
-                accel = 10.0f;
-                decel = 8.0f;
+                accel = 20.0f;
+                decel = 4.0f;
                 break;
             
             //! can change to "Spikes" to see the effect first
