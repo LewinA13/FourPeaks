@@ -126,6 +126,16 @@ struct Player
 
     f32 dashAnimTimer;
     f32 dashFrameTime;
+
+    // ======== Ground Type ==========
+    enum class GroundType {
+        Normal = 1,
+        Spikes = 2,
+        Ice = 3
+    };
+
+    GroundType currGroundType = Player::GroundType::Normal;
+
 };
 
 // function declarations (NO function bodies here)

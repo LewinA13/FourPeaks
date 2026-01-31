@@ -211,8 +211,34 @@ void PlayerUpdate(Player& p, float dt)
     // =========================================================
     if (!p.dashing)
     {
-        const f32 accel = p.grounded ? 10.0f : 8.0f; // adjust this to make ice in winter
-        const f32 decel = p.grounded ? 8.0f : 4.0f;
+        f32 accel{};
+        f32 decel{};
+
+        if (p.grounded) {
+            switch (p.currGroundType) {
+
+            case Player::GroundType::Normal:
+            case Player::GroundType::Spikes:
+                accel = 10.0f;
+                decel = 8.0f;
+                break;
+            
+            //! can change to "Spikes" to see the effect first
+            case Player::GroundType::Ice:
+                accel = 5.0f;
+                decel = 2.0f;
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        else {
+            accel = 8.0f;
+            decel = 4.0f;
+        }
+
 
         const f32 maxHorzSpeed = 2.0f;
         const f32 minHorzSpeed = -2.0f;

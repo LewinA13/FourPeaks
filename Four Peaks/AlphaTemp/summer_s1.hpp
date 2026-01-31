@@ -15,12 +15,16 @@ namespace game {
         int update(float dt);
         void draw() const;
 
-    private:
-        bool gridVisible;
-
         // Grid dimensions - 32 columns width x 20 rows height.
         static const int gridCols = 32;
         static const int gridRows = 20;
+
+        int (*getTileMap())[gridCols] { return tileMap; }
+
+    private:
+        bool gridVisible;
+
+      
 
 
         // Tile map: 0=empty, 1=ground, 2=spikes, etc.

@@ -89,6 +89,9 @@ namespace game
     // -------------------------------------------------------------------
     int SummerS1::update(float dt)
     {
+        extern int (*g_currentMap)[32];
+        g_currentMap = getTileMap();
+
         if (AEInputCheckTriggered(AEVK_G))
         {
             gridVisible = !gridVisible;
