@@ -1,15 +1,23 @@
 #include "sprite.hpp"
 #include <AEGraphics.h>
+#include "graphics.hpp"
+
+
+
 
 namespace sprite
 {
+
+
     namespace
     {
         AEGfxTexture* tilesetTex{};
         AEGfxTexture* spikesTex{};
         AEGfxTexture* backgroundTex{};
-
-
+        AEGfxTexture* coinTex{};
+        AEGfxTexture* bgStripTex{};
+        AEGfxTexture* iceTex{};
+        AEGfxTexture* checkpointTex{};
 
         constexpr float texW = 224.0f;
         constexpr float texH = 320.0f;
@@ -17,6 +25,7 @@ namespace sprite
         // seam fix (no filtering API available)
         constexpr float inset = 1.0f;
 
+		// Helper: get UVs from pixel coordinates in the tileset
         void uvFromPixels(float px, float py, float pw, float ph,
             float& u0, float& v0, float& u1, float& v1)
         {
@@ -32,6 +41,20 @@ namespace sprite
             v1 = y1 / texH;
         }
 
+        // ---------------------------------------------------------
+        // Shared animation state for tiles (used across all stages)
+        // ---------------------------------------------------------
+        int coinFrame = 0;
+        float coinTimer = 0.0f;
+        constexpr int coinFrameCount = 12;
+        constexpr float coinFrameTime = 0.08f;
+
+        int checkpointFrame = 0;
+        float checkpointTimer = 0.0f;
+        constexpr int checkpointFrameCount = 10;
+        constexpr float checkpointFrameTime = 0.09f;
+
+
     }
 
     void init()
@@ -42,15 +65,31 @@ namespace sprite
 
         if (tilesetTex) return;
 
-        // Try common locations
+        // Winter spritesheet
         tilesetTex = AEGfxTextureLoad("Assets/winter_.png");
         if (!tilesetTex)
             tilesetTex = AEGfxTextureLoad("winter_.png");
 
-        // NEW: spikes texture
+        // spikes texture
         spikesTex = AEGfxTextureLoad("Assets/idle.png");
         if (!spikesTex)
             spikesTex = AEGfxTextureLoad("idle.png");
+
+        // coin spritesheet texture
+        coinTex = AEGfxTextureLoad("Assets/coin_.png");
+        if (!coinTex)
+            coinTex = AEGfxTextureLoad("coin_.png");
+
+		// ice texture
+        iceTex = AEGfxTextureLoad("Assets/IceBox.png");
+        if (!iceTex)
+            iceTex = AEGfxTextureLoad("IceBox.png");
+
+        // checkpoint spritesheet texture
+        checkpointTex = AEGfxTextureLoad("Assets/Checkpoint.png");
+        if (!checkpointTex)
+            checkpointTex = AEGfxTextureLoad("Checkpoint.png");
+
     }
 
     void shutdown()
@@ -73,6 +112,24 @@ namespace sprite
             backgroundTex = nullptr;
         }
 
+        if (coinTex)
+        {
+            AEGfxTextureUnload(coinTex);
+            coinTex = nullptr;
+        }
+
+        if (iceTex)
+        {
+            AEGfxTextureUnload(iceTex);
+            iceTex = nullptr;
+        }
+
+        if (checkpointTex)
+        {
+            AEGfxTextureUnload(checkpointTex);
+            checkpointTex = nullptr;
+        }
+
     }
 
     AEGfxTexture* tileset()
@@ -90,9 +147,140 @@ namespace sprite
         return backgroundTex;
     }
 
+    AEGfxTexture* coin()
+    {
+        return coinTex;
+    }
+
+    AEGfxTexture* ice()
+    {
+        return iceTex;
+    }
+
+    AEGfxTexture* checkpoint()
+    {
+        return checkpointTex;
+    }
+
+	// UVs for coin animation frames
+    bool getCoinUv(int frame, float& u0, float& v0, float& u1, float& v1)
+    {
+        // coin_.png = 192x16
+        // 12 frames, each 16x16 laid horizontally
+        constexpr int frameCount = 12;
+        constexpr float sheetW = 192.0f;
+        constexpr float sheetH = 16.0f;
+        constexpr float frameW = 16.0f;
+        constexpr float frameH = 16.0f;
+
+        if (frame < 0) frame = 0;
+        frame %= frameCount;
+
+        // Small inset to reduce texture bleeding
+        constexpr float insetPx = 0.5f;
+
+        float px = frame * frameW;
+        float py = 0.0f;
+
+        float x0 = px + insetPx;
+        float x1 = px + frameW - insetPx;
+        float y0 = py + insetPx;
+        float y1 = py + frameH - insetPx;
+
+        u0 = x0 / sheetW;
+        u1 = x1 / sheetW;
+        v0 = y0 / sheetH;
+        v1 = y1 / sheetH;
+
+        return true;
+    }
+
+	// UVs for checkpoint animation frames
+    bool getCheckpointUv(int frame, float& u0, float& v0, float& u1, float& v1)
+    {
+        // Checkpoint.png = 320x32 (10 frames, each 32x32 laid horizontally)
+        constexpr int frameCount = 10;
+        constexpr float sheetW = 320.0f;
+        constexpr float sheetH = 32.0f;
+        constexpr float frameW = 32.0f;
+        constexpr float frameH = 32.0f;
+
+        if (frame < 0) frame = 0;
+        frame %= frameCount;
+
+        // Small inset to reduce texture bleeding
+        constexpr float insetPx = 0.5f;
+
+        float px = frame * frameW;
+        float py = 0.0f;
+
+        float x0 = px + insetPx;
+        float x1 = px + frameW - insetPx;
+        float y0 = py + insetPx;
+        float y1 = py + frameH - insetPx;
+
+        u0 = x0 / sheetW;
+        u1 = x1 / sheetW;
+        v0 = y0 / sheetH;
+        v1 = y1 / sheetH;
+
+        return true;
+    }
+
+    void updateAnimatedTiles(f32 dt)
+    {
+        // coin
+        coinTimer += dt;
+        while (coinTimer >= coinFrameTime)
+        {
+            coinTimer -= coinFrameTime;
+            coinFrame = (coinFrame + 1) % coinFrameCount;
+        }
+
+        // checkpoint
+        checkpointTimer += dt;
+        while (checkpointTimer >= checkpointFrameTime)
+        {
+            checkpointTimer -= checkpointFrameTime;
+            checkpointFrame = (checkpointFrame + 1) % checkpointFrameCount;
+        }
+    }
+
+    bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size)
+    {
+        // Tile IDs in your project:
+        // 8  = coin
+        // 10 = checkpoint
+
+        if (tileType == 8)
+        {
+            if (!coinTex) return true;
+
+            float u0{}, v0{}, u1{}, v1{};
+            getCoinUv(coinFrame, u0, v0, u1, v1);
+
+            gfx::Vec2 coinSize{ size.x * 0.6f, size.y * 0.6f };
+            gfx::drawSprite(coinTex, pos, 0.0f, coinSize, u0, v0, u1, v1);
+            return true;
+        }
+
+        if (tileType == 10)
+        {
+            if (!checkpointTex) return true;
+
+            float u0{}, v0{}, u1{}, v1{};
+            getCheckpointUv(checkpointFrame, u0, v0, u1, v1);
+
+            gfx::Vec2 cpSize{ size.x * 0.85f, size.y * 0.85f };
+            gfx::drawSprite(checkpointTex, pos, 0.0f, cpSize, u0, v0, u1, v1);
+            return true;
+        }
+
+        return false;
+    }
 
 
-
+	// UVs from tileset
     bool getTileUv(int tileType, float& u0, float& v0, float& u1, float& v1)
     {
         switch (tileType)

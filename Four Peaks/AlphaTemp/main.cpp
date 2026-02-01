@@ -9,11 +9,28 @@
 #include "gamestate.hpp"
 #include "sprite.hpp"
 #include "mainmenu.hpp"
-#include "summer_s1.hpp"
+#include "Summer_s1.hpp"
+#include "Summer_s2.hpp"
+#include "camera.hpp"
+
 
 
 // Global font handle used by all states
 s8 gFontId = -1;
+
+enum class SceneState
+{
+    MainMenu,
+    HowToPlay,
+    SummerS1,
+    SummerS2,
+    Exit
+};
+
+
+SceneState pendingScene = SceneState::SummerS1;
+SceneState lastState = SceneState::Exit;
+
 
 // ---------------------------------------------------------------------------
 // main
@@ -44,6 +61,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Initialise the graphics helper.
     gfx::init();
+    camera::init();
+    camera::setY(0.0f);
+
 
 	// Initialize sprite system.    
     sprite::init();
@@ -55,18 +75,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Game state objects.
     game::MainMenu mainMenu;
     game::SummerS1 summerStage;
+    game::SummerS2 summerStage2;
 
-    // Enumeration for states.
-    enum class GameState
-    {
-        MainMenu,
-        HowToPlay,
-        SummerS1,
-        Exit
-    };
 
     // Start on the main menu.
-    GameState currentState = GameState::MainMenu;
+    SceneState currentState = SceneState::MainMenu;
+
 
  
     // Game Loop
@@ -79,6 +93,109 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         f32 dt = (f32)AEFrameRateControllerGetFrameTime();
 
+        float prevCamY = camera::getY();
+        camera::update(dt);
+        float deltaCamY = camera::getY() - prevCamY;
+
+        // During a transition, make the player "ride" the camera
+        if (camera::isTransitioning())
+        {
+            gGame.player.pos.y += deltaCamY;
+            gGame.player.velY = 0.0f;
+        }
+
+        // 1) If the transition just finished, SWITCH STATE FIRST
+        if (camera::consumeJustFinished())
+        {
+            currentState = pendingScene;
+
+            // Snap camera immediately to the destination so Stage 2 is visible THIS frame
+            if (currentState == SceneState::SummerS2)
+                camera::setY(camera::screenHeight());
+            else if (currentState == SceneState::SummerS1)
+                camera::setY(0.0f);
+
+            // Force the "enter state" logic to run
+            lastState = SceneState::Exit;
+
+            // Optional: stop weird motion after transition
+            gGame.player.velY = 0.0f;
+            gGame.player.grounded = false;
+        }
+
+        // 2) Now handle direct state entry (pressing keys / menu swap / etc.)
+        if (currentState != lastState)
+        {
+            if (currentState == SceneState::SummerS2)
+            {
+                if (!camera::isTransitioning())
+                {
+                    camera::setY(camera::screenHeight());
+
+                    // Keep player in the same screen-relative spot
+                    if (gGame.player.pos.y < camera::screenHeight() * 0.5f)
+                        gGame.player.pos.y += camera::screenHeight();
+                }
+            }
+            else if (currentState == SceneState::SummerS1)
+            {
+                if (!camera::isTransitioning())
+                {
+                    camera::setY(0.0f);
+
+                    if (gGame.player.pos.y > camera::screenHeight() * 0.5f)
+                        gGame.player.pos.y -= camera::screenHeight();
+                }
+            }
+
+            lastState = currentState;
+        }
+
+        // 3) APPLY CAMERA LAST (after any changes above)
+        camera::apply();
+
+        // ------------------------------------------------------------
+// DEBUG STAGE SWITCH (no animation)
+// Press 1 for Stage 1, Press 2 for Stage 2
+// ------------------------------------------------------------
+        if (AEInputCheckTriggered(AEVK_2))
+        {
+            // Go to Stage 2
+            if (currentState != SceneState::SummerS2)
+            {
+                currentState = SceneState::SummerS2;
+
+                // Snap camera to Stage 2 (one screen above Stage 1)
+                float h = camera::screenHeight();
+                camera::setY(h);
+
+                // Keep player in same screen-relative position
+                // If you were in Stage 1, move player up by one screen.
+                gGame.player.pos.y += h;
+
+                // Force entry logic to run cleanly
+                lastState = SceneState::Exit;
+            }
+        }
+
+        if (AEInputCheckTriggered(AEVK_1))
+        {
+            // Go to Stage 1
+            if (currentState != SceneState::SummerS1)
+            {
+                currentState = SceneState::SummerS1;
+
+                float h = camera::screenHeight();
+                camera::setY(0.0f);
+
+                // Move player down by one screen when returning
+                gGame.player.pos.y -= h;
+
+                lastState = SceneState::Exit;
+            }
+        }
+
+
         // Optionally let the window close terminate the game.
         if (AESysDoesWindowExist() == 0)
         {
@@ -90,7 +207,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         switch (currentState)
         {
-        case GameState::MainMenu:
+        case SceneState::MainMenu:
         {
             action = mainMenu.update();
             mainMenu.draw();
@@ -99,7 +216,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 // Go to Summer stage.
                 // AESysReset();
-                currentState = GameState::SummerS1;
+                currentState = SceneState::SummerS1;
             }
             else if (action == 2)
             {
@@ -110,31 +227,63 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
         break;
 
-        case GameState::SummerS1:
+        case SceneState::SummerS1:
         {
-            // Update and draw the first summer stage.
             action = summerStage.update(dt);
             summerStage.draw();
 
+            // If transitioning, ALSO draw Stage 2 on top
+            if (camera::isTransitioning())
+            {
+                summerStage2.draw();
+            }
 
+            // Transition request (you haven't wired this yet, see Fix 2)
+            if (action == 20)
+            {
+                pendingScene = SceneState::SummerS2;
+            }
 
             if (action == 2)
             {
-                // Return to main menu from level.
-                // AESysReset();
-                currentState = GameState::MainMenu;
+                currentState = SceneState::MainMenu;
+                camera::setY(0.0f);
             }
+
             else if (action == 3)
             {
-                // Future: quit from within a level.
                 gGameRunning = 0;
             }
         }
         break;
 
-        default:
-            break;
+
+        case SceneState::SummerS2:
+        {
+            action = summerStage2.update(dt);
+            summerStage2.draw();
+
+            // Debug back to stage 1 (if you add return 5)
+            if (action == 5)
+            {
+                currentState = SceneState::SummerS1;
+                camera::setY(0.0f);
+                gGame.player.pos.y -= camera::screenHeight();
+            }
+
+            if (action == 2)
+            {
+                currentState = SceneState::MainMenu;
+                camera::setY(0.0f);
+            }
+
+            else if (action == 3)
+            {
+                gGameRunning = 0;
+            }
         }
+        break;
+        } 
 
         // End frame.
         AESysFrameEnd();

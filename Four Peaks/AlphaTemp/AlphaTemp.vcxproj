@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="gamestate.cpp" />
     <ClCompile Include="graphics.cpp" />
@@ -18,16 +19,19 @@
     <ClCompile Include="mainmenu.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="sprite.cpp" />
-    <ClCompile Include="summer_s1.cpp" />
+    <ClCompile Include="Summer_s1.cpp" />
+    <ClCompile Include="Summer_s2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.hpp" />
     <ClInclude Include="collision.hpp" />
     <ClInclude Include="gamestate.hpp" />
     <ClInclude Include="graphics.hpp" />
     <ClInclude Include="mainmenu.hpp" />
     <ClInclude Include="player.hpp" />
     <ClInclude Include="sprite.hpp" />
-    <ClInclude Include="summer_s1.hpp" />
+    <ClInclude Include="Summer_s1.hpp" />
+    <ClInclude Include="Summer_s2.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
