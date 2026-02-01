@@ -5,6 +5,8 @@
 #include "AEEngine.h"   
 #include <cmath>
 #include <cstdint>
+#include <unordered_map>
+
 
 
 
@@ -12,9 +14,10 @@
 #define AE_PI 3.14159265358979323846f
 #endif
     // player sprite mesh
-    static AEGfxVertexList* spriteMesh = nullptr;
+    // Mesh cache for sprites
+static std::unordered_map<uint64_t, AEGfxVertexList*> spriteMeshCache;
 
-    static int circleSegments = 40;
+static int circleSegments = 40;
 
 namespace gfx
 {
@@ -93,6 +96,18 @@ namespace gfx
         return AEGfxMeshEnd();
     }
 
+    // Helper to create cache key from UV coordinates
+    static uint64_t makeUVKey(f32 u0, f32 v0, f32 u1, f32 v1)
+    {
+        uint16_t iu0 = (uint16_t)(u0 * 65535.0f);
+        uint16_t iv0 = (uint16_t)(v0 * 65535.0f);
+        uint16_t iu1 = (uint16_t)(u1 * 65535.0f);
+        uint16_t iv1 = (uint16_t)(v1 * 65535.0f);
+        return ((uint64_t)iu0 << 48) | ((uint64_t)iv0 << 32) |
+            ((uint64_t)iu1 << 16) | (uint64_t)iv1;
+    }
+
+
     // ============================================
     // Public API
     // ============================================
@@ -126,7 +141,12 @@ namespace gfx
         if (rectMesh) { AEGfxMeshFree(rectMesh); rectMesh = nullptr; }
         if (triMesh) { AEGfxMeshFree(triMesh); triMesh = nullptr; }
         if (circleMesh) { AEGfxMeshFree(circleMesh); circleMesh = nullptr; }
-        if (spriteMesh) { AEGfxMeshFree(spriteMesh); spriteMesh = nullptr; }
+        // Clean up mesh cache
+        for (auto& pair : spriteMeshCache) {
+            if (pair.second) AEGfxMeshFree(pair.second);
+        }
+        spriteMeshCache.clear();
+
     }
 
     f32 degToRad(f32 degrees)
@@ -213,9 +233,19 @@ namespace gfx
     {
         if (!tex) return;
 
-        // rebuild mesh for these UVs (simple + clear for now)
-        if (spriteMesh) { AEGfxMeshFree(spriteMesh); spriteMesh = nullptr; }
-        spriteMesh = buildSpriteMesh(u0, v0, u1, v1);
+        // Check cache for existing mesh with these UVs
+        uint64_t key = makeUVKey(u0, v0, u1, v1);
+        auto it = spriteMeshCache.find(key);
+        AEGfxVertexList* mesh;
+
+        if (it != spriteMeshCache.end()) {
+            mesh = it->second;  // Reuse cached mesh
+        }
+        else {
+            mesh = buildSpriteMesh(u0, v0, u1, v1);  // Create new mesh
+            spriteMeshCache[key] = mesh;  // Cache it
+        }
+
 
         AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
         AEGfxSetBlendMode(AE_GFX_BM_BLEND);
@@ -227,9 +257,9 @@ namespace gfx
 
         AEGfxTextureSet(tex, 0, 0);
 
-        // ✅ MISSING PART (THIS IS THE BUG)
         AEMtx33 m = makeTransform(position, rotationRad, size);
         AEGfxSetTransform(m.m);
-        AEGfxMeshDraw(spriteMesh, AE_GFX_MDM_TRIANGLES);
+        AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
+
     }
 }
