@@ -1,17 +1,19 @@
-#ifndef SUMMERS1HPP
-#define SUMMERS1HPP
+#ifndef SUMMERS2HPP
+#define SUMMERS2HPP
 
 #include <vector>
 #include <cstdint>
+#include "sprite.hpp"   // tileset/spikes/background textures
+#include <cmath>        // std::round
 
 typedef uint32_t u32;
 
 namespace game {
-    class SummerS1 {
+    class SummerS2 {
     public:
-        SummerS1();
-        ~SummerS1();
-        SummerS1(const SummerS1&) = delete;
+        SummerS2();
+        ~SummerS2();
+        SummerS2(const SummerS2&) = delete;
         int update(float dt);
         void draw() const;
 
@@ -26,6 +28,7 @@ namespace game {
         // Tile map: 0=empty, 1=ground, 2=spikes, etc.
         int tileMap[gridRows][gridCols];
         u32 getTileColor(int tileType) const;
+
 
         void drawGrid() const;
         void drawTiles() const;

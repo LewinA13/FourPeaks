@@ -1,23 +1,24 @@
 // ---------------------------------------------------------------------------
-// winter_s1.cpp
+// winter_s2.cpp
 // ---------------------------------------------------------------------------
 
+#include "Summer_s2.hpp"
 #include "Summer_s1.hpp"
+#include "sprite.hpp"
 #include "AEEngine.h"
 #include "graphics.hpp"
 #include "player.hpp"
-#include <cstdint>
 #include "gamestate.hpp"
-#include "sprite.hpp"
-#include <cmath>
 #include "camera.hpp"
-#include "Summer_s2.hpp"
-
-
+#include <cstdint>
+#include <cmath>
 
 
 typedef uint32_t u32;
 extern s8 gFontId;
+
+
+
 
 namespace game
 {
@@ -32,7 +33,7 @@ namespace game
         AEGfxPrint(gFontId, text, x, y, scale, r, g, b, a);
     }
 
-    u32 game::SummerS1::getTileColor(int tileType) const {
+    u32 game::SummerS2::getTileColor(int tileType) const {
         switch (tileType) {
         case 1: return 0xFF224B94u;
         case 2: return 0xFFA3B013u;  // Spikes: red
@@ -43,9 +44,9 @@ namespace game
 
 
     // -------------------------------------------------------------------
-    // Constructor 
+    // Constructor - Design your 32x20 level here!
     // -------------------------------------------------------------------
-    SummerS1::SummerS1()
+    SummerS2::SummerS2()
         : gridVisible(true)
         , tileMap{}
     {
@@ -55,42 +56,42 @@ namespace game
 
         int levelLayout[gridRows][gridCols] = {
             // Row 0 (bottom ground)
-            {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0},
-            {6,6,6,6,6,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0},
-            {0,0,0,0,0,4,0,0,0,0,0,0,4,2,2,2,4,4,4,0,4,4,4,4,4,4,4,0,0,0,0,0},
-            {0,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,4,4,4,0,4,4,4,4,4,4,4,0,0,0,0,0},
-            {0,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,4,4,4,0,4,4,4,4,4,4,4,0,0,0,0,0},
-            {0,0,0,0,0,6,6,6,6,6,6,6,6,0,0,0,4,4,4,0,4,4,4,4,4,4,4,0,0,0,0,0},
-            {0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,6,6,6,0,4,4,4,4,4,4,4,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,2,2,2,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,0,0,0,0,0,0,0,0},
-            {4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,6,4,4,4,0,0,0,0,0,0,0,0},
-            {4,4,2,2,2,2,2,9,9,9,9,9,9,9,9,9,0,0,0,0,0,4,4,4,0,0,0,0,0,0,0,0},
-            {4,4,0,0,0,0,0,8,0,0,8,0,0,0,0,0,0,0,0,0,0,4,2,2,0,0,0,0,0,0,0,0},
-            {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0},
-            {4,4,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0},
-            {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,0,0,0,0,6,6,6,6,4,0},
-            {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,8,0,4,0},
+            {4,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0}, //Ground Plat
+            {6,0,0,4,4,4,4,4,4,4,4,6,6,6,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0}, //Ground Plat
+            {0,0,0,4,4,2,2,4,2,2,4,0,0,0,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0}, //1st Above G
+            {0,0,0,4,4,0,0,4,0,0,4,0,0,0,6,6,6,6,6,6,4,0,0,0,0,0,0,0,0,0,0,0}, //2nd Above G
+            {0,0,0,4,4,0,0,4,0,0,4,0,0,0,0,8,0,0,8,0,4,0,0,0,0,0,0,0,0,0,0,0}, //000110010010000000001
+            {0,0,0,4,4,0,0,4,0,0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0}, //000110010010000000001
+            {0,0,0,4,4,0,0,4,0,0,4,0,0,0,4,4,4,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0}, //000110010010001110001
+            {0,0,0,6,6,0,0,6,0,0,6,0,0,0,4,6,6,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0}, //000110010010001110001
+            {0,0,0,0,0,0,0,10,0,0,10,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0}, //000000000000001000001
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,6,6,4,4,0,0,0,0}, //0000000000000010000010001111
+            {0,9,9,9,0,0,0,9,9,0,0,0,0,0,4,0,0,6,0,0,4,0,0,0,0,0,2,4,0,0,0,0}, //0000000000000010010010000021
+            {4,6,6,6,6,6,6,6,6,6,6,6,6,6,6,0,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,0}, //2222111221111110000010000001
+            {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,0}, //2000000000000000000010000001
+            {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,4,0,0,4,0,0,0,0}, //2000000000000000000010001001
+            {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,4,0,0,6,0,0,0,0}, //2000000000000000000010001001
+            {4,0,0,0,0,0,0,6,6,6,6,6,6,6,6,0,0,4,4,0,6,0,0,0,4,0,0,0,0,6,6,4}, //20000001111111100110100010000111
             // Row 16-19 (empty sky)
-            {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0},
-            {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,4,0},
-            {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,4,0},
-            {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,4,0}
+            {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,4,0,0,0,0,0,0,4}, //2000000000000000011000001
+            {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,0,0,0,0,0,6,0,0,0,0,0,0,4}, //2000000000000000011000001
+            {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6}, //2000000000000000000000001
+            {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}  //2000000000000000000000000
         };
 
         // Copy layout into member tileMap.
         for (int row = 0; row < gridRows; ++row)
             for (int col = 0; col < gridCols; ++col)
                 tileMap[row][col] = levelLayout[row][col];
+
     }
 
-    SummerS1::~SummerS1() = default;
+    SummerS2::~SummerS2() = default;
 
     // -------------------------------------------------------------------
     // update
     // -------------------------------------------------------------------
-
-    int SummerS1::update(float dt)
+    int SummerS2::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))
         {
@@ -102,22 +103,7 @@ namespace game
             return 2;
         }
 
-        // DEBUG: Press UP or W key anywhere to start transition
-        if (AEInputCheckTriggered(AEVK_UP))
-        {
-            if (!camera::isTransitioning())
-            {
-                float fromY = 0.0f;
-                float toY = camera::screenHeight();
-				camera::startTransitionY(fromY, toY, 1.0f); // tst time = 1 sec
-                return 20; // Signal transition to main
-            }
-        }
-
-        if (!camera::isTransitioning())
-        {
-            PlayerUpdate(gGame.player, dt);
-        }
+        PlayerUpdate(gGame.player, dt);
 
         sprite::updateAnimatedTiles(dt);
 
@@ -127,13 +113,12 @@ namespace game
     // -------------------------------------------------------------------
     // draw
     // -------------------------------------------------------------------
-    void SummerS1::draw() const
+
+    void SummerS2::draw() const
     {
-		// just in case, set background to black
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 
-
-        // ---- DRAW BACKGROUND FIRST ----
+        // ---- DRAW BACKGROUND (same as Stage 1) ----
         AEGfxTexture* bg = sprite::background();
         if (bg)
         {
@@ -142,23 +127,19 @@ namespace game
             float minY = AEGfxGetWinMinY();
             float maxY = AEGfxGetWinMaxY();
 
-            gfx::Vec2 center{ (minX + maxX) * 0.5f, (minY + maxY) * 0.5f };
+            gfx::Vec2 center{ (minX + maxX) * 0.5f, (minY + maxY) * 0.5f };  
             gfx::Vec2 size{ (maxX - minX), (maxY - minY) };
-
-            // full UVs of the image
             gfx::drawSprite(bg, center, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
         }
 
-        // ---- NOW DRAW YOUR LEVEL ----
+        // ---- DRAW LEVEL ----
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
-
         drawTiles();
-
         if (gridVisible)
             drawGrid();
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");
+        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 2 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
@@ -166,11 +147,12 @@ namespace game
     }
 
 
+
     // -------------------------------------------------------------------
     // gridToWorld
     // -------------------------------------------------------------------
 
-    void SummerS1::gridToWorld(int col, int row,
+    void SummerS2::gridToWorld(int col, int row,
         float& xWorld, float& yWorld,
         float& cellW, float& cellH) const
     {
@@ -179,18 +161,18 @@ namespace game
         float minY = AEGfxGetWinMinY();
         float maxY = AEGfxGetWinMaxY();
 
-        cellW = (maxX - minX) / static_cast<float>(gridCols);
-        cellH = (maxY - minY) / static_cast<float>(gridRows);
-
+        cellW = (maxX - minX) / static_cast<f32>(gridCols);
+        cellH = (maxY - minY) / static_cast<f32>(gridRows);
         xWorld = minX + col * cellW;
-        yWorld = minY + row * cellH;  // Camera-relative
+        yWorld = minY + row * cellH;  
     }
+
 
 
     // -------------------------------------------------------------------
     // drawTiles
     // -------------------------------------------------------------------
-    void game::SummerS1::drawTiles() const
+    void SummerS2::drawTiles() const
     {
         for (int row = 0; row < gridRows; ++row)
         {
@@ -205,59 +187,60 @@ namespace game
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
                 gfx::Vec2 size{ cellW, cellH };
 
-
-
+                // Helps reduce shimmering / seams
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
 
-                if (sprite::drawAnimatedTile(tileType, pos, size))
-                    continue;
-
-
-				// ice tile (tileType == 9)
-                if (tileType == 9)
-                {
-                    AEGfxTexture* iceTex = sprite::ice();
-                    if (iceTex)
-                    {
-                        gfx::drawSprite(iceTex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    }
-                    else
-                    {
-                        // Fallback: light blue color
-                        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
-                    }
-                    continue;
-                }
-
-                // 1) Spikes tile: draw idle.png
-                if (tileType == 2)
+                // -------------------------------------------------
+                // SPIKES
+                // tileType == 2 : spike facing UP
+                // tileType == 9 : spike facing DOWN
+                // -------------------------------------------------
+                if (tileType == 2 || tileType == 9)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
-                        // spikes taller 
+                        // Make spikes taller (1.5x height), same width
                         float heightScale = 1.5f;  // Adjust this value (1.5 to 2.5)
                         gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
 
-                        // Move position UP so base stays 
+                        // Adjust position based on direction
                         gfx::Vec2 spikePos = pos;
-                        spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                        if (tileType == 2) {
+                            // UP-facing: move position UP so base stays at bottom
+                            spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                        }
+                        else {
+                            // DOWN-facing: move position DOWN so base stays at top
+                            spikePos.y -= (spikeSize.y - size.y) * 0.5f;
+                        }
 
-                        // Full image UVs (v0=top, v1=bottom)
-                        gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                        // Default UVs (facing UP)
+                        float u0 = 0.0f;
+                        float v0 = 0.0f;
+                        float u1 = 1.0f;
+                        float v1 = 1.0f;
+
+                        // Flip vertically for DOWN-facing spikes
+                        if (tileType == 9)
+                        {
+                            v0 = 1.0f;
+                            v1 = 0.0f;
+                        }
+
+                        gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
-                    else
-                    {
-                        // fallback if texture missing
-                        u32 tileColor = getTileColor(tileType);
-                        gfx::drawRectangle(pos, 0.0f, size, tileColor);
-                    }
-                    continue; // important: don't also draw tileset/rect logic below
+                    continue;
                 }
 
 
-                // 2) Normal tiles: draw from tileset if it has UVs
+                if (sprite::drawAnimatedTile(tileType, pos, size))
+                    continue;
+
+                // -------------------------------------------------
+                // Normal tiles: using the Winter tileset (winter_.png)
+                // -------------------------------------------------
                 float u0{}, v0{}, u1{}, v1{};
                 AEGfxTexture* tex = sprite::tileset();
 
@@ -267,10 +250,10 @@ namespace game
                 }
                 else
                 {
+                    // fallback for unknown IDs
                     u32 tileColor = getTileColor(tileType);
                     gfx::drawRectangle(pos, 0.0f, size, tileColor);
                 }
-
             }
         }
     }
@@ -281,7 +264,8 @@ namespace game
     // -------------------------------------------------------------------
     // drawGrid
     // -------------------------------------------------------------------
-    void SummerS1::drawGrid() const
+    
+    void SummerS2::drawGrid() const
     {
         const u32 gridColor = 0x80FFFFFF;
 
@@ -290,26 +274,31 @@ namespace game
         float minY = AEGfxGetWinMinY();
         float maxY = AEGfxGetWinMaxY();
 
-        float cellW = (maxX - minX) / static_cast<float>(gridCols);
-        float cellH = (maxY - minY) / static_cast<float>(gridRows);
+        float screenW = (maxX - minX);
+        float screenH = (maxY - minY);
 
+        float stage2BottomY = maxY;
+
+        float cellW = screenW / static_cast<float>(gridCols);
+        float cellH = screenH / static_cast<float>(gridRows);
         float thickness = (cellW < cellH ? cellW : cellH) * 0.04f;
 
-        // Vertical lines.
+        // Vertical lines
         for (int col = 0; col <= gridCols; ++col)
         {
             float x = minX + col * cellW;
-            gfx::Vec2 pos{ x, (minY + maxY) * 0.5f };
-            gfx::Vec2 size{ thickness, maxY - minY };
+            float centerY = stage2BottomY + screenH * 0.5f;
+            gfx::Vec2 pos{ x, centerY };
+            gfx::Vec2 size{ thickness, screenH };
             gfx::drawRectangle(pos, 0.0f, size, gridColor);
         }
 
-        // Horizontal lines.
+        // Horizontal lines
         for (int row = 0; row <= gridRows; ++row)
         {
-            float y = minY + row * cellH;
+            float y = stage2BottomY + row * cellH;
             gfx::Vec2 pos{ (minX + maxX) * 0.5f, y };
-            gfx::Vec2 size{ maxX - minX, thickness };
+            gfx::Vec2 size{ screenW, thickness };
             gfx::drawRectangle(pos, 0.0f, size, gridColor);
         }
     }
