@@ -72,7 +72,7 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm]) {
 	//! start checking, if not equal 0, means collision with solid block, return true
 	for (int r = box.rowStart; r <= box.rowEnd; r++) {
 		for (int c = box.colStart; c <= box.colEnd; c++) {
-			if (levelLayout[r][c] != 0) {
+			if (levelLayout[r][c] != 0 ) {
 				return true;
 			}
 		}
@@ -88,9 +88,27 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm]) {
 // Check and change the type grounded type player step on
 void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) {
 
+
 	for (int r = box.rowStart; r <= box.rowEnd; r++) {
 		for (int c = box.colStart; c <= box.colEnd; c++) {
 			switch (levelLayout[r][c]) {
+
+			case 5: { 
+
+				std::cout << "DEBUG: Checkpoint Saved at grid (" << c << "," << r << ")" << std::endl;
+
+				float halfWinW = (float)AEGfxGetWindowWidth() / 2.0f;
+				float halfWinH = (float)AEGfxGetWindowHeight() / 2.0f;
+
+
+				player.currGroundType = Player::GroundType::CheckPoint;
+				gfx::Vec2 res;
+				res.x = (c + 0.5f) * tileW - halfWinW;
+				res.y = (r + 1.0f) * tileH - halfWinH;
+				PlayerSetRespawn(player, res);
+				break;
+			}
+
 			case 1:
 			case 4:
 			case 6:
@@ -101,15 +119,23 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				player.currGroundType = Player::GroundType::Spikes;
 				break;
 
+			//! Assume Ice Block is 3, change in future  
 			case 3:
 				player.currGroundType = Player::GroundType::Ice;
 				break;
+
+			/*case 5:
+				player.currGroundType = Player::GroundType::CheckPoint;
+				break;*/
+
 
 			default:
 				break;
 			}
 		}
 	}
+
+
 
 }
 
@@ -157,6 +183,9 @@ void CollisionResolveSpawn(Player& player) // justin function
     player.velY = 0.0f;
     player.horzSpeed = 0.0f;
 }
+
+
+
 
 void resolvePlayerCollision(Player &player, int levelLayout[][mapColm], f32 dt) {
 
@@ -219,17 +248,18 @@ void resolvePlayerCollision(Player &player, int levelLayout[][mapColm], f32 dt) 
 void applyGroundPhysics(Player& player) {
 	switch (player.currGroundType) {
 	case Player::GroundType::Normal:
-		player.accel = 20.0f;
-		player.decel = 0.5f;
+		player.accel = 8.0f;
+		player.decel = 4.0f;
 		break;
 
 	case Player::GroundType::Spikes:
 		PlayerKill(player);
 		break;
 
+
 		//! can change to "Spikes" to see the effect first
 	case Player::GroundType::Ice:
-		player.accel = 5.0f;
+		player.accel = 20.0f;
 		player.decel = 2.0f;
 		break;
 
@@ -240,12 +270,16 @@ void applyGroundPhysics(Player& player) {
 
 
 void CollisionUpdate(Player& player, f32 dt) {
+
+	gfx::Vec2 oldPos = player.pos;
+
 	resolvePlayerCollision(player, g_currentMap, dt);
 
-	if (player.grounded) {
-		applyGroundPhysics(player);
-	}
-	else {
+
+
+	applyGroundPhysics(player);
+
+	if (!(player.grounded)) {
 		player.accel = 8.0f;
 		player.decel = 4.0f;
 	}
@@ -265,4 +299,22 @@ void CollisionUpdateWallFlags(Player& player)
 	player.onWallLeft = checkAABBCollisionAt(player.pos.x - PROBE, player.pos.y, w, h);
 	player.onWallRight = checkAABBCollisionAt(player.pos.x + PROBE, player.pos.y, w, h);
 
+}
+
+
+void CheckPathForCheckpoint(Player& player, gfx::Vec2 startPos, gfx::Vec2 endPos) {
+	const int numSamples = 10;
+
+	float fakeWidth = player.colliderSize.x + 5.0f;
+	float fakeHeight = player.colliderSize.y + 5.0f;
+
+	for (int i = 0; i <= numSamples; ++i) {
+		float t = (float)i / (float)numSamples;
+		float sx = startPos.x + (endPos.x - startPos.x) * t;
+		float sy = startPos.y + (endPos.y - startPos.y) * t;
+
+		TileRange box = calTileRange(sx, sy, fakeWidth, fakeHeight);
+
+		checkGroundType(player, box, g_currentMap);
+	}
 }

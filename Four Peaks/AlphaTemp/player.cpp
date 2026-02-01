@@ -35,6 +35,8 @@ void PlayerRespawn(Player& p)
     p.dead = false;
     p.deadTimer = 0.0f;
 
+    p.currGroundType = Player::GroundType::Normal;
+
     // Teleport to respawn point
     PlayerSetFeetWorld(p, p.respawnPos);
     p.justRespawned = true;
@@ -480,6 +482,11 @@ void PlayerUpdate(Player& p, float dt)
     // =========================================================
     if (p.dashing)
     {
+
+        gfx::Vec2 startPos = p.pos;
+
+   
+
         p.dashTimer -= dt;
 
         p.velX = p.dashDir * p.dashSpeed;
@@ -487,6 +494,13 @@ void PlayerUpdate(Player& p, float dt)
 
         if (p.dashTimer <= 0.0f)
             p.dashing = false;
+
+        gfx::Vec2 endPos;
+        endPos.x = p.pos.x + (p.velX * dt);
+        endPos.y = p.pos.y + (p.velY * dt);
+
+        CheckPathForCheckpoint(p, startPos, endPos);
+
     }
 
     // =========================================================

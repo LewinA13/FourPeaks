@@ -163,12 +163,16 @@ struct Player
 
     // ======== Ground Type ==========
     enum class GroundType {
-        Normal = 1,
-        Spikes = 2,
-        Ice = 3
+        Normal,
+        Spikes,
+        Ice,
+        CheckPoint
     };
 
     GroundType currGroundType = Player::GroundType::Normal;
+
+    gfx::Vec2 lastCheckPointPos;
+    
 
 };
 
