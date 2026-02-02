@@ -1,6 +1,9 @@
 ﻿#include "player.hpp"
 #include "graphics.hpp"
 #include "collision.hpp"
+#include <fstream>
+#include <iomanip>
+#include <string>
 
 #include <iostream>
 
@@ -25,6 +28,66 @@ void PlayerSetFeetWorld(Player& p, gfx::Vec2 feetWorld)
 void PlayerSetRespawn(Player& p, gfx::Vec2 pos) // PlayerSetRespawn(gGame.p, gfx::Vec2 pos)
 {
     p.respawnPos = pos;
+}
+
+// File format:
+//   checkpoint_v1
+//   <respawnX> <respawnY>
+
+bool PlayerSaveCheckpoint(const Player& p, const char* filename)
+{
+    if (filename == nullptr || filename[0] == '\0')
+        return false;
+
+    // trunc is used to remove old checkpoint and add in new one
+    std::ofstream out(filename, std::ios::out | std::ios::trunc);
+    if (!out.is_open())
+        return false;
+
+    out << "checkpoint_v1\n";
+    out << std::fixed << std::setprecision(3);
+    out << p.respawnPos.x << " " << p.respawnPos.y << "\n";
+
+    std::cout << "Saved checkpoint to file";
+    return out.good();
+}
+
+bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespawn)
+{
+    if (filename == nullptr || filename[0] == '\0')
+        return false;
+
+    std::ifstream in(filename);
+    if (!in.is_open())
+        return false;
+
+    std::string header;
+    in >> header;
+
+    float x = 0.0f;
+    float y = 0.0f;
+
+    if (header == "checkpoint_v1")
+    {
+        if (!(in >> x >> y))
+            return false;
+    }
+    else
+    {
+        // Backwards-compat: if file just contains "x y" with no header.
+        try { x = std::stof(header); }
+        catch (...) { return false; }
+
+        if (!(in >> y))
+            return false;
+    }
+
+    p.respawnPos = { x, y };
+
+    if (teleportToRespawn)
+        PlayerSetFeetWorld(p, p.respawnPos);
+
+    return true;
 }
 
 void PlayerRespawn(Player& p)
@@ -136,6 +199,7 @@ void PlayerInit(Player& p)
     p.dead = false;
 
     p.respawnPos = p.pos;      // default respawn = start position
+    PlayerLoadCheckpoint(p, "checkpoint.txt", true);
     p.justRespawned = false;
 
 
@@ -534,6 +598,7 @@ void PlayerUpdate(Player& p, float dt)
         gfx::Vec2 feet = PlayerGetFeetWorld(p);
         feet.y += 1.0f;     // +Y is up in your project
         PlayerSetRespawn(p, feet);
+        PlayerSaveCheckpoint(p, "checkpoint.txt");
 
         // If grounded, lift the saved respawn a tiny bit so we don't respawn intersecting tiles.
         if (p.grounded)

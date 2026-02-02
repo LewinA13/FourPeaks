@@ -192,6 +192,11 @@ void PlayerSetRespawn(Player& p, gfx::Vec2 pos);
 gfx::Vec2 PlayerGetFeetWorld(const Player& p);
 void      PlayerSetFeetWorld(Player& p, gfx::Vec2 feetWorld);
 
+// checkpoint helper functions
+bool PlayerSaveCheckpoint(const Player& p, const char* filename);
+bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespawn);
+
+
 #endif
 
 

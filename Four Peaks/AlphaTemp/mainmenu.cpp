@@ -12,6 +12,10 @@
 #include <cstdint>
 
 extern s8 gFontId;      // Font handle created in main.cpp
+static bool gIsFullscreen = false; //Full Screen Handler
+
+
+
 
 namespace game
 {
@@ -47,6 +51,24 @@ namespace game
         , showHowTo(false)
     {
     }
+
+    void ToggleFullscreen()
+    {
+        gIsFullscreen = !gIsFullscreen;
+
+        if (gIsFullscreen)
+        {
+            // Switch to fullscreen
+            AESysSetFullScreen(1);
+        }
+        else
+        {
+            // Switch back to windowed mode
+            AESysSetFullScreen(0);
+        }
+    }
+
+
 
     // -------------------------------------------------------------------
     // MainMenu::update
@@ -93,6 +115,13 @@ namespace game
             default:
                 break;
             }
+        }
+
+        //Full Screen Toggle
+        // Check if 'I' key was pressed THIS frame
+        if (AEInputCheckTriggered(AEVK_I))
+        {
+            ToggleFullscreen();
         }
 
         return 0; // no state change
