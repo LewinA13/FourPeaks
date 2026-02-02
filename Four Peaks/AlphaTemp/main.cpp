@@ -90,41 +90,47 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         // Begin frame.
         AESysFrameStart();
-
         f32 dt = (f32)AEFrameRateControllerGetFrameTime();
 
-        float prevCamY = camera::getY();
         camera::update(dt);
-        float deltaCamY = camera::getY() - prevCamY;
 
-        // During a transition, make the player "ride" the camera
-        if (camera::isTransitioning())
-        {
-            gGame.player.pos.y += deltaCamY;
-            gGame.player.velY = 0.0f;
-        }
-
-        // 1) If the transition just finished, SWITCH STATE FIRST
+        // 1) If transition just finished, SWITCH STATE and SPAWN PLAYER
         if (camera::consumeJustFinished())
         {
             currentState = pendingScene;
-
-            // Camera is already at the correct position from the transition
-            // Just update lastState to match so we don't re-enter
             lastState = currentState;
 
-            // Reset player physics state
+            // Spawn player at the correct position for the new stage
+            if (currentState == SceneState::SummerS2)
+            {
+                // Spawn at grid (3, 3) in Stage 2 - BOTTOM LEFT
+                float minX = AEGfxGetWinMinX();
+                float maxX = AEGfxGetWinMaxX();
+                float minY = AEGfxGetWinMinY();
+                float maxY = AEGfxGetWinMaxY();
+
+                float cellW = (maxX - minX) / 32.0f;
+                float cellH = (maxY - minY) / 20.0f;
+
+                // Grid (3,3) in Stage 2's world space
+                float worldX = minX + 3 * cellW + cellW * 0.5f;
+                float worldY = camera::screenHeight() + minY + 3 * cellH + cellH * 0.5f;
+
+                gGame.player.pos.x = worldX;
+                gGame.player.pos.y = worldY;
+            }
+
+            // Reset player physics
             gGame.player.velY = 0.0f;
             gGame.player.grounded = false;
         }
-        // 2) Now handle direct state entry (pressing keys / menu swap / etc.)
-        // This ONLY runs for non-transition state changes
+
+        // 2) Handle direct state entry (pressing keys / menu / etc.) - NO transition
         else if (currentState != lastState)
         {
             if (currentState == SceneState::SummerS2)
             {
                 camera::setY(camera::screenHeight());
-                // Keep player in the same screen-relative spot
                 if (gGame.player.pos.y < camera::screenHeight() * 0.5f)
                     gGame.player.pos.y += camera::screenHeight();
             }
@@ -137,13 +143,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             lastState = currentState;
         }
 
-        // 3) APPLY CAMERA LAST (after any changes above)
+        // 3) APPLY CAMERA
         camera::apply();
 
+
         // ------------------------------------------------------------
-// DEBUG STAGE SWITCH (no animation)
-// Press 1 for Stage 1, Press 2 for Stage 2
-// ------------------------------------------------------------
+        // DEBUG STAGE SWITCH (no animation)
+        // Press 1 for Stage 1, Press 2 for Stage 2
+        // ------------------------------------------------------------
         if (AEInputCheckTriggered(AEVK_2))
         {
             // Go to Stage 2
