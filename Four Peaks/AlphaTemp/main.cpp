@@ -101,16 +101,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         camera::update(dt);
 
-        // 1) If transition just finished, SWITCH STATE and SPAWN PLAYER
-        if (camera::consumeJustFinished())
+        // Handle state changes (both transition-based and direct)
+        if (currentState != lastState)
         {
-            currentState = pendingScene;
-            lastState = currentState;
-
-            // Spawn player at the correct position for the new stage
             if (currentState == SceneState::SummerS2)
             {
-                // Spawn at grid (3, 3) in Stage 2 - BOTTOM LEFT
+                // Set camera to Stage 2
+                camera::setY(camera::screenHeight());
+
+                // Spawn player at grid stage 2 - change here for spawn location - A
                 float minX = AEGfxGetWinMinX();
                 float maxX = AEGfxGetWinMaxX();
                 float minY = AEGfxGetWinMinY();
@@ -120,37 +119,26 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 float cellH = (maxY - minY) / 20.0f;
 
                 // Grid (3,3) in Stage 2's world space
-                float worldX = minX + 3 * cellW + cellW * 0.5f;
-                float worldY = camera::screenHeight() + minY + 3 * cellH + cellH * 0.5f;
+                float worldX = minX + 2 * cellW + cellW * 0.5f;
+                float worldY = camera::screenHeight() + minY + 1 * cellH + cellH * 0.5f;
 
                 gGame.player.pos.x = worldX;
                 gGame.player.pos.y = worldY;
+            }
+            else if (currentState == SceneState::SummerS1)
+            {
+                camera::setY(0.0f);
+                // Optionally set spawn position for Stage 1 too
             }
 
             // Reset player physics
             gGame.player.velY = 0.0f;
             gGame.player.grounded = false;
-        }
 
-        // 2) Handle direct state entry (pressing keys / menu / etc.) - NO transition
-        else if (currentState != lastState)
-        {
-            if (currentState == SceneState::SummerS2)
-            {
-                camera::setY(camera::screenHeight());
-                if (gGame.player.pos.y < camera::screenHeight() * 0.5f)
-                    gGame.player.pos.y += camera::screenHeight();
-            }
-            else if (currentState == SceneState::SummerS1)
-            {
-                camera::setY(0.0f);
-                if (gGame.player.pos.y > camera::screenHeight() * 0.5f)
-                    gGame.player.pos.y -= camera::screenHeight();
-            }
             lastState = currentState;
         }
 
-        // 3) APPLY CAMERA
+        // Apply camera
         camera::apply();
 
 
@@ -234,16 +222,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = summerStage.update(dt);
             summerStage.draw();
 
-            // If transitioning, ALSO draw Stage 2 on top
-            if (camera::isTransitioning())
-            {
-                summerStage2.draw();
-            }
-
-            // Transition request (you haven't wired this yet, see Fix 2)
+            // Handle action == 20 (instant teleport to Stage 2)
             if (action == 20)
             {
-                pendingScene = SceneState::SummerS2;
+                currentState = SceneState::SummerS2;
             }
 
             if (action == 2)
@@ -251,13 +233,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
             }
-
             else if (action == 3)
             {
                 gGameRunning = 0;
             }
         }
         break;
+
 
 
         case SceneState::SummerS2:

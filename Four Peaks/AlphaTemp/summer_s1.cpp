@@ -143,12 +143,9 @@ namespace game
 
             if (distance < cellW * 1.5f)
             {
-                // Start camera transition to Summer_s2
-                float fromY = 0.0f;
-                float toY = camera::screenHeight();
-                camera::startTransitionY(fromY, toY, 1.0f); // 1 second transition
-                return 20; // Signal transition to main
+                return 20; // Signal INSTANT teleport to Stage 2
             }
+
         }
 
 
