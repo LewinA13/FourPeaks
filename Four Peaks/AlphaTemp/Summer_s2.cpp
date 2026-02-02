@@ -93,6 +93,7 @@ namespace game
     // -------------------------------------------------------------------
     int SummerS2::update(float dt)
     {
+
         if (AEInputCheckTriggered(AEVK_G))
         {
             gridVisible = !gridVisible;
