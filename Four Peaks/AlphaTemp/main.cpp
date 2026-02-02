@@ -109,45 +109,31 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         {
             currentState = pendingScene;
 
-            // Snap camera immediately to the destination so Stage 2 is visible THIS frame
-            if (currentState == SceneState::SummerS2)
-                camera::setY(camera::screenHeight());
-            else if (currentState == SceneState::SummerS1)
-                camera::setY(0.0f);
+            // Camera is already at the correct position from the transition
+            // Just update lastState to match so we don't re-enter
+            lastState = currentState;
 
-            // Force the "enter state" logic to run
-            lastState = SceneState::Exit;
-
-            // Optional: stop weird motion after transition
+            // Reset player physics state
             gGame.player.velY = 0.0f;
             gGame.player.grounded = false;
         }
-
         // 2) Now handle direct state entry (pressing keys / menu swap / etc.)
-        if (currentState != lastState)
+        // This ONLY runs for non-transition state changes
+        else if (currentState != lastState)
         {
             if (currentState == SceneState::SummerS2)
             {
-                if (!camera::isTransitioning())
-                {
-                    camera::setY(camera::screenHeight());
-
-                    // Keep player in the same screen-relative spot
-                    if (gGame.player.pos.y < camera::screenHeight() * 0.5f)
-                        gGame.player.pos.y += camera::screenHeight();
-                }
+                camera::setY(camera::screenHeight());
+                // Keep player in the same screen-relative spot
+                if (gGame.player.pos.y < camera::screenHeight() * 0.5f)
+                    gGame.player.pos.y += camera::screenHeight();
             }
             else if (currentState == SceneState::SummerS1)
             {
-                if (!camera::isTransitioning())
-                {
-                    camera::setY(0.0f);
-
-                    if (gGame.player.pos.y > camera::screenHeight() * 0.5f)
-                        gGame.player.pos.y -= camera::screenHeight();
-                }
+                camera::setY(0.0f);
+                if (gGame.player.pos.y > camera::screenHeight() * 0.5f)
+                    gGame.player.pos.y -= camera::screenHeight();
             }
-
             lastState = currentState;
         }
 

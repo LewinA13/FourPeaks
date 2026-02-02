@@ -70,7 +70,7 @@ namespace game
             {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0},
             {4,4,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0},
             {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,0,0,0,0,6,6,6,6,4,0},
-            {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,8,0,4,0},
+            {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0},
             // Row 16-19 (empty sky)
             {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0},
             {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,4,0},
@@ -112,7 +112,7 @@ namespace game
             {
                 float fromY = 0.0f;
                 float toY = camera::screenHeight();
-				camera::startTransitionY(fromY, toY, 1.0f); // tst time = 1 sec
+				camera::startTransitionY(fromY, toY, 0.3f); // tst time = 1 sec
                 return 20; // Signal transition to main
             }
         }
@@ -121,6 +121,39 @@ namespace game
         {
             PlayerUpdate(gGame.player, dt);
         }
+
+        // In SummerS1::update(float dt) - add this before "return 0;"
+
+        // Check if player reached the teleport zone (example: top-right area)
+        if (!camera::isTransitioning())
+        {
+            // Define teleport zone in grid coordinates
+            int teleportCol = 28;  // Column 27 (right side of map)
+            int teleportRow = 19;  // Row 18 (near top)
+
+            // Convert grid position to world coordinates
+            float gridWorldX, gridWorldY, cellW, cellH;
+            gridToWorld(teleportCol, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
+
+            // Check if player is within the teleport zone
+            float teleportCenterX = gridWorldX + cellW * 0.5f;
+            float teleportCenterY = gridWorldY + cellH * 0.5f;
+
+            // Distance check (within 1.5 cells)
+            float dx = gGame.player.pos.x - teleportCenterX;
+            float dy = gGame.player.pos.y - teleportCenterY;
+            float distance = sqrt(dx * dx + dy * dy);
+
+            if (distance < cellW * 1.5f)
+            {
+                // Start camera transition to Summer_s2
+                float fromY = 0.0f;
+                float toY = camera::screenHeight();
+                camera::startTransitionY(fromY, toY, 1.0f); // 1 second transition
+                return 20; // Signal transition to main
+            }
+        }
+
 
         sprite::updateAnimatedTiles(dt);
 
@@ -164,6 +197,34 @@ namespace game
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
+        // Draw teleport indicator (2x1 cells - 2 columns, 1 row)
+        if (!camera::isTransitioning())
+        {
+            int teleportCol = 28;  // Starting column (left edge)
+            int teleportRow = 19;  // Row position
+
+            // Draw 2 adjacent cells horizontally
+            for (int c = 0; c < 2; c++)
+            {
+                int col = teleportCol + c;
+
+                if (col < gridCols)
+                {
+                    float gridWorldX, gridWorldY, cellW, cellH;
+                    gridToWorld(col, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
+
+                    gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
+
+                    // Round to match tile alignment
+                    portalPos.x = std::round(portalPos.x);
+                    portalPos.y = std::round(portalPos.y);
+
+                    gfx::Vec2 portalSize{ cellW, cellH };
+                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAA00FFFF); // Cyan
+                }
+            }
+        }
 
         PlayerDraw(gGame.player);
     }

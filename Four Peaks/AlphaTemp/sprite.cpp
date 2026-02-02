@@ -46,8 +46,10 @@ namespace sprite
         // ---------------------------------------------------------
         int coinFrame = 0;
         float coinTimer = 0.0f;
-        constexpr int coinFrameCount = 12;
-        constexpr float coinFrameTime = 0.08f;
+        // Melon.png is 544x32, 17 frames, each 32x32 (horizontal strip)
+        constexpr int coinFrameCount = 17;
+        constexpr float coinFrameTime = 0.08f; // tweak if you want faster/slower
+
 
         int checkpointFrame = 0;
         float checkpointTimer = 0.0f;
@@ -76,9 +78,9 @@ namespace sprite
             spikesTex = AEGfxTextureLoad("idle.png");
 
         // coin spritesheet texture
-        coinTex = AEGfxTextureLoad("Assets/coin_.png");
+        coinTex = AEGfxTextureLoad("Assets/Melon.png");
         if (!coinTex)
-            coinTex = AEGfxTextureLoad("coin_.png");
+            coinTex = AEGfxTextureLoad("Melon.png");
 
 		// ice texture
         iceTex = AEGfxTextureLoad("Assets/IceBox.png");
@@ -162,21 +164,20 @@ namespace sprite
         return checkpointTex;
     }
 
-	// UVs for coin animation frames
     bool getCoinUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
-        // coin_.png = 192x16
-        // 12 frames, each 16x16 laid horizontally
-        constexpr int frameCount = 12;
-        constexpr float sheetW = 192.0f;
-        constexpr float sheetH = 16.0f;
-        constexpr float frameW = 16.0f;
-        constexpr float frameH = 16.0f;
+        // Melon.png = 544x32
+        // 17 frames, each 32x32, laid horizontally
+        constexpr int frameCount = 17;
+        constexpr float sheetW = 544.0f;
+        constexpr float sheetH = 32.0f;
+        constexpr float frameW = 32.0f;
+        constexpr float frameH = 32.0f;
 
         if (frame < 0) frame = 0;
         frame %= frameCount;
 
-        // Small inset to reduce texture bleeding
+        // small inset to reduce bleeding between frames
         constexpr float insetPx = 0.5f;
 
         float px = frame * frameW;
@@ -194,6 +195,7 @@ namespace sprite
 
         return true;
     }
+
 
 	// UVs for checkpoint animation frames
     bool getCheckpointUv(int frame, float& u0, float& v0, float& u1, float& v1)
@@ -259,7 +261,8 @@ namespace sprite
             float u0{}, v0{}, u1{}, v1{};
             getCoinUv(coinFrame, u0, v0, u1, v1);
 
-            gfx::Vec2 coinSize{ size.x * 0.6f, size.y * 0.6f };
+            // melon size
+            gfx::Vec2 coinSize{ size.x * 0.9f, size.y * 0.9f };
             gfx::drawSprite(coinTex, pos, 0.0f, coinSize, u0, v0, u1, v1);
             return true;
         }

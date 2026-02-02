@@ -103,6 +103,16 @@ namespace game
             return 2;
         }
 
+        // Only update player when NOT transitioning (matches Stage 1 behavior)
+        if (!camera::isTransitioning())
+        {
+            PlayerUpdate(gGame.player, dt);
+        }
+
+        sprite::updateAnimatedTiles(dt);
+        return 0;
+
+
         PlayerUpdate(gGame.player, dt);
 
         sprite::updateAnimatedTiles(dt);
