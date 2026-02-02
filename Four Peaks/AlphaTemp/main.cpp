@@ -12,7 +12,7 @@
 #include "Summer_s1.hpp"
 #include "Summer_s2.hpp"
 #include "camera.hpp"
-
+#include "collision.hpp"
 
 
 // Global font handle used by all states
@@ -87,6 +87,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     PlayerInit(gGame.player);
     while (gGameRunning)
     {
+
+        if (currentState == SceneState::SummerS1) {
+            g_currentMap = summerStage.getTileMap();
+        }
+        else if (currentState == SceneState::SummerS2) {
+            g_currentMap = summerStage2.getTileMap();
+        }
 
         // Begin frame.
         AESysFrameStart();
@@ -165,6 +172,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 // Keep player in same screen-relative position
                 // If you were in Stage 1, move player up by one screen.
                 gGame.player.pos.y += h;
+
+              
 
                 // Force entry logic to run cleanly
                 lastState = SceneState::Exit;

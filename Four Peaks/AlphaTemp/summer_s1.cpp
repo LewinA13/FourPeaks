@@ -15,7 +15,6 @@
 
 
 
-
 typedef uint32_t u32;
 extern s8 gFontId;
 
@@ -92,8 +91,6 @@ namespace game
 
     int SummerS1::update(float dt)
     {
-        extern int (*g_currentMap)[32];
-        g_currentMap = getTileMap();
 
         if (AEInputCheckTriggered(AEVK_G))
         {
