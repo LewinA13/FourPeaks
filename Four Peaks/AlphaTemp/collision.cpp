@@ -67,18 +67,29 @@ TileRange calTileRange(f32 x, f32 y, f32 width, f32 height) {
 	return box;
 }
 
-
-bool checkMapCollision(TileRange box, int levelLayout[][mapColm]) {
+bool checkMapCollision(TileRange box, int levelLayout[][mapColm], float velY = -1.0f) {//! velY is defauly parameter, use for check one-way platform case
 
 	//! return false once member in box equal to -1, means player out of screen
 	if (box.colStart == -1) {
 		return false;
 	}
 
-	//! start checking, if not equal 0, means collision with solid block, return true
 	for (int r = box.rowStart; r <= box.rowEnd; r++) {
 		for (int c = box.colStart; c <= box.colEnd; c++) {
-			if (levelLayout[r][c] != 0 && levelLayout[r][c] != 10 && levelLayout[r][c] != 8) {
+			int tile = levelLayout[r][c];
+
+			//! Assume platform is 7 first, ****change in future
+			if (tile == 7) {
+				// If (player is dropping or staying) and (player bottom is near with platform), collision detect
+				if (velY <= 0 && (box.rowStart == r || box.rowStart == r + 1)) {
+					return true;
+				}
+				//! Skip this tile, check remaining tiles for collision
+				continue;
+			}
+
+			//! start checking, if not equal 0, 10, 8, means collision with solid block, return true
+			if (tile != 0 && tile != 10 && tile != 8) {
 				return true;
 			}
 		}
@@ -86,12 +97,11 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm]) {
 
 	//! return false if not collision with solid block
 	return false;
-
 }
 
 
 
-// Check and change the type grounded type player step on
+//! Check and change the type grounded type player step on
 void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) {
 
 
@@ -101,11 +111,11 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 	for (int r = box.rowStart; r <= box.rowEnd; r++) {
 		for (int c = box.colStart; c <= box.colEnd; c++) {
 			printf("  Checking tile[%d][%d] = %d\n", r, c, levelLayout[r][c]);
-			if (levelLayout[r][c] == 2) { 
+			/*if (levelLayout[r][c] == 2) { 
 				printf("  >>> SPIKE DETECTED! Calling PlayerKill\n");
-				PlayerKill(player);
 				return; 
-			}
+			}*/
+
 
 			switch (levelLayout[r][c]) {
 			//! dont call "PlayerSetRespawn" at "applyGroundPhysics", pos will be push and cant get exact same pos
@@ -129,13 +139,13 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 			case 1:
 			case 4:
 			case 6:
+			case 7:
 				player.currGroundType = Player::GroundType::Normal;
 				break;
 
 			case 2:
 			case 9:
 				player.currGroundType = Player::GroundType::Spikes;
-				PlayerKill(player);
 				return;
 
 			default:
@@ -155,7 +165,7 @@ bool checkPlayerCollision(Player& player, int levelLayout[][mapColm]) {
 	if (player.dead) {
 		return false;
 	}
-	return checkMapCollision(box, levelLayout);
+	return checkMapCollision(box, levelLayout,player.velY);
 }
 
 
@@ -265,6 +275,8 @@ void resolvePlayerCollision(Player &player, int levelLayout[][mapColm], f32 dt) 
 
 }
 
+
+
 void applyGroundPhysics(Player& player) {
 	switch (player.currGroundType) {
 	case Player::GroundType::Normal:
@@ -272,9 +284,9 @@ void applyGroundPhysics(Player& player) {
 		player.decel = 4.0f;
 		break;
 
-	//case Player::GroundType::Spikes:
-	//	PlayerKill(player);
-	//	break;
+	case Player::GroundType::Spikes:
+		PlayerKill(player);
+		break;
 
 	case Player::GroundType::Ice:
 		player.accel = 20.0f;
