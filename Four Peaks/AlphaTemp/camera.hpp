@@ -1,36 +1,33 @@
-#pragma once
+#ifndef CAMERA_HPP
+#define CAMERA_HPP
 
-namespace camera
-{
-    // Call once at startup (after window init), and any time window size changes.
-    void init();
+#include "AEEngine.h"
 
-    // Call every frame (dt in seconds)
-    void update(float dt);
+namespace camera {
 
-    // Apply camera to Alpha Engine (call once per frame, after update)
-    void apply();
+	void init();
+	void update(float dt);
+	void apply();
 
-    // Instantly set camera Y (no animation)
-    void setY(float y);
+	// Position control
+	void setY(float y);
+	float getY();
 
-    // Get camera Y
-    float getY();
+	// Camera follow player
+	void followPlayer(float playerX, float playerY, float dt);
+	void setFollowMode(bool enabled);
+	bool isFollowMode();
 
-    // Screen height in world units (WinMaxY - WinMinY)
-    float screenHeight();
+	// Screen info
+	float screenHeight();
+	float screenWidth();
 
-    // Start a smooth vertical transition (Y only)
-    // Returns true if it started, false if already transitioning.
-    bool startTransitionY(float fromY, float toY, float durationSec);
+	// Transitions
+	bool startTransitionY(float newFromY, float newToY, float durationSec);
+	bool isTransitioning();
+	float transitionProgress();
+	bool consumeJustFinished();
 
-    // Is camera currently transitioning?
-    bool isTransitioning();
+} // namespace camera
 
-    // 0..1 progress of the current transition (0 if not transitioning)
-    float transitionProgress();
-
-    // Has a transition just finished this frame?
-    // (useful to trigger a state switch once)
-    bool consumeJustFinished();
-}
+#endif // CAMERA_HPP

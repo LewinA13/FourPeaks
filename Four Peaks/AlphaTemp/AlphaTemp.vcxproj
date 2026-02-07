@@ -20,7 +20,6 @@
     <ClCompile Include="player.cpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="Summer_s1.cpp" />
-    <ClCompile Include="Summer_s2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp" />
@@ -31,7 +30,6 @@
     <ClInclude Include="player.hpp" />
     <ClInclude Include="sprite.hpp" />
     <ClInclude Include="Summer_s1.hpp" />
-    <ClInclude Include="Summer_s2.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
