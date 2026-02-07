@@ -9,7 +9,6 @@
 #include "gamestate.hpp"
 #include "sprite.hpp"
 #include "camera.hpp"
-#include "Summer_s2.hpp"
 #include <sstream>
 #include <string>
 #include <cstdint>
