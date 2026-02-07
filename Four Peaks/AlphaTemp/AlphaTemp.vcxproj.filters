@@ -39,9 +39,6 @@
     <ClCompile Include="collision.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Summer_s2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -66,9 +63,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sprite.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Summer_s2.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="camera.hpp">

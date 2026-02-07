@@ -10,7 +10,6 @@
 #include "sprite.hpp"
 #include "mainmenu.hpp"
 #include "Summer_s1.hpp"
-#include "Summer_s2.hpp"
 #include "camera.hpp"
 #include "collision.hpp"
 
@@ -24,6 +23,8 @@ enum class SceneState
     HowToPlay,
     SummerS1,
     SummerS2,
+    SummerS3,
+	SummerS4,
     Exit
 };
 
@@ -76,6 +77,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     game::MainMenu mainMenu;
     game::SummerS1 summerStage;
     game::SummerS2 summerStage2;
+    game::SummerS3 summerStage3;
+    game::SummerS4 summerStage4;
 
 
     // Start on the main menu.
@@ -142,49 +145,66 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         camera::apply();
 
 
-        // ------------------------------------------------------------
-        // DEBUG STAGE SWITCH (no animation)
-        // Press 1 for Stage 1, Press 2 for Stage 2
-        // ------------------------------------------------------------
-        if (AEInputCheckTriggered(AEVK_2))
-        {
-            // Go to Stage 2
-            if (currentState != SceneState::SummerS2)
-            {
-                currentState = SceneState::SummerS2;
-
-                // Snap camera to Stage 2 (one screen above Stage 1)
-                float h = camera::screenHeight();
-                camera::setY(h);
-
-                // Keep player in same screen-relative position
-                // If you were in Stage 1, move player up by one screen.
-                gGame.player.pos.y += h;
-
-              
-
-                // Force entry logic to run cleanly
-                lastState = SceneState::Exit;
-            }
-        }
-
+        // --------------------------------------------------------
+        // DEBUG: STAGE SWITCH (no animation)
+        // Press 1 for Stage 1, 2 for Stage 2, 3 for Stage 3, 4 for Stage 4
+        // --------------------------------------------------------
         if (AEInputCheckTriggered(AEVK_1))
         {
             // Go to Stage 1
             if (currentState != SceneState::SummerS1)
             {
                 currentState = SceneState::SummerS1;
-
                 float h = camera::screenHeight();
                 camera::setY(0.0f);
-
                 // Move player down by one screen when returning
                 gGame.player.pos.y -= h;
-
                 lastState = SceneState::Exit;
             }
         }
 
+        if (AEInputCheckTriggered(AEVK_2))
+        {
+            // Go to Stage 2
+            if (currentState != SceneState::SummerS2)
+            {
+                currentState = SceneState::SummerS2;
+                // Snap camera to Stage 2 (one screen above Stage 1)
+                float h = camera::screenHeight();
+                camera::setY(h);
+                // Keep player in same screen-relative position
+                // If you were in Stage 1, move player up by one screen.
+                gGame.player.pos.y += h;
+                // Force entry logic to run cleanly
+                lastState = SceneState::Exit;
+            }
+        }
+
+        if (AEInputCheckTriggered(AEVK_3))
+        {
+            // Go to Stage 3
+            if (currentState != SceneState::SummerS3)
+            {
+                currentState = SceneState::SummerS3;
+                float h = camera::screenHeight();
+                camera::setY(h * 2.0f);  // Two screens above Stage 1
+                gGame.player.pos.y = h * 2.0f + 100.0f;  // Spawn at Stage 3
+                lastState = SceneState::Exit;
+            }
+        }
+
+        if (AEInputCheckTriggered(AEVK_4))
+        {
+            // Go to Stage 4
+            if (currentState != SceneState::SummerS4)
+            {
+                currentState = SceneState::SummerS4;
+                float h = camera::screenHeight();
+                camera::setY(h * 3.0f);  // Three screens above Stage 1
+                gGame.player.pos.y = h * 3.0f + 100.0f;  // Spawn at Stage 4
+                lastState = SceneState::Exit;
+            }
+        }
 
         // Optionally let the window close terminate the game.
         if (AESysDoesWindowExist() == 0)
@@ -240,14 +260,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
         break;
 
-
-
         case SceneState::SummerS2:
         {
             action = summerStage2.update(dt);
             summerStage2.draw();
 
-            // Debug back to stage 1 (if you add return 5)
+            // ADD THIS: Handle teleport to Stage 3
+            if (action == 21)
+            {
+                currentState = SceneState::SummerS3;
+            }
+
+            // Debug: back to stage 1 if you add return 5
             if (action == 5)
             {
                 currentState = SceneState::SummerS1;
@@ -260,14 +284,56 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
             }
-
             else if (action == 3)
             {
                 gGameRunning = 0;
             }
+            break;
         }
-        break;
-        } 
+
+        case SceneState::SummerS3:
+        {
+            action = summerStage3.update(dt);
+            summerStage3.draw();
+
+            // ADD THIS: Handle teleport to Stage 4
+            if (action == 22)
+            {
+                currentState = SceneState::SummerS4;
+            }
+
+            if (action == 2)
+            {
+                currentState = SceneState::MainMenu;
+                camera::setY(0.0f);
+            }
+            else if (action == 3)
+            {
+                gGameRunning = 0;
+            }
+            break;
+        }
+
+        case SceneState::SummerS4:
+        {
+            action = summerStage4.update(dt);
+            summerStage4.draw();
+
+            if (action == 2)
+            {
+                currentState = SceneState::MainMenu;
+                camera::setY(0.0f);
+            }
+            else if (action == 3)
+            {
+                gGameRunning = 0;
+            }
+            break;
+        }
+        
+
+    }  // End of switch statement
+
 
         // End frame.
         AESysFrameEnd();
