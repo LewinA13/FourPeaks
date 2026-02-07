@@ -10,7 +10,7 @@
 //
 // update() return codes:
 //   0 = stay on main menu
-//   1 = start SummerS1
+//   1 = start winter
 //   2 = exit game
 //
 

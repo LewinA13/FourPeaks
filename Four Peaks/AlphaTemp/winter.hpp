@@ -1,5 +1,5 @@
-#ifndef SUMMERS1HPP
-#define SUMMERS1HPP
+#ifndef WINTERHPP
+#define WINTERHPP
 
 #include <cstdint>
 #include <vector>
@@ -11,13 +11,13 @@ typedef uint32_t u32;
 namespace game {
 
     // -------------------------------------------------------------------
-    // SummerS1 - First Stage
+    // WinterS1 - First Stage
     // -------------------------------------------------------------------
-    class SummerS1 {
+    class WinterS1 {
     public:
-        SummerS1();
-        ~SummerS1();
-        SummerS1(const SummerS1&) = delete;
+        WinterS1();
+        ~WinterS1();
+        WinterS1(const WinterS1&) = delete;
         int update(float dt);
         void draw() const;
 
@@ -37,13 +37,13 @@ namespace game {
     };
 
     // -------------------------------------------------------------------
-    // SummerS2 - Second Stage
+    // WinterS2 - Second Stage
     // -------------------------------------------------------------------
-    class SummerS2 {
+    class WinterS2 {
     public:
-        SummerS2();
-        ~SummerS2();
-        SummerS2(const SummerS2&) = delete;
+        WinterS2();
+        ~WinterS2();
+        WinterS2(const WinterS2&) = delete;
         int update(float dt);
         void draw() const;
 
@@ -63,13 +63,13 @@ namespace game {
     };
 
     // -------------------------------------------------------------------
-    // SummerS3 - Third Stage
+    // WinterS3 - Third Stage
     // -------------------------------------------------------------------
-    class SummerS3 {
+    class WinterS3 {
     public:
-        SummerS3();
-        ~SummerS3();
-        SummerS3(const SummerS3&) = delete;
+        WinterS3();
+        ~WinterS3();
+        WinterS3(const WinterS3&) = delete;
         int update(float dt);
         void draw() const;
 
@@ -89,13 +89,13 @@ namespace game {
     };
 
     // -------------------------------------------------------------------
-    // SummerS4 - Fourth Stage
+    // WinterS4 - Fourth Stage
     // -------------------------------------------------------------------
-    class SummerS4 {
+    class WinterS4 {
     public:
-        SummerS4();
-        ~SummerS4();
-        SummerS4(const SummerS4&) = delete;
+        WinterS4();
+        ~WinterS4();
+        WinterS4(const WinterS4&) = delete;
         int update(float dt);
         void draw() const;
 

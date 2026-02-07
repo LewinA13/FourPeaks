@@ -19,7 +19,7 @@
     <ClCompile Include="mainmenu.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="sprite.cpp" />
-    <ClCompile Include="Summer_s1.cpp" />
+    <ClCompile Include="winter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp" />
@@ -29,7 +29,7 @@
     <ClInclude Include="mainmenu.hpp" />
     <ClInclude Include="player.hpp" />
     <ClInclude Include="sprite.hpp" />
-    <ClInclude Include="Summer_s1.hpp" />
+    <ClInclude Include="winter.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -97,7 +97,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmodL.dll" "$(OutDir)" /s /r /y /q</
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>

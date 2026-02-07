@@ -33,7 +33,7 @@
     <ClCompile Include="sprite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Summer_s1.cpp">
+    <ClCompile Include="winter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="collision.cpp">
@@ -56,7 +56,7 @@
     <ClInclude Include="player.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Summer_s1.hpp">
+    <ClInclude Include="winter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="collision.hpp">

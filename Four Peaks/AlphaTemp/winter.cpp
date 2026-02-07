@@ -1,8 +1,8 @@
 // ---------------------------------------------------------------------------
-// Summer_s1.cpp - Combined Summer Stages (Stage 1 + Stage 2)
+// Winter_s1.cpp - Combined Winter Stages (Stage 1 + Stage 2)
 // ---------------------------------------------------------------------------
 
-#include "Summer_s1.hpp"
+#include "winter.hpp"
 #include "AEEngine.h"
 #include "graphics.hpp"
 #include "player.hpp"
@@ -37,7 +37,7 @@ namespace game {
     // SUMMER STAGE 1 IMPLEMENTATION
     // ===================================================================
 
-    u32 SummerS1::getTileColor(int tileType) const {
+    u32 WinterS1::getTileColor(int tileType) const {
         switch (tileType) {
         case 1: return 0xFF224B94u;
         case 2: return 0xFFA3B013u; // Spikes: red
@@ -47,9 +47,9 @@ namespace game {
     }
 
     // -------------------------------------------------------------------
-    // SummerS1 Constructor
+    // WinterS1 Constructor
     // -------------------------------------------------------------------
-    SummerS1::SummerS1()
+    WinterS1::WinterS1()
         : gridVisible(true)
         , tileMap{}
     {
@@ -87,12 +87,12 @@ namespace game {
                 tileMap[row][col] = levelLayout[row][col];
     }
 
-    SummerS1::~SummerS1() = default;
+    WinterS1::~WinterS1() = default;
 
     // -------------------------------------------------------------------
-    // SummerS1 update
+    // WinterS1 update
     // -------------------------------------------------------------------
-    int SummerS1::update(float dt)
+    int WinterS1::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))
         {
@@ -152,9 +152,9 @@ namespace game {
     }
 
     // -------------------------------------------------------------------
-    // SummerS1 draw
+    // WinterS1 draw
     // -------------------------------------------------------------------
-    void SummerS1::draw() const
+    void WinterS1::draw() const
     {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 
@@ -181,7 +181,7 @@ namespace game {
         if (gridVisible)
             drawGrid();
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");
+        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 1 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
@@ -221,9 +221,9 @@ namespace game {
     }
 
     // -------------------------------------------------------------------
-    // SummerS1 gridToWorld
+    // WinterS1 gridToWorld
     // -------------------------------------------------------------------
-    void SummerS1::gridToWorld(int col, int row,
+    void WinterS1::gridToWorld(int col, int row,
         float& xWorld, float& yWorld,
         float& cellW, float& cellH) const
     {
@@ -240,9 +240,9 @@ namespace game {
     }
 
     // -------------------------------------------------------------------
-    // SummerS1 drawTiles
+    // WinterS1 drawTiles
     // -------------------------------------------------------------------
-    void SummerS1::drawTiles() const
+    void WinterS1::drawTiles() const
     {
         for (int row = 0; row < gridRows; ++row)
         {
@@ -317,9 +317,9 @@ namespace game {
     }
 
     // -------------------------------------------------------------------
-    // SummerS1 drawGrid
+    // WinterS1 drawGrid
     // -------------------------------------------------------------------
-    void SummerS1::drawGrid() const
+    void WinterS1::drawGrid() const
     {
         const u32 gridColor = 0x80FFFFFF;
 
@@ -355,7 +355,7 @@ namespace game {
     // SUMMER STAGE 2 IMPLEMENTATION
     // ===================================================================
 
-    u32 SummerS2::getTileColor(int tileType) const {
+    u32 WinterS2::getTileColor(int tileType) const {
         switch (tileType) {
         case 1: return 0xFF224B94u;
         case 2: return 0xFFA3B013u; // Spikes: red
@@ -365,9 +365,9 @@ namespace game {
     }
 
     // -------------------------------------------------------------------
-    // SummerS2 Constructor
+    // WinterS2 Constructor
     // -------------------------------------------------------------------
-    SummerS2::SummerS2()
+    WinterS2::WinterS2()
         : gridVisible(true)
         , tileMap{}
     {
@@ -404,12 +404,12 @@ namespace game {
                 tileMap[row][col] = levelLayout[row][col];
     }
 
-    SummerS2::~SummerS2() = default;
+    WinterS2::~WinterS2() = default;
 
     // -------------------------------------------------------------------
-    // SummerS2 update
+    // WinterS2 update
     // -------------------------------------------------------------------
-    int SummerS2::update(float dt)
+    int WinterS2::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))
         {
@@ -460,9 +460,9 @@ namespace game {
 
 
     // -------------------------------------------------------------------
-    // SummerS2 draw
+    // WinterS2 draw
     // -------------------------------------------------------------------
-    void SummerS2::draw() const
+    void WinterS2::draw() const
     {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 
@@ -486,7 +486,7 @@ namespace game {
         if (gridVisible)
             drawGrid();
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 2 - 32x20 Grid");
+        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 2 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
@@ -515,9 +515,9 @@ namespace game {
 
 
     // -------------------------------------------------------------------
-    // SummerS2 gridToWorld
+    // WinterS2 gridToWorld
     // -------------------------------------------------------------------
-    void SummerS2::gridToWorld(int col, int row,
+    void WinterS2::gridToWorld(int col, int row,
         float& xWorld, float& yWorld,
         float& cellW, float& cellH) const
     {
@@ -534,9 +534,9 @@ namespace game {
     }
 
     // -------------------------------------------------------------------
-    // SummerS2 drawTiles
+    // WinterS2 drawTiles
     // -------------------------------------------------------------------
-    void SummerS2::drawTiles() const
+    void WinterS2::drawTiles() const
     {
         for (int row = 0; row < gridRows; ++row)
         {
@@ -613,9 +613,9 @@ namespace game {
     }
 
     // -------------------------------------------------------------------
-    // SummerS2 drawGrid
+    // WinterS2 drawGrid
     // -------------------------------------------------------------------
-    void SummerS2::drawGrid() const
+    void WinterS2::drawGrid() const
     {
         const u32 gridColor = 0x80FFFFFF;
 
@@ -655,7 +655,7 @@ namespace game {
     // SUMMER STAGE 3 IMPLEMENTATION
     // ===================================================================
 
-    u32 SummerS3::getTileColor(int tileType) const {
+    u32 WinterS3::getTileColor(int tileType) const {
         switch (tileType) {
         case 1: return 0xFF224B94u;
         case 2: return 0xFFA3B013u;
@@ -664,7 +664,7 @@ namespace game {
         }
     }
 
-    SummerS3::SummerS3()
+    WinterS3::WinterS3()
         : gridVisible(true)
         , tileMap{}
     {
@@ -696,12 +696,12 @@ namespace game {
                 tileMap[row][col] = levelLayout[row][col];
     }
 
-    SummerS3::~SummerS3() = default;
+    WinterS3::~WinterS3() = default;
 
     // -------------------------------------------------------------------
-    // SummerS3 update
+    // WinterS3 update
     // -------------------------------------------------------------------
-    int SummerS3::update(float dt)
+    int WinterS3::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))
         {
@@ -750,9 +750,9 @@ namespace game {
     }
 
 	// -------------------------------------------------------------------
-	// SummerS3 draw
+	// WinterS3 draw
 	// -------------------------------------------------------------------
-    void SummerS3::draw() const
+    void WinterS3::draw() const
     {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 
@@ -774,7 +774,7 @@ namespace game {
         if (gridVisible)
             drawGrid();
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 3 - 32x20 Grid");
+        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 3 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
@@ -802,9 +802,9 @@ namespace game {
     }
 
 	// -------------------------------------------------------------------
-	// SummerS3 gridToWorld
+	// WinterS3 gridToWorld
 	// -------------------------------------------------------------------
-    void SummerS3::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
+    void WinterS3::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
     {
         float minX = AEGfxGetWinMinX();
         float maxX = AEGfxGetWinMaxX();
@@ -817,9 +817,9 @@ namespace game {
     }
 
 	// -------------------------------------------------------------------
-	// SummerS3 drawTiles
+	// WinterS3 drawTiles
 	// -------------------------------------------------------------------
-    void SummerS3::drawTiles() const
+    void WinterS3::drawTiles() const
     {
         for (int row = 0; row < gridRows; ++row)
         {
@@ -883,9 +883,9 @@ namespace game {
     }
 
 	// -------------------------------------------------------------------
-	// SummerS3 drawGrid
+	// WinterS3 drawGrid
 	// -------------------------------------------------------------------
-    void SummerS3::drawGrid() const
+    void WinterS3::drawGrid() const
     {
         const u32 gridColor = 0x80FFFFFF;
         float minX = AEGfxGetWinMinX();
@@ -920,7 +920,7 @@ namespace game {
     // SUMMER STAGE 4 IMPLEMENTATION
     // ===================================================================
 
-    u32 SummerS4::getTileColor(int tileType) const {
+    u32 WinterS4::getTileColor(int tileType) const {
         switch (tileType) {
         case 1: return 0xFF224B94u;
         case 2: return 0xFFA3B013u;
@@ -929,7 +929,7 @@ namespace game {
         }
     }
 
-    SummerS4::SummerS4()
+    WinterS4::WinterS4()
         : gridVisible(true)
         , tileMap{}
     {
@@ -961,9 +961,9 @@ namespace game {
                 tileMap[row][col] = levelLayout[row][col];
     }
 
-    SummerS4::~SummerS4() = default;
+    WinterS4::~WinterS4() = default;
 
-    int SummerS4::update(float dt)
+    int WinterS4::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))
         {
@@ -984,7 +984,7 @@ namespace game {
         return 0;
     }
 
-    void SummerS4::draw() const
+    void WinterS4::draw() const
     {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 
@@ -1006,14 +1006,14 @@ namespace game {
         if (gridVisible)
             drawGrid();
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 4 - 32x20 Grid");
+        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 4 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
         PlayerDraw(gGame.player);
     }
 
-    void SummerS4::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
+    void WinterS4::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
     {
         float minX = AEGfxGetWinMinX();
         float maxX = AEGfxGetWinMaxX();
@@ -1025,7 +1025,7 @@ namespace game {
         yWorld = minY + row * cellH;
     }
 
-    void SummerS4::drawTiles() const
+    void WinterS4::drawTiles() const
     {
         for (int row = 0; row < gridRows; ++row)
         {
@@ -1088,7 +1088,7 @@ namespace game {
         }
     }
 
-    void SummerS4::drawGrid() const
+    void WinterS4::drawGrid() const
     {
         const u32 gridColor = 0x80FFFFFF;
         float minX = AEGfxGetWinMinX();

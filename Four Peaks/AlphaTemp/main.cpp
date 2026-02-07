@@ -9,7 +9,7 @@
 #include "gamestate.hpp"
 #include "sprite.hpp"
 #include "mainmenu.hpp"
-#include "Summer_s1.hpp"
+#include "winter.hpp"
 #include "camera.hpp"
 #include "collision.hpp"
 
@@ -21,15 +21,15 @@ enum class SceneState
 {
     MainMenu,
     HowToPlay,
-    SummerS1,
-    SummerS2,
-    SummerS3,
-	SummerS4,
+    WinterS1,
+    WinterS2,
+    WinterS3,
+	WinterS4,
     Exit
 };
 
 
-SceneState pendingScene = SceneState::SummerS1;
+SceneState pendingScene = SceneState::WinterS1;
 SceneState lastState = SceneState::Exit;
 
 
@@ -75,10 +75,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Game state objects.
     game::MainMenu mainMenu;
-    game::SummerS1 summerStage;
-    game::SummerS2 summerStage2;
-    game::SummerS3 summerStage3;
-    game::SummerS4 summerStage4;
+    game::WinterS1 winterStage;
+    game::WinterS2 winterStage2;
+    game::WinterS3 winterStage3;
+    game::WinterS4 winterStage4;
 
 
     // Start on the main menu.
@@ -91,17 +91,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     while (gGameRunning)
     {
 
-        if (currentState == SceneState::SummerS1) {
-            g_currentMap = summerStage.getTileMap();
+        if (currentState == SceneState::WinterS1) {
+            g_currentMap = winterStage.getTileMap();
         }
-        else if (currentState == SceneState::SummerS2) {
-            g_currentMap = summerStage2.getTileMap();
+        else if (currentState == SceneState::WinterS2) {
+            g_currentMap = winterStage2.getTileMap();
         }
-        else if (currentState == SceneState::SummerS3) {
-            g_currentMap = summerStage3.getTileMap();
+        else if (currentState == SceneState::WinterS3) {
+            g_currentMap = winterStage3.getTileMap();
         }
-        else if (currentState == SceneState::SummerS4) {
-            g_currentMap = summerStage4.getTileMap();
+        else if (currentState == SceneState::WinterS4) {
+            g_currentMap = winterStage4.getTileMap();
         }
 
         // Begin frame.
@@ -113,7 +113,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // Handle state changes (both transition-based and direct)
         if (currentState != lastState)
         {
-            if (currentState == SceneState::SummerS2)
+            if (currentState == SceneState::WinterS2)
             {
                 // Set camera to Stage 2
                 camera::setY(camera::screenHeight());
@@ -134,7 +134,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 gGame.player.pos.x = worldX;
                 gGame.player.pos.y = worldY;
             }
-            else if (currentState == SceneState::SummerS1)
+            else if (currentState == SceneState::WinterS1)
             {
                 camera::setY(0.0f);
                 // Optionally set spawn position for Stage 1 too
@@ -158,9 +158,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (AEInputCheckTriggered(AEVK_1))
         {
             // Go to Stage 1
-            if (currentState != SceneState::SummerS1)
+            if (currentState != SceneState::WinterS1)
             {
-                currentState = SceneState::SummerS1;
+                currentState = SceneState::WinterS1;
                 float h = camera::screenHeight();
                 camera::setY(0.0f);
                 // Move player down by one screen when returning
@@ -172,9 +172,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (AEInputCheckTriggered(AEVK_2))
         {
             // Go to Stage 2
-            if (currentState != SceneState::SummerS2)
+            if (currentState != SceneState::WinterS2)
             {
-                currentState = SceneState::SummerS2;
+                currentState = SceneState::WinterS2;
                 // Snap camera to Stage 2 (one screen above Stage 1)
                 float h = camera::screenHeight();
                 camera::setY(h);
@@ -189,9 +189,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (AEInputCheckTriggered(AEVK_3))
         {
             // Go to Stage 3
-            if (currentState != SceneState::SummerS3)
+            if (currentState != SceneState::WinterS3)
             {
-                currentState = SceneState::SummerS3;
+                currentState = SceneState::WinterS3;
                 float h = camera::screenHeight();
                 camera::setY(h * 2.0f);  // Two screens above Stage 1
                 gGame.player.pos.y = h * 2.0f + 100.0f;  // Spawn at Stage 3
@@ -202,9 +202,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (AEInputCheckTriggered(AEVK_4))
         {
             // Go to Stage 4
-            if (currentState != SceneState::SummerS4)
+            if (currentState != SceneState::WinterS4)
             {
-                currentState = SceneState::SummerS4;
+                currentState = SceneState::WinterS4;
                 float h = camera::screenHeight();
                 camera::setY(h * 3.0f);  // Three screens above Stage 1
                 gGame.player.pos.y = h * 3.0f + 100.0f;  // Spawn at Stage 4
@@ -230,9 +230,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (action == 1)
             {
-                // Go to Summer stage.
+                // Go to Winter stage.
                 // AESysReset();
-                currentState = SceneState::SummerS1;
+                currentState = SceneState::WinterS1;
             }
             else if (action == 2)
             {
@@ -243,15 +243,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
         break;
 
-        case SceneState::SummerS1:
+        case SceneState::WinterS1:
         {
-            action = summerStage.update(dt);
-            summerStage.draw();
+            action = winterStage.update(dt);
+            winterStage.draw();
 
             // Handle action == 20 (instant teleport to Stage 2)
             if (action == 20)
             {
-                currentState = SceneState::SummerS2;
+                currentState = SceneState::WinterS2;
             }
 
             if (action == 2)
@@ -266,21 +266,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
         break;
 
-        case SceneState::SummerS2:
+        case SceneState::WinterS2:
         {
-            action = summerStage2.update(dt);
-            summerStage2.draw();
+            action = winterStage2.update(dt);
+            winterStage2.draw();
 
             // ADD THIS: Handle teleport to Stage 3
             if (action == 21)
             {
-                currentState = SceneState::SummerS3;
+                currentState = SceneState::WinterS3;
             }
 
             // Debug: back to stage 1 if you add return 5
             if (action == 5)
             {
-                currentState = SceneState::SummerS1;
+                currentState = SceneState::WinterS1;
                 camera::setY(0.0f);
                 gGame.player.pos.y -= camera::screenHeight();
             }
@@ -297,15 +297,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             break;
         }
 
-        case SceneState::SummerS3:
+        case SceneState::WinterS3:
         {
-            action = summerStage3.update(dt);
-            summerStage3.draw();
+            action = winterStage3.update(dt);
+            winterStage3.draw();
 
             // ADD THIS: Handle teleport to Stage 4
             if (action == 22)
             {
-                currentState = SceneState::SummerS4;
+                currentState = SceneState::WinterS4;
             }
 
             if (action == 2)
@@ -320,10 +320,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             break;
         }
 
-        case SceneState::SummerS4:
+        case SceneState::WinterS4:
         {
-            action = summerStage4.update(dt);
-            summerStage4.draw();
+            action = winterStage4.update(dt);
+            winterStage4.draw();
 
             if (action == 2)
             {
