@@ -138,6 +138,13 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				PlayerKill(player);
 				return;
 
+			case 8:	// melon collectible
+				player.melonsCollected += 1;
+
+				// Remove melon tile so it can't be collected again this run
+				levelLayout[r][c] = 0;
+				break;
+
 			default:
 				break;
 			}

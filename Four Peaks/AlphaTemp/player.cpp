@@ -44,9 +44,9 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
     if (!out.is_open())
         return false;
 
-    out << "checkpoint_v1\n";
+    out << "checkpoint_v2\n";
     out << std::fixed << std::setprecision(3);
-    out << p.respawnPos.x << " " << p.respawnPos.y << "\n";
+    out << p.respawnPos.x << " " << p.respawnPos.y << " " << p.melonsCollected << "\n";
 
     std::cout << "Saved checkpoint to file";
     return out.good();
@@ -97,6 +97,8 @@ void PlayerRespawn(Player& p)
     p.alive = true;
     p.dead = false;
     p.deadTimer = 0.0f;
+
+    p.melonsCollected = 0;
 
     p.currGroundType = Player::GroundType::Normal;
 

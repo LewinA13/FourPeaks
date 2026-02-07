@@ -12,6 +12,8 @@
 #include <cmath>
 #include "camera.hpp"
 #include "Summer_s2.hpp"
+#include <sstream>
+#include <string>
 
 
 
@@ -191,6 +193,13 @@ namespace game
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
+        // melon counter and display
+        std::ostringstream ss;
+        ss << "Melons: " << gGame.player.melonsCollected;
+
+        std::string hud = ss.str(); // keep it alive
+        printText(-0.95f, 0.5f, 0xFFFFFF00u, hud.c_str(), 1);
 
         // Draw teleport indicator (2x1 cells - 2 columns, 1 row)
         if (!camera::isTransitioning())

@@ -34,6 +34,9 @@ struct Player
     int maxHp;
     bool alive;
 
+    // Collected in this run (persists while game is running)
+    int melonsCollected;
+
     // Respawn point (world position)
     gfx::Vec2 respawnPos;
     bool justRespawned;
