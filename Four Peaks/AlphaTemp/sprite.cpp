@@ -11,6 +11,7 @@ namespace sprite
 
     namespace
     {
+		// Textures
         AEGfxTexture* tilesetTex{};
         AEGfxTexture* spikesTex{};
         AEGfxTexture* backgroundTex{};
@@ -18,6 +19,11 @@ namespace sprite
         AEGfxTexture* bgStripTex{};
         AEGfxTexture* iceTex{};
         AEGfxTexture* checkpointTex{};
+        AEGfxTexture* wallTopTex{};
+        AEGfxTexture* wallLeftTex{};
+        AEGfxTexture* wallRightTex{};
+        AEGfxTexture* wallBottomTex{};
+
 
         constexpr float texW = 224.0f;
         constexpr float texH = 320.0f;
@@ -92,6 +98,20 @@ namespace sprite
         if (!checkpointTex)
             checkpointTex = AEGfxTextureLoad("Checkpoint.png");
 
+		// white wall sprites (for winter)
+        wallTopTex = AEGfxTextureLoad("Assets/Top-Piece White Wall.png");
+        if (!wallTopTex) wallTopTex = AEGfxTextureLoad("Top-Piece White Wall.png");
+
+        wallLeftTex = AEGfxTextureLoad("Assets/Left-Side B White Wall.png");
+        if (!wallLeftTex) wallLeftTex = AEGfxTextureLoad("Left-Side B White Wall.png");
+
+        wallRightTex = AEGfxTextureLoad("Assets/Right-Side B White Wall.png");
+        if (!wallRightTex) wallRightTex = AEGfxTextureLoad("Right-Side B White Wall.png");
+
+        wallBottomTex = AEGfxTextureLoad("Assets/Btm-Piece White Wall.png");
+        if (!wallBottomTex) wallBottomTex = AEGfxTextureLoad("Btm-Piece White Wall.png");
+
+
     }
 
     void shutdown()
@@ -132,6 +152,30 @@ namespace sprite
             checkpointTex = nullptr;
         }
 
+        if (wallTopTex) 
+        { 
+            AEGfxTextureUnload(wallTopTex);    
+            wallTopTex = nullptr; 
+        }
+
+        if (wallLeftTex) 
+        { 
+            AEGfxTextureUnload(wallLeftTex);   
+            wallLeftTex = nullptr; 
+        }
+
+        if (wallRightTex) 
+        { 
+            AEGfxTextureUnload(wallRightTex);  
+            wallRightTex = nullptr; 
+        }
+
+        if (wallBottomTex) 
+        { 
+            AEGfxTextureUnload(wallBottomTex); 
+            wallBottomTex = nullptr; 
+        }
+
     }
 
     AEGfxTexture* tileset()
@@ -163,6 +207,27 @@ namespace sprite
     {
         return checkpointTex;
     }
+
+    AEGfxTexture* wallTop() 
+    { 
+        return wallTopTex; 
+    }
+
+    AEGfxTexture* wallLeft() 
+    { 
+        return wallLeftTex; 
+    }
+
+    AEGfxTexture* wallRight() 
+    { 
+        return wallRightTex; 
+    }
+
+    AEGfxTexture* wallBottom() 
+    { 
+        return wallBottomTex; 
+    }
+
 
     bool getCoinUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {

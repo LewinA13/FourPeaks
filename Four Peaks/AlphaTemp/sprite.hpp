@@ -27,6 +27,12 @@ namespace sprite
     // checkpoint spritesheet (Checkpoint.png)
     AEGfxTexture* checkpoint();
 
+    // white wall pieces (wall ice, 4x for WINTER)
+    AEGfxTexture* wallTop();
+    AEGfxTexture* wallLeft();
+    AEGfxTexture* wallRight();
+    AEGfxTexture* wallBottom();
+
     // UVs for checkpoint animation frames
     bool getCheckpointUv(int frame, float& u0, float& v0, float& u1, float& v1);
 

@@ -10,7 +10,6 @@
 #include "sprite.hpp"
 #include "mainmenu.hpp"
 #include "Summer_s1.hpp"
-#include "Summer_s2.hpp"
 #include "camera.hpp"
 #include "collision.hpp"
 

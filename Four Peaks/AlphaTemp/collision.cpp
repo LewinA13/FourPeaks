@@ -127,10 +127,13 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 			}
 
 			case 1:
+			case 3:
 			case 4:
+			case 5:
 			case 6:
 				player.currGroundType = Player::GroundType::Normal;
 				break;
+
 
 			case 2:
 			case 9:
