@@ -18,6 +18,7 @@ namespace sprite
         AEGfxTexture* bgStripTex{};
         AEGfxTexture* iceTex{};
         AEGfxTexture* checkpointTex{};
+        AEGfxTexture* crackTex{};
 
         constexpr float texW = 224.0f;
         constexpr float texH = 320.0f;
@@ -56,6 +57,11 @@ namespace sprite
         constexpr int checkpointFrameCount = 10;
         constexpr float checkpointFrameTime = 0.09f;
 
+        // ice crack sprite sheet is 224x32, 7 frames, each 32x32 (horizontal strip)
+        int crackFrame = 0;
+        float crackTimer = 0.0f;
+        constexpr int crackFrameCount = 7;
+        constexpr float crackFrameTime = 0.30f;
 
     }
 
@@ -91,6 +97,11 @@ namespace sprite
         checkpointTex = AEGfxTextureLoad("Assets/Checkpoint.png");
         if (!checkpointTex)
             checkpointTex = AEGfxTextureLoad("Checkpoint.png");
+
+		// ice crack spritesheet texture
+        crackTex = AEGfxTextureLoad("Assets/b_ice.jpg");
+        if (!crackTex)
+            crackTex = AEGfxTextureLoad("b_ice.jpg");
 
     }
 
@@ -132,6 +143,11 @@ namespace sprite
             checkpointTex = nullptr;
         }
 
+        if (crackTex)
+        {
+            AEGfxTextureUnload(crackTex);
+            crackTex = nullptr;
+        }
     }
 
     AEGfxTexture* tileset()
@@ -163,6 +179,12 @@ namespace sprite
     {
         return checkpointTex;
     }
+
+    AEGfxTexture* crack()
+    {
+        return crackTex;
+    }
+
 
     bool getCoinUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
@@ -229,6 +251,38 @@ namespace sprite
         return true;
     }
 
+    // UVs for crack animation frames
+    bool getCrackUv(int frame, float& u0, float& v0, float& u1, float& v1)
+    {
+        // cf985dfb-...jpg = 224x32 (7 frames, each 32x32 laid horizontally)
+        constexpr int frameCount = 7;
+        constexpr float sheetW = 160.0f;
+        constexpr float sheetH = 32.0f;
+        constexpr float frameW = 32.0f;
+        constexpr float frameH = 32.0f;
+
+        if (frame < 0) frame = 0;
+        frame %= frameCount;
+
+        // Small inset to reduce bleeding
+        constexpr float insetPx = 0.5f;
+
+        float px = frame * frameW;
+        float py = 0.0f;
+
+        float x0 = px + insetPx;
+        float x1 = px + frameW - insetPx;
+        float y0 = py + insetPx;
+        float y1 = py + frameH - insetPx;
+
+        u0 = x0 / sheetW;
+        u1 = x1 / sheetW;
+        v0 = y0 / sheetH;
+        v1 = y1 / sheetH;
+
+        return true;
+    }
+
     void updateAnimatedTiles(f32 dt)
     {
         // coin
@@ -246,6 +300,15 @@ namespace sprite
             checkpointTimer -= checkpointFrameTime;
             checkpointFrame = (checkpointFrame + 1) % checkpointFrameCount;
         }
+
+        // ice crack (tile 1)
+        crackTimer += dt;
+        while (crackTimer >= crackFrameTime)
+        {
+            crackTimer -= crackFrameTime;
+            crackFrame = (crackFrame + 1) % crackFrameCount;
+        }
+
     }
 
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size)
@@ -253,6 +316,18 @@ namespace sprite
         // Tile IDs in your project:
         // 8  = coin
         // 10 = checkpoint
+
+        // 1 = crack / lightning (animated)
+        if (tileType == 1)
+        {
+            if (!crackTex) return true;
+
+            float u0{}, v0{}, u1{}, v1{};
+            getCrackUv(crackFrame, u0, v0, u1, v1);
+
+            gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
+            return true;
+        }
 
         if (tileType == 8)
         {

@@ -919,6 +919,9 @@ namespace game {
         }
     }
 
+	// -------------------------------------------------------------------
+	// SummerS4 constructor
+	// -------------------------------------------------------------------
     SummerS4::SummerS4()
         : gridVisible(true)
         , tileMap{}
@@ -953,6 +956,9 @@ namespace game {
 
     SummerS4::~SummerS4() = default;
 
+	// -------------------------------------------------------------------
+	// SummerS4 update
+	// -------------------------------------------------------------------
     int SummerS4::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))
