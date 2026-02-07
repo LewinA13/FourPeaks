@@ -97,6 +97,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         else if (currentState == SceneState::SummerS2) {
             g_currentMap = summerStage2.getTileMap();
         }
+        else if (currentState == SceneState::SummerS3) {
+            g_currentMap = summerStage3.getTileMap();
+        }
+        else if (currentState == SceneState::SummerS4) {
+            g_currentMap = summerStage4.getTileMap();
+        }
 
         // Begin frame.
         AESysFrameStart();

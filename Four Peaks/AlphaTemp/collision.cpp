@@ -133,6 +133,7 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				res.x = (c + 0.5f) * tileW - halfWinW;
 				res.y =  (stageLevel* AEGfxGetWindowHeight()) + ((r + 1.0f) * tileH - halfWinH);
 				PlayerSetRespawn(player, res);
+				PlayerSaveCheckpoint(player, "checkpoint.txt");
 				break;
 			}
 
