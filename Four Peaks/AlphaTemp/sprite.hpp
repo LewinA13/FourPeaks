@@ -27,16 +27,22 @@ namespace sprite
     // checkpoint spritesheet (Checkpoint.png)
     AEGfxTexture* checkpoint();
 
+	// ice_crack texture (b_ice.jpg)
+    AEGfxTexture* crack();
+
     // UVs for checkpoint animation frames
     bool getCheckpointUv(int frame, float& u0, float& v0, float& u1, float& v1);
 
     // UVs for coin animation frames 
     bool getCoinUv(int frame, float& u0, float& v0, float& u1, float& v1);
 
+    // UVs for crack animation frames
+    bool getCrackUv(int frame, float& u0, float& v0, float& u1, float& v1);
+
     // UVs from tileset
     bool getTileUv(int tileType, float& u0, float& v0, float& u1, float& v1);
 
-    // Update shared animated tiles (coin/checkpoint) once per frame
+    // Update shared animated tiles (coin/checkpoint/crack) once per frame
     void updateAnimatedTiles(f32 dt);
 
     // Draw animated tiles by tileType. Returns true if it drew something.

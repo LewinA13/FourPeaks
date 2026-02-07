@@ -928,7 +928,9 @@ namespace game {
         default: return 0x00000000u;
         }
     }
-
+    // -------------------------------------------------------------------
+    // Winter S4 constructor
+    // -------------------------------------------------------------------
     WinterS4::WinterS4()
         : gridVisible(true)
         , tileMap{}
@@ -962,7 +964,9 @@ namespace game {
     }
 
     WinterS4::~WinterS4() = default;
-
+    // -------------------------------------------------------------------
+    // WinterS4 update
+    // -------------------------------------------------------------------
     int WinterS4::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))
