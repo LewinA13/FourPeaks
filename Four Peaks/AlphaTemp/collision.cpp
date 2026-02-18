@@ -137,6 +137,19 @@ float calculateSpikeOverlapRatio(const Player& player, int row, TileRange box, i
 	return totalSpikeWidth / player.colliderSize.x;
 }
 
+bool checkingSpikes(int tileType) {
+	switch (tileType) {
+	case 0:
+	case 2:
+	case 9:
+		return false;
+
+	default:
+		return true;
+	}
+}
+
+
 //! Check and change the type grounded type player step on
 void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) {
 
@@ -145,7 +158,6 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 
 	for (int r = box.rowStart; r <= box.rowEnd; r++) {
 		for (int c = box.colStart; c <= box.colEnd; c++) {
-			printf("  Checking tile[%d][%d] = %d\n", r, c, levelLayout[r][c]);
 
 			switch (levelLayout[r][c]) {
 			case 10: {
@@ -175,8 +187,23 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				const float checkingRatio = 0.5f;
 
 				//! if player step on different box col
-				if (box.colStart != box.colEnd) {
-					//! 
+				if (box.colStart != box.colEnd ) {
+
+					int leftTile = levelLayout[r][box.colStart];
+					int rightTile = levelLayout[r][box.colEnd];
+
+					bool leftGroup = (leftTile == 0 || leftTile == 2 || leftTile == 9);
+					bool rightGroup = (rightTile == 0 || rightTile == 2 || rightTile == 9);
+
+
+					if (leftGroup && rightGroup)
+					{
+						player.currGroundType = Player::GroundType::Spikes;
+						//! once detect spikes, stop checking
+						return;
+					}
+
+
 					float overlapRatio = calculateSpikeOverlapRatio(player, r, box, levelLayout);
 
 					if (overlapRatio >= checkingRatio) {
@@ -199,6 +226,11 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				player.melonsCollected += 1;
 				// Remove melon tile so it can't be collected again this run
 				levelLayout[r][c] = 0;
+				break;
+
+			case 11:
+				player.currGroundType = Player::GroundType::BreakingIce;
+
 				break;
 
 			default:
@@ -342,6 +374,9 @@ void applyGroundPhysics(Player& player) {
 		player.accel = 20.0f;
 		player.decel = 2.0f;
 		break;
+
+
+
 
 	default:
 		break;

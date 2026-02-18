@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="collision.cpp" />
+    <ClCompile Include="dialogue.cpp" />
     <ClCompile Include="gamestate.cpp" />
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="main.cpp" />
@@ -24,6 +25,7 @@
   <ItemGroup>
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="collision.hpp" />
+    <ClInclude Include="dialogue.hpp" />
     <ClInclude Include="gamestate.hpp" />
     <ClInclude Include="graphics.hpp" />
     <ClInclude Include="mainmenu.hpp" />

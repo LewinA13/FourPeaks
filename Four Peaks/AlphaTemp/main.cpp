@@ -12,6 +12,7 @@
 #include "winter.hpp"
 #include "camera.hpp"
 #include "collision.hpp"
+#include "dialogue.hpp"
 
 
 // Global font handle used by all states
@@ -32,6 +33,24 @@ enum class SceneState
 SceneState pendingScene = SceneState::WinterS1;
 SceneState lastState = SceneState::Exit;
 
+
+enum StateID{
+    MENU = 0,
+    WINTER_S1 = 1,
+    WINTER_S2 = 2,
+    WINTER_S3 = 3,
+    WINTER_S4 = 4
+};
+
+int getStateID(SceneState scene) {
+    switch (scene) {
+    case SceneState::WinterS1: return WINTER_S1;
+    case SceneState::WinterS2: return WINTER_S2;
+    case SceneState::WinterS3: return WINTER_S3;
+    case SceneState::WinterS4: return WINTER_S4;
+    default: return MENU;
+    }
+}
 
 // ---------------------------------------------------------------------------
 // main
@@ -88,27 +107,46 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
  
     // Game Loop
     PlayerInit(gGame.player);
+    UI::Dialog dialog;
+
+    // Dialog
+    dialog.initialize();
+
+
+
     while (gGameRunning)
     {
 
-        if (currentState == SceneState::WinterS1) {
+
+        switch (currentState) {
+        case SceneState::WinterS1:
             g_currentMap = winterStage.getTileMap();
-        }
-        else if (currentState == SceneState::WinterS2) {
+            dialog.showForLevel(1);
+            break;
+
+        case SceneState::WinterS2:
             g_currentMap = winterStage2.getTileMap();
-        }
-        else if (currentState == SceneState::WinterS3) {
+            dialog.showForLevel(2);
+            break;
+
+        case SceneState::WinterS3:
             g_currentMap = winterStage3.getTileMap();
-        }
-        else if (currentState == SceneState::WinterS4) {
+            dialog.showForLevel(3);
+            break;
+
+        case SceneState::WinterS4:
             g_currentMap = winterStage4.getTileMap();
+            dialog.showForLevel(4);
+            break;
         }
 
         // Begin frame.
         AESysFrameStart();
         f32 dt = (f32)AEFrameRateControllerGetFrameTime();
 
+
         camera::update(dt);
+
 
         // Handle state changes (both transition-based and direct)
         if (currentState != lastState)
@@ -133,6 +171,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
                 gGame.player.pos.x = worldX;
                 gGame.player.pos.y = worldY;
+
             }
             else if (currentState == SceneState::WinterS1)
             {
@@ -336,11 +375,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
             break;
         }
+
+
         
 
     }  // End of switch statement
 
+        dialog.update(dt);
+        dialog.render();
 
+ 
         // End frame.
         AESysFrameEnd();
     }
