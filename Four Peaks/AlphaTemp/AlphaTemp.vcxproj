@@ -15,6 +15,7 @@
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="gamestate.cpp" />
     <ClCompile Include="graphics.cpp" />
+    <ClCompile Include="level_loader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainmenu.cpp" />
     <ClCompile Include="player.cpp" />
@@ -26,6 +27,7 @@
     <ClInclude Include="collision.hpp" />
     <ClInclude Include="gamestate.hpp" />
     <ClInclude Include="graphics.hpp" />
+    <ClInclude Include="level_loader.hpp" />
     <ClInclude Include="mainmenu.hpp" />
     <ClInclude Include="player.hpp" />
     <ClInclude Include="sprite.hpp" />
