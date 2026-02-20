@@ -15,19 +15,22 @@ namespace sprite
     // NEW: spikes texture (idle.png)
     AEGfxTexture* spikes();
 
-	// background texture (BG.png)
+    // background texture (BG.png)
     AEGfxTexture* background();
+
+    // tutorial background texture (bg_tutorial.png)
+    AEGfxTexture* tutorialBackground();
 
     // coin spritesheet (coin_.png)
     AEGfxTexture* coin();
 
-	// ice texture (ice1.jpg)
+    // ice texture (ice1.jpg)
     AEGfxTexture* ice();
 
     // checkpoint spritesheet (Checkpoint.png)
     AEGfxTexture* checkpoint();
 
-	// ice_crack texture (b_ice.jpg)
+    // ice_crack texture (b_ice.jpg)
     AEGfxTexture* crack();
 
     // UVs for checkpoint animation frames

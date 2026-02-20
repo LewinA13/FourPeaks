@@ -9,6 +9,7 @@
 #include "gamestate.hpp"
 #include "sprite.hpp"
 #include "mainmenu.hpp"
+#include "tutorial.hpp"
 #include "winter.hpp"
 #include "camera.hpp"
 #include "collision.hpp"
@@ -21,15 +22,20 @@ enum class SceneState
 {
     MainMenu,
     HowToPlay,
+    Tutorial1,
+    Tutorial2,
+    Tutorial3,
     WinterS1,
     WinterS2,
     WinterS3,
-	WinterS4,
+    WinterS4,
     Exit
 };
 
 
-SceneState pendingScene = SceneState::WinterS1;
+// Default pending scene (used by some older transition code paths).
+// We start the game flow at Tutorial 1, not Winter.
+SceneState pendingScene = SceneState::Tutorial1;
 SceneState lastState = SceneState::Exit;
 
 
@@ -66,7 +72,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     camera::setY(0.0f);
 
 
-	// Initialize sprite system.    
+    // Initialize sprite system.    
     sprite::init();
 
     // Load font once and share it.
@@ -75,6 +81,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Game state objects.
     game::MainMenu mainMenu;
+
+    // Tutorial stages (3 levels before Winter)
+    game::Tutorial1 tutorial1;
+    game::Tutorial2 tutorial2;
+    game::Tutorial3 tutorial3;
+
     game::WinterS1 winterStage;
     game::WinterS2 winterStage2;
     game::WinterS3 winterStage3;
@@ -85,13 +97,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     SceneState currentState = SceneState::MainMenu;
 
 
- 
+
     // Game Loop
     PlayerInit(gGame.player);
     while (gGameRunning)
     {
 
-        if (currentState == SceneState::WinterS1) {
+        if (currentState == SceneState::Tutorial1) {
+            g_currentMap = tutorial1.getTileMap();
+        }
+        else if (currentState == SceneState::Tutorial2) {
+            g_currentMap = tutorial2.getTileMap();
+        }
+        else if (currentState == SceneState::Tutorial3) {
+            g_currentMap = tutorial3.getTileMap();
+        }
+        else if (currentState == SceneState::WinterS1) {
             g_currentMap = winterStage.getTileMap();
         }
         else if (currentState == SceneState::WinterS2) {
@@ -153,8 +174,29 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         // --------------------------------------------------------
         // DEBUG: STAGE SWITCH (no animation)
-        // Press 1 for Stage 1, 2 for Stage 2, 3 for Stage 3, 4 for Stage 4
+        // Tutorial: F1/F2/F3
+        // Winter:   1/2/3/4
         // --------------------------------------------------------
+
+        if (AEInputCheckTriggered(AEVK_F1))
+        {
+            currentState = SceneState::Tutorial1;
+            camera::setY(0.0f);
+            lastState = SceneState::Exit;
+        }
+        if (AEInputCheckTriggered(AEVK_F2))
+        {
+            currentState = SceneState::Tutorial2;
+            camera::setY(0.0f);
+            lastState = SceneState::Exit;
+        }
+        if (AEInputCheckTriggered(AEVK_F3))
+        {
+            currentState = SceneState::Tutorial3;
+            camera::setY(0.0f);
+            lastState = SceneState::Exit;
+        }
+
         if (AEInputCheckTriggered(AEVK_1))
         {
             // Go to Stage 1
@@ -163,8 +205,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 currentState = SceneState::WinterS1;
                 float h = camera::screenHeight();
                 camera::setY(0.0f);
-                // Move player down by one screen when returning
-                gGame.player.pos.y -= h;
+                // If you came from another Winter stage, keep screen-relative position.
+                // If you came from Tutorial/Menu, don't apply the offset.
+                if (lastState == SceneState::WinterS2 || lastState == SceneState::WinterS3 || lastState == SceneState::WinterS4)
+                    gGame.player.pos.y -= h;
                 lastState = SceneState::Exit;
             }
         }
@@ -180,7 +224,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 camera::setY(h);
                 // Keep player in same screen-relative position
                 // If you were in Stage 1, move player up by one screen.
-                gGame.player.pos.y += h;
+                if (lastState == SceneState::WinterS1)
+                    gGame.player.pos.y += h;
                 // Force entry logic to run cleanly
                 lastState = SceneState::Exit;
             }
@@ -230,9 +275,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (action == 1)
             {
-                // Go to Winter stage.
-                // AESysReset();
-                currentState = SceneState::WinterS1;
+                // Go to Tutorial 1 first.
+                currentState = SceneState::Tutorial1;
+                camera::setY(0.0f);
             }
             else if (action == 2)
             {
@@ -242,6 +287,54 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             // action == 3 is reserved for "How To Play".
         }
         break;
+
+        case SceneState::Tutorial1:
+        {
+            action = tutorial1.update(dt);
+            tutorial1.draw();
+
+            if (action == 30) { currentState = SceneState::Tutorial2; camera::setY(0.0f); }
+            if (action == 31) { currentState = SceneState::Tutorial3; camera::setY(0.0f); }
+            if (action == 32) { currentState = SceneState::WinterS1;  camera::setY(0.0f); }
+            if (action == 2)
+            {
+                currentState = SceneState::MainMenu;
+                camera::setY(0.0f);
+            }
+            break;
+        }
+
+        case SceneState::Tutorial2:
+        {
+            action = tutorial2.update(dt);
+            tutorial2.draw();
+
+            if (action == 30) { currentState = SceneState::Tutorial2; camera::setY(0.0f); }
+            if (action == 31) { currentState = SceneState::Tutorial3; camera::setY(0.0f); }
+            if (action == 32) { currentState = SceneState::WinterS1;  camera::setY(0.0f); }
+            if (action == 2)
+            {
+                currentState = SceneState::MainMenu;
+                camera::setY(0.0f);
+            }
+            break;
+        }
+
+        case SceneState::Tutorial3:
+        {
+            action = tutorial3.update(dt);
+            tutorial3.draw();
+
+            if (action == 30) { currentState = SceneState::Tutorial2; camera::setY(0.0f); }
+            if (action == 31) { currentState = SceneState::Tutorial3; camera::setY(0.0f); }
+            if (action == 32) { currentState = SceneState::WinterS1;  camera::setY(0.0f); }
+            if (action == 2)
+            {
+                currentState = SceneState::MainMenu;
+                camera::setY(0.0f);
+            }
+            break;
+        }
 
         case SceneState::WinterS1:
         {
@@ -336,12 +429,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
             break;
         }
-        
-
-    }  // End of switch statement
 
 
-        // End frame.
+        }  // End of switch statement
+
+
+            // End frame.
         AESysFrameEnd();
     }
 
@@ -352,7 +445,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         gFontId = -1;
     }
 
-	// Shut down sprite helper.
+    // Shut down sprite helper.
     sprite::shutdown();
 
     // Shut down graphics helper.

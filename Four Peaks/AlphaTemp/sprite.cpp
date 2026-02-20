@@ -14,6 +14,7 @@ namespace sprite
         AEGfxTexture* tilesetTex{};
         AEGfxTexture* spikesTex{};
         AEGfxTexture* backgroundTex{};
+        AEGfxTexture* tutorialBgTex{};
         AEGfxTexture* coinTex{};
         AEGfxTexture* bgStripTex{};
         AEGfxTexture* iceTex{};
@@ -26,7 +27,7 @@ namespace sprite
         // seam fix (no filtering API available)
         constexpr float inset = 1.0f;
 
-		// Helper: get UVs from pixel coordinates in the tileset
+        // Helper: get UVs from pixel coordinates in the tileset
         void uvFromPixels(float px, float py, float pw, float ph,
             float& u0, float& v0, float& u1, float& v1)
         {
@@ -71,6 +72,11 @@ namespace sprite
         if (!backgroundTex)
             backgroundTex = AEGfxTextureLoad("BG.png");
 
+        // Tutorial background (3 tutorial stages)
+        tutorialBgTex = AEGfxTextureLoad("Assets/bg_tutorial.png");
+        if (!tutorialBgTex)
+            tutorialBgTex = AEGfxTextureLoad("bg_tutorial.png");
+
         if (tilesetTex) return;
 
         // Winter spritesheet
@@ -88,7 +94,7 @@ namespace sprite
         if (!coinTex)
             coinTex = AEGfxTextureLoad("Melon.png");
 
-		// ice texture
+        // ice texture
         iceTex = AEGfxTextureLoad("Assets/IceBox.png");
         if (!iceTex)
             iceTex = AEGfxTextureLoad("IceBox.png");
@@ -98,7 +104,7 @@ namespace sprite
         if (!checkpointTex)
             checkpointTex = AEGfxTextureLoad("Checkpoint.png");
 
-		// ice crack spritesheet texture
+        // ice crack spritesheet texture
         crackTex = AEGfxTextureLoad("Assets/b_ice.jpg");
         if (!crackTex)
             crackTex = AEGfxTextureLoad("b_ice.jpg");
@@ -123,6 +129,12 @@ namespace sprite
         {
             AEGfxTextureUnload(backgroundTex);
             backgroundTex = nullptr;
+        }
+
+        if (tutorialBgTex)
+        {
+            AEGfxTextureUnload(tutorialBgTex);
+            tutorialBgTex = nullptr;
         }
 
         if (coinTex)
@@ -163,6 +175,11 @@ namespace sprite
     AEGfxTexture* background()
     {
         return backgroundTex;
+    }
+
+    AEGfxTexture* tutorialBackground()
+    {
+        return tutorialBgTex;
     }
 
     AEGfxTexture* coin()
@@ -219,7 +236,7 @@ namespace sprite
     }
 
 
-	// UVs for checkpoint animation frames
+    // UVs for checkpoint animation frames
     bool getCheckpointUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
         // Checkpoint.png = 320x32 (10 frames, each 32x32 laid horizontally)
@@ -358,7 +375,7 @@ namespace sprite
     }
 
 
-	// UVs from tileset
+    // UVs from tileset
     bool getTileUv(int tileType, float& u0, float& v0, float& u1, float& v1)
     {
         switch (tileType)

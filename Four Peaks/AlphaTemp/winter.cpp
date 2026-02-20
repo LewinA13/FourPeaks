@@ -62,7 +62,6 @@ namespace game {
 
         if (!loaded)
         {
-            // No hardcoded fallback: keep the map empty if the file is missing/invalid.
             // (Check that Assets/Levels/winter_s1.txt exists and has 20 rows x 32 cols.)
             for (int r = 0; r < gridRows; ++r)
                 for (int c = 0; c < gridCols; ++c)
@@ -363,7 +362,6 @@ namespace game {
 
         if (!loaded)
         {
-            // No hardcoded fallback: keep the map empty if the file is missing/invalid.
             // (Check that Assets/Levels/winter_s2.txt exists and has 20 rows x 32 cols.)
             for (int r = 0; r < gridRows; ++r)
                 for (int c = 0; c < gridCols; ++c)
@@ -641,7 +639,6 @@ namespace game {
 
         if (!loaded)
         {
-            // No hardcoded fallback: keep the map empty if the file is missing/invalid.
             // (Check that Assets/Levels/winter_s3.txt exists and has 20 rows x 32 cols.)
             for (int r = 0; r < gridRows; ++r)
                 for (int c = 0; c < gridCols; ++c)
@@ -894,7 +891,6 @@ namespace game {
 
         if (!loaded)
         {
-            // No hardcoded fallback: keep the map empty if the file is missing/invalid.
             // (Check that Assets/Levels/winter_s4.txt exists and has 20 rows x 32 cols.)
             for (int r = 0; r < gridRows; ++r)
                 for (int c = 0; c < gridCols; ++c)
