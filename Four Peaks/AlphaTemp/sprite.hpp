@@ -30,6 +30,9 @@ namespace sprite
 	// ice_crack texture (b_ice.jpg)
     AEGfxTexture* crack();
 
+    // heatbar spritesheet (heatbar.png)
+    AEGfxTexture* heatbar();
+
     // UVs for checkpoint animation frames
     bool getCheckpointUv(int frame, float& u0, float& v0, float& u1, float& v1);
 
@@ -48,5 +51,8 @@ namespace sprite
     // Draw animated tiles by tileType. Returns true if it drew something.
     // Use this inside any stage tile loop.
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size);
+
+    // frame 0 = full, frame 11 = empty
+    bool getHeatBarUv(int frame, float& u0, float& v0, float& u1, float& v1);
 
 }

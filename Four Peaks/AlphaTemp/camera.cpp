@@ -1,5 +1,6 @@
 #include "camera.hpp"
 #include <algorithm>
+#include <cmath>
 
 namespace camera {
 
@@ -20,6 +21,17 @@ namespace camera {
         float followSmoothness = 5.0f; // Higher = slower follow
         float targetCamX = 0.0f;
         float targetCamY = 0.0f;
+
+        //screenshake
+        float shakeOffsetX = 0.0f;
+        float shakeOffsetY = 0.0f;
+
+        float shakeTimeLeft = 0.0f;
+        float shakeDuration = 0.0f;
+        float shakeMagnitude = 0.0f;
+        float shakeFrequencyHz = 35.0f;
+
+        float shakePhase = 0.0f; // radians
 
         float clamp01(float t) {
             if (t < 0.0f) return 0.0f;
@@ -44,10 +56,39 @@ namespace camera {
         transitioning = false;
         justFinished = false;
         followMode = false;
+
+        shakeOffsetX = shakeOffsetY = 0.0f;
+        shakeTimeLeft = shakeDuration = 0.0f;
+        shakeMagnitude = 0.0f;
+        shakeFrequencyHz = 35.0f;
+        shakePhase = 0.0f;
     }
 
     void update(float dt) {
         justFinished = false;
+        // -----------------------------
+        // Screen shake update (predictable sin/cos)
+        // -----------------------------
+        if (shakeTimeLeft > 0.0f) {
+            shakeTimeLeft -= dt;
+            if (shakeTimeLeft < 0.0f) shakeTimeLeft = 0.0f;
+
+            // decay from 1 -> 0 over lifetime
+            float t = (shakeDuration > 0.0f) ? (shakeTimeLeft / shakeDuration) : 0.0f;
+            t = clamp01(t);
+
+            const float twoPi = 6.283185307f;
+            shakePhase += twoPi * shakeFrequencyHz * dt;
+
+            float mag = shakeMagnitude * t;
+
+            shakeOffsetX = std::cos(shakePhase) * mag;
+            shakeOffsetY = std::sin(shakePhase * 1.3f) * mag; //
+        }
+        else {
+            shakeOffsetX = 0.0f;
+            shakeOffsetY = 0.0f;
+        }
 
         // Handle transitions (takes priority over follow mode)
         if (transitioning) {
@@ -73,7 +114,7 @@ namespace camera {
     }
 
     void apply() {
-        AEGfxSetCamPosition(camX, camY);
+        AEGfxSetCamPosition(camX + shakeOffsetX, camY + shakeOffsetY);
     }
 
     void setY(float y) {
@@ -153,5 +194,30 @@ namespace camera {
         justFinished = false;
         return v;
     }
+
+    //screenshake
+    void startShake(float magnitude, float durationSec, float frequencyHz) {
+        if (magnitude <= 0.0f || durationSec <= 0.0f) {
+            stopShake();
+            return;
+        }
+        shakeMagnitude = magnitude;
+        shakeDuration = durationSec;
+        shakeTimeLeft = durationSec;
+        shakeFrequencyHz = (frequencyHz <= 0.0f) ? 35.0f : frequencyHz;
+        shakePhase = 0.0f;
+    }
+
+    void stopShake() {
+        shakeOffsetX = shakeOffsetY = 0.0f;
+        shakeTimeLeft = shakeDuration = 0.0f;
+        shakeMagnitude = 0.0f;
+        shakePhase = 0.0f;
+    }
+
+    bool isShaking() {
+        return shakeTimeLeft > 0.0f;
+    }
+
 
 } // namespace camera
