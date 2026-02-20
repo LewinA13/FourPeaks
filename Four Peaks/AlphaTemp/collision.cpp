@@ -7,6 +7,8 @@
 #include "collision.hpp"
 
 
+std::vector<IceTrigger> g_triggeredIceTiles;
+
 const int mapRows = 20;
 const int mapColm = 32;
 
@@ -99,45 +101,71 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm], float velY = -
 	return false;
 }
 
+float calculateSpikeOverlapRatio(const Player& player, int row, TileRange box, int levelLayout[][mapColm]) {
+	//! translate x center coord from (0) to (-1600)
+	float halfWinW = (float)AEGfxGetWindowWidth() / 2.0f;
+	float btmCoordPostX = player.pos.x + halfWinW;
+
+	/*
+		get player left and right for checking player body step on strikes,
+		if using player center, cant accurate check player step how many strikes
+	*/
+	float playerLeft = btmCoordPostX - player.colliderSize.x / 2.0f;
+	float playerRight = btmCoordPostX + player.colliderSize.x / 2.0f;
+
+	float totalSpikeWidth = 0.0f;
+
+	for (int checkCol = box.colStart; checkCol <= box.colEnd; checkCol++) {
+		if (levelLayout[row][checkCol] == 2 || levelLayout[row][checkCol] == 9) {
+			//! calc current spike tile left boundary 
+			float tileLeft = static_cast<float>(checkCol * tileW);
+			//! calc current spike tile right boundary 
+			float tileRight = static_cast<float>((checkCol + 1) * tileW);
+
+			// calc overlap area left boundary
+			float overlapLeft = fmaxf(playerLeft, tileLeft);
+			// calc overlap area right boundary
+			float overlapRight = fminf(playerRight, tileRight);
+
+			// if overlapRight > overlapLeft, means overlap exists
+			if (overlapRight > overlapLeft) {
+				// add the overlap width to total spike contact width
+				totalSpikeWidth += (overlapRight - overlapLeft);
+			}
+		}
+	}
+
+
+	return totalSpikeWidth / player.colliderSize.x;
+}
+
 
 
 //! Check and change the type grounded type player step on
 void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) {
-
 
 	printf("Player Y: %.2f, Box rows: %d to %d, cols: %d to %d\n",
 		player.pos.y, box.rowStart, box.rowEnd, box.colStart, box.colEnd);
 
 	for (int r = box.rowStart; r <= box.rowEnd; r++) {
 		for (int c = box.colStart; c <= box.colEnd; c++) {
-			printf("  Checking tile[%d][%d] = %d\n", r, c, levelLayout[r][c]);
-			/*if (levelLayout[r][c] == 2) { 
-				printf("  >>> SPIKE DETECTED! Calling PlayerKill\n");
-				return; 
-			}*/
-
 
 			switch (levelLayout[r][c]) {
-			//! dont call "PlayerSetRespawn" at "applyGroundPhysics", pos will be push and cant get exact same pos
-			case 10: { 
+			case 10: {
 				player.currGroundType = Player::GroundType::CheckPoint;
 
 				float halfWinW = (float)AEGfxGetWindowWidth() / 2.0f;
 				float halfWinH = (float)AEGfxGetWindowHeight() / 2.0f;
 
 				gfx::Vec2 res;
-				//! respawn at exact tile middle (c + 0.5f) and one block higher (r + 1.0f)
-				 
 				int stageLevel = static_cast<int>(floorf((player.pos.y + halfWinH) / AEGfxGetWindowHeight()));
-			
+
 				res.x = (c + 0.5f) * tileW - halfWinW;
-				res.y =  (stageLevel* AEGfxGetWindowHeight()) + ((r + 1.0f) * tileH - halfWinH);
+				res.y = (stageLevel * AEGfxGetWindowHeight()) + ((r + 1.0f) * tileH - halfWinH);
 				PlayerSetRespawn(player, res);
-				PlayerSaveCheckpoint(player, "checkpoint.txt");
 				break;
 			}
 
-			case 1:
 			case 4:
 			case 6:
 			case 7:
@@ -145,9 +173,44 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				break;
 
 			case 2:
-			case 9:
-				player.currGroundType = Player::GroundType::Spikes;
-				return;
+			case 9: {
+				const float checkingRatio = 0.5f;
+
+				//! if player step on different box col
+				if (box.colStart != box.colEnd ) {
+
+					int leftTile = levelLayout[r][box.colStart];
+					int rightTile = levelLayout[r][box.colEnd];
+
+					bool leftGroup = (leftTile == 0 || leftTile == 2 || leftTile == 9);
+					bool rightGroup = (rightTile == 0 || rightTile == 2 || rightTile == 9);
+
+
+					if (leftGroup && rightGroup)
+					{
+						player.currGroundType = Player::GroundType::Spikes;
+						//! once detect spikes, stop checking
+						return;
+					}
+
+
+					float overlapRatio = calculateSpikeOverlapRatio(player, r, box, levelLayout);
+
+					if (overlapRatio >= checkingRatio) {
+						printf("  >>> SPIKE DETECTED! Overlap: %.2f%%, Calling PlayerKill\n", overlapRatio * 100);
+						player.currGroundType = Player::GroundType::Spikes;
+						//! once detect spikes, stop checking
+						return;
+					}
+				}
+				else {
+					printf("  >>> SPIKE DETECTED! Calling PlayerKill\n");
+					player.currGroundType = Player::GroundType::Spikes;
+					//! once detect spikes, stop checking
+					return;
+				}
+				break;
+			}
 
 			case 8:	// melon 
 				player.melonsCollected += 1;
@@ -155,8 +218,14 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				levelLayout[r][c] = 0;
 				break;
 
-				levelLayout[r][c] = 0;
+
+
+			case 1:
+			{
+				g_triggeredIceTiles.push_back({ r, c });
 				break;
+			}
+
 
 			case 99:  // water bottle
 				player.heat += 0.35f;
@@ -169,9 +238,6 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 			}
 		}
 	}
-
-
-
 }
 
 //! This function will get player tile and check collision with maps

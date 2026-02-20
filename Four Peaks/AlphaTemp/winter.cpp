@@ -14,6 +14,7 @@
 #include <string>
 #include <cstdint>
 #include <cmath>
+#include "collision.hpp"
 
 typedef uint32_t u32;
 
@@ -686,6 +687,16 @@ namespace game {
                     tileMap[r][c] = 0;
         }
 
+        for (int row = 0; row < gridRows; ++row)
+            for (int col = 0; col < gridCols; ++col) {
+                //! all breaking ice will be store in vector "iceTiles" and type will be struct "IceTileState"
+                if (tileMap[row][col] == 1) {
+                    IceTileState ice;
+                    ice.row = row;
+                    ice.col = col;
+                    iceTiles.push_back(ice);
+                }
+            }
     }
 
     WinterS3::~WinterS3() = default;
@@ -734,6 +745,35 @@ namespace game {
             if (distance < cellW * 1.5f)
             {
                 return 22; // Signal teleport to Stage 4
+            }
+        }
+
+        for (auto& trigger : g_triggeredIceTiles) {
+            for (auto& ice : iceTiles) {
+                //! check the ice pos whether equal and never set state befote
+                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
+                    ice.triggered = true; 
+                }
+            }
+        }
+
+        //! clear the list to save the memory
+        g_triggeredIceTiles.clear();
+
+        //! check only if breakingIce is triggered but havent being destroyed
+        for (auto& ice : iceTiles) {
+            if (ice.triggered && !ice.destroyed) {
+                ice.timer += dt;
+                //! update the frame
+                int newFrame = static_cast<int>(ice.timer / sprite::crackFrameTime);
+                //! if reach end of the craking frame, then set to 0(destroyed) and set the state
+                if (newFrame >= sprite::crackFrameCount - 1) {
+                    tileMap[ice.row][ice.col] = 0;
+                    ice.destroyed = true;
+                }
+                else {
+                    ice.crackFrame = newFrame;
+                }
             }
         }
 
@@ -856,6 +896,28 @@ namespace game {
                     continue;
                 }
 
+                if (tileType == 1)
+                {
+                    AEGfxTexture* crackTex = sprite::crack();
+                    if (crackTex)
+                    {
+                        int frameToUse = 0;
+                        for (const auto& ice : iceTiles)
+                        {
+                            if (ice.row == row && ice.col == col)
+                            {
+                                frameToUse = ice.crackFrame;
+                                break;
+                            }
+                        }
+                        float u0{}, v0{}, u1{}, v1{};
+                        sprite::getCrackUv(frameToUse, u0, v0, u1, v1);
+                        gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
+                    }
+                    continue;
+                }
+
+            
                 if (sprite::drawAnimatedTile(tileType, pos, size))
                     continue;
 
@@ -938,6 +1000,18 @@ namespace game {
                     tileMap[r][c] = 0;
         }
 
+        for (int row = 0; row < gridRows; ++row)
+            for (int col = 0; col < gridCols; ++col) {
+
+                //! all breaking ice will be store in vector "iceTiles" and type will be struct "IceTileState"
+                if (tileMap[row][col] == 1) {
+                    IceTileState ice;
+                    ice.row = row;
+                    ice.col = col;
+                    iceTiles.push_back(ice);
+                }
+            }
+
     }
 
     WinterS4::~WinterS4() = default;
@@ -962,6 +1036,36 @@ namespace game {
         }
 
         sprite::updateAnimatedTiles(dt);
+
+
+        //! g_triggeredIceTiles is the list to store triggered breaking ice
+        for (auto& trigger : g_triggeredIceTiles) {
+            for (auto& ice : iceTiles) {
+                //! if breaking ice havent been change the state, set triggered state to true          
+                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
+                    ice.triggered = true;
+                }
+            }
+        }
+
+        //! clear the list to save the memory
+        g_triggeredIceTiles.clear();
+
+        //! handle ice have been triggered but tileType havent change to 0(destroyed)
+        for (auto& ice : iceTiles) {
+            if (ice.triggered && !ice.destroyed) {
+                ice.timer += dt;
+                int newFrame = static_cast<int>(ice.timer / sprite::crackFrameTime);
+                if (newFrame >= sprite::crackFrameCount - 1) {
+                    tileMap[ice.row][ice.col] = 0;
+                    ice.destroyed = true;
+                }
+                else {
+                    ice.crackFrame = newFrame;
+                }
+            }
+        }
+
         return 0;
     }
 
@@ -1047,6 +1151,27 @@ namespace game {
                         }
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
+                    }
+                    continue;
+                }
+
+                if (tileType == 1)
+                {
+                    AEGfxTexture* crackTex = sprite::crack();
+                    if (crackTex)
+                    {
+                        int frameToUse = 0;
+                        for (const auto& ice : iceTiles)
+                        {
+                            if (ice.row == row && ice.col == col)
+                            {
+                                frameToUse = ice.crackFrame;
+                                break;
+                            }
+                        }
+                        float u0{}, v0{}, u1{}, v1{};
+                        sprite::getCrackUv(frameToUse, u0, v0, u1, v1);
+                        gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
                     }
                     continue;
                 }

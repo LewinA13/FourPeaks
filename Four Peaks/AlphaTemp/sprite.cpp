@@ -62,8 +62,8 @@ namespace sprite
         // ice crack sprite sheet is 224x32, 7 frames, each 32x32 (horizontal strip)
         int crackFrame = 0;
         float crackTimer = 0.0f;
-        constexpr int crackFrameCount = 7;
-        constexpr float crackFrameTime = 0.30f;
+        
+      
 
     }
 
@@ -310,6 +310,7 @@ namespace sprite
         return true;
     }
 
+
     void updateAnimatedTiles(f32 dt)
     {
         // coin
@@ -327,15 +328,6 @@ namespace sprite
             checkpointTimer -= checkpointFrameTime;
             checkpointFrame = (checkpointFrame + 1) % checkpointFrameCount;
         }
-
-        // ice crack (tile 1)
-        crackTimer += dt;
-        while (crackTimer >= crackFrameTime)
-        {
-            crackTimer -= crackFrameTime;
-            crackFrame = (crackFrame + 1) % crackFrameCount;
-        }
-
     }
 
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size)
@@ -343,19 +335,6 @@ namespace sprite
         // Tile IDs in your project:
         // 8  = coin
         // 10 = checkpoint
-
-        // 1 = crack / lightning (animated)
-        if (tileType == 1)
-        {
-            if (!crackTex) return true;
-
-            float u0{}, v0{}, u1{}, v1{};
-            getCrackUv(crackFrame, u0, v0, u1, v1);
-
-            gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
-            return true;
-        }
-
         if (tileType == 8)
         {
             if (!coinTex) return true;
