@@ -149,11 +149,19 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				player.currGroundType = Player::GroundType::Spikes;
 				return;
 
-			case 8:	// melon collectible
+			case 8:	// melon 
 				player.melonsCollected += 1;
-
-				// Remove melon tile so it can't be collected again this run
+				PlayerSaveMelons(player, "melons.txt");
 				levelLayout[r][c] = 0;
+				break;
+
+				levelLayout[r][c] = 0;
+				break;
+
+			case 99:  // water bottle
+				player.heat += 0.35f;
+				if (player.heat > player.maxHeat) player.heat = player.maxHeat;
+				levelLayout[r][c] = 0;   // remove after pickup
 				break;
 
 			default:

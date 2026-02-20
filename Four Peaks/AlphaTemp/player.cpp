@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
+#include "camera.hpp"
 
 #include <iostream>
 
@@ -67,7 +68,7 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     float x = 0.0f;
     float y = 0.0f;
 
-    if (header == "checkpoint_v1")
+    if (header == "checkpoint_v2")
     {
         if (!(in >> x >> y))
             return false;
@@ -90,6 +91,24 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     return true;
 }
 
+bool PlayerSaveMelons(const Player& p, const char* filename)
+{
+    std::ofstream out(filename, std::ios::out | std::ios::trunc);
+    if (!out.is_open()) return false;
+    out << p.melonsCollected << "\n";
+    return out.good();
+}
+
+bool PlayerLoadMelons(Player& p, const char* filename)
+{
+    std::ifstream in(filename);
+    if (!in.is_open()) return false;
+    int melons = 0;
+    if (!(in >> melons)) return false;
+    p.melonsCollected = melons;
+    return true;
+}
+
 void PlayerRespawn(Player& p)
 {
     // Restore core life state
@@ -97,8 +116,8 @@ void PlayerRespawn(Player& p)
     p.alive = true;
     p.dead = false;
     p.deadTimer = 0.0f;
+    p.heat = p.maxHeat;
 
-    p.melonsCollected = 0;
 
     p.currGroundType = Player::GroundType::Normal;
 
@@ -202,6 +221,7 @@ void PlayerInit(Player& p)
 
     p.respawnPos = p.pos;      // default respawn = start position
     PlayerLoadCheckpoint(p, "checkpoint.txt", true);
+    PlayerLoadMelons(p, "melons.txt");
     p.justRespawned = false;
 
 
@@ -321,6 +341,10 @@ void PlayerInit(Player& p)
     p.dashFrameCount = 5;      // IMPORTANT: set to the correct number of frames in the dash sheet
     p.dashAnimTimer = 0.0f;
     p.dashFrameTime = 0.04f;   // tweak feel later
+
+    //heat bar
+    p.maxHeat = 1.0f;
+    p.heat = p.maxHeat;
 
 }
 
@@ -451,6 +475,7 @@ void PlayerUpdate(Player& p, float dt)
         p.dashing = true;
         p.dashTimer = p.dashDuration;
         p.dashCount--;
+        camera::startShake(12.0f, 0.10f, 60.0f);
 
         // dash direction
         if (AEInputCheckCurr(AEVK_A))      p.dashDir = -1;

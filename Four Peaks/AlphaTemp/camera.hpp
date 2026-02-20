@@ -28,6 +28,11 @@ namespace camera {
 	float transitionProgress();
 	bool consumeJustFinished();
 
+	// screen shake magnitude
+	void startShake(float magnitude, float durationSec, float frequencyHz = 35.0f);
+	void stopShake();
+	bool isShaking();
+
 } // namespace camera
 
 #endif // CAMERA_HPP

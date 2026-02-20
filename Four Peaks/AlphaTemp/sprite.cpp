@@ -20,6 +20,7 @@ namespace sprite
         AEGfxTexture* iceTex{};
         AEGfxTexture* checkpointTex{};
         AEGfxTexture* crackTex{};
+        AEGfxTexture* heatbarTex{};
 
         constexpr float texW = 224.0f;
         constexpr float texH = 320.0f;
@@ -109,6 +110,10 @@ namespace sprite
         if (!crackTex)
             crackTex = AEGfxTextureLoad("b_ice.jpg");
 
+        heatbarTex = AEGfxTextureLoad("Assets/player/heatbar.png");
+        if (!heatbarTex)
+            heatbarTex = AEGfxTextureLoad("heatbar.png");
+
     }
 
     void shutdown()
@@ -159,6 +164,11 @@ namespace sprite
         {
             AEGfxTextureUnload(crackTex);
             crackTex = nullptr;
+        }
+        if (heatbarTex)
+        {
+            AEGfxTextureUnload(heatbarTex);
+            heatbarTex = nullptr;
         }
     }
 
@@ -396,5 +406,18 @@ namespace sprite
         }
 
         return false;
+    }
+
+    AEGfxTexture* heatbar() { return heatbarTex; }
+
+    bool getHeatBarUv(int frame, float& u0, float& v0, float& u1, float& v1)
+    {
+        if (frame < 0 || frame > 5) return false;   // was 11
+        constexpr float frameW = 48.0f / 384.0f;    // was 32.0f / 384.0f
+        u0 = frame * frameW;
+        u1 = u0 + frameW;
+        v0 = 0.5f;
+        v1 = 1.0f;
+        return true;
     }
 }

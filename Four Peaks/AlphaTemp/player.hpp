@@ -175,6 +175,10 @@ struct Player
     GroundType currGroundType = Player::GroundType::Normal;
 
     gfx::Vec2 lastCheckPointPos;
+
+    // Heat Bar (summer only)
+    float heat;
+    float maxHeat;
     
 
 };
@@ -198,6 +202,10 @@ void      PlayerSetFeetWorld(Player& p, gfx::Vec2 feetWorld);
 // checkpoint helper functions
 bool PlayerSaveCheckpoint(const Player& p, const char* filename);
 bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespawn);
+
+//melon 
+bool PlayerSaveMelons(const Player& p, const char* filename);
+bool PlayerLoadMelons(Player& p, const char* filename);
 
 
 #endif
