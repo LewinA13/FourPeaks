@@ -12,6 +12,7 @@
 
 typedef std::uint32_t u32;
 extern s8 gFontId;
+constexpr float kPi = 3.14159265358979323846f;
 
 namespace
 {
@@ -106,19 +107,44 @@ namespace
                 if (sprite::drawAnimatedTile(tileType, pos, size))
                     continue;
 
-                // Spikes (2)
-                if (tileType == 2)
+                // Spikes
+                // 2  = up
+                // 14 = left
+                // 15 = right
+                if (tileType == 2 || tileType == 14 || tileType == 15)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
                         float heightScale = 1.5f;
-                        gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
 
+                        gfx::Vec2 spikeSize = size;
                         gfx::Vec2 spikePos = pos;
-                        spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                        float rot = 0.0f;
 
-                        gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                        if (tileType == 2)
+                        {
+                            // UP-facing: extend height and push up
+                            spikeSize = gfx::Vec2{ size.x, size.y * heightScale };
+                            spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                            rot = 0.0f;
+                        }
+                        else if (tileType == 14)
+                        {
+                            // LEFT-facing: extend width and push left
+                            spikeSize = gfx::Vec2{ size.x * heightScale, size.y };
+                            spikePos.x -= (spikeSize.x - size.x) * 0.5f;
+                            rot = kPi * 0.5f;
+                        }
+                        else // 15
+                        {
+                            // RIGHT-facing: extend width and push right
+                            spikeSize = gfx::Vec2{ size.x * heightScale, size.y };
+                            spikePos.x += (spikeSize.x - size.x) * 0.5f;
+                            rot = -kPi * 0.5f;
+                        }
+
+                        gfx::drawSprite(spikeTex, spikePos, rot, spikeSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     }
                     else
                     {

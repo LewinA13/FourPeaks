@@ -20,6 +20,7 @@ namespace sprite
         AEGfxTexture* iceTex{};
         AEGfxTexture* checkpointTex{};
         AEGfxTexture* crackTex{};
+        AEGfxTexture* onGearTex{};
 
         constexpr float texW = 224.0f;
         constexpr float texH = 320.0f;
@@ -63,6 +64,12 @@ namespace sprite
         float crackTimer = 0.0f;
         constexpr int crackFrameCount = 7;
         constexpr float crackFrameTime = 0.30f;
+
+        // On_38x38.png = 304x38, 8 frames, each 38x38
+        int onGearFrame = 0;
+        float onGearTimer = 0.0f;
+        constexpr int onGearFrameCount = 8;
+        constexpr float onGearFrameTime = 0.06f;
 
     }
 
@@ -108,6 +115,17 @@ namespace sprite
         crackTex = AEGfxTextureLoad("Assets/b_ice.jpg");
         if (!crackTex)
             crackTex = AEGfxTextureLoad("b_ice.jpg");
+
+        // animated gear strip for tile 13
+        onGearTex = AEGfxTextureLoad("Assets/On_38x38.png");
+        if (!onGearTex)
+            onGearTex = AEGfxTextureLoad("On_38x38.png");
+
+        // (also accept the original filename if you didn't rename it)
+        if (!onGearTex)
+            onGearTex = AEGfxTextureLoad("Assets/On (38x38).png");
+        if (!onGearTex)
+            onGearTex = AEGfxTextureLoad("On (38x38).png");
 
     }
 
@@ -160,6 +178,12 @@ namespace sprite
             AEGfxTextureUnload(crackTex);
             crackTex = nullptr;
         }
+
+        if (onGearTex)
+        {
+            AEGfxTextureUnload(onGearTex);
+            onGearTex = nullptr;
+        }
     }
 
     AEGfxTexture* tileset()
@@ -200,6 +224,41 @@ namespace sprite
     AEGfxTexture* crack()
     {
         return crackTex;
+    }
+
+    AEGfxTexture* onGear()
+    {
+        return onGearTex;
+    }
+
+    static bool getOnGearUv(int frame, float& u0, float& v0, float& u1, float& v1)
+    {
+        // On_38x38.png = 304x38
+        constexpr int frameCount = onGearFrameCount;
+        constexpr float sheetW = 304.0f;
+        constexpr float sheetH = 38.0f;
+        constexpr float frameW = 38.0f;
+        constexpr float frameH = 38.0f;
+
+        if (frame < 0) frame = 0;
+        frame %= frameCount;
+
+        // small inset to reduce bleeding
+        constexpr float insetPx = 0.5f;
+
+        float px = frame * frameW;
+        float py = 0.0f;
+
+        float x0 = px + insetPx;
+        float x1 = px + frameW - insetPx;
+        float y0 = py + insetPx;
+        float y1 = py + frameH - insetPx;
+
+        u0 = x0 / sheetW;
+        u1 = x1 / sheetW;
+        v0 = y0 / sheetH;
+        v1 = y1 / sheetH;
+        return true;
     }
 
 
@@ -326,6 +385,14 @@ namespace sprite
             crackFrame = (crackFrame + 1) % crackFrameCount;
         }
 
+        // on gear (tile 13)
+        onGearTimer += dt;
+        while (onGearTimer >= onGearFrameTime)
+        {
+            onGearTimer -= onGearFrameTime;
+            onGearFrame = (onGearFrame + 1) % onGearFrameCount;
+        }
+
     }
 
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size)
@@ -333,6 +400,7 @@ namespace sprite
         // Tile IDs in your project:
         // 8  = coin
         // 10 = checkpoint
+        // 13 = animated gear
 
         // 1 = crack / lightning (animated)
         if (tileType == 1)
@@ -368,6 +436,19 @@ namespace sprite
 
             gfx::Vec2 cpSize{ size.x * 0.85f, size.y * 0.85f };
             gfx::drawSprite(checkpointTex, pos, 0.0f, cpSize, u0, v0, u1, v1);
+            return true;
+        }
+
+        if (tileType == 13)
+        {
+            if (!onGearTex) return true;
+
+            float u0{}, v0{}, u1{}, v1{};
+            getOnGearUv(onGearFrame, u0, v0, u1, v1);
+
+            // Slightly larger because the source frames are 38x38
+            gfx::Vec2 gearSize{ size.x * 1.15f, size.y * 1.15f };
+            gfx::drawSprite(onGearTex, pos, 0.0f, gearSize, u0, v0, u1, v1);
             return true;
         }
 

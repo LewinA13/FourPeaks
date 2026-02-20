@@ -16,8 +16,8 @@
 #include <cmath>
 
 typedef uint32_t u32;
-
 extern s8 gFontId;
+constexpr float kPi = 3.14159265358979323846f;
 
 namespace game {
 
@@ -262,18 +262,40 @@ namespace game {
                 }
 
                 // Spikes tile
-                if (tileType == 2)
+                // 2  = UP
+                // 14 = LEFT
+                // 15 = RIGHT
+                if (tileType == 2 || tileType == 14 || tileType == 15)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
                         float heightScale = 1.5f;
-                        gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
 
+                        gfx::Vec2 spikeSize = size;
                         gfx::Vec2 spikePos = pos;
-                        spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                        float rot = 0.0f;
 
-                        gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                        if (tileType == 2)
+                        {
+                            spikeSize = gfx::Vec2{ size.x, size.y * heightScale };
+                            spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                            rot = 0.0f;
+                        }
+                        else if (tileType == 14)
+                        {
+                            spikeSize = gfx::Vec2{ size.x * heightScale, size.y };
+                            spikePos.x -= (spikeSize.x - size.x) * 0.5f;
+                            rot = kPi * 0.5f;
+                        }
+                        else // 15
+                        {
+                            spikeSize = gfx::Vec2{ size.x * heightScale, size.y };
+                            spikePos.x += (spikeSize.x - size.x) * 0.5f;
+                            rot = -kPi * 0.5f;
+                        }
+
+                        gfx::drawSprite(spikeTex, spikePos, rot, spikeSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     }
                     else
                     {
@@ -522,39 +544,59 @@ namespace game {
 
                 // -------------------------------------------------
                 // SPIKES
-                // tileType == 2 : spike facing UP
-                // tileType == 9 : spike facing DOWN
+                // 2  = UP
+                // 9  = DOWN
+                // 14 = LEFT
+                // 15 = RIGHT
                 // -------------------------------------------------
-                if (tileType == 2 || tileType == 9)
+                if (tileType == 2 || tileType == 9 || tileType == 14 || tileType == 15)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
                         float heightScale = 1.5f;
-                        gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
 
+                        gfx::Vec2 spikeSize = size;
                         gfx::Vec2 spikePos = pos;
-                        if (tileType == 2) {
-                            // UP-facing
-                            spikePos.y += (spikeSize.y - size.y) * 0.5f;
-                        }
-                        else {
-                            // DOWN-facing
-                            spikePos.y -= (spikeSize.y - size.y) * 0.5f;
-                        }
+                        float rot = 0.0f;
 
                         float u0 = 0.0f;
                         float v0 = 0.0f;
                         float u1 = 1.0f;
                         float v1 = 1.0f;
 
-                        if (tileType == 9)
+                        if (tileType == 2)
                         {
+                            // UP-facing
+                            spikeSize = gfx::Vec2{ size.x, size.y * heightScale };
+                            spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                            rot = 0.0f;
+                        }
+                        else if (tileType == 9)
+                        {
+                            // DOWN-facing (keep using V flip)
+                            spikeSize = gfx::Vec2{ size.x, size.y * heightScale };
+                            spikePos.y -= (spikeSize.y - size.y) * 0.5f;
                             v0 = 1.0f;
                             v1 = 0.0f;
+                            rot = 0.0f;
+                        }
+                        else if (tileType == 14)
+                        {
+                            // LEFT-facing
+                            spikeSize = gfx::Vec2{ size.x * heightScale, size.y };
+                            spikePos.x -= (spikeSize.x - size.x) * 0.5f;
+                            rot = kPi * 0.5f;
+                        }
+                        else // 15
+                        {
+                            // RIGHT-facing
+                            spikeSize = gfx::Vec2{ size.x * heightScale, size.y };
+                            spikePos.x += (spikeSize.x - size.x) * 0.5f;
+                            rot = -kPi * 0.5f;
                         }
 
-                        gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
+                        gfx::drawSprite(spikeTex, spikePos, rot, spikeSize, u0, v0, u1, v1);
                     }
                     continue;
                 }
@@ -787,30 +829,47 @@ namespace game {
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
 
-                if (tileType == 2 || tileType == 9)
+                if (tileType == 2 || tileType == 9 || tileType == 14 || tileType == 15)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
                         float heightScale = 1.5f;
-                        gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
-                        gfx::Vec2 spikePos = pos;
 
-                        if (tileType == 2) {
-                            spikePos.y += (spikeSize.y - size.y) * 0.5f;
-                        }
-                        else {
-                            spikePos.y -= (spikeSize.y - size.y) * 0.5f;
-                        }
+                        gfx::Vec2 spikeSize = size;
+                        gfx::Vec2 spikePos = pos;
+                        float rot = 0.0f;
 
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                        if (tileType == 9)
+
+                        if (tileType == 2)
                         {
+                            spikeSize = gfx::Vec2{ size.x, size.y * heightScale };
+                            spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                            rot = 0.0f;
+                        }
+                        else if (tileType == 9)
+                        {
+                            spikeSize = gfx::Vec2{ size.x, size.y * heightScale };
+                            spikePos.y -= (spikeSize.y - size.y) * 0.5f;
                             v0 = 1.0f;
                             v1 = 0.0f;
+                            rot = 0.0f;
+                        }
+                        else if (tileType == 14)
+                        {
+                            spikeSize = gfx::Vec2{ size.x * heightScale, size.y };
+                            spikePos.x -= (spikeSize.x - size.x) * 0.5f;
+                            rot = kPi * 0.5f;
+                        }
+                        else
+                        {
+                            spikeSize = gfx::Vec2{ size.x * heightScale, size.y };
+                            spikePos.x += (spikeSize.x - size.x) * 0.5f;
+                            rot = -kPi * 0.5f;
                         }
 
-                        gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
+                        gfx::drawSprite(spikeTex, spikePos, rot, spikeSize, u0, v0, u1, v1);
                     }
                     continue;
                 }
@@ -982,30 +1041,47 @@ namespace game {
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
 
-                if (tileType == 2 || tileType == 9)
+                if (tileType == 2 || tileType == 9 || tileType == 14 || tileType == 15)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
                         float heightScale = 1.5f;
-                        gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
-                        gfx::Vec2 spikePos = pos;
 
-                        if (tileType == 2) {
-                            spikePos.y += (spikeSize.y - size.y) * 0.5f;
-                        }
-                        else {
-                            spikePos.y -= (spikeSize.y - size.y) * 0.5f;
-                        }
+                        gfx::Vec2 spikeSize = size;
+                        gfx::Vec2 spikePos = pos;
+                        float rot = 0.0f;
 
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                        if (tileType == 9)
+
+                        if (tileType == 2)
                         {
+                            spikeSize = gfx::Vec2{ size.x, size.y * heightScale };
+                            spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                            rot = 0.0f;
+                        }
+                        else if (tileType == 9)
+                        {
+                            spikeSize = gfx::Vec2{ size.x, size.y * heightScale };
+                            spikePos.y -= (spikeSize.y - size.y) * 0.5f;
                             v0 = 1.0f;
                             v1 = 0.0f;
+                            rot = 0.0f;
+                        }
+                        else if (tileType == 14)
+                        {
+                            spikeSize = gfx::Vec2{ size.x * heightScale, size.y };
+                            spikePos.x -= (spikeSize.x - size.x) * 0.5f;
+                            rot = kPi * 0.5f;
+                        }
+                        else
+                        {
+                            spikeSize = gfx::Vec2{ size.x * heightScale, size.y };
+                            spikePos.x += (spikeSize.x - size.x) * 0.5f;
+                            rot = -kPi * 0.5f;
                         }
 
-                        gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
+                        gfx::drawSprite(spikeTex, spikePos, rot, spikeSize, u0, v0, u1, v1);
                     }
                     continue;
                 }

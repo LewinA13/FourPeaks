@@ -52,4 +52,7 @@ namespace sprite
     // Use this inside any stage tile loop.
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size);
 
+    // NEW: animated gear strip (tile 13)
+    AEGfxTexture* onGear();
+
 }
