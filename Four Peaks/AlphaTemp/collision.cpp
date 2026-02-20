@@ -7,6 +7,8 @@
 #include "collision.hpp"
 
 
+std::vector<IceTrigger> g_triggeredIceTiles;
+
 const int mapRows = 20;
 const int mapColm = 32;
 
@@ -137,17 +139,6 @@ float calculateSpikeOverlapRatio(const Player& player, int row, TileRange box, i
 	return totalSpikeWidth / player.colliderSize.x;
 }
 
-bool checkingSpikes(int tileType) {
-	switch (tileType) {
-	case 0:
-	case 2:
-	case 9:
-		return false;
-
-	default:
-		return true;
-	}
-}
 
 
 //! Check and change the type grounded type player step on
@@ -175,7 +166,6 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				break;
 			}
 
-			case 1:
 			case 4:
 			case 6:
 			case 7:
@@ -228,10 +218,12 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				levelLayout[r][c] = 0;
 				break;
 
-			case 11:
-				player.currGroundType = Player::GroundType::BreakingIce;
-
+			case 1:
+			{
+				g_triggeredIceTiles.push_back({ r, c });
 				break;
+			}
+
 
 			default:
 				break;
@@ -374,9 +366,6 @@ void applyGroundPhysics(Player& player) {
 		player.accel = 20.0f;
 		player.decel = 2.0f;
 		break;
-
-
-
 
 	default:
 		break;

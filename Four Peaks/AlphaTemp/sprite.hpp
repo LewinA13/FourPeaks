@@ -44,9 +44,13 @@ namespace sprite
 
     // Update shared animated tiles (coin/checkpoint/crack) once per frame
     void updateAnimatedTiles(f32 dt);
-
+    
     // Draw animated tiles by tileType. Returns true if it drew something.
     // Use this inside any stage tile loop.
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size);
+
+    //! this two following var move from sprite.cpp to this headers
+    constexpr int crackFrameCount = 5;
+    constexpr float crackFrameTime = 0.30f;
 
 }

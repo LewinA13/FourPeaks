@@ -62,6 +62,14 @@ namespace game {
         void gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const;
     };
 
+    struct IceTileState{
+        int row, col;
+        bool triggered = false;
+        float timer = 0.0f;
+        int crackFrame = 0;
+        bool destroyed = false;
+    };
+
     // -------------------------------------------------------------------
     // WinterS3 - Third Stage
     // -------------------------------------------------------------------
@@ -86,6 +94,9 @@ namespace game {
         void drawGrid() const;
         void drawTiles() const;
         void gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const;
+
+        std::vector<IceTileState> iceTiles;
+
     };
 
     // -------------------------------------------------------------------
@@ -112,6 +123,8 @@ namespace game {
         void drawGrid() const;
         void drawTiles() const;
         void gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const;
+
+        std::vector<IceTileState> iceTiles;
     };
 
 } // namespace game

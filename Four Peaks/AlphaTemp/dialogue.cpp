@@ -27,31 +27,38 @@ namespace UI {
     void Dialog::initialize() {
    
         levelDialogs[1] = {  // WinterS1
-          "Welcome to Winter Peak!",
-          "Use arrow keys to move.",
-          "Press X to dash.",
-          "Good luck!",
+
+
+          /*  "Stage 1!",
+            "Hello there..."*/
+          "Have you even wondered",
+          "Why must we serve?",
+          "When we holding gun",
+          "Children having fun"
         };
 
         levelDialogs[2] = {  // WinterS2
-            "Stage 2!",
-            "Watch out for spikes.",
-            "Dash through gaps!"
+           /* "Stage 2!",
+            "Watch out for spikes."*/
+            "Where is my song?"
         };
 
         levelDialogs[3] = {  // WinterS3
-            "You're doing great!",
-            "The summit is near."
+            /*"You're doing great!",
+            "The summit is near."*/
+            "Count by the count by the left foot count yay!",
+            "1"
         };
 
         levelDialogs[4] = {  // WinterS4
-            "One last push!"
+            //"One last push!"
+            "Cant hear you lah"
         };
     }
 
     //! check current level and show dialog for that level
     void Dialog::showForLevel(int levelID) {
-        //! skip if already shown or no dialog exists that level
+        //! skip if already shown or no dialog exists at that level
         if (hasShown[levelID]) return;
         if (levelDialogs.find(levelID) == levelDialogs.end()) return;
 
