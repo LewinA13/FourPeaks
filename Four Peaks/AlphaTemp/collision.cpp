@@ -212,7 +212,7 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				break;
 			}
 
-			case 8:	// melon 
+			case 99:	// melon 
 				player.melonsCollected += 1;
 				PlayerSaveMelons(player, "melons.txt");
 				levelLayout[r][c] = 0;
@@ -227,7 +227,7 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 			}
 
 
-			case 99:  // water bottle
+			case 8:  // water bottle
 				player.heat += 0.35f;
 				if (player.heat > player.maxHeat) player.heat = player.maxHeat;
 				levelLayout[r][c] = 0;   // remove after pickup

@@ -219,6 +219,7 @@ void PlayerInit(Player& p)
     p.alive = true;
     p.dead = false;
 
+    PlayerLoadCheckpoint(p, "checkpoint.txt", true);
     p.respawnPos = p.pos;      // default respawn = start position
     PlayerLoadCheckpoint(p, "checkpoint.txt", true);
     PlayerLoadMelons(p, "melons.txt");
