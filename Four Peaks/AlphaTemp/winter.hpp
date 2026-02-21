@@ -69,7 +69,7 @@ namespace game {
     };
 
     struct IceTileState{
-        int row, col;
+        int row{}, col{};
         bool triggered = false;
         float timer = 0.0f;
         int crackFrame = 0;

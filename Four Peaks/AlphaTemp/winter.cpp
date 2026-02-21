@@ -748,6 +748,11 @@ namespace game {
             }
         }
 
+        for (auto& ice : iceTiles) {
+            ice.triggered = false; 
+        }
+
+
         for (auto& trigger : g_triggeredIceTiles) {
             for (auto& ice : iceTiles) {
                 //! check the ice pos whether equal and never set state befote
@@ -762,7 +767,7 @@ namespace game {
 
         //! check only if breakingIce is triggered but havent being destroyed
         for (auto& ice : iceTiles) {
-            if (ice.triggered && !ice.destroyed) {
+            if (ice.triggered && !ice.destroyed ) {
                 ice.timer += dt;
                 //! update the frame
                 int newFrame = static_cast<int>(ice.timer / sprite::crackFrameTime);
@@ -777,7 +782,19 @@ namespace game {
             }
         }
 
-        sprite::updateAnimatedTiles(dt);
+
+        //! if player dead and respawning, reset all ice states 
+        if (gGame.player.respawning) {
+            for (auto& ice : iceTiles) {
+                tileMap[ice.row][ice.col] = 1; 
+                ice.triggered = false;
+                ice.timer = 0.0f;
+                ice.crackFrame = 0;
+                ice.destroyed = false;
+            }
+        }
+
+
         return 0;
     }
 
@@ -1038,6 +1055,10 @@ namespace game {
         sprite::updateAnimatedTiles(dt);
 
 
+        for (auto& ice : iceTiles) {
+            ice.triggered = false;
+        }
+
         //! g_triggeredIceTiles is the list to store triggered breaking ice
         for (auto& trigger : g_triggeredIceTiles) {
             for (auto& ice : iceTiles) {
@@ -1065,6 +1086,18 @@ namespace game {
                 }
             }
         }
+
+        //! if player dead and respawning, reset all ice states 
+        if (gGame.player.respawning) {
+            for (auto& ice : iceTiles) {
+                tileMap[ice.row][ice.col] = 1;
+                ice.triggered = false;
+                ice.timer = 0.0f;
+                ice.crackFrame = 0;
+                ice.destroyed = false;
+            }
+        }
+
 
         return 0;
     }
