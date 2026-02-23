@@ -36,6 +36,16 @@ namespace sprite
     // heatbar spritesheet (heatbar.png)
     AEGfxTexture* heatbar();
 
+    // sign texture (sign.jpg)
+    AEGfxTexture* sign();
+    // tile12 texture (Tile_12.jpg)
+    AEGfxTexture* tile12();
+    // tile02 texture (Tile_02.jpg)
+    AEGfxTexture* tile02();
+    // bottle texture (bottle.jpg)
+    AEGfxTexture* bottle();
+
+
     // UVs for checkpoint animation frames
     bool getCheckpointUv(int frame, float& u0, float& v0, float& u1, float& v1);
 

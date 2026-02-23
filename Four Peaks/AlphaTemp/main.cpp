@@ -11,6 +11,7 @@
 #include "mainmenu.hpp"
 #include "tutorial.hpp"
 #include "winter.hpp"
+#include "summer.hpp"
 #include "camera.hpp"
 #include "collision.hpp"
 #include "dialogue.hpp"
@@ -30,6 +31,10 @@ enum class SceneState
     WinterS2,
     WinterS3,
     WinterS4,
+    SummerS1,
+    SummerS2,
+    SummerS3,
+    SummerS4,
     Exit
 };
 
@@ -40,7 +45,7 @@ SceneState pendingScene = SceneState::Tutorial1;
 SceneState lastState = SceneState::Exit;
 
 
-enum StateID{
+enum StateID {
     MENU = 0,
     WINTER_S1 = 1,
     WINTER_S2 = 2,
@@ -111,6 +116,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     game::WinterS3 winterStage3;
     game::WinterS4 winterStage4;
 
+    game::SummerS1 summerStage;
+    game::SummerS2 summerStage2;
+    game::SummerS3 summerStage3;
+    game::SummerS4 summerStage4;
+
 
     // Start on the main menu.
     SceneState currentState = SceneState::MainMenu;
@@ -156,6 +166,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         else if (currentState == SceneState::WinterS4) {
             g_currentMap = winterStage4.getTileMap();
             dialog.showForLevel(4);
+        }
+
+        // Summer stages (so collision + pickups use the correct current map)
+        else if (currentState == SceneState::SummerS1) {
+            g_currentMap = summerStage.getTileMap();
+        }
+        else if (currentState == SceneState::SummerS2) {
+            g_currentMap = summerStage2.getTileMap();
+        }
+        else if (currentState == SceneState::SummerS3) {
+            g_currentMap = summerStage3.getTileMap();
+        }
+        else if (currentState == SceneState::SummerS4) {
+            g_currentMap = summerStage4.getTileMap();
         }
 
         // Begin frame.
@@ -293,6 +317,67 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
         }
 
+
+        if (AEInputCheckTriggered(AEVK_5))
+        {
+            // Go to Summer Stage 1
+            if (currentState != SceneState::SummerS1)
+            {
+                currentState = SceneState::SummerS1;
+                float h = camera::screenHeight();
+                camera::setY(0.0f);
+
+                if (lastState == SceneState::SummerS2 || lastState == SceneState::SummerS3 || lastState == SceneState::SummerS4)
+                    gGame.player.pos.y -= h;
+
+                lastState = SceneState::Exit;
+            }
+        }
+
+        if (AEInputCheckTriggered(AEVK_6))
+        {
+            // Go to Summer Stage 2
+            if (currentState != SceneState::SummerS2)
+            {
+                currentState = SceneState::SummerS2;
+                float h = camera::screenHeight();
+                camera::setY(h);
+
+                if (lastState == SceneState::SummerS1)
+                    gGame.player.pos.y += h;
+
+                lastState = SceneState::Exit;
+            }
+        }
+
+        if (AEInputCheckTriggered(AEVK_7))
+        {
+            // Go to Summer Stage 3
+            if (currentState != SceneState::SummerS3)
+            {
+                currentState = SceneState::SummerS3;
+                float h = camera::screenHeight();
+                camera::setY(h * 2.0f);
+                gGame.player.pos.y = h * 2.0f + 100.0f;
+
+                lastState = SceneState::Exit;
+            }
+        }
+
+        if (AEInputCheckTriggered(AEVK_8))
+        {
+            // Go to Summer Stage 4
+            if (currentState != SceneState::SummerS4)
+            {
+                currentState = SceneState::SummerS4;
+                float h = camera::screenHeight();
+                camera::setY(h * 3.0f);
+                gGame.player.pos.y = h * 3.0f + 100.0f;
+
+                lastState = SceneState::Exit;
+            }
+        }
+
         // Optionally let the window close terminate the game.
         if (AESysDoesWindowExist() == 0)
         {
@@ -369,6 +454,53 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
             }
+            break;
+        }
+
+        // --------------------------------------------------------
+        // SUMMER (Stages 1..4)
+        // action codes from summer.cpp:
+        // 20 -> go SummerS2
+        // 21 -> go SummerS3
+        // 22 -> go SummerS4
+        // 2  -> back to MainMenu
+        // --------------------------------------------------------
+        case SceneState::SummerS1:
+        {
+            action = summerStage.update(dt);
+            summerStage.draw();
+
+            if (action == 20) { currentState = SceneState::SummerS2; camera::setY(camera::screenHeight()); }
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            break;
+        }
+
+        case SceneState::SummerS2:
+        {
+            action = summerStage2.update(dt);
+            summerStage2.draw();
+
+            if (action == 21) { currentState = SceneState::SummerS3; camera::setY(camera::screenHeight() * 2.0f); }
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            break;
+        }
+
+        case SceneState::SummerS3:
+        {
+            action = summerStage3.update(dt);
+            summerStage3.draw();
+
+            if (action == 22) { currentState = SceneState::SummerS4; camera::setY(camera::screenHeight() * 3.0f); }
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            break;
+        }
+
+        case SceneState::SummerS4:
+        {
+            action = summerStage4.update(dt);
+            summerStage4.draw();
+
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
             break;
         }
 
@@ -472,7 +604,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         dialog.update(dt);
         dialog.render();
 
- 
+
         // End frame.
         AESysFrameEnd();
     }

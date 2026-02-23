@@ -21,6 +21,11 @@ namespace sprite
         AEGfxTexture* checkpointTex{};
         AEGfxTexture* crackTex{};
         AEGfxTexture* heatbarTex{};
+        AEGfxTexture* signTex{};
+        AEGfxTexture* tile12Tex{};
+        AEGfxTexture* tile02Tex{};
+        AEGfxTexture* bottleTex{};
+
 
         constexpr float texW = 224.0f;
         constexpr float texH = 320.0f;
@@ -62,59 +67,73 @@ namespace sprite
         // ice crack sprite sheet is 224x32, 7 frames, each 32x32 (horizontal strip)
         int crackFrame = 0;
         float crackTimer = 0.0f;
-        
-      
+
+
 
     }
 
     void init()
     {
-        backgroundTex = AEGfxTextureLoad("Assets/BG.png");
-        if (!backgroundTex)
-            backgroundTex = AEGfxTextureLoad("BG.png");
-
-        // Tutorial background (3 tutorial stages)
-        tutorialBgTex = AEGfxTextureLoad("Assets/bg_tutorial.png");
-        if (!tutorialBgTex)
-            tutorialBgTex = AEGfxTextureLoad("bg_tutorial.png");
-
-        if (tilesetTex) return;
-
-        // Winter spritesheet
-        tilesetTex = AEGfxTextureLoad("Assets/winter_.png");
-        if (!tilesetTex)
-            tilesetTex = AEGfxTextureLoad("winter_.png");
-
-        // spikes texture
-        spikesTex = AEGfxTextureLoad("Assets/idle.png");
-        if (!spikesTex)
-            spikesTex = AEGfxTextureLoad("idle.png");
-
-        // coin spritesheet texture
-        coinTex = AEGfxTextureLoad("Assets/Melon.png");
-        if (!coinTex)
-            coinTex = AEGfxTextureLoad("Melon.png");
-
-        // ice texture
-        iceTex = AEGfxTextureLoad("Assets/IceBox.png");
-        if (!iceTex)
-            iceTex = AEGfxTextureLoad("IceBox.png");
-
-        // checkpoint spritesheet texture
-        checkpointTex = AEGfxTextureLoad("Assets/Checkpoint.png");
-        if (!checkpointTex)
-            checkpointTex = AEGfxTextureLoad("Checkpoint.png");
-
-        // ice crack spritesheet texture
-        crackTex = AEGfxTextureLoad("Assets/b_ice.jpg");
-        if (!crackTex)
-            crackTex = AEGfxTextureLoad("b_ice.jpg");
-
-        heatbarTex = AEGfxTextureLoad("Assets/player/heatbar.png");
-        if (!heatbarTex)
-            heatbarTex = AEGfxTextureLoad("heatbar.png");
-
+        // Always (re)load these if missing
+        if (!backgroundTex) {
+            backgroundTex = AEGfxTextureLoad("Assets/BG.png");
+            if (!backgroundTex) backgroundTex = AEGfxTextureLoad("BG.png");
+        }
+        if (!tutorialBgTex) {
+            tutorialBgTex = AEGfxTextureLoad("Assets/bg_tutorial.png");
+            if (!tutorialBgTex) tutorialBgTex = AEGfxTextureLoad("bg_tutorial.png");
+        }
+        if (!tilesetTex) {
+            tilesetTex = AEGfxTextureLoad("Assets/winter_.png");
+            if (!tilesetTex) tilesetTex = AEGfxTextureLoad("winter_.png");
+        }
+        if (!spikesTex) {
+            spikesTex = AEGfxTextureLoad("Assets/idle.png");
+            if (!spikesTex) spikesTex = AEGfxTextureLoad("idle.png");
+        }
+        if (!coinTex) {
+            coinTex = AEGfxTextureLoad("Assets/Melon.png");
+            if (!coinTex) coinTex = AEGfxTextureLoad("Melon.png");
+        }
+        if (!iceTex) {
+            iceTex = AEGfxTextureLoad("Assets/IceBox.png");
+            if (!iceTex) iceTex = AEGfxTextureLoad("IceBox.png");
+        }
+        if (!checkpointTex) {
+            checkpointTex = AEGfxTextureLoad("Assets/Checkpoint.png");
+            if (!checkpointTex) checkpointTex = AEGfxTextureLoad("Checkpoint.png");
+        }
+        if (!crackTex) {
+            crackTex = AEGfxTextureLoad("Assets/b_ice.jpg");
+            if (!crackTex) crackTex = AEGfxTextureLoad("b_ice.jpg");
+        }
+        if (!heatbarTex) {
+            heatbarTex = AEGfxTextureLoad("Assets/player/heatbar.png");
+            if (!heatbarTex) heatbarTex = AEGfxTextureLoad("heatbar.png");
+        }
+        if (!signTex) {
+            signTex = AEGfxTextureLoad("Assets/sign.png");
+            if (!signTex) signTex = AEGfxTextureLoad("sign.jpg");
+        }
+        if (!tile12Tex) {
+            // Support both your project asset paths and direct project-root drops.
+            tile12Tex = AEGfxTextureLoad("Assets/Tile_12.png");
+            if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Assets/center.png");
+            if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Tile_12.png");
+            if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Tile_12.jpg");
+        }
+        if (!tile02Tex) {
+            tile02Tex = AEGfxTextureLoad("Assets/Tile_02.png");
+            if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Assets/top.png");
+            if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Tile_02.png");
+            if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Tile_02.jpg");
+        }
+        if (!bottleTex) {
+            bottleTex = AEGfxTextureLoad("Assets/bottle.png");
+            if (!bottleTex) bottleTex = AEGfxTextureLoad("bottle.jpg");
+        }
     }
+
 
     void shutdown()
     {
@@ -170,6 +189,15 @@ namespace sprite
             AEGfxTextureUnload(heatbarTex);
             heatbarTex = nullptr;
         }
+        if (signTex)
+        {
+            AEGfxTextureUnload(signTex);
+            signTex = nullptr;
+        } // make it look nc later - A
+        if (tile12Tex) { AEGfxTextureUnload(tile12Tex); tile12Tex = nullptr; }
+        if (tile02Tex) { AEGfxTextureUnload(tile02Tex); tile02Tex = nullptr; }
+        if (bottleTex) { AEGfxTextureUnload(bottleTex); bottleTex = nullptr; }
+
     }
 
     AEGfxTexture* tileset()
@@ -211,6 +239,13 @@ namespace sprite
     {
         return crackTex;
     }
+
+    // make it look nice later - Arun
+    AEGfxTexture* sign() { return signTex; }
+    AEGfxTexture* tile12() { return tile12Tex; }
+    AEGfxTexture* tile02() { return tile02Tex; }
+    AEGfxTexture* bottle() { return bottleTex; }
+
 
 
     bool getCoinUv(int frame, float& u0, float& v0, float& u1, float& v1)

@@ -21,6 +21,7 @@
     <ClCompile Include="mainmenu.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="summer.cpp" />
     <ClCompile Include="tutorial.cpp" />
     <ClCompile Include="winter.cpp" />
   </ItemGroup>
@@ -34,6 +35,7 @@
     <ClInclude Include="mainmenu.hpp" />
     <ClInclude Include="player.hpp" />
     <ClInclude Include="sprite.hpp" />
+    <ClInclude Include="summer.hpp" />
     <ClInclude Include="tutorial.hpp" />
     <ClInclude Include="winter.hpp" />
   </ItemGroup>
