@@ -222,7 +222,10 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 
 			case 1:
 			{
-				g_triggeredIceTiles.push_back({ r, c });
+				//! only when player above on ice &&  player (stay or down)
+				if ((r == box.rowStart) && player.velY <= 0.0f) {
+					g_triggeredIceTiles.push_back({ r, c });
+				}
 				break;
 			}
 
