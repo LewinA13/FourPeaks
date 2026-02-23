@@ -7,20 +7,39 @@
 // Uses normalized coordinates (-1..1) for AEGfxPrint.
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// mainmenu.cpp
+// ---------------------------------------------------------------------------
+
 #include "mainmenu.hpp"
 #include "AEEngine.h"
+#include "AEFrameRateController.h"
+#include "sprite.hpp"
 #include <cstdint>
+#include <cstring>
 
-extern s8 gFontId;      // Font handle created in main.cpp
-static bool gIsFullscreen = false; //Full Screen Handler
-
-
+extern s8 gFontId;
+static bool gIsFullscreen = false;
 
 
 namespace game
 {
-    // Helper for drawing ARGB-colour text using the shared font.
-    // x,y are in normalized coordinates (-1..1).
+
+    //For Animated Background
+    static const int BG_FRAME_COUNT = 6;
+
+    static AEGfxTexture* bgFrames[BG_FRAME_COUNT];
+    static AEGfxVertexList* bgMesh = nullptr;
+
+    int backgroundFrame = 0;
+    float backgroundTimer = 0.0f;
+    constexpr int backgroundFrameCount = 6;
+    constexpr float backgroundFrameTime = 0.09f;
+
+
+    // ---------------------------------------------------------------------
+    // Low-level print
+    // ---------------------------------------------------------------------
     static void printText(f32 x, f32 y, u32 argbColor,
         const char* text, f32 scale = 1.0f)
     {
@@ -32,7 +51,24 @@ namespace game
         AEGfxPrint(gFontId, text, x, y, scale, r, g, b, a);
     }
 
+    // ---------------------------------------------------------------------
+    // Proper centered print (tuned for Alpha Engine default font)
+    // ---------------------------------------------------------------------
+    static void printCentered(f32 y, u32 color,
+        const char* text, f32 scale = 1.0f)
+    {
+        // Calibrated horizontal correction for AE font
+        const f32 correction = 0.12f * scale;
+
+        // Anchor at screen center
+        f32 x = -correction;
+
+        printText(x, y, color, text, scale);
+    }
+
+    // ---------------------------------------------------------------------
     // Menu entries
+    // ---------------------------------------------------------------------
     static const char* const kMenuItems[] =
     {
         "Play",
@@ -43,39 +79,53 @@ namespace game
     static const int kMenuItemCount =
         static_cast<int>(sizeof(kMenuItems) / sizeof(kMenuItems[0]));
 
-    static const u32 kColorNormal = 0xFFFFFFFF; // white
-    static const u32 kColorSelected = 0xFF00FF00; // green
+    static const u32 kColorNormal = 0xFFFFFFFF;
+    static const u32 kColorSelected = 0xFF00FF00;
 
+    // ---------------------------------------------------------------------
+    // Constructor
+    // ---------------------------------------------------------------------
     MainMenu::MainMenu()
         : selectedIndex(0)
         , showHowTo(false)
     {
+        // --------------------------
+        // Load Background Frames
+        // --------------------------
+
+        bgFrames[0] = AEGfxTextureLoad("Assets/mmf1.png");
+        bgFrames[1] = AEGfxTextureLoad("Assets/mmf2.png");
+        bgFrames[2] = AEGfxTextureLoad("Assets/mmf3.png");
+        bgFrames[3] = AEGfxTextureLoad("Assets/mmf4.png");
+        bgFrames[4] = AEGfxTextureLoad("Assets/mmf5.png");
+        bgFrames[5] = AEGfxTextureLoad("Assets/mmf6.png");
     }
 
+    // ---------------------------------------------------------------------
+    // Fullscreen toggle
+    // ---------------------------------------------------------------------
     void ToggleFullscreen()
     {
         gIsFullscreen = !gIsFullscreen;
-
-        if (gIsFullscreen)
-        {
-            // Switch to fullscreen
-            AESysSetFullScreen(1);
-        }
-        else
-        {
-            // Switch back to windowed mode
-            AESysSetFullScreen(0);
-        }
+        AESysSetFullScreen(gIsFullscreen ? 1 : 0);
     }
 
-
-
-    // -------------------------------------------------------------------
-    // MainMenu::update
-    // -------------------------------------------------------------------
+    // ---------------------------------------------------------------------
+    // Update
+    // ---------------------------------------------------------------------
     int MainMenu::update()
     {
-        // If How To Play is visible, wait for any confirm key to close it.
+        float dt = AEFrameRateControllerGetFrameTime();
+
+        backgroundTimer += dt;
+
+        if (backgroundTimer >= backgroundFrameTime)
+        {
+            backgroundTimer -= backgroundFrameTime;
+            backgroundFrame = (backgroundFrame + 1) % backgroundFrameCount;
+        }
+
+
         if (showHowTo)
         {
             if (AEInputCheckTriggered(AEVK_RETURN) ||
@@ -84,59 +134,56 @@ namespace game
             {
                 showHowTo = false;
             }
-            return 0; // stay on menu
+            return 0;
         }
 
-        // Move selection down.
         if (AEInputCheckTriggered(AEVK_DOWN))
-        {
             selectedIndex = (selectedIndex + 1) % kMenuItemCount;
-        }
 
-        // Move selection up.
         if (AEInputCheckTriggered(AEVK_UP))
-        {
             selectedIndex = (selectedIndex + kMenuItemCount - 1) % kMenuItemCount;
-        }
 
-        // Confirm selection.
         if (AEInputCheckTriggered(AEVK_RETURN) ||
             AEInputCheckTriggered(AEVK_SPACE))
         {
             switch (selectedIndex)
             {
-            case 0: // Play
-                return 1;
-            case 1: // How To Play (placeholder)
-                showHowTo = true;
-                return 0;
-            case 2: // Exit
-                return 2;
-            default:
-                break;
+            case 0: return 1; // Play
+            case 1: showHowTo = true; return 0;
+            case 2: return 2; // Exit
             }
         }
 
-        //Full Screen Toggle
-        // Check if 'I' key was pressed THIS frame
         if (AEInputCheckTriggered(AEVK_I))
-        {
             ToggleFullscreen();
-        }
 
-        return 0; // no state change
+        return 0;
     }
 
-    // -------------------------------------------------------------------
-    // MainMenu::draw
-    // -------------------------------------------------------------------
+    // ---------------------------------------------------------------------
+    // Draw
+    // ---------------------------------------------------------------------
     void MainMenu::draw() const
     {
-        // Background colour.
-        AEGfxSetBackgroundColor(0.05f, 0.05f, 0.2f);
+        AEGfxSetBackgroundColor(0, 0, 0);
 
+        // ------------------------------------------------
+        // DRAW ANIMATED BACKGROUND FIRST
+        // ------------------------------------------------
+        AEGfxTexture* bg = sprite::background();
+        if (bg)
+        {
+            float minX = AEGfxGetWinMinX();
+            float maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY();
+            float maxY = AEGfxGetWinMaxY();
+
+            gfx::Vec2 center{ (minX + maxX) * 0.5f, (minY + maxY) * 0.5f };
+            gfx::Vec2 size{ (maxX - minX), (maxY - minY) };
+
+        }
+        // Switch back to color mode for text
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-        AEGfxSetBlendMode(AE_GFX_BM_NONE);
 
         if (showHowTo)
         {
@@ -144,39 +191,37 @@ namespace game
             return;
         }
 
-        // Title near top-center (normalized coordinates).
-        printText(-0.6f, 0.8f, 0xFFFFFF00u, "Four Seasons Platformer");
+        // Title
+        printCentered(0.6f, 0xFFFFFF00u,
+            "Four Seasons Platformer", 1.5f);
 
-        // Menu entries vertically centered.
-        f32 baseY = 0.2f;   // first item
-        f32 spacing = -0.25f; // distance between items
+        const f32 spacing = 0.25f;
+        f32 totalHeight = (kMenuItemCount - 1) * spacing;
+        f32 startY = totalHeight * 0.5f;
 
         for (int i = 0; i < kMenuItemCount; ++i)
         {
-            u32 color = (i == selectedIndex) ? kColorSelected : kColorNormal;
-            f32 y = baseY + spacing * i;
+            u32 color = (i == selectedIndex)
+                ? kColorSelected
+                : kColorNormal;
 
-            // x = -0.3 places text slightly left of center.
-            printText(-0.3f, y, color, kMenuItems[i]);
+            f32 y = startY - i * spacing;
+            printCentered(y, color, kMenuItems[i], 1.0f);
         }
     }
 
-    // -------------------------------------------------------------------
-    // MainMenu::drawHowToPlay
-    // -------------------------------------------------------------------
+    // ---------------------------------------------------------------------
+    // Draw How-To screen
+    // ---------------------------------------------------------------------
     void MainMenu::drawHowToPlay() const
     {
-        // Simple placeholder screen in normalized coordinates.
-        printText(-0.4f, 0.7f, 0xFF00FFFFu, "How To Play (WIP)");
+        printCentered(0.7f, 0xFF00FFFFu, "How To Play");
 
-        printText(-0.9f, 0.3f, 0xFFFFFFFFu,
-            "- Use arrow keys to move (later).");
-        printText(-0.9f, 0.1f, 0xFFFFFFFFu,
-            "- Reach the end of each seasonal stage.");
-        printText(-0.9f, -0.1f, 0xFFFFFFFFu,
-            "- Future screens will explain mechanics.");
+        printCentered(0.3f, 0xFFFFFFFFu, "- Use arrow keys to move.");
+        printCentered(0.1f, 0xFFFFFFFFu, "- Reach the end of each stage.");
+        printCentered(-0.1f, 0xFFFFFFFFu, "- More mechanics coming soon.");
 
-        printText(-0.9f, -0.5f, 0xFFFFFF00u,
+        printCentered(-0.5f, 0xFFFFFF00u,
             "Press Enter, Space or ESC to return.");
     }
 }

@@ -1,4 +1,4 @@
-// ---------------------------------------------------------------------------
+﻿// ---------------------------------------------------------------------------
 // Winter_s1.cpp - Combined Winter Stages (Stage 1 + Stage 2)
 // ---------------------------------------------------------------------------
 
@@ -269,6 +269,15 @@ namespace game {
     // -------------------------------------------------------------------
     void WinterS1::drawTiles() const
     {
+        auto isSolid = [&](int r, int c) -> bool
+            {
+                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols)
+                    return false;
+
+                int t = tileMap[r][c];
+                return (t == 4 || t == 6 || t == 1);
+            };
+
         for (int row = 0; row < gridRows; ++row)
         {
             for (int col = 0; col < gridCols; ++col)
@@ -285,26 +294,24 @@ namespace game {
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
 
-                if (sprite::drawAnimatedTile(tileType, pos, size))
-                    continue;
+                float border = (cellW < cellH ? cellW : cellH) * 0.05f;
+                u32 borderColor = 0xFF000000;
 
-                // Ice tile (tileType == 9)
+                // -------------------------
+                // 1️⃣ Draw Tile First
+                // -------------------------
+
+                // Ice tile
                 if (tileType == 9)
                 {
                     AEGfxTexture* iceTex = sprite::ice();
                     if (iceTex)
-                    {
-                        gfx::drawSprite(iceTex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    }
+                        gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
                     else
-                    {
                         gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
-                    }
-                    continue;
                 }
-
                 // Spikes tile
-                if (tileType == 2)
+                if (tileType == 2 || tileType == 11)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
@@ -313,29 +320,82 @@ namespace game {
                         gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
 
                         gfx::Vec2 spikePos = pos;
-                        spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                        if (tileType == 2) {
+                            // UP-facing
+                            spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                        }
+                        else {
+                            // DOWN-facing
+                            spikePos.y -= (spikeSize.y - size.y) * 0.5f;
+                        }
 
-                        gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                        float u0 = 0.0f;
+                        float v0 = 0.0f;
+                        float u1 = 1.0f;
+                        float v1 = 1.0f;
+
+                        if (tileType == 9)
+                        {
+                            v0 = 1.0f;
+                            v1 = 0.0f;
+                        }
+
+                        gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
+                    }
+                }
+                // Normal tiles
+                else
+                {
+                    float u0{}, v0{}, u1{}, v1{};
+                    AEGfxTexture* tex = sprite::tileset();
+                    if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                    {
+                        gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
                     }
                     else
                     {
                         u32 tileColor = getTileColor(tileType);
                         gfx::drawRectangle(pos, 0.0f, size, tileColor);
                     }
-                    continue;
                 }
 
-                // Normal tiles
-                float u0{}, v0{}, u1{}, v1{};
-                AEGfxTexture* tex = sprite::tileset();
-                if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                // -------------------------
+                // 2️⃣ Draw Borders LAST (Only Solid Tiles)
+                // -------------------------
+
+                if (!isSolid(row, col))
+                    continue;
+
+                // TOP
+                if (!isSolid(row + 1, col))
                 {
-                    gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
+                    gfx::Vec2 topPos{ pos.x, pos.y + size.y * 0.5f - border * 0.5f };
+                    gfx::Vec2 topSize{ size.x, border };
+                    gfx::drawRectangle(topPos, 0.0f, topSize, borderColor);
                 }
-                else
+
+                // BOTTOM
+                if (!isSolid(row - 1, col))
                 {
-                    u32 tileColor = getTileColor(tileType);
-                    gfx::drawRectangle(pos, 0.0f, size, tileColor);
+                    gfx::Vec2 bottomPos{ pos.x, pos.y - size.y * 0.5f + border * 0.5f };
+                    gfx::Vec2 bottomSize{ size.x, border };
+                    gfx::drawRectangle(bottomPos, 0.0f, bottomSize, borderColor);
+                }
+
+                // LEFT
+                if (!isSolid(row, col - 1))
+                {
+                    gfx::Vec2 leftPos{ pos.x - size.x * 0.5f + border * 0.5f, pos.y };
+                    gfx::Vec2 leftSize{ border, size.y };
+                    gfx::drawRectangle(leftPos, 0.0f, leftSize, borderColor);
+                }
+
+                // RIGHT
+                if (!isSolid(row, col + 1))
+                {
+                    gfx::Vec2 rightPos{ pos.x + size.x * 0.5f - border * 0.5f, pos.y };
+                    gfx::Vec2 rightSize{ border, size.y };
+                    gfx::drawRectangle(rightPos, 0.0f, rightSize, borderColor);
                 }
             }
         }
@@ -546,6 +606,15 @@ namespace game {
     // -------------------------------------------------------------------
     void WinterS2::drawTiles() const
     {
+        auto isSolid = [&](int r, int c) -> bool
+            {
+                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols)
+                    return false;
+
+                int t = tileMap[r][c];
+                return (t == 4 || t == 6 || t == 1);
+            };
+
         for (int row = 0; row < gridRows; ++row)
         {
             for (int col = 0; col < gridCols; ++col)
@@ -562,12 +631,24 @@ namespace game {
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
 
-                // -------------------------------------------------
-                // SPIKES
-                // tileType == 2 : spike facing UP
-                // tileType == 9 : spike facing DOWN
-                // -------------------------------------------------
-                if (tileType == 2 || tileType == 9)
+                float border = (cellW < cellH ? cellW : cellH) * 0.05f;
+                u32 borderColor = 0xFF000000;
+
+                // -------------------------
+                // 1️⃣ Draw Tile First
+                // -------------------------
+
+                // Ice tile
+                if (tileType == 1)
+                {
+                    AEGfxTexture* iceTex = sprite::ice();
+                    if (iceTex)
+                        gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
+                }
+                // Spikes tile
+                if (tileType == 9 || tileType == 2)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
@@ -598,23 +679,60 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
-                    continue;
                 }
-
-                if (sprite::drawAnimatedTile(tileType, pos, size))
-                    continue;
-
                 // Normal tiles
-                float u0{}, v0{}, u1{}, v1{};
-                AEGfxTexture* tex = sprite::tileset();
-                if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                {
-                    gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                }
                 else
                 {
-                    u32 tileColor = getTileColor(tileType);
-                    gfx::drawRectangle(pos, 0.0f, size, tileColor);
+                    float u0{}, v0{}, u1{}, v1{};
+                    AEGfxTexture* tex = sprite::tileset();
+                    if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                    {
+                        gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
+                    }
+                    else
+                    {
+                        u32 tileColor = getTileColor(tileType);
+                        gfx::drawRectangle(pos, 0.0f, size, tileColor);
+                    }
+                }
+
+                // -------------------------
+                // 2️⃣ Draw Borders LAST (Only Solid Tiles)
+                // -------------------------
+
+                if (!isSolid(row, col))
+                    continue;
+
+                // TOP
+                if (!isSolid(row + 1, col))
+                {
+                    gfx::Vec2 topPos{ pos.x, pos.y + size.y * 0.5f - border * 0.5f };
+                    gfx::Vec2 topSize{ size.x, border };
+                    gfx::drawRectangle(topPos, 0.0f, topSize, borderColor);
+                }
+
+                // BOTTOM
+                if (!isSolid(row - 1, col))
+                {
+                    gfx::Vec2 bottomPos{ pos.x, pos.y - size.y * 0.5f + border * 0.5f };
+                    gfx::Vec2 bottomSize{ size.x, border };
+                    gfx::drawRectangle(bottomPos, 0.0f, bottomSize, borderColor);
+                }
+
+                // LEFT
+                if (!isSolid(row, col - 1))
+                {
+                    gfx::Vec2 leftPos{ pos.x - size.x * 0.5f + border * 0.5f, pos.y };
+                    gfx::Vec2 leftSize{ border, size.y };
+                    gfx::drawRectangle(leftPos, 0.0f, leftSize, borderColor);
+                }
+
+                // RIGHT
+                if (!isSolid(row, col + 1))
+                {
+                    gfx::Vec2 rightPos{ pos.x + size.x * 0.5f - border * 0.5f, pos.y };
+                    gfx::Vec2 rightSize{ border, size.y };
+                    gfx::drawRectangle(rightPos, 0.0f, rightSize, borderColor);
                 }
             }
         }
@@ -853,6 +971,15 @@ namespace game {
     // -------------------------------------------------------------------
     void WinterS3::drawTiles() const
     {
+        auto isSolid = [&](int r, int c) -> bool
+            {
+                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols)
+                    return false;
+
+                int t = tileMap[r][c];
+                return (t == 4 || t == 6 || t == 1);
+            };
+
         for (int row = 0; row < gridRows; ++row)
         {
             for (int col = 0; col < gridCols; ++col)
@@ -865,26 +992,50 @@ namespace game {
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
                 gfx::Vec2 size{ cellW, cellH };
+
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
 
-                if (tileType == 2 || tileType == 9)
+                float border = (cellW < cellH ? cellW : cellH) * 0.05f;
+                u32 borderColor = 0xFF000000;
+
+                // -------------------------
+                // 1️⃣ Draw Tile First
+                // -------------------------
+
+                // Ice tile
+                if (tileType == 11)
+                {
+                    AEGfxTexture* iceTex = sprite::ice();
+                    if (iceTex)
+                        gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
+                }
+                // Spikes tile
+                if (tileType == 9 || tileType == 2)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
                         float heightScale = 1.5f;
                         gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
-                        gfx::Vec2 spikePos = pos;
 
+                        gfx::Vec2 spikePos = pos;
                         if (tileType == 2) {
+                            // UP-facing
                             spikePos.y += (spikeSize.y - size.y) * 0.5f;
                         }
                         else {
+                            // DOWN-facing
                             spikePos.y -= (spikeSize.y - size.y) * 0.5f;
                         }
 
-                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        float u0 = 0.0f;
+                        float v0 = 0.0f;
+                        float u1 = 1.0f;
+                        float v1 = 1.0f;
+
                         if (tileType == 9)
                         {
                             v0 = 1.0f;
@@ -893,44 +1044,60 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
-                    continue;
                 }
-
-                if (tileType == 1)
-                {
-                    AEGfxTexture* crackTex = sprite::crack();
-                    if (crackTex)
-                    {
-                        int frameToUse = 0;
-                        for (const auto& ice : iceTiles)
-                        {
-                            if (ice.row == row && ice.col == col)
-                            {
-                                frameToUse = ice.crackFrame;
-                                break;
-                            }
-                        }
-                        float u0{}, v0{}, u1{}, v1{};
-                        sprite::getCrackUv(frameToUse, u0, v0, u1, v1);
-                        gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
-                    }
-                    continue;
-                }
-
-            
-                if (sprite::drawAnimatedTile(tileType, pos, size))
-                    continue;
-
-                float u0{}, v0{}, u1{}, v1{};
-                AEGfxTexture* tex = sprite::tileset();
-                if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                {
-                    gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                }
+                // Normal tiles
                 else
                 {
-                    u32 tileColor = getTileColor(tileType);
-                    gfx::drawRectangle(pos, 0.0f, size, tileColor);
+                    float u0{}, v0{}, u1{}, v1{};
+                    AEGfxTexture* tex = sprite::tileset();
+                    if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                    {
+                        gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
+                    }
+                    else
+                    {
+                        u32 tileColor = getTileColor(tileType);
+                        gfx::drawRectangle(pos, 0.0f, size, tileColor);
+                    }
+                }
+
+                // -------------------------
+                // 2️⃣ Draw Borders LAST (Only Solid Tiles)
+                // -------------------------
+
+                if (!isSolid(row, col))
+                    continue;
+
+                // TOP
+                if (!isSolid(row + 1, col))
+                {
+                    gfx::Vec2 topPos{ pos.x, pos.y + size.y * 0.5f - border * 0.5f };
+                    gfx::Vec2 topSize{ size.x, border };
+                    gfx::drawRectangle(topPos, 0.0f, topSize, borderColor);
+                }
+
+                // BOTTOM
+                if (!isSolid(row - 1, col))
+                {
+                    gfx::Vec2 bottomPos{ pos.x, pos.y - size.y * 0.5f + border * 0.5f };
+                    gfx::Vec2 bottomSize{ size.x, border };
+                    gfx::drawRectangle(bottomPos, 0.0f, bottomSize, borderColor);
+                }
+
+                // LEFT
+                if (!isSolid(row, col - 1))
+                {
+                    gfx::Vec2 leftPos{ pos.x - size.x * 0.5f + border * 0.5f, pos.y };
+                    gfx::Vec2 leftSize{ border, size.y };
+                    gfx::drawRectangle(leftPos, 0.0f, leftSize, borderColor);
+                }
+
+                // RIGHT
+                if (!isSolid(row, col + 1))
+                {
+                    gfx::Vec2 rightPos{ pos.x + size.x * 0.5f - border * 0.5f, pos.y };
+                    gfx::Vec2 rightSize{ border, size.y };
+                    gfx::drawRectangle(rightPos, 0.0f, rightSize, borderColor);
                 }
             }
         }
@@ -1112,6 +1279,15 @@ namespace game {
 
     void WinterS4::drawTiles() const
     {
+        auto isSolid = [&](int r, int c) -> bool
+            {
+                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols)
+                    return false;
+
+                int t = tileMap[r][c];
+                return (t == 4 || t == 6 || t == 1);
+            };
+
         for (int row = 0; row < gridRows; ++row)
         {
             for (int col = 0; col < gridCols; ++col)
@@ -1124,26 +1300,50 @@ namespace game {
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
                 gfx::Vec2 size{ cellW, cellH };
+
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
 
-                if (tileType == 2 || tileType == 9)
+                float border = (cellW < cellH ? cellW : cellH) * 0.05f;
+                u32 borderColor = 0xFF000000;
+
+                // -------------------------
+                // 1️⃣ Draw Tile First
+                // -------------------------
+
+                // Ice tile
+                if (tileType == 11 || tileType == 1)
+                {
+                    AEGfxTexture* iceTex = sprite::ice();
+                    if (iceTex)
+                        gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
+                }
+                // Spikes tile
+                if (tileType == 9 || tileType == 2)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
                         float heightScale = 1.5f;
                         gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
-                        gfx::Vec2 spikePos = pos;
 
+                        gfx::Vec2 spikePos = pos;
                         if (tileType == 2) {
+                            // UP-facing
                             spikePos.y += (spikeSize.y - size.y) * 0.5f;
                         }
                         else {
+                            // DOWN-facing
                             spikePos.y -= (spikeSize.y - size.y) * 0.5f;
                         }
 
-                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        float u0 = 0.0f;
+                        float v0 = 0.0f;
+                        float u1 = 1.0f;
+                        float v1 = 1.0f;
+
                         if (tileType == 9)
                         {
                             v0 = 1.0f;
@@ -1152,43 +1352,60 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
-                    continue;
                 }
-
-                if (tileType == 1)
-                {
-                    AEGfxTexture* crackTex = sprite::crack();
-                    if (crackTex)
-                    {
-                        int frameToUse = 0;
-                        for (const auto& ice : iceTiles)
-                        {
-                            if (ice.row == row && ice.col == col)
-                            {
-                                frameToUse = ice.crackFrame;
-                                break;
-                            }
-                        }
-                        float u0{}, v0{}, u1{}, v1{};
-                        sprite::getCrackUv(frameToUse, u0, v0, u1, v1);
-                        gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
-                    }
-                    continue;
-                }
-
-                if (sprite::drawAnimatedTile(tileType, pos, size))
-                    continue;
-
-                float u0{}, v0{}, u1{}, v1{};
-                AEGfxTexture* tex = sprite::tileset();
-                if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                {
-                    gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                }
+                // Normal tiles
                 else
                 {
-                    u32 tileColor = getTileColor(tileType);
-                    gfx::drawRectangle(pos, 0.0f, size, tileColor);
+                    float u0{}, v0{}, u1{}, v1{};
+                    AEGfxTexture* tex = sprite::tileset();
+                    if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                    {
+                        gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
+                    }
+                    else
+                    {
+                        u32 tileColor = getTileColor(tileType);
+                        gfx::drawRectangle(pos, 0.0f, size, tileColor);
+                    }
+                }
+
+                // -------------------------
+                // 2️⃣ Draw Borders LAST (Only Solid Tiles)
+                // -------------------------
+
+                if (!isSolid(row, col))
+                    continue;
+
+                // TOP
+                if (!isSolid(row + 1, col))
+                {
+                    gfx::Vec2 topPos{ pos.x, pos.y + size.y * 0.5f - border * 0.5f };
+                    gfx::Vec2 topSize{ size.x, border };
+                    gfx::drawRectangle(topPos, 0.0f, topSize, borderColor);
+                }
+
+                // BOTTOM
+                if (!isSolid(row - 1, col))
+                {
+                    gfx::Vec2 bottomPos{ pos.x, pos.y - size.y * 0.5f + border * 0.5f };
+                    gfx::Vec2 bottomSize{ size.x, border };
+                    gfx::drawRectangle(bottomPos, 0.0f, bottomSize, borderColor);
+                }
+
+                // LEFT
+                if (!isSolid(row, col - 1))
+                {
+                    gfx::Vec2 leftPos{ pos.x - size.x * 0.5f + border * 0.5f, pos.y };
+                    gfx::Vec2 leftSize{ border, size.y };
+                    gfx::drawRectangle(leftPos, 0.0f, leftSize, borderColor);
+                }
+
+                // RIGHT
+                if (!isSolid(row, col + 1))
+                {
+                    gfx::Vec2 rightPos{ pos.x + size.x * 0.5f - border * 0.5f, pos.y };
+                    gfx::Vec2 rightSize{ border, size.y };
+                    gfx::drawRectangle(rightPos, 0.0f, rightSize, borderColor);
                 }
             }
         }

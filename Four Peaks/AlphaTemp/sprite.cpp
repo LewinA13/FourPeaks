@@ -14,6 +14,7 @@ namespace sprite
         AEGfxTexture* tilesetTex{};
         AEGfxTexture* spikesTex{};
         AEGfxTexture* backgroundTex{};
+        AEGfxTexture* mmBackgroundTex{};
         AEGfxTexture* tutorialBgTex{};
         AEGfxTexture* coinTex{};
         AEGfxTexture* bgStripTex{};
@@ -72,6 +73,10 @@ namespace sprite
         backgroundTex = AEGfxTextureLoad("Assets/BG.png");
         if (!backgroundTex)
             backgroundTex = AEGfxTextureLoad("BG.png");
+
+		mmBackgroundTex = AEGfxTextureLoad("Assets/mmf1.png");
+        if (!mmBackgroundTex)
+			mmBackgroundTex = AEGfxTextureLoad("mmf1.png");
 
         // Tutorial background (3 tutorial stages)
         tutorialBgTex = AEGfxTextureLoad("Assets/bg_tutorial.png");
@@ -136,6 +141,12 @@ namespace sprite
             backgroundTex = nullptr;
         }
 
+		if (mmBackgroundTex)
+        {
+            AEGfxTextureUnload(mmBackgroundTex);
+            mmBackgroundTex = nullptr;
+        }
+
         if (tutorialBgTex)
         {
             AEGfxTextureUnload(tutorialBgTex);
@@ -186,6 +197,11 @@ namespace sprite
     {
         return backgroundTex;
     }
+
+    AEGfxTexture* mmBackground()
+    {
+        return mmBackgroundTex;
+	}
 
     AEGfxTexture* tutorialBackground()
     {
