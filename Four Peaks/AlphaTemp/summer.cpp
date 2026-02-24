@@ -76,7 +76,7 @@ namespace game {
         }
     }
 
-    SummerS1::SummerS1() : gridVisible(true), tileMap{} {
+    SummerS1::SummerS1() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s1.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
             for (int r = 0; r < gridRows; ++r)
@@ -97,7 +97,7 @@ namespace game {
         if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
         if (!camera::isTransitioning()) {
             float gx, gy, cw, ch;
-            gridToWorld(28, 19, gx, gy, cw, ch);
+            gridToWorld(30, 19, gx, gy, cw, ch);
             float dx = gGame.player.pos.x - (gx + cw * 0.5f);
             float dy = gGame.player.pos.y - (gy + ch * 0.5f);
             if (sqrt(dx * dx + dy * dy) < cw * 1.5f) return 20;
@@ -127,7 +127,7 @@ namespace game {
         printText(-0.95f, 0.5f, 0xFFFFFF00u, hud.c_str(), 1);
         if (!camera::isTransitioning()) {
             for (int c = 0; c < 2; c++) {
-                int col = 28 + c;
+                int col = 30 + c;
                 if (col < gridCols) {
                     float gx, gy, cw, ch;
                     gridToWorld(col, 19, gx, gy, cw, ch);
@@ -171,6 +171,17 @@ namespace game {
                     continue;
                 }
 
+
+                if (tileType == 9) {
+                    // Inverted spike (ID 9) - uses the same texture you use in winter
+                    AEGfxTexture* invSpikeTex = sprite::ice();
+                    if (invSpikeTex)
+                        gfx::drawSprite(invSpikeTex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+
                 if (drawSpecialTile(tileType, pos, size)) continue;
 
                 float u0{}, v0{}, u1{}, v1{};
@@ -204,7 +215,7 @@ namespace game {
         }
     }
 
-    SummerS2::SummerS2() : gridVisible(true), tileMap{} {
+    SummerS2::SummerS2() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s2.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
             for (int r = 0; r < gridRows; ++r) for (int c = 0; c < gridCols; ++c) tileMap[r][c] = 0;
@@ -217,7 +228,7 @@ namespace game {
         if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
         if (!camera::isTransitioning()) {
             float gx, gy, cw, ch;
-            gridToWorld(31, 18, gx, gy, cw, ch);
+            gridToWorld(30, 0, gx, gy, cw, ch);
             float dx = gGame.player.pos.x - (gx + cw * 0.5f);
             float dy = gGame.player.pos.y - (gy + ch * 1.0f);
             if (sqrt(dx * dx + dy * dy) < cw * 1.5f) return 21;
@@ -241,12 +252,12 @@ namespace game {
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
         if (!camera::isTransitioning()) {
-            for (int r = 0; r < 2; r++) {
-                int row = 18 + r;
-                if (row < gridRows) {
+            for (int c = 0; c < 2; c++) {
+                int col = 30 + c;
+                if (col < gridCols) {
                     float gx, gy, cw, ch;
-                    gridToWorld(31, row, gx, gy, cw, ch);
-                    gfx::Vec2 pp{ std::round(gx + cw * 0.5f),std::round(gy + ch * 0.5f) };
+                    gridToWorld(col, 0, gx, gy, cw, ch);
+                    gfx::Vec2 pp{ std::round(gx + cw * 0.5f), std::round(gy + ch * 0.5f) };
                     gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAA00FFFFu);
                 }
             }
@@ -285,6 +296,17 @@ namespace game {
                 }
 
                 if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
+
+                if (tileType == 9) {
+                    // Inverted spike (ID 9) - uses the same texture you use in winter
+                    AEGfxTexture* invSpikeTex = sprite::ice();
+                    if (invSpikeTex)
+                        gfx::drawSprite(invSpikeTex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+
                 if (drawSpecialTile(tileType, pos, size)) continue;
 
                 float u0{}, v0{}, u1{}, v1{};
@@ -319,7 +341,7 @@ namespace game {
         }
     }
 
-    SummerS3::SummerS3() : gridVisible(true), tileMap{} {
+    SummerS3::SummerS3() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s3.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
             for (int r = 0; r < gridRows; ++r) for (int c = 0; c < gridCols; ++c) tileMap[r][c] = 0;
@@ -335,7 +357,7 @@ namespace game {
         if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
         if (!camera::isTransitioning()) {
             float gx, gy, cw, ch;
-            gridToWorld(1, 19, gx, gy, cw, ch);
+            gridToWorld(29, 19, gx, gy, cw, ch);
             float dx = gGame.player.pos.x - (gx + cw * 1.0f);
             float dy = gGame.player.pos.y - (gy + ch * 0.5f);
             if (sqrt(dx * dx + dy * dy) < cw * 1.5f) return 22;
@@ -372,7 +394,7 @@ namespace game {
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
         if (!camera::isTransitioning()) {
             for (int c = 0; c < 2; c++) {
-                int col = 1 + c;
+                int col = 29 + c;
                 if (col < gridCols) {
                     float gx, gy, cw, ch;
                     gridToWorld(col, 19, gx, gy, cw, ch);
@@ -428,6 +450,17 @@ namespace game {
                 }
 
                 if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
+
+                if (tileType == 9) {
+                    // Inverted spike (ID 9) - uses the same texture you use in winter
+                    AEGfxTexture* invSpikeTex = sprite::ice();
+                    if (invSpikeTex)
+                        gfx::drawSprite(invSpikeTex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+
                 if (drawSpecialTile(tileType, pos, size)) continue;
 
                 float u0{}, v0{}, u1{}, v1{};
@@ -462,7 +495,7 @@ namespace game {
         }
     }
 
-    SummerS4::SummerS4() : gridVisible(true), tileMap{} {
+    SummerS4::SummerS4() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s4.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
             for (int r = 0; r < gridRows; ++r) for (int c = 0; c < gridCols; ++c) tileMap[r][c] = 0;
@@ -553,6 +586,17 @@ namespace game {
                 }
 
                 if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
+
+                if (tileType == 9) {
+                    // Inverted spike (ID 9) - uses the same texture you use in winter
+                    AEGfxTexture* invSpikeTex = sprite::ice();
+                    if (invSpikeTex)
+                        gfx::drawSprite(invSpikeTex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+
                 if (drawSpecialTile(tileType, pos, size)) continue;
 
                 float u0{}, v0{}, u1{}, v1{};

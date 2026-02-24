@@ -89,7 +89,7 @@ namespace game {
     // WinterS1 Constructor
     // -------------------------------------------------------------------
     WinterS1::WinterS1()
-        : gridVisible(true)
+        : gridVisible(false)
         , tileMap{}
     {
         // LEVEL DESIGN: 0 = empty, 1 = solid block
@@ -239,6 +239,7 @@ namespace game {
                 }
             }
         }
+
 
 
         PlayerDraw(gGame.player);
@@ -393,7 +394,7 @@ namespace game {
     // WinterS2 Constructor
     // -------------------------------------------------------------------
     WinterS2::WinterS2()
-        : gridVisible(true)
+        : gridVisible(false)
         , tileMap{}
     {
         // LEVEL DESIGN: 0 = empty, 1 = solid block
@@ -673,7 +674,7 @@ namespace game {
     }
 
     WinterS3::WinterS3()
-        : gridVisible(true)
+        : gridVisible(false)
         , tileMap{}
     {
         const bool loaded = level::loadTileMap("Assets/Levels/winter_s3.txt", gridRows, gridCols, &tileMap[0][0]);
@@ -752,6 +753,7 @@ namespace game {
             for (auto& ice : iceTiles) {
                 //! check the ice pos whether equal and never set state befote
                 if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
+                    ice.triggered = true;
                     ice.triggered = true;
                 }
             }
@@ -918,6 +920,7 @@ namespace game {
                 }
 
 
+
                 if (sprite::drawAnimatedTile(tileType, pos, size))
                     continue;
 
@@ -986,7 +989,7 @@ namespace game {
     // Winter S4 constructor
     // -------------------------------------------------------------------
     WinterS4::WinterS4()
-        : gridVisible(true)
+        : gridVisible(false)
         , tileMap{}
     {
         const bool loaded = level::loadTileMap("Assets/Levels/winter_s4.txt", gridRows, gridCols, &tileMap[0][0]);
@@ -1226,6 +1229,3 @@ namespace game {
     }
 
 } // namespace game
-
-
-
