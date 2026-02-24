@@ -108,7 +108,7 @@ namespace game {
 
     void SummerS1::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
-        AEGfxTexture* bg = sprite::background();
+        AEGfxTexture* bg = sprite::summerBackground();
         if (bg) {
             float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
             float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
@@ -228,7 +228,7 @@ namespace game {
 
     void SummerS2::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
-        AEGfxTexture* bg = sprite::background();
+        AEGfxTexture* bg = sprite::summerBackground();
         if (bg) {
             float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
             gfx::drawSprite(bg, { (minX + maxX) * 0.5f,(minY + maxY) * 0.5f }, 0.0f, { maxX - minX,maxY - minY }, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -358,7 +358,7 @@ namespace game {
 
     void SummerS3::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
-        AEGfxTexture* bg = sprite::background();
+        AEGfxTexture* bg = sprite::summerBackground();
         if (bg) {
             float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
             gfx::drawSprite(bg, { (minX + maxX) * 0.5f,(minY + maxY) * 0.5f }, 0.0f, { maxX - minX,maxY - minY }, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -494,7 +494,7 @@ namespace game {
 
     void SummerS4::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
-        AEGfxTexture* bg = sprite::background();
+        AEGfxTexture* bg = sprite::summerBackground();
         if (bg) {
             float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
             gfx::drawSprite(bg, { (minX + maxX) * 0.5f,(minY + maxY) * 0.5f }, 0.0f, { maxX - minX,maxY - minY }, 0.0f, 0.0f, 1.0f, 1.0f);
