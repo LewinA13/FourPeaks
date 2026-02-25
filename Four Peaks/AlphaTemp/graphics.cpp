@@ -262,4 +262,28 @@ namespace gfx
         AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
 
     }
+
+
+    // same as the one above, just with transparency
+    void drawSprite(AEGfxTexture* tex, Vec2 position, f32 rotationRad, Vec2 size,
+        f32 u0, f32 v0, f32 u1, f32 v1, float alpha)
+    {
+        if (!tex) return;
+
+        uint64_t key = makeUVKey(u0, v0, u1, v1);
+        auto it = spriteMeshCache.find(key);
+        AEGfxVertexList* mesh;
+        if (it != spriteMeshCache.end()) mesh = it->second;
+        else { mesh = buildSpriteMesh(u0, v0, u1, v1); spriteMeshCache[key] = mesh; }
+
+        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+        AEGfxSetTransparency(alpha);           // only change which is transparency
+        AEGfxSetColorToMultiply(1, 1, 1, 1);
+        AEGfxSetColorToAdd(0, 0, 0, 0);
+        AEGfxTextureSet(tex, 0, 0);
+        AEMtx33 m = makeTransform(position, rotationRad, size);
+        AEGfxSetTransform(m.m);
+        AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
+    }
 }

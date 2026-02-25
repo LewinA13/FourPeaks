@@ -1,7 +1,9 @@
 #pragma once
 #include "player.hpp"
 #include <vector>
+#include <string>
 extern int (*g_currentMap)[32];
+extern std::string g_currentScene;
 
 void CollisionUpdate(Player &player,f32 dt);
 void CollisionUpdateWallFlags(Player& player); // update wall booleans in player

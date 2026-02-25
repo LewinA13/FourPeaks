@@ -3,6 +3,7 @@
 
 #include "graphics.hpp"
 #include "AEEngine.h"
+#include <string>
 
 // Player data
 struct Player
@@ -39,6 +40,7 @@ struct Player
 
     // Respawn point (world position)
     gfx::Vec2 respawnPos;
+    std::string checkpointScene = "";
     bool justRespawned;
 
     // Simple death delay (for now: allows “dead for 0.5s then respawn”)
@@ -163,6 +165,15 @@ struct Player
 
     f32 dashAnimTimer;
     f32 dashFrameTime;
+
+    // ======== DASH TRAIL ==========
+    struct TrailGhost
+    {
+        gfx::Vec2 pos;
+        float alpha;
+    };
+    static const int TRAIL_MAX = 8;
+    TrailGhost trail[TRAIL_MAX];
 
     // ======== Ground Type ==========
     enum class GroundType {

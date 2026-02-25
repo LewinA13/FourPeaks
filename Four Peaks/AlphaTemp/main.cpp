@@ -65,6 +65,43 @@ int getStateID(SceneState scene) {
 }
 
 
+//checkpoint saving
+static std::string SceneToString(SceneState s)
+{
+    switch (s)
+    {
+    case SceneState::Tutorial1: return "Tutorial1";
+    case SceneState::Tutorial2: return "Tutorial2";
+    case SceneState::Tutorial3: return "Tutorial3";
+    case SceneState::WinterS1:  return "WinterS1";
+    case SceneState::WinterS2:  return "WinterS2";
+    case SceneState::WinterS3:  return "WinterS3";
+    case SceneState::WinterS4:  return "WinterS4";
+    case SceneState::SummerS1:  return "SummerS1";
+    case SceneState::SummerS2:  return "SummerS2";
+    case SceneState::SummerS3:  return "SummerS3";
+    case SceneState::SummerS4:  return "SummerS4";
+    default:                    return "";
+    }
+}
+
+static SceneState StringToScene(const std::string& s)
+{
+    if (s == "Tutorial1") return SceneState::Tutorial1;
+    if (s == "Tutorial2") return SceneState::Tutorial2;
+    if (s == "Tutorial3") return SceneState::Tutorial3;
+    if (s == "WinterS1")  return SceneState::WinterS1;
+    if (s == "WinterS2")  return SceneState::WinterS2;
+    if (s == "WinterS3")  return SceneState::WinterS3;
+    if (s == "WinterS4")  return SceneState::WinterS4;
+    if (s == "SummerS1")  return SceneState::SummerS1;
+    if (s == "SummerS2")  return SceneState::SummerS2;
+    if (s == "SummerS3")  return SceneState::SummerS3;
+    if (s == "SummerS4")  return SceneState::SummerS4;
+    return SceneState::Tutorial1; // default if unrecognised
+}
+
+
 static BgmType Audio_GetDesiredBgmType(SceneState state)
 {
     if (state == SceneState::WinterS1 ||
@@ -159,6 +196,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     while (gGameRunning)
     {
+        g_currentScene = SceneToString(currentState);
 
         if (currentState == SceneState::Tutorial1) {
             g_currentMap = tutorial1.getTileMap();
@@ -420,9 +458,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (action == 1)
             {
-                // Go to Tutorial 1 first.
-                currentState = SceneState::WinterS1;
-                camera::setY(0.0f);
+                if (!gGame.player.checkpointScene.empty())
+                {
+                    currentState = StringToScene(gGame.player.checkpointScene);
+                    lastState = SceneState::Exit;
+
+                    float h = camera::screenHeight();
+                    if (currentState == SceneState::WinterS2 || currentState == SceneState::SummerS2) camera::setY(h);
+                    else if (currentState == SceneState::WinterS3 || currentState == SceneState::SummerS3) camera::setY(h * 2.0f);
+                    else if (currentState == SceneState::WinterS4 || currentState == SceneState::SummerS4) camera::setY(h * 3.0f);
+                    else camera::setY(0.0f);
+                }
+                else
+                {
+                    currentState = SceneState::WinterS1;
+                    camera::setY(0.0f);
+                }
             }
             else if (action == 2)
             {

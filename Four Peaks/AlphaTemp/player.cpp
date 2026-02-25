@@ -47,7 +47,8 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
     if (!out.is_open())
         return false;
 
-    out << "checkpoint_v2\n";
+    out << "checkpoint_v3\n";
+    out << p.checkpointScene << "\n";
     out << std::fixed << std::setprecision(3);
     out << p.respawnPos.x << " " << p.respawnPos.y << " " << p.melonsCollected << "\n";
 
@@ -70,20 +71,15 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     float x = 0.0f;
     float y = 0.0f;
 
-    if (header == "checkpoint_v2")
-    {
-        if (!(in >> x >> y))
-            return false;
-    }
-    else
-    {
-        // Backwards-compat: if file just contains "x y" with no header.
-        try { x = std::stof(header); }
-        catch (...) { return false; }
+    if(header != "checkpoint_v3")
+        return false;
 
-        if (!(in >> y))
-            return false;
-    }
+    std::string scene;
+    if (!(in >> scene))
+        return false;
+    p.checkpointScene = scene;
+    if (!(in >> x >> y >> p.melonsCollected))
+        return false;
 
     p.respawnPos = { x, y };
 
@@ -226,8 +222,6 @@ void PlayerInit(Player& p)
     p.dead = false;
 
     PlayerLoadCheckpoint(p, "checkpoint.txt", true);
-    p.respawnPos = p.pos;      // default respawn = start position
-    PlayerLoadCheckpoint(p, "checkpoint.txt", true);
     PlayerLoadMelons(p, "melons.txt");
     p.justRespawned = false;
 
@@ -345,9 +339,13 @@ void PlayerInit(Player& p)
     p.dashTex = AEGfxTextureLoad("Assets/player/male_hero-dash.png");
 
     p.dashFrame = 0;
-    p.dashFrameCount = 5;      // IMPORTANT: set to the correct number of frames in the dash sheet
+    p.dashFrameCount = 5;
     p.dashAnimTimer = 0.0f;
     p.dashFrameTime = 0.04f;   // tweak feel later
+
+    // dash trail 
+    for (int i = 0; i < Player::TRAIL_MAX; i++)
+        p.trail[i] = { {0,0}, 0.0f };
 
     //heat bar
     p.maxHeat = 1.0f;
@@ -487,7 +485,7 @@ void PlayerUpdate(Player& p, float dt)
         p.dashing = true;
         p.dashTimer = p.dashDuration;
         p.dashCount--;
-        camera::startShake(12.0f, 0.10f, 60.0f);
+        camera::startShake(30.0f, 0.10f, 60.0f);
 
         // dash direction
         if (AEInputCheckCurr(AEVK_A))      p.dashDir = -1;
@@ -599,6 +597,12 @@ void PlayerUpdate(Player& p, float dt)
         p.velX = p.dashDir * p.dashSpeed;
         p.velY = 0.0f;
 
+        // dash trail
+        // Spawn trail ghost at current position 
+        for (int i = Player::TRAIL_MAX - 1; i > 0; i--)
+            p.trail[i] = p.trail[i - 1];
+        p.trail[0] = { p.pos, 0.8f };
+
         if (p.dashTimer <= 0.0f)
             p.dashing = false;
 
@@ -608,6 +612,14 @@ void PlayerUpdate(Player& p, float dt)
 
         CheckPathForCheckpoint(p, startPos, endPos);
 
+    }
+
+    // outside p.dashing to ensure even after dash end, they are fading
+    const float TRAIL_FADE = 6.0f;  // how fast they fade — tweak this
+    for (int i = 0; i < Player::TRAIL_MAX; i++)
+    {
+        p.trail[i].alpha -= TRAIL_FADE * dt;
+        if (p.trail[i].alpha < 0.0f) p.trail[i].alpha = 0.0f;
     }
 
     // =========================================================
@@ -1032,6 +1044,22 @@ void PlayerDraw(Player& p)
         else if (p.onWallLeft)
             drawPos.x -= p.wallHangOffsetX;  // push sprite left into left wall
     }
+
+
+    // Draw dash trail
+    for (int i = Player::TRAIL_MAX - 1; i >= 0; i--)
+    {
+        if (p.trail[i].alpha <= 0.0f) continue;
+
+        float u0 = (float)p.dashFrame / (float)p.dashFrameCount;
+        float u1 = u0 + 1.0f / (float)p.dashFrameCount;
+        float flipU0 = (p.facing == -1) ? u1 : u0;
+        float flipU1 = (p.facing == -1) ? u0 : u1;
+
+        gfx::drawSprite(p.dashTex, p.trail[i].pos, 0.0f, p.spriteSize,
+            flipU0, 0.0f, flipU1, 1.0f, p.trail[i].alpha);
+    }
+
 
     gfx::drawSprite(tex, drawPos, 0.0f, p.spriteSize, u0, 0.0f, u1, 1.0f);
 }

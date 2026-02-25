@@ -9,6 +9,7 @@
 
 
 std::vector<IceTrigger> g_triggeredIceTiles;
+std::string g_currentScene = "";
 
 const int mapRows = 20;
 const int mapColm = 32;
@@ -163,7 +164,9 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 
 				res.x = (c + 0.5f) * tileW - halfWinW;
 				res.y = (stageLevel * AEGfxGetWindowHeight()) + ((r + 1.0f) * tileH - halfWinH);
+				player.checkpointScene = g_currentScene;
 				PlayerSetRespawn(player, res);
+				PlayerSaveCheckpoint(player, "checkpoint.txt");
 				break;
 			}
 
