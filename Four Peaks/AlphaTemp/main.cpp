@@ -15,6 +15,7 @@
 #include "camera.hpp"
 #include "collision.hpp"
 #include "dialogue.hpp"
+#include "audio.hpp"
 
 
 // Global font handle used by all states
@@ -63,6 +64,23 @@ int getStateID(SceneState scene) {
     }
 }
 
+
+static BgmType Audio_GetDesiredBgmType(SceneState state)
+{
+    if (state == SceneState::WinterS1 ||
+        state == SceneState::WinterS2 ||
+        state == SceneState::WinterS3 ||
+        state == SceneState::WinterS4)
+    {
+        return BgmType::Winter;
+    }
+
+    // Future:
+    // if (state == SceneState::SummerS1 || ... ) return BgmType::Summer;
+
+    return BgmType::None;
+}
+
 // ---------------------------------------------------------------------------
 // main
 // ---------------------------------------------------------------------------
@@ -102,6 +120,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Load font once and share it.
     // Make sure this path points to a valid .ttf in your Assets folder.
     gFontId = AEGfxCreateFont("Assets/Super Mellow.ttf", 24);
+
+    // Audio system + loading (done in audio.cpp)
+    audio::init();
 
     // Game state objects.
     game::MainMenu mainMenu;
@@ -186,6 +207,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         AESysFrameStart();
         f32 dt = (f32)AEFrameRateControllerGetFrameTime();
 
+
+        // frame audio maintenance + switching
+        audio::update(Audio_GetDesiredBgmType(currentState));
 
         camera::update(dt);
 
@@ -621,6 +645,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Shut down graphics helper.
     gfx::shutdown();
+
+
+    // -----------------------
+    // AUDIO CLEANUP
+    // -----------------------
+    audio::shutdown();
+
 
     // Free all engine resources.
     AESysExit();

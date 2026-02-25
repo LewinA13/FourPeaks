@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "collision.hpp"
+#include "audio.hpp"
 
 
 std::vector<IceTrigger> g_triggeredIceTiles;

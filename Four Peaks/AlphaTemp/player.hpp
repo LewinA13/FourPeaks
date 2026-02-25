@@ -180,6 +180,9 @@ struct Player
     // Heat Bar (summer only)
     float heat;
     float maxHeat;
+
+    // ======== AUDIO ==========
+    float winterStepTimer = 0.0f;   // accumulates time
     
 
 };

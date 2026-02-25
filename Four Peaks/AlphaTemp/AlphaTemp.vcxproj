@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="audio.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="dialogue.cpp" />
@@ -26,6 +27,7 @@
     <ClCompile Include="winter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="audio.hpp" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="collision.hpp" />
     <ClInclude Include="dialogue.hpp" />

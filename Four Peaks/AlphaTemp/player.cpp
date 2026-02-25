@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <string>
 #include "camera.hpp"
+#include "gamestate.hpp"
+#include "audio.hpp"
 
 #include <iostream>
 
@@ -153,6 +155,8 @@ void PlayerRespawn(Player& p)
 
     p.respawnFrame = p.deathFrameCount - 1;   // start from last death frame
     p.respawnAnimTimer = 0.0f;
+
+    audio::play_sfx(SfxType::Respawn);
 }
 
 void PlayerKill(Player& p) // PlayerKill(gGame.player)
@@ -178,6 +182,8 @@ void PlayerKill(Player& p) // PlayerKill(gGame.player)
     // Cancel special states
     p.dashing = false;
     p.wallHanging = false;
+
+    audio::play_sfx(SfxType::Death);
 }
 
 void PlayerDamage(Player& p, int dmg)
@@ -347,6 +353,8 @@ void PlayerInit(Player& p)
     p.maxHeat = 1.0f;
     p.heat = p.maxHeat;
 
+
+
 }
 
 
@@ -367,6 +375,9 @@ void PlayerUpdate(Player& p, float dt)
     const bool pressDown = AEInputCheckCurr(AEVK_S);
 
     bool didWallJumpThisFrame = false;
+
+    static constexpr float SNOW_STEP_INTERVAL = 0.10f; // tweak: 0.22-0.35 feels normal
+    static constexpr float WALK_SPEED_EPS = 5.0f; // tweak based on your velocity scale
 
     // Safety to avoid giant dt spikes exploding physics
     if (dt > 0.05f) dt = 0.05f;
@@ -485,6 +496,9 @@ void PlayerUpdate(Player& p, float dt)
 
         // dash breaks wall hang
         p.wallHanging = false;
+        
+        //dash sound
+        audio::play_sfx(SfxType::Dash);
     }
 
     // =========================================================
@@ -537,6 +551,7 @@ void PlayerUpdate(Player& p, float dt)
             // reset jump anim
             p.jumpFrame = 0;
             p.jumpAnimTimer = 0.0f;
+            audio::play_sfx(SfxType::Jump);
         }
     }
 
@@ -729,6 +744,8 @@ void PlayerUpdate(Player& p, float dt)
             // reset jump anim
             p.jumpFrame = 0;
             p.jumpAnimTimer = 0.0f;
+
+            audio::play_sfx(SfxType::Jump);
         }
     }
 
@@ -833,6 +850,38 @@ void PlayerUpdate(Player& p, float dt)
     {
         p.dashFrame = 0;
         p.dashAnimTimer = 0.0f;
+    }
+
+    // =========================================================
+    // 15) AUDIO BASED ON FINAL STATE
+    // =========================================================
+
+    // Conditions: on ground + moving horizontally + not dashing (optional)
+    const float vxAbs = fabsf(p.velX);
+
+    const bool isWalking =
+        p.grounded &&
+        (moveX != 0.0f) &&
+        (vxAbs > WALK_SPEED_EPS) &&
+        !p.dashing;
+
+    if (isWalking)
+    {
+        p.winterStepTimer += dt;
+
+        if (p.winterStepTimer >= SNOW_STEP_INTERVAL)
+        {
+            // Play one footstep
+            audio::play_sfx(SfxType::WinterStep);
+
+            // Keep leftover time so cadence stays stable even if dt fluctuates
+            p.winterStepTimer -= SNOW_STEP_INTERVAL;
+        }
+    }
+    else
+    {
+        // Reset so the first step happens quickly after you start walking again
+        p.winterStepTimer = 0.0f;
     }
 }
 
