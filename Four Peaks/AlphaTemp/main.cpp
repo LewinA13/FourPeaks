@@ -397,7 +397,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             if (action == 1)
             {
                 // Go to Tutorial 1 first.
-                currentState = SceneState::Tutorial1;
+                currentState = SceneState::WinterS1;
                 camera::setY(0.0f);
             }
             else if (action == 2)
@@ -406,6 +406,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 gGameRunning = 0;
             }
             // action == 3 is reserved for "How To Play".
+
+            if (action == 4) {
+                currentState = SceneState::Tutorial1;
+				camera::setY(0.0f);
+            }
         }
         break;
 
