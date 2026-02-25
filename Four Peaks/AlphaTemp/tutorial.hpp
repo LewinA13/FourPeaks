@@ -14,7 +14,7 @@ namespace game
         static constexpr int gridRows = 20;
         static constexpr int gridCols = 32;
 
-        bool gridVisible{ true };
+        bool gridVisible{ false };
         int tileMap[gridRows][gridCols]{};
     };
 
@@ -30,7 +30,7 @@ namespace game
         static constexpr int gridRows = 20;
         static constexpr int gridCols = 32;
 
-        bool gridVisible{ true };
+        bool gridVisible{ false };
         int tileMap[gridRows][gridCols]{};
     };
 
@@ -46,7 +46,7 @@ namespace game
         static constexpr int gridRows = 20;
         static constexpr int gridCols = 32;
 
-        bool gridVisible{ true };
+        bool gridVisible{ false };
         int tileMap[gridRows][gridCols]{};
     };
 }
