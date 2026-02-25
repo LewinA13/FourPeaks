@@ -80,6 +80,10 @@ namespace sprite
             backgroundTex = AEGfxTextureLoad("Assets/BG.png");
             if (!backgroundTex) backgroundTex = AEGfxTextureLoad("BG.png");
         }
+        if (!mmBackgroundTex) {
+            mmBackgroundTex = AEGfxTextureLoad("Assets/mmf1.png");
+            if (!mmBackgroundTex) mmBackgroundTex = AEGfxTextureLoad("Assets/mmf1.png");
+		}
         if (!tutorialBgTex) {
             tutorialBgTex = AEGfxTextureLoad("Assets/bg_tutorial.png");
             if (!tutorialBgTex) tutorialBgTex = AEGfxTextureLoad("bg_tutorial.png");

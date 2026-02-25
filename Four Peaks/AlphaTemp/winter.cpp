@@ -301,8 +301,47 @@ namespace game {
                 // 1️⃣ Draw Tile First
                 // -------------------------
 
+                // Melon (animated, type 8)
+                if (tileType == 8)
+                {
+                    
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    sprite::drawAnimatedTile(8, pos, size);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    continue; // Not solid, skip border drawing
+                }
+
+                // Checkpoint (animated, type 10)
+                if (tileType == 10)
+                {
+                    
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    sprite::drawAnimatedTile(10, pos, size);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    continue; // Not solid, skip border drawing
+                }
+
+                if (tileType == 12)
+                {
+                    AEGfxTexture* crackTex = sprite::crack();
+                    if (crackTex)
+                    {
+                        float u0{}, v0{}, u1{}, v1{};
+                        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                        gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
+                        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                        AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    }
+                    continue; // Not solid, skip border drawing
+                }
+
                 // Ice tile
-                if (tileType == 9)
+                if (tileType == 11 || tileType == 1)
                 {
                     AEGfxTexture* iceTex = sprite::ice();
                     if (iceTex)
@@ -311,7 +350,7 @@ namespace game {
                         gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
                 }
                 // Spikes tile
-                if (tileType == 2 || tileType == 11)
+                if (tileType == 9 || tileType == 2)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
@@ -638,8 +677,31 @@ namespace game {
                 // 1️⃣ Draw Tile First
                 // -------------------------
 
+                if (tileType == 8)
+                {
+                    
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    sprite::drawAnimatedTile(8, pos, size);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    continue;
+                }
+
+                // Checkpoint (animated, type 10)
+                if (tileType == 10)
+                {
+                    
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    sprite::drawAnimatedTile(10, pos, size);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    continue;
+                }
+
                 // Ice tile
-                if (tileType == 1)
+                if (tileType == 11 || tileType == 1)
                 {
                     AEGfxTexture* iceTex = sprite::ice();
                     if (iceTex)
@@ -1020,6 +1082,29 @@ namespace game {
                 // 1️⃣ Draw Tile First
                 // -------------------------
 
+                if (tileType == 8)
+                {
+
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    sprite::drawAnimatedTile(8, pos, size);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    continue;
+                }
+
+                // Checkpoint (animated, type 10)
+                if (tileType == 10)
+                {
+
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    sprite::drawAnimatedTile(10, pos, size);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    continue;
+                }
+
                 // Ice tile
                 if (tileType == 11)
                 {
@@ -1029,6 +1114,32 @@ namespace game {
                     else
                         gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
                 }
+
+                //Breaking Ice tile (type 1)
+                if (tileType == 1)
+                {
+                    AEGfxTexture* crackTex = sprite::crack();
+                    if (crackTex)
+                    {
+                        int thisCrackFrame = 0;
+                        for (const auto& ice : iceTiles) {
+                            if (ice.row == row && ice.col == col) {
+                                thisCrackFrame = ice.crackFrame;
+                                break;
+                            }
+                        }
+
+                        float u0{}, v0{}, u1{}, v1{};
+                        sprite::getCrackUv(thisCrackFrame, u0, v0, u1, v1);
+                        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                        gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
+                        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                        AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    }
+                    continue;
+                }
+
                 // Spikes tile
                 if (tileType == 9 || tileType == 2)
                 {
@@ -1341,11 +1452,59 @@ namespace game {
                 u32 borderColor = 0xFF000000;
 
                 // -------------------------
-                // 1️⃣ Draw Tile First
+                // 1️. Draw Tile First
                 // -------------------------
 
+                if (tileType == 8)
+                {
+
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    sprite::drawAnimatedTile(8, pos, size);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    continue;
+                }
+
+                // Checkpoint (animated, type 10)
+                if (tileType == 10)
+                {
+
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    sprite::drawAnimatedTile(10, pos, size);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    continue;
+                }
+
+                //Breaking Ice tile (type 1)
+                if (tileType == 1)
+                {
+                    AEGfxTexture* crackTex = sprite::crack();
+                    if (crackTex)
+                    {
+                        int thisCrackFrame = 0;
+                        for (const auto& ice : iceTiles) {
+                            if (ice.row == row && ice.col == col) {
+                                thisCrackFrame = ice.crackFrame;
+                                break;
+                            }
+                        }
+
+                        float u0{}, v0{}, u1{}, v1{};
+                        sprite::getCrackUv(thisCrackFrame, u0, v0, u1, v1);
+                        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                        gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
+                        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                        AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    }
+                    continue;
+                }
+
                 // Ice tile
-                if (tileType == 11 || tileType == 1)
+                if (tileType == 11)
                 {
                     AEGfxTexture* iceTex = sprite::ice();
                     if (iceTex)
@@ -1403,7 +1562,7 @@ namespace game {
                 }
 
                 // -------------------------
-                // 2️⃣ Draw Borders LAST (Only Solid Tiles)
+                // 2️. Draw Borders LAST (Only Solid Tiles)
                 // -------------------------
 
                 if (!isSolid(row, col))
