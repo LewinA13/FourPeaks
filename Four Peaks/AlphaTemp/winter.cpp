@@ -289,6 +289,14 @@ namespace game {
                     continue; // Not solid, skip border drawing
                 }
 
+                if (tileType == 19)
+                {
+                    AEGfxTexture* tex = sprite::sign();
+                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                }
+
+
                 if (tileType == 12)
                 {
                     AEGfxTexture* crackTex = sprite::crack();
@@ -400,15 +408,6 @@ namespace game {
                     gfx::Vec2 rightSize{ border, size.y };
                     gfx::drawRectangle(rightPos, 0.0f, rightSize, borderColor);
                 }
-
-                if (tileType == 19)
-                {
-                    AEGfxTexture* tex = sprite::sign();
-                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
-                }
-             
-
             }
         }
     }
@@ -671,6 +670,13 @@ namespace game {
                     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                     AEGfxSetBlendMode(AE_GFX_BM_NONE);
                     continue;
+                }
+
+                if (tileType == 19)
+                {
+                    AEGfxTexture* tex = sprite::sign();
+                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }
 
                 // Ice tile
@@ -1079,6 +1085,14 @@ namespace game {
                     continue;
                 }
 
+                if (tileType == 19)
+                {
+                    AEGfxTexture* tex = sprite::sign();
+                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                }
+
+
                 // Ice tile
                 if (tileType == 11)
                 {
@@ -1450,6 +1464,13 @@ namespace game {
                     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                     AEGfxSetBlendMode(AE_GFX_BM_NONE);
                     continue;
+                }
+
+                if (tileType == 19)
+                {
+                    AEGfxTexture* tex = sprite::sign();
+                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }
 
                 //Breaking Ice tile (type 1)

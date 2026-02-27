@@ -1,11 +1,9 @@
 #include "winter.hpp"
-
 #include "player.hpp"
-
 #include <iostream>
-
 #include "collision.hpp"
 #include "audio.hpp"
+#include "dialogue.hpp"
 
 
 std::vector<IceTrigger> g_triggeredIceTiles;
@@ -25,6 +23,8 @@ int tileH = 45;
 
 
 int (*g_currentMap)[32] = nullptr;
+int g_currentSignID = 0;  
+
 
 TileRange calTileRange(f32 x, f32 y, f32 width, f32 height) {
 	TileRange box{};
@@ -93,7 +93,7 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm], float velY = -
 			}
 
 			//! start checking, if not equal 0, 10, 8, 2, 9  means collision with solid block, return true
-			if (tile != 0 && tile != 10 && tile != 8 && tile != 2 && tile != 9) {
+			if (tile != 0 && tile != 10 && tile != 8 && tile != 2 && tile != 9 && tile != 19) {
 				return true;
 			}
 		}
@@ -268,6 +268,13 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				player.heat += 0.35f;
 				if (player.heat > player.maxHeat) player.heat = player.maxHeat;
 				levelLayout[r][c] = 0;   // remove after pickup
+				break;
+
+			case 19:
+				UI::gDialog.showForLevel(g_currentSignID);
+				UI::gDialog.PLAYERNEARSIGN(true);
+				break;
+				
 				break;
 
 			default:

@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 extern int (*g_currentMap)[32];
+extern int g_currentSignID;
 extern std::string g_currentScene;
 
 void CollisionUpdate(Player &player,f32 dt);

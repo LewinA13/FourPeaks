@@ -23,6 +23,8 @@
 // Global font handle used by all states
 s8 gFontId = -1;
 
+UI::Dialog UI::gDialog;
+
 enum class SceneState
 {
     MainMenu,
@@ -220,58 +222,73 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Game Loop
     PlayerInit(gGame.player);
-    UI::Dialog dialog;
 
-    // Dialog
-    dialog.initialize();
+    // gDialog
+    UI::gDialog.initialize();
 
 
 
     while (gGameRunning)
     {
         g_currentScene = SceneToString(currentState);
-
+        // =========================================================
+        // Tutorial stage
+        // =========================================================
         if (currentState == SceneState::Tutorial1) {
             g_currentMap = tutorial1.getTileMap();
+            g_currentSignID = 0;
         }
         else if (currentState == SceneState::Tutorial2) {
             g_currentMap = tutorial2.getTileMap();
+            g_currentSignID = 1;
         }
         else if (currentState == SceneState::Tutorial3) {
             g_currentMap = tutorial3.getTileMap();
+            g_currentSignID = 2;
         }
+
+        // =========================================================
+        // Winter stage
+        // =========================================================
         else if (currentState == SceneState::WinterS1) {
             g_currentMap = winterStage.getTileMap();
-            dialog.showForLevel(1);
+            g_currentSignID = 10;
         }
 
         else if (currentState == SceneState::WinterS2) {
             g_currentMap = winterStage2.getTileMap();
-            dialog.showForLevel(2);
+            g_currentSignID = 11;
         }
 
         else if (currentState == SceneState::WinterS3) {
             g_currentMap = winterStage3.getTileMap();
-            dialog.showForLevel(3);
+            g_currentSignID = 12;
         }
 
         else if (currentState == SceneState::WinterS4) {
             g_currentMap = winterStage4.getTileMap();
-            dialog.showForLevel(4);
+            g_currentSignID = 13;
         }
 
+
+        // ==================================================================
         // Summer stages (so collision + pickups use the correct current map)
+        // ==================================================================
         else if (currentState == SceneState::SummerS1) {
             g_currentMap = summerStage.getTileMap();
+            g_currentSignID = 20;
         }
         else if (currentState == SceneState::SummerS2) {
             g_currentMap = summerStage2.getTileMap();
+            g_currentSignID = 21;
         }
         else if (currentState == SceneState::SummerS3) {
             g_currentMap = summerStage3.getTileMap();
+            g_currentSignID = 22;
         }
         else if (currentState == SceneState::SummerS4) {
             g_currentMap = summerStage4.getTileMap();
+            g_currentSignID = 23;
         }
 
         // Begin frame.
@@ -505,6 +522,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // Run current state.
         int action = 0;
 
+        UI::gDialog.PLAYERNEARSIGN(false);
+
         switch (currentState)
         {
         case SceneState::MainMenu:
@@ -535,7 +554,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 // Exit selected.
                 gGameRunning = 0;
-                dialog.reset();
+                
             }
             // action == 3 is reserved for "How To Play".
 
@@ -558,7 +577,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                dialog.reset();
+                
             }
             break;
         }
@@ -575,7 +594,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                dialog.reset();
+                
             }
             break;
         }
@@ -592,7 +611,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                dialog.reset();
+                
             }
             break;
         }
@@ -611,7 +630,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             summerStage.draw();
 
             if (action == 20) { currentState = SceneState::SummerS2; camera::setY(camera::screenHeight()); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); dialog.reset();}
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
             break;
         }
 
@@ -621,7 +640,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             summerStage2.draw();
 
             if (action == 21) { currentState = SceneState::SummerS3; camera::setY(camera::screenHeight() * 2.0f); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); dialog.reset();}
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
             break;
         }
 
@@ -631,7 +650,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             summerStage3.draw();
 
             if (action == 22) { currentState = SceneState::SummerS4; camera::setY(camera::screenHeight() * 3.0f); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); dialog.reset();}
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
             break;
         }
 
@@ -640,7 +659,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = summerStage4.update(dt);
             summerStage4.draw();
 
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); dialog.reset();}
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
             break;
         }
 
@@ -659,7 +678,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                dialog.reset();
+                
             }
             else if (action == 3)
             {
@@ -691,7 +710,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                dialog.reset();
+                
             }
             else if (action == 3)
             {
@@ -715,7 +734,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                dialog.reset();
+                
             }
             else if (action == 3)
             {
@@ -733,7 +752,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                dialog.reset();
+                
             }
             else if (action == 3)
             {
@@ -745,8 +764,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         }  // End of switch statement
 
-        dialog.update(dt);
-        dialog.render();
+
+        UI::gDialog.update(dt);
+        UI::gDialog.render();
 
 
         // End frame.

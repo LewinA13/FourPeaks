@@ -22,31 +22,95 @@ namespace UI {
     }
 
     void Dialog::initialize() {
+
+
+        // =========================================================
+        // Prologue
+        // =========================================================
+        levelDialogs[99] = {
+            "For generations, my family sought the four seasonal relics hidden atop this mountain.",
+            "No archaeologist has ever returned with all four.",
+            "My father... and his father before him... never came back.",
+            "All they left behind was this map - and their notes.",
+            "The mountain only reveals its path during specific seasons.",
+            "This time... I will finish what they started."
+        };
+
    
-        levelDialogs[1] = {  // Tutorial 1
-            "Press W/ A/ S/ D for moving",
-            "Shift for dashing",
-            "Space for jumping"
+        // =========================================================
+        // Tutorial stage
+        // =========================================================
+        levelDialogs[0] = {  // Tutorial 1
+            "I've trained my whole life for this climb.",
+            "Move with care. Every step matters.",
+            "Press [W]/ [A]/ [S]/ [D] for moving",
+            "[SHIFT] for dashing",
+            "[SPACE] for jumping"
         };
 
-        levelDialogs[2] = {  // WinterS2
-           /* "Stage 2!",
-            "Watch out for spikes."*/
-            "Where is my song?"
+        levelDialogs[1] = {  // Tutorial 2
+            "The flag play a crucial part!!!",
+            "Touch it to save your progress."
         };
 
-        levelDialogs[3] = {  // WinterS3
-            /*"You're doing great!",
-            "The summit is near."*/
-            "Count by the count by the left foot count yay!",
-            "1"
+        levelDialogs[2] = {  // Tutorial 3
+            "At the peak lie four relics - Frost, Flame, Wind, and Harvest.",
+            "Winter is the first path to open. The climb begins now."
         };
 
-        levelDialogs[4] = {  // WinterS4
-            //"One last push!"
-            "Cant hear you lah"
+
+        // =========================================================
+        // Winter stage
+        // =========================================================
+        levelDialogs[10] = {  // WinterS1
+            "Remembering Dad's Note:",
+            "The ice will betray your footing. Don't trust the ground.",
+            "...but first, watch your step. Those spikes are unforgiving."
         };
+
+        levelDialogs[11] = {  // WinterS2
+            "Remembering Dad's Note:",
+            "The ice will betray your footing. Don't trust the ground.",
+            "...but first, watch your step. Those spikes are unforgiving."
+        };
+
+        levelDialogs[12] = {  // WinterS3
+            "The ice... it doesn't feel stable."
+        };
+
+        levelDialogs[13] = {  // WinterS4 sign
+            "Relic of Frost obtained.",
+            "One relic down. I'm closer than they ever were."
+        };
+
+
+        // =========================================================
+        // Summer stage
+        // =========================================================
+        levelDialogs[20] = {  // SummerS1
+            "Dad's Note:",
+            "Heat kills faster than hunger. Find water - or faint.",
+            "I can already feel the scorching heat.",
+            "I need to find water bottles to stay cool."
+        };
+
+        levelDialogs[21] = {  // SummerS2
+            "The heat is getting worse the higher I climb."
+        };
+
+        levelDialogs[22] = {  // SummerS3
+            "Water... I need water.",
+            "Dad never mentioned it would be this bad."
+        };
+
+        levelDialogs[23] = {  // SummerS4 sign
+            "Relic of Flame obtained.",
+            "The mountain grows harsher. But so do I."
+        };
+
+
     }
+
 
     //! check current level and show dialog for that level
     void Dialog::showForLevel(int levelID) {
@@ -65,34 +129,38 @@ namespace UI {
     void Dialog::update(float dt) {
         if (!isShowing) return;
 
+        if (!playerNearSign) {
+            //reset();
+            isShowing = false;   
+            return;
+        }
+
         size_t currentTextLength = texts[currentIndex].length();
 
-        //! check if current showing char is less than length of string
         if (displayedChars < currentTextLength) {
-
             typeWriterTimer += dt;
-
-            //! if reach the timing set before, display another char, reset typewriterTimer
             if (typeWriterTimer >= timePerChar) {
-                displayedChars++;        
-                typeWriterTimer = 0.0f;     
+                displayedChars++;
+                typeWriterTimer = 0.0f;
             }
         }
 
-        if (AEInputCheckTriggered(AEVK_RETURN)) {
-            // skip typewriter animation if ENTER pressed mid-sentence
+        if (playerNearSign && AEInputCheckTriggered(AEVK_UP)) {
+            if (currentIndex > 0) {
+                currentIndex--;
+                displayedChars = 0;
+                typeWriterTimer = 0.0f;
+            }
+        }
+
+        if (playerNearSign && AEInputCheckTriggered(AEVK_DOWN)) {
             if (displayedChars < currentTextLength) {
                 displayedChars = currentTextLength;
             }
-            else {//! if string finished
-
-                currentIndex++;
-
-                if (currentIndex >= texts.size()) {
-                    isShowing = false;  
-                }
-                else { 
-                    displayedChars = 0;   
+            else {
+                if (currentIndex+1 < (int)texts.size()) {
+                    currentIndex++;
+                    displayedChars = 0;
                     typeWriterTimer = 0.0f;
                 }
             }
@@ -147,6 +215,7 @@ namespace UI {
         AEGfxSetCamPosition(oldX, oldY);
     }
 
+
     
 
     void Dialog::reset() {
@@ -155,6 +224,10 @@ namespace UI {
         displayedChars = 0;
         typeWriterTimer = 0.0f;
     
+    }
+
+    void Dialog::PLAYERNEARSIGN(bool detect) {
+        playerNearSign = detect;
     }
    
 }
