@@ -89,7 +89,7 @@ namespace game {
     // WinterS1 Constructor
     // -------------------------------------------------------------------
     WinterS1::WinterS1()
-        : gridVisible(true)
+        : gridVisible(false)
         , tileMap{}
     {
         // LEVEL DESIGN: 0 = empty, 1 = solid block
@@ -240,7 +240,8 @@ namespace game {
             }
         }
 
-        
+
+
         PlayerDraw(gGame.player);
         HeatDraw();
     }
@@ -453,7 +454,7 @@ namespace game {
     // WinterS2 Constructor
     // -------------------------------------------------------------------
     WinterS2::WinterS2()
-        : gridVisible(true)
+        : gridVisible(false)
         , tileMap{}
     {
         // LEVEL DESIGN: 0 = empty, 1 = solid block
@@ -791,7 +792,7 @@ namespace game {
     }
 
     WinterS3::WinterS3()
-        : gridVisible(true)
+        : gridVisible(false)
         , tileMap{}
     {
         const bool loaded = level::loadTileMap("Assets/Levels/winter_s3.txt", gridRows, gridCols, &tileMap[0][0]);
@@ -875,7 +876,8 @@ namespace game {
             for (auto& ice : iceTiles) {
                 //! check the ice pos whether equal and never set state befote
                 if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
-                    ice.triggered = true; 
+                    ice.triggered = true;
+                    ice.triggered = true;
                 }
             }
         }
@@ -1061,6 +1063,40 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
+                    continue;
+                }
+
+                if (tileType == 1)
+                {
+                    AEGfxTexture* crackTex = sprite::crack();
+                    if (crackTex)
+                    {
+                        int frameToUse = 0;
+                        for (const auto& ice : iceTiles)
+                        {
+                            if (ice.row == row && ice.col == col)
+                            {
+                                frameToUse = ice.crackFrame;
+                                break;
+                            }
+                        }
+                        float u0{}, v0{}, u1{}, v1{};
+                        sprite::getCrackUv(frameToUse, u0, v0, u1, v1);
+                        gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
+                    }
+                    continue;
+                }
+
+
+
+                if (sprite::drawAnimatedTile(tileType, pos, size))
+                    continue;
+
+                float u0{}, v0{}, u1{}, v1{};
+                AEGfxTexture* tex = sprite::tileset();
+                if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                {
+                    gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
                 }
                 // Normal tiles
                 else
@@ -1170,7 +1206,7 @@ namespace game {
     // Winter S4 constructor
     // -------------------------------------------------------------------
     WinterS4::WinterS4()
-        : gridVisible(true)
+        : gridVisible(false)
         , tileMap{}
     {
         const bool loaded = level::loadTileMap("Assets/Levels/winter_s4.txt", gridRows, gridCols, &tileMap[0][0]);
@@ -1476,6 +1512,3 @@ namespace game {
     }
 
 } // namespace game
-
-
-

@@ -21,6 +21,9 @@ namespace sprite
     // tutorial background texture (bg_tutorial.png)
     AEGfxTexture* tutorialBackground();
 
+    // summer background texture summerbg.png
+    AEGfxTexture* summerBackground();
+
     // coin spritesheet (coin_.png)
     AEGfxTexture* coin();
 

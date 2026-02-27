@@ -15,6 +15,7 @@ namespace sprite
         AEGfxTexture* spikesTex{};
         AEGfxTexture* backgroundTex{};
         AEGfxTexture* mmBackgroundTex{};
+        AEGfxTexture* summerBgTex{};
         AEGfxTexture* tutorialBgTex{};
         AEGfxTexture* coinTex{};
         AEGfxTexture* bgStripTex{};
@@ -80,6 +81,10 @@ namespace sprite
             backgroundTex = AEGfxTextureLoad("Assets/BG.png");
             if (!backgroundTex) backgroundTex = AEGfxTextureLoad("BG.png");
         }
+        if (!summerBgTex) {
+            summerBgTex = AEGfxTextureLoad("Assets/summerbg.png");
+            if (!summerBgTex) summerBgTex = AEGfxTextureLoad("summerbg.jpg");
+		}
         if (!tutorialBgTex) {
             tutorialBgTex = AEGfxTextureLoad("Assets/bg_tutorial.png");
             if (!tutorialBgTex) tutorialBgTex = AEGfxTextureLoad("bg_tutorial.png");
@@ -156,11 +161,11 @@ namespace sprite
             backgroundTex = nullptr;
         }
 
-		if (mmBackgroundTex)
+        if (summerBgTex)
         {
-            AEGfxTextureUnload(mmBackgroundTex);
-            mmBackgroundTex = nullptr;
-        }
+            AEGfxTextureUnload(summerBgTex);
+            summerBgTex = nullptr;
+		}
 
         if (tutorialBgTex)
         {
@@ -222,9 +227,9 @@ namespace sprite
         return backgroundTex;
     }
 
-    AEGfxTexture* mmBackground()
+    AEGfxTexture* summerBackground()
     {
-        return mmBackgroundTex;
+        return summerBgTex;
 	}
 
     AEGfxTexture* tutorialBackground()
