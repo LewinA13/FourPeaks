@@ -12,9 +12,12 @@
 #include "tutorial.hpp"
 #include "winter.hpp"
 #include "summer.hpp"
+#include "spring.hpp"
+#include "autumn.hpp"
 #include "camera.hpp"
 #include "collision.hpp"
 #include "dialogue.hpp"
+#include "audio.hpp"
 
 
 // Global font handle used by all states
@@ -35,6 +38,14 @@ enum class SceneState
     SummerS2,
     SummerS3,
     SummerS4,
+    SpringS1,
+    SpringS2,
+    SpringS3,
+    SpringS4,
+    AutumnS1,
+    AutumnS2,
+    AutumnS3,
+    AutumnS4,
     Exit
 };
 
@@ -61,6 +72,83 @@ int getStateID(SceneState scene) {
     case SceneState::WinterS4: return WINTER_S4;
     default: return MENU;
     }
+}
+
+
+//checkpoint saving
+static std::string SceneToString(SceneState s)
+{
+    switch (s)
+    {
+    case SceneState::Tutorial1: return "Tutorial1";
+    case SceneState::Tutorial2: return "Tutorial2";
+    case SceneState::Tutorial3: return "Tutorial3";
+    case SceneState::WinterS1:  return "WinterS1";
+    case SceneState::WinterS2:  return "WinterS2";
+    case SceneState::WinterS3:  return "WinterS3";
+    case SceneState::WinterS4:  return "WinterS4";
+    case SceneState::SummerS1:  return "SummerS1";
+    case SceneState::SummerS2:  return "SummerS2";
+    case SceneState::SummerS3:  return "SummerS3";
+    case SceneState::SummerS4:  return "SummerS4";
+    case SceneState::SpringS1:  return "SpringS1";
+    case SceneState::SpringS2:  return "SpringS2";
+    case SceneState::SpringS3:  return "SpringS3";
+    case SceneState::SpringS4:  return "SpringS4";
+    case SceneState::AutumnS1:  return "AutumnS1";
+    case SceneState::AutumnS2:  return "AutumnS2";
+    case SceneState::AutumnS3:  return "AutumnS3";
+    case SceneState::AutumnS4:  return "AutumnS4";
+
+    default:                    return "";
+    }
+}
+
+static SceneState StringToScene(const std::string& s)
+{
+    if (s == "Tutorial1")
+        if (s == "SpringS1") return SceneState::SpringS1;
+    if (s == "SpringS2") return SceneState::SpringS2;
+    if (s == "SpringS3") return SceneState::SpringS3;
+    if (s == "SpringS4") return SceneState::SpringS4;
+    if (s == "AutumnS1") return SceneState::AutumnS1;
+    if (s == "AutumnS2") return SceneState::AutumnS2;
+    if (s == "AutumnS3") return SceneState::AutumnS3;
+    if (s == "AutumnS4") return SceneState::AutumnS4;
+    return SceneState::Tutorial1;
+    if (s == "Tutorial2") return SceneState::Tutorial2;
+    if (s == "Tutorial3") return SceneState::Tutorial3;
+    if (s == "WinterS1")  return SceneState::WinterS1;
+    if (s == "WinterS2")  return SceneState::WinterS2;
+    if (s == "WinterS3")  return SceneState::WinterS3;
+    if (s == "WinterS4")  return SceneState::WinterS4;
+    if (s == "SummerS1")  return SceneState::SummerS1;
+    if (s == "SummerS2")  return SceneState::SummerS2;
+    if (s == "SummerS3")  return SceneState::SummerS3;
+    if (s == "SummerS4")  return SceneState::SummerS4;
+    return SceneState::Tutorial1; // default if unrecognised
+}
+
+
+static BgmType Audio_GetDesiredBgmType(SceneState state)
+{
+    if (state == SceneState::WinterS1 ||
+        state == SceneState::WinterS2 ||
+        state == SceneState::WinterS3 ||
+        state == SceneState::WinterS4)
+    {
+        return BgmType::Winter;
+    }
+
+    // Summer / Spring / Autumn
+    if (state == SceneState::SummerS1 || state == SceneState::SummerS2 || state == SceneState::SummerS3 || state == SceneState::SummerS4 ||
+        state == SceneState::SpringS1 || state == SceneState::SpringS2 || state == SceneState::SpringS3 || state == SceneState::SpringS4 ||
+        state == SceneState::AutumnS1 || state == SceneState::AutumnS2 || state == SceneState::AutumnS3 || state == SceneState::AutumnS4)
+    {
+        return BgmType::Summer; // currently silent unless you load a summer track in audio.cpp
+    }
+
+    return BgmType::None;
 }
 
 // ---------------------------------------------------------------------------
@@ -103,6 +191,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Make sure this path points to a valid .ttf in your Assets folder.
     gFontId = AEGfxCreateFont("Assets/Super Mellow.ttf", 24);
 
+    // Audio system + loading (done in audio.cpp)
+    audio::init();
+
     // Game state objects.
     game::MainMenu mainMenu;
 
@@ -138,6 +229,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     while (gGameRunning)
     {
+        g_currentScene = SceneToString(currentState);
 
         if (currentState == SceneState::Tutorial1) {
             g_currentMap = tutorial1.getTileMap();
@@ -186,6 +278,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         AESysFrameStart();
         f32 dt = (f32)AEFrameRateControllerGetFrameTime();
 
+
+        // frame audio maintenance + switching
+        audio::update(Audio_GetDesiredBgmType(currentState));
 
         camera::update(dt);
 
@@ -378,6 +473,29 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
         }
 
+
+        if (AEInputCheckTriggered(AEVK_9))
+        {
+            // Go to Spring Stage 1
+            if (currentState != SceneState::SpringS1)
+            {
+                currentState = SceneState::SpringS1;
+                camera::setY(0.0f);
+                lastState = SceneState::Exit;
+            }
+        }
+
+        if (AEInputCheckTriggered(AEVK_0))
+        {
+            // Go to Autumn Stage 1
+            if (currentState != SceneState::AutumnS1)
+            {
+                currentState = SceneState::AutumnS1;
+                camera::setY(0.0f);
+                lastState = SceneState::Exit;
+            }
+        }
+
         // Optionally let the window close terminate the game.
         if (AESysDoesWindowExist() == 0)
         {
@@ -396,10 +514,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (action == 1)
             {
-                // Go to Tutorial 1 first.
-                currentState = SceneState::Tutorial1;
-                camera::setY(0.0f);
-                dialog.reset();
+                if (!gGame.player.checkpointScene.empty())
+                {
+                    currentState = StringToScene(gGame.player.checkpointScene);
+                    lastState = SceneState::Exit;
+
+                    float h = camera::screenHeight();
+                    if (currentState == SceneState::WinterS2 || currentState == SceneState::SummerS2) camera::setY(h);
+                    else if (currentState == SceneState::WinterS3 || currentState == SceneState::SummerS3) camera::setY(h * 2.0f);
+                    else if (currentState == SceneState::WinterS4 || currentState == SceneState::SummerS4) camera::setY(h * 3.0f);
+                    else camera::setY(0.0f);
+                }
+                else
+                {
+                    currentState = SceneState::WinterS1;
+                    camera::setY(0.0f);
+                }
             }
             else if (action == 2)
             {
@@ -408,6 +538,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 dialog.reset();
             }
             // action == 3 is reserved for "How To Play".
+
+            if (action == 4) {
+                currentState = SceneState::Tutorial1;
+                camera::setY(0.0f);
+            }
         }
         break;
 
@@ -630,6 +765,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Shut down graphics helper.
     gfx::shutdown();
+
+
+    // -----------------------
+    // AUDIO CLEANUP
+    // -----------------------
+    audio::shutdown();
+
 
     // Free all engine resources.
     AESysExit();

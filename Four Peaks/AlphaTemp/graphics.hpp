@@ -30,4 +30,7 @@ namespace gfx
 
     // draw player sprite
     void drawSprite(AEGfxTexture* tex, Vec2 position, f32 rotationRad, Vec2 size, f32 u0, f32 v0, f32 u1, f32 v1);
+
+    // function overload for trail ghost D:
+    void drawSprite(AEGfxTexture* tex, Vec2 position, f32 rotationRad, Vec2 size, f32 u0, f32 v0, f32 u1, f32 v1, float alpha);
 }

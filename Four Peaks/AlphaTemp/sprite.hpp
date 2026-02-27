@@ -39,6 +39,8 @@ namespace sprite
     // heatbar spritesheet (heatbar.png)
     AEGfxTexture* heatbar();
 
+	AEGfxTexture* mmBackground();
+
     // sign texture (sign.jpg)
     AEGfxTexture* sign();
     // tile12 texture (Tile_12.jpg)

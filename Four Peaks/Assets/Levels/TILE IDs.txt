@@ -1,0 +1,35 @@
+TILE IDs
+
+0 = Empty
+
+1 = Ice tile 
+
+2 = Spike 
+
+3 = Tileset tile (brown) 
+
+4 = Tileset tile (grey) 
+
+5 = Tileset tile 
+
+6 = Ground “underground” 
+
+7 = Platform/top ground
+
+8 = Collectible tile 
+
+9 = Spike (down-facing / inverted spike) 
+
+10 = Checkpoint 
+
+11 = Winter ice tile 
+
+12 = Winter crack tile
+
+16 = Tile_02 summer tile top
+
+17 = Tile_12 summer tile bottom
+
+18 = bottle 
+
+19 = sign 

@@ -81,6 +81,10 @@ namespace sprite
             backgroundTex = AEGfxTextureLoad("Assets/BG.png");
             if (!backgroundTex) backgroundTex = AEGfxTextureLoad("BG.png");
         }
+        if (!mmBackgroundTex) {
+            mmBackgroundTex = AEGfxTextureLoad("Assets/mmf1.png");
+            if (!mmBackgroundTex) mmBackgroundTex = AEGfxTextureLoad("Assets/mmf1.png");
+		}
         if (!summerBgTex) {
             summerBgTex = AEGfxTextureLoad("Assets/summerbg.png");
             if (!summerBgTex) summerBgTex = AEGfxTextureLoad("summerbg.jpg");
@@ -123,14 +127,14 @@ namespace sprite
         }
         if (!tile12Tex) {
             // Support both your project asset paths and direct project-root drops.
-            tile12Tex = AEGfxTextureLoad("Assets/Tile_12.png");
+            tile12Tex = AEGfxTextureLoad("Assets/center.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Assets/center.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Tile_12.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Tile_12.jpg");
         }
         if (!tile02Tex) {
-            tile02Tex = AEGfxTextureLoad("Assets/Tile_02.png");
-            if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Assets/top.png");
+            tile02Tex = AEGfxTextureLoad("Assets/top1.png");
+            if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Assets/top1.png");
             if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Tile_02.png");
             if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Tile_02.jpg");
         }
@@ -166,6 +170,12 @@ namespace sprite
             AEGfxTextureUnload(summerBgTex);
             summerBgTex = nullptr;
 		}
+
+		if (mmBackgroundTex)
+        {
+            AEGfxTextureUnload(mmBackgroundTex);
+            mmBackgroundTex = nullptr;
+        }
 
         if (tutorialBgTex)
         {
@@ -230,6 +240,11 @@ namespace sprite
     AEGfxTexture* summerBackground()
     {
         return summerBgTex;
+	}
+
+    AEGfxTexture* mmBackground()
+    {
+        return mmBackgroundTex;
 	}
 
     AEGfxTexture* tutorialBackground()
