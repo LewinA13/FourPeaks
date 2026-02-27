@@ -24,6 +24,7 @@ namespace UI{
         void showForLevel(int levelID);
         void next();
         bool isActive() const { return isShowing; }
+        void reset();
 
     private:
 

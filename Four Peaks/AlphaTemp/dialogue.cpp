@@ -26,15 +26,10 @@ namespace UI {
 
     void Dialog::initialize() {
    
-        levelDialogs[1] = {  // WinterS1
-
-
-          /*  "Stage 1!",
-            "Hello there..."*/
-          "Have you even wondered",
-          "Why must we serve?",
-          "When we holding gun",
-          "Children having fun"
+        levelDialogs[1] = {  // Tutorial 1
+            "Press W/ A/ S/ D for moving",
+            "Shift for dashing",
+            "Space for jumping"
         };
 
         levelDialogs[2] = {  // WinterS2
@@ -157,6 +152,16 @@ namespace UI {
         AEGfxSetCamPosition(oldX, oldY);
     }
 
+    void Dialog::reset() {
+        isShowing = false;
+        currentIndex = 0;
+        displayedChars = 0;
+        typeWriterTimer = 0.0f;
+
+        for (int i = 0; i < 10; i++) {
+            hasShown[i] = false; 
+        }
+    }
    
 }
 	

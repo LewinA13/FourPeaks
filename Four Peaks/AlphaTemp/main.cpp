@@ -399,11 +399,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 // Go to Tutorial 1 first.
                 currentState = SceneState::Tutorial1;
                 camera::setY(0.0f);
+                dialog.reset();
             }
             else if (action == 2)
             {
                 // Exit selected.
                 gGameRunning = 0;
+                dialog.reset();
             }
             // action == 3 is reserved for "How To Play".
         }
@@ -421,6 +423,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
+                dialog.reset();
             }
             break;
         }
@@ -437,6 +440,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
+                dialog.reset();
             }
             break;
         }
@@ -453,6 +457,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
+                dialog.reset();
             }
             break;
         }
@@ -471,7 +476,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             summerStage.draw();
 
             if (action == 20) { currentState = SceneState::SummerS2; camera::setY(camera::screenHeight()); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); dialog.reset();}
             break;
         }
 
@@ -481,7 +486,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             summerStage2.draw();
 
             if (action == 21) { currentState = SceneState::SummerS3; camera::setY(camera::screenHeight() * 2.0f); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); dialog.reset();}
             break;
         }
 
@@ -491,7 +496,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             summerStage3.draw();
 
             if (action == 22) { currentState = SceneState::SummerS4; camera::setY(camera::screenHeight() * 3.0f); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); dialog.reset();}
             break;
         }
 
@@ -500,7 +505,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = summerStage4.update(dt);
             summerStage4.draw();
 
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); dialog.reset();}
             break;
         }
 
@@ -519,6 +524,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
+                dialog.reset();
             }
             else if (action == 3)
             {
@@ -550,6 +556,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
+                dialog.reset();
             }
             else if (action == 3)
             {
@@ -573,6 +580,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
+                dialog.reset();
             }
             else if (action == 3)
             {
@@ -590,6 +598,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
+                dialog.reset();
             }
             else if (action == 3)
             {
