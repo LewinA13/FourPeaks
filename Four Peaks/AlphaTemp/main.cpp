@@ -12,6 +12,8 @@
 #include "tutorial.hpp"
 #include "winter.hpp"
 #include "summer.hpp"
+#include "spring.hpp"
+#include "autumn.hpp"
 #include "camera.hpp"
 #include "collision.hpp"
 #include "dialogue.hpp"
@@ -36,6 +38,14 @@ enum class SceneState
     SummerS2,
     SummerS3,
     SummerS4,
+    SpringS1,
+    SpringS2,
+    SpringS3,
+    SpringS4,
+    AutumnS1,
+    AutumnS2,
+    AutumnS3,
+    AutumnS4,
     Exit
 };
 
@@ -81,13 +91,31 @@ static std::string SceneToString(SceneState s)
     case SceneState::SummerS2:  return "SummerS2";
     case SceneState::SummerS3:  return "SummerS3";
     case SceneState::SummerS4:  return "SummerS4";
+    case SceneState::SpringS1:  return "SpringS1";
+    case SceneState::SpringS2:  return "SpringS2";
+    case SceneState::SpringS3:  return "SpringS3";
+    case SceneState::SpringS4:  return "SpringS4";
+    case SceneState::AutumnS1:  return "AutumnS1";
+    case SceneState::AutumnS2:  return "AutumnS2";
+    case SceneState::AutumnS3:  return "AutumnS3";
+    case SceneState::AutumnS4:  return "AutumnS4";
+
     default:                    return "";
     }
 }
 
 static SceneState StringToScene(const std::string& s)
 {
-    if (s == "Tutorial1") return SceneState::Tutorial1;
+    if (s == "Tutorial1")
+        if (s == "SpringS1") return SceneState::SpringS1;
+    if (s == "SpringS2") return SceneState::SpringS2;
+    if (s == "SpringS3") return SceneState::SpringS3;
+    if (s == "SpringS4") return SceneState::SpringS4;
+    if (s == "AutumnS1") return SceneState::AutumnS1;
+    if (s == "AutumnS2") return SceneState::AutumnS2;
+    if (s == "AutumnS3") return SceneState::AutumnS3;
+    if (s == "AutumnS4") return SceneState::AutumnS4;
+    return SceneState::Tutorial1;
     if (s == "Tutorial2") return SceneState::Tutorial2;
     if (s == "Tutorial3") return SceneState::Tutorial3;
     if (s == "WinterS1")  return SceneState::WinterS1;
@@ -112,8 +140,13 @@ static BgmType Audio_GetDesiredBgmType(SceneState state)
         return BgmType::Winter;
     }
 
-    // Future:
-    // if (state == SceneState::SummerS1 || ... ) return BgmType::Summer;
+    // Summer / Spring / Autumn
+    if (state == SceneState::SummerS1 || state == SceneState::SummerS2 || state == SceneState::SummerS3 || state == SceneState::SummerS4 ||
+        state == SceneState::SpringS1 || state == SceneState::SpringS2 || state == SceneState::SpringS3 || state == SceneState::SpringS4 ||
+        state == SceneState::AutumnS1 || state == SceneState::AutumnS2 || state == SceneState::AutumnS3 || state == SceneState::AutumnS4)
+    {
+        return BgmType::Summer; // currently silent unless you load a summer track in audio.cpp
+    }
 
     return BgmType::None;
 }
@@ -440,6 +473,29 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
         }
 
+
+        if (AEInputCheckTriggered(AEVK_9))
+        {
+            // Go to Spring Stage 1
+            if (currentState != SceneState::SpringS1)
+            {
+                currentState = SceneState::SpringS1;
+                camera::setY(0.0f);
+                lastState = SceneState::Exit;
+            }
+        }
+
+        if (AEInputCheckTriggered(AEVK_0))
+        {
+            // Go to Autumn Stage 1
+            if (currentState != SceneState::AutumnS1)
+            {
+                currentState = SceneState::AutumnS1;
+                camera::setY(0.0f);
+                lastState = SceneState::Exit;
+            }
+        }
+
         // Optionally let the window close terminate the game.
         if (AESysDoesWindowExist() == 0)
         {
@@ -484,7 +540,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (action == 4) {
                 currentState = SceneState::Tutorial1;
-				camera::setY(0.0f);
+                camera::setY(0.0f);
             }
         }
         break;

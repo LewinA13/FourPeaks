@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="audio.cpp" />
+    <ClCompile Include="autumn.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="dialogue.cpp" />
@@ -21,6 +22,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainmenu.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="spring.cpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="summer.cpp" />
     <ClCompile Include="tutorial.cpp" />
@@ -28,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="audio.hpp" />
+    <ClInclude Include="autumn.hpp" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="collision.hpp" />
     <ClInclude Include="dialogue.hpp" />
@@ -36,6 +39,7 @@
     <ClInclude Include="level_loader.hpp" />
     <ClInclude Include="mainmenu.hpp" />
     <ClInclude Include="player.hpp" />
+    <ClInclude Include="spring.hpp" />
     <ClInclude Include="sprite.hpp" />
     <ClInclude Include="summer.hpp" />
     <ClInclude Include="tutorial.hpp" />

@@ -127,14 +127,14 @@ namespace sprite
         }
         if (!tile12Tex) {
             // Support both your project asset paths and direct project-root drops.
-            tile12Tex = AEGfxTextureLoad("Assets/Tile_12.png");
+            tile12Tex = AEGfxTextureLoad("Assets/center.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Assets/center.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Tile_12.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Tile_12.jpg");
         }
         if (!tile02Tex) {
-            tile02Tex = AEGfxTextureLoad("Assets/Tile_02.png");
-            if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Assets/top.png");
+            tile02Tex = AEGfxTextureLoad("Assets/top1.png");
+            if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Assets/top1.png");
             if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Tile_02.png");
             if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Tile_02.jpg");
         }
