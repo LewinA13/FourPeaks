@@ -24,6 +24,7 @@ namespace UI{
         void showForLevel(int levelID);
         void next();
         bool isActive() const { return isShowing; }
+        void hide();
         void reset();
 
     private:
@@ -40,7 +41,6 @@ namespace UI{
         bool isShowing;
 
         //! check which level have been shown up
-        bool hasShown[10];
 
         float toNormalizedX(float pixelX);
         float toNormalizedY(float pixelY);

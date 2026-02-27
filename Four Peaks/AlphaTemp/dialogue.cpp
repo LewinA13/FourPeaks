@@ -16,9 +16,6 @@ namespace UI {
         timePerChar = 1.0f / 20.0f;
         wordSize = 2.0f;
 
-        for (int i = 0; i < 10; i++) {
-            hasShown[i] = false;
-        }
 
      
 
@@ -54,8 +51,8 @@ namespace UI {
     //! check current level and show dialog for that level
     void Dialog::showForLevel(int levelID) {
         //! skip if already shown or no dialog exists at that level
-        if (hasShown[levelID]) return;
         if (levelDialogs.find(levelID) == levelDialogs.end()) return;
+        if (isShowing) return; 
 
 
         texts = levelDialogs[levelID];
@@ -63,7 +60,6 @@ namespace UI {
         displayedChars = 0;      
         typeWriterTimer = 0.0f;    
         isShowing = true;
-        hasShown[levelID] = true;
     }
 
     void Dialog::update(float dt) {
@@ -128,8 +124,7 @@ namespace UI {
         float boxHeight = 100.0f;
         gfx::drawRectangle({ boxX, boxY }, 0.0f, { boxWidth, boxHeight }, 0x88000000);
 
-        if (currentIndex < texts.size())
-        {
+        if (currentIndex < texts.size()){
             std::string fullText = texts[currentIndex];
             std::string visibleText = fullText.substr(0, displayedChars);
                                                  
@@ -152,15 +147,14 @@ namespace UI {
         AEGfxSetCamPosition(oldX, oldY);
     }
 
+    
+
     void Dialog::reset() {
         isShowing = false;
         currentIndex = 0;
         displayedChars = 0;
         typeWriterTimer = 0.0f;
-
-        for (int i = 0; i < 10; i++) {
-            hasShown[i] = false; 
-        }
+    
     }
    
 }
