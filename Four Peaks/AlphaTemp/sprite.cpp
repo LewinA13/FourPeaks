@@ -17,6 +17,7 @@ namespace sprite
         AEGfxTexture* mmBackgroundTex{};
         AEGfxTexture* summerBgTex{};
         AEGfxTexture* tutorialBgTex{};
+        AEGfxTexture* autumnBgTex{};
         AEGfxTexture* coinTex{};
         AEGfxTexture* bgStripTex{};
         AEGfxTexture* iceTex{};
@@ -27,6 +28,12 @@ namespace sprite
         AEGfxTexture* tile12Tex{};
         AEGfxTexture* tile02Tex{};
         AEGfxTexture* bottleTex{};
+
+        // Standalone seasonal tile textures
+        AEGfxTexture* spring1Tex{};
+        AEGfxTexture* spring2Tex{};
+        AEGfxTexture* autumn1Tex{};
+        AEGfxTexture* autumn2Tex{};
 
 
         constexpr float texW = 224.0f;
@@ -84,14 +91,18 @@ namespace sprite
         if (!mmBackgroundTex) {
             mmBackgroundTex = AEGfxTextureLoad("Assets/mmf1.png");
             if (!mmBackgroundTex) mmBackgroundTex = AEGfxTextureLoad("Assets/mmf1.png");
-		}
+        }
         if (!summerBgTex) {
             summerBgTex = AEGfxTextureLoad("Assets/summerbg.png");
             if (!summerBgTex) summerBgTex = AEGfxTextureLoad("summerbg.jpg");
-		}
+        }
         if (!tutorialBgTex) {
             tutorialBgTex = AEGfxTextureLoad("Assets/bg_tutorial.png");
             if (!tutorialBgTex) tutorialBgTex = AEGfxTextureLoad("bg_tutorial.png");
+        }
+        if (!autumnBgTex) {
+            autumnBgTex = AEGfxTextureLoad("Assets/autumnbg.jpg");
+            if (!autumnBgTex) autumnBgTex = AEGfxTextureLoad("autumnbg.jpg");
         }
         if (!tilesetTex) {
             tilesetTex = AEGfxTextureLoad("Assets/winter_.png");
@@ -142,6 +153,12 @@ namespace sprite
             bottleTex = AEGfxTextureLoad("Assets/bottle.png");
             if (!bottleTex) bottleTex = AEGfxTextureLoad("bottle.jpg");
         }
+
+        // Seasonal tile textures (standalone images)
+        if (!spring1Tex) spring1Tex = AEGfxTextureLoad("Assets/spring1.png");
+        if (!spring2Tex) spring2Tex = AEGfxTextureLoad("Assets/spring2.png");
+        if (!autumn1Tex) autumn1Tex = AEGfxTextureLoad("Assets/autumn1.png");
+        if (!autumn2Tex) autumn2Tex = AEGfxTextureLoad("Assets/autumn2.png");
     }
 
 
@@ -169,9 +186,9 @@ namespace sprite
         {
             AEGfxTextureUnload(summerBgTex);
             summerBgTex = nullptr;
-		}
+        }
 
-		if (mmBackgroundTex)
+        if (mmBackgroundTex)
         {
             AEGfxTextureUnload(mmBackgroundTex);
             mmBackgroundTex = nullptr;
@@ -181,6 +198,12 @@ namespace sprite
         {
             AEGfxTextureUnload(tutorialBgTex);
             tutorialBgTex = nullptr;
+        }
+
+        if (autumnBgTex)
+        {
+            AEGfxTextureUnload(autumnBgTex);
+            autumnBgTex = nullptr;
         }
 
         if (coinTex)
@@ -220,6 +243,11 @@ namespace sprite
         if (tile02Tex) { AEGfxTextureUnload(tile02Tex); tile02Tex = nullptr; }
         if (bottleTex) { AEGfxTextureUnload(bottleTex); bottleTex = nullptr; }
 
+        if (spring1Tex) { AEGfxTextureUnload(spring1Tex); spring1Tex = nullptr; }
+        if (spring2Tex) { AEGfxTextureUnload(spring2Tex); spring2Tex = nullptr; }
+        if (autumn1Tex) { AEGfxTextureUnload(autumn1Tex); autumn1Tex = nullptr; }
+        if (autumn2Tex) { AEGfxTextureUnload(autumn2Tex); autumn2Tex = nullptr; }
+
     }
 
     AEGfxTexture* tileset()
@@ -240,16 +268,21 @@ namespace sprite
     AEGfxTexture* summerBackground()
     {
         return summerBgTex;
-	}
+    }
 
     AEGfxTexture* mmBackground()
     {
         return mmBackgroundTex;
-	}
+    }
 
     AEGfxTexture* tutorialBackground()
     {
         return tutorialBgTex;
+    }
+
+    AEGfxTexture* autumnBackground()
+    {
+        return autumnBgTex;
     }
 
     AEGfxTexture* coin()
@@ -277,6 +310,11 @@ namespace sprite
     AEGfxTexture* tile12() { return tile12Tex; }
     AEGfxTexture* tile02() { return tile02Tex; }
     AEGfxTexture* bottle() { return bottleTex; }
+
+    AEGfxTexture* spring1() { return spring1Tex; }
+    AEGfxTexture* spring2() { return spring2Tex; }
+    AEGfxTexture* autumn1() { return autumn1Tex; }
+    AEGfxTexture* autumn2() { return autumn2Tex; }
 
 
 

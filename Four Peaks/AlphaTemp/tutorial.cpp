@@ -127,6 +127,36 @@ namespace
                     continue;
                 }
 
+                // Standalone seasonal tiles (replace old sprites for IDs 1,3,5,7)
+                if (tileType == 1)
+                {
+                    AEGfxTexture* t = sprite::spring1();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+                if (tileType == 3)
+                {
+                    AEGfxTexture* t = sprite::spring2();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+                if (tileType == 5)
+                {
+                    AEGfxTexture* t = sprite::autumn1();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+                if (tileType == 7)
+                {
+                    AEGfxTexture* t = sprite::autumn2();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+
                 // Tileset UV tiles (6/7 etc.)
                 float u0{}, v0{}, u1{}, v1{};
                 AEGfxTexture* tex = sprite::tileset();

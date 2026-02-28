@@ -19,7 +19,7 @@ namespace
     {
         // Re-use an existing background if you don't have a dedicated Autumn BG yet.
         // Change this later to sprite::springBackground() when you add it.
-        AEGfxTexture* bg = sprite::summerBackground();
+        AEGfxTexture* bg = sprite::autumnBackground();
         if (!bg) bg = sprite::background();
 
         if (bg)
@@ -113,6 +113,36 @@ namespace
                 {
                     AEGfxTexture* s = sprite::spikes();
                     if (s) gfx::drawSprite(s, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
+                    continue;
+                }
+
+                // Standalone seasonal tiles (replace old sprites for IDs 1,3,5,7)
+                if (tileType == 1)
+                {
+                    AEGfxTexture* t = sprite::spring1();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
+                    continue;
+                }
+                if (tileType == 3)
+                {
+                    AEGfxTexture* t = sprite::spring2();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
+                    continue;
+                }
+                if (tileType == 5)
+                {
+                    AEGfxTexture* t = sprite::autumn1();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
+                    continue;
+                }
+                if (tileType == 7)
+                {
+                    AEGfxTexture* t = sprite::autumn2();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
                     continue;
                 }
