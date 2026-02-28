@@ -66,6 +66,21 @@ namespace sprite
     AEGfxTexture* autumn1();
     AEGfxTexture* autumn2();
 
+    // -----------------------------------------------------------------
+    // New tile textures
+    // 23 -> grass (grasss.png, single frame)
+    // 24 -> fire  (fire.png,   animated spritesheet, 8 frames 20x24)
+    // 25 -> saw   (saw.png,    animated spritesheet, 8 frames 38x38)
+    // 26 -> spike facing LEFT  (uses spikes texture, rotated)
+    // 27 -> spike facing RIGHT (uses spikes texture, rotated)
+    // -----------------------------------------------------------------
+    AEGfxTexture* grass();
+    AEGfxTexture* fireTex();
+    AEGfxTexture* sawTex();
+
+    bool getFireUv(int frame, float& u0, float& v0, float& u1, float& v1);
+    bool getSawUv(int frame, float& u0, float& v0, float& u1, float& v1);
+
 
     // UVs for checkpoint animation frames
     bool getCheckpointUv(int frame, float& u0, float& v0, float& u1, float& v1);

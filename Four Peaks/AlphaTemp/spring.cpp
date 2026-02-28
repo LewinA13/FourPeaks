@@ -104,16 +104,49 @@ namespace
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
                 gfx::Vec2 size{ cellW, cellH };
 
-                // Animated tiles first (coin/checkpoint).
+                // Animated tiles first (coin/checkpoint/fire/saw).
                 if (sprite::drawAnimatedTile(tileType, pos, size))
                     continue;
 
-                // Spikes are separate texture in this project.
+                // Spikes - taller than cell, anchored correctly
                 if (tileType == 2 || tileType == 9)
                 {
                     AEGfxTexture* s = sprite::spikes();
-                    if (s) gfx::drawSprite(s, pos, 0.0f, size, 0, 0, 1, 1);
-                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
+                    if (s)
+                    {
+                        gfx::Vec2 ss{ size.x, size.y * 1.5f };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 2) { sp.y += (ss.y - size.y) * 0.5f; }
+                        else { sp.y -= (ss.y - size.y) * 0.5f; v0 = 1.0f; v1 = 0.0f; }
+                        gfx::drawSprite(s, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                    else gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
+                    continue;
+                }
+
+                // Left-facing spike (26) and right-facing spike (27)
+                if (tileType == 26 || tileType == 27)
+                {
+                    AEGfxTexture* s = sprite::spikes();
+                    if (s)
+                    {
+                        gfx::Vec2 ss{ size.x * 1.5f, size.y };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(s, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                    continue;
+                }
+
+                // Grass tile (ID 23)
+                if (tileType == 23)
+                {
+                    AEGfxTexture* t = sprite::grass();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                     continue;
                 }
 

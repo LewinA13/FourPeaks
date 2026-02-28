@@ -173,12 +173,35 @@ namespace game {
 
 
                 if (tileType == 9) {
-                    // Inverted spike (ID 9) - uses the same texture you use in winter
-                    AEGfxTexture* invSpikeTex = sprite::ice();
-                    if (invSpikeTex)
-                        gfx::drawSprite(invSpikeTex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else
-                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex) {
+                        gfx::Vec2 ss{ size.x, size.y * 1.5f };
+                        gfx::Vec2 sp = pos; sp.y -= (ss.y - size.y) * 0.5f;
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, 0.0f, 1.0f, 1.0f, 0.0f);
+                    }
+                    else gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+
+                // Left-facing spike (26) and right-facing spike (27)
+                if (tileType == 26 || tileType == 27) {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex) {
+                        gfx::Vec2 ss{ size.x * 1.5f, size.y };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; } // left: anchor right edge
+                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; } // right: flip U
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                    continue;
+                }
+
+                // Grass tile (ID 23)
+                if (tileType == 23) {
+                    AEGfxTexture* t = sprite::grass();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                     continue;
                 }
 
@@ -321,17 +344,29 @@ namespace game {
                     continue;
                 }
 
-                if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
-
-                if (tileType == 9) {
-                    // Inverted spike (ID 9) - uses the same texture you use in winter
-                    AEGfxTexture* invSpikeTex = sprite::ice();
-                    if (invSpikeTex)
-                        gfx::drawSprite(invSpikeTex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else
-                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                // Left-facing spike (26) and right-facing spike (27)
+                if (tileType == 26 || tileType == 27) {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex) {
+                        gfx::Vec2 ss{ size.x * 1.5f, size.y };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
                     continue;
                 }
+
+                // Grass tile (ID 23)
+                if (tileType == 23) {
+                    AEGfxTexture* t = sprite::grass();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                    continue;
+                }
+
+                if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
 
                 if (drawSpecialTile(tileType, pos, size)) continue;
 
@@ -485,6 +520,28 @@ namespace game {
                         if (tileType == 9) { v0 = 1.0f; v1 = 0.0f; }
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
+                    continue;
+                }
+
+                // Left-facing spike (26) and right-facing spike (27)
+                if (tileType == 26 || tileType == 27) {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex) {
+                        gfx::Vec2 ss{ size.x * 1.5f, size.y };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                    continue;
+                }
+
+                // Grass tile (ID 23)
+                if (tileType == 23) {
+                    AEGfxTexture* t = sprite::grass();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                     continue;
                 }
 
@@ -647,6 +704,28 @@ namespace game {
                         if (tileType == 9) { v0 = 1.0f; v1 = 0.0f; }
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
+                    continue;
+                }
+
+                // Left-facing spike (26) and right-facing spike (27)
+                if (tileType == 26 || tileType == 27) {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex) {
+                        gfx::Vec2 ss{ size.x * 1.5f, size.y };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                    continue;
+                }
+
+                // Grass tile (ID 23)
+                if (tileType == 23) {
+                    AEGfxTexture* t = sprite::grass();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                     continue;
                 }
 

@@ -29,6 +29,31 @@ namespace sprite
         AEGfxTexture* tile02Tex{};
         AEGfxTexture* bottleTex{};
 
+        // New tile textures (IDs 23-25)
+        AEGfxTexture* grassTex{};
+        AEGfxTexture* fireTex_{};
+        AEGfxTexture* sawTex_{};
+
+        // Fire animation (fire.png = 160x24, 8 frames 20x24)
+        int fireFrame = 0;
+        float fireTimer = 0.0f;
+        constexpr int fireFrameCount = 8;
+        constexpr float fireFrameTime = 0.08f;
+        constexpr float fireSheetW = 160.0f;
+        constexpr float fireSheetH = 24.0f;
+        constexpr float fireFrameW = 20.0f;
+        constexpr float fireFrameH = 24.0f;
+
+        // Saw animation (saw.png = 304x38, 8 frames 38x38)
+        int sawFrame = 0;
+        float sawTimer = 0.0f;
+        constexpr int sawFrameCount = 8;
+        constexpr float sawFrameTime = 0.06f;
+        constexpr float sawSheetW = 304.0f;
+        constexpr float sawSheetH = 38.0f;
+        constexpr float sawFrameW = 38.0f;
+        constexpr float sawFrameH = 38.0f;
+
         // Standalone seasonal tile textures
         AEGfxTexture* spring1Tex{};
         AEGfxTexture* spring2Tex{};
@@ -159,6 +184,11 @@ namespace sprite
         if (!spring2Tex) spring2Tex = AEGfxTextureLoad("Assets/spring2.png");
         if (!autumn1Tex) autumn1Tex = AEGfxTextureLoad("Assets/autumn1.png");
         if (!autumn2Tex) autumn2Tex = AEGfxTextureLoad("Assets/autumn2.png");
+
+        // New tile textures
+        if (!grassTex)  grassTex = AEGfxTextureLoad("Assets/grasss.png");
+        if (!fireTex_)  fireTex_ = AEGfxTextureLoad("Assets/fire.png");
+        if (!sawTex_)   sawTex_ = AEGfxTextureLoad("Assets/saw.png");
     }
 
 
@@ -248,6 +278,10 @@ namespace sprite
         if (autumn1Tex) { AEGfxTextureUnload(autumn1Tex); autumn1Tex = nullptr; }
         if (autumn2Tex) { AEGfxTextureUnload(autumn2Tex); autumn2Tex = nullptr; }
 
+        if (grassTex) { AEGfxTextureUnload(grassTex);  grassTex = nullptr; }
+        if (fireTex_) { AEGfxTextureUnload(fireTex_);  fireTex_ = nullptr; }
+        if (sawTex_) { AEGfxTextureUnload(sawTex_);   sawTex_ = nullptr; }
+
     }
 
     AEGfxTexture* tileset()
@@ -315,6 +349,36 @@ namespace sprite
     AEGfxTexture* spring2() { return spring2Tex; }
     AEGfxTexture* autumn1() { return autumn1Tex; }
     AEGfxTexture* autumn2() { return autumn2Tex; }
+
+    AEGfxTexture* grass() { return grassTex; }
+    AEGfxTexture* fireTex() { return fireTex_; }
+    AEGfxTexture* sawTex() { return sawTex_; }
+
+    bool getFireUv(int frame, float& u0, float& v0, float& u1, float& v1)
+    {
+        if (frame < 0) frame = 0;
+        frame %= fireFrameCount;
+        constexpr float insetPx = 0.5f;
+        float px = frame * fireFrameW;
+        u0 = (px + insetPx) / fireSheetW;
+        u1 = (px + fireFrameW - insetPx) / fireSheetW;
+        v0 = insetPx / fireSheetH;
+        v1 = (fireFrameH - insetPx) / fireSheetH;
+        return true;
+    }
+
+    bool getSawUv(int frame, float& u0, float& v0, float& u1, float& v1)
+    {
+        if (frame < 0) frame = 0;
+        frame %= sawFrameCount;
+        constexpr float insetPx = 0.5f;
+        float px = frame * sawFrameW;
+        u0 = (px + insetPx) / sawSheetW;
+        u1 = (px + sawFrameW - insetPx) / sawSheetW;
+        v0 = insetPx / sawSheetH;
+        v1 = (sawFrameH - insetPx) / sawSheetH;
+        return true;
+    }
 
 
 
@@ -433,6 +497,22 @@ namespace sprite
             checkpointTimer -= checkpointFrameTime;
             checkpointFrame = (checkpointFrame + 1) % checkpointFrameCount;
         }
+
+        // fire (tile 24)
+        fireTimer += dt;
+        while (fireTimer >= fireFrameTime)
+        {
+            fireTimer -= fireFrameTime;
+            fireFrame = (fireFrame + 1) % fireFrameCount;
+        }
+
+        // saw (tile 25)
+        sawTimer += dt;
+        while (sawTimer >= sawFrameTime)
+        {
+            sawTimer -= sawFrameTime;
+            sawFrame = (sawFrame + 1) % sawFrameCount;
+        }
     }
 
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size)
@@ -462,6 +542,26 @@ namespace sprite
 
             gfx::Vec2 cpSize{ size.x * 0.85f, size.y * 0.85f };
             gfx::drawSprite(checkpointTex, pos, 0.0f, cpSize, u0, v0, u1, v1);
+            return true;
+        }
+
+        // Tile 24 = fire (animated, fits exactly in cell)
+        if (tileType == 24)
+        {
+            if (!fireTex_) return true;
+            float u0{}, v0{}, u1{}, v1{};
+            getFireUv(fireFrame, u0, v0, u1, v1);
+            gfx::drawSprite(fireTex_, pos, 0.0f, size, u0, v0, u1, v1);
+            return true;
+        }
+
+        // Tile 25 = saw (animated, fits exactly in cell)
+        if (tileType == 25)
+        {
+            if (!sawTex_) return true;
+            float u0{}, v0{}, u1{}, v1{};
+            getSawUv(sawFrame, u0, v0, u1, v1);
+            gfx::drawSprite(sawTex_, pos, 0.0f, size, u0, v0, u1, v1);
             return true;
         }
 

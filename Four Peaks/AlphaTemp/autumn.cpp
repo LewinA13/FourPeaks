@@ -104,16 +104,83 @@ namespace
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
                 gfx::Vec2 size{ cellW, cellH };
 
-                // Animated tiles first (coin/checkpoint).
+                // Animated tiles first (coin/checkpoint/fire/saw).
                 if (sprite::drawAnimatedTile(tileType, pos, size))
                     continue;
 
-                // Spikes are separate texture in this project.
-                if (tileType == 2 || tileType == 9)
+                // Grass tile (ID 23) - single static sprite
+                if (tileType == 23)
                 {
-                    AEGfxTexture* s = sprite::spikes();
-                    if (s) gfx::drawSprite(s, pos, 0.0f, size, 0, 0, 1, 1);
-                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
+                    AEGfxTexture* t = sprite::grass();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                    continue;
+                }
+
+                // Spikes - rendered taller than the cell, anchored to correct edge
+                // tileType 2  = up-facing spike
+                // tileType 9  = down-facing (inverted) spike
+                // tileType 26 = left-facing spike  (rotate spikes 90° CW via UV swap)
+                // tileType 27 = right-facing spike (rotate spikes 90° CCW via UV swap)
+                if (tileType == 2 || tileType == 9 || tileType == 26 || tileType == 27)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        float heightScale = 1.5f;
+
+                        if (tileType == 26 || tileType == 27)
+                        {
+                            // Left/right spikes: scale width instead, fit exactly in cell
+                            gfx::Vec2 spikeSize{ size.x * heightScale, size.y };
+                            gfx::Vec2 spikePos = pos;
+                            float u0, v0, u1, v1;
+                            if (tileType == 27)
+                            {
+                                // Right-facing: rotate 90 CCW  ? swap UV axes
+                                // Original: u goes left->right, v goes top->bottom
+                                // Rotate 90 CCW: map (u,v) -> (v, 1-u)
+                                u0 = 0.0f; v0 = 0.0f; u1 = 1.0f; v1 = 1.0f;
+                                // Use swapped UVs by drawing with transposed coords
+                                // We achieve 90° rotation by swapping U/V mapping:
+                                // draw with: u0=v_start, v0=u_start, u1=v_end, v1=u_end  but on a square that's same
+                                // Simplest: for right-facing, flip the spike horizontally from left
+                                // Left-facing = spike points left: v goes 0->1 top to bottom, u goes 0->1 left to right
+                                // To make it point right, flip U: u0=1,u1=0
+                                u0 = 1.0f; v0 = 0.0f; u1 = 0.0f; v1 = 1.0f;
+                                spikePos.x -= (spikeSize.x - size.x) * 0.5f;
+                            }
+                            else
+                            {
+                                // Left-facing: spike points left
+                                u0 = 0.0f; v0 = 0.0f; u1 = 1.0f; v1 = 1.0f;
+                                spikePos.x += (spikeSize.x - size.x) * 0.5f;
+                            }
+                            gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
+                        }
+                        else
+                        {
+                            gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
+                            gfx::Vec2 spikePos = pos;
+
+                            float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+
+                            if (tileType == 2)
+                            {
+                                // UP-facing: anchor bottom to cell bottom
+                                spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                            }
+                            else // tileType == 9
+                            {
+                                // DOWN-facing: anchor top to cell top, flip texture vertically
+                                spikePos.y -= (spikeSize.y - size.y) * 0.5f;
+                                v0 = 1.0f;
+                                v1 = 0.0f;
+                            }
+
+                            gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
+                        }
+                    }
                     continue;
                 }
 
