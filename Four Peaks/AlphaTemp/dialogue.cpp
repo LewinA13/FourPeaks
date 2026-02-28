@@ -27,7 +27,7 @@ namespace UI {
         // =========================================================
         // Prologue
         // =========================================================
-        levelDialogs[99] = {
+        levelDialogs[50] = {
             "For generations, my family sought the four seasonal relics hidden atop this mountain.",
             "No archaeologist has ever returned with all four.",
             "My father... and his father before him... never came back.",
@@ -108,6 +108,59 @@ namespace UI {
             "The mountain grows harsher. But so do I."
         };
 
+        // =========================================================
+        // Spring stage
+        // =========================================================
+        levelDialogs[30] = {  // SpringS1
+            "The winds push against me.",
+            "Every step forward is a fight."
+        };
+
+        levelDialogs[31] = {  // SpringS2
+            "Dad's Note:",
+            "The giant mushrooms can launch you higher.",
+            "Use them wisely."
+        };
+
+        levelDialogs[32] = {  // SpringS3
+            "The wind howls louder the higher I climb.",
+            "One wrong jump... and I'm gone."
+        };
+
+        levelDialogs[33] = {  // SpringS4 sign
+            "Relic of Wind obtained.",
+            "Just one more season."
+        };
+
+        // =========================================================
+        // Autumn stage
+        // =========================================================
+        levelDialogs[40] = {  // AutumnS1
+            "Dad's Note:",
+            "When the leaves fall thick... you won't see what's ahead.",
+            "Wonder what that means."
+        };
+
+        levelDialogs[41] = {  // AutumnS2
+            "The ground is buried in leaves.",
+            "Every step drags."
+        };
+
+        levelDialogs[42] = {  // AutumnS3
+            "I can't see the traps beneath.",
+            "I have to trust my instincts."
+        };
+
+        levelDialogs[43] = {  // AutumnS4 sign
+            "This must be the final stretch."
+        };
+
+        levelDialogs[44] = {  // AutumnS5 relic
+            "Relic of Harvest obtained.",
+            "Four relics.",
+            "The mountain is conquered."
+        };
+
 
     }
 
@@ -116,13 +169,17 @@ namespace UI {
     void Dialog::showForLevel(int levelID) {
         //! skip if already shown or no dialog exists at that level
         if (levelDialogs.find(levelID) == levelDialogs.end()) return;
-        if (isShowing) return; 
 
+        if (currentLevelID == levelID) {
+            isShowing = true;
+            return;
+        }
 
+        currentLevelID = levelID;
         texts = levelDialogs[levelID];
         currentIndex = 0;
-        displayedChars = 0;      
-        typeWriterTimer = 0.0f;    
+        displayedChars = 0;
+        typeWriterTimer = 0.0f;
         isShowing = true;
     }
 
@@ -130,10 +187,10 @@ namespace UI {
         if (!isShowing) return;
 
         if (!playerNearSign) {
-            //reset();
-            isShowing = false;   
+            isShowing = false;
             return;
         }
+
 
         size_t currentTextLength = texts[currentIndex].length();
 
@@ -192,6 +249,10 @@ namespace UI {
         float boxHeight = 100.0f;
         gfx::drawRectangle({ boxX, boxY }, 0.0f, { boxWidth, boxHeight }, 0x88000000);
 
+
+
+    
+
         if (currentIndex < texts.size()){
             std::string fullText = texts[currentIndex];
             std::string visibleText = fullText.substr(0, displayedChars);
@@ -210,6 +271,13 @@ namespace UI {
             float drawY = normY - textHeight / 2.0f;
 
             AEGfxPrint(gFontId, pText, drawX, drawY, wordSize, 1.0f, 1.0f, 1.0f, 1.0f);
+        }
+
+        if (currentIndex > 0) {
+            gfx::drawTriangle({ 550,350 }, 0.0f, { 25.0f,25.0f }, 0xFF00FF00);
+        }
+        if (currentIndex + 1 < (int)texts.size() || displayedChars < texts[currentIndex].length()) {
+            gfx::drawTriangle({ 550,250 }, PI, { 25.0f,25.0f }, 0xFF00FF00);
         }
 
         AEGfxSetCamPosition(oldX, oldY);

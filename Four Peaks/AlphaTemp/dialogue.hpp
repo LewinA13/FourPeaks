@@ -43,6 +43,8 @@ namespace UI{
 
         bool playerNearSign = false;
 
+        int currentLevelID = -1;
+
 
         //! check which level have been shown up
 
