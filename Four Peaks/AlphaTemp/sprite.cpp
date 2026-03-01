@@ -17,6 +17,7 @@ namespace sprite
         AEGfxTexture* mmBackgroundTex{};
         AEGfxTexture* summerBgTex{};
         AEGfxTexture* tutorialBgTex{};
+        AEGfxTexture* autumnBgTex{};
         AEGfxTexture* coinTex{};
         AEGfxTexture* bgStripTex{};
         AEGfxTexture* iceTex{};
@@ -27,6 +28,37 @@ namespace sprite
         AEGfxTexture* tile12Tex{};
         AEGfxTexture* tile02Tex{};
         AEGfxTexture* bottleTex{};
+
+        // New tile textures (IDs 23-25)
+        AEGfxTexture* grassTex{};
+        AEGfxTexture* fireTex_{};
+        AEGfxTexture* sawTex_{};
+
+        // Fire animation (fire.png = 160x24, 8 frames 20x24)
+        int fireFrame = 0;
+        float fireTimer = 0.0f;
+        constexpr int fireFrameCount = 8;
+        constexpr float fireFrameTime = 0.08f;
+        constexpr float fireSheetW = 160.0f;
+        constexpr float fireSheetH = 24.0f;
+        constexpr float fireFrameW = 20.0f;
+        constexpr float fireFrameH = 24.0f;
+
+        // Saw animation (saw.png = 304x38, 8 frames 38x38)
+        int sawFrame = 0;
+        float sawTimer = 0.0f;
+        constexpr int sawFrameCount = 8;
+        constexpr float sawFrameTime = 0.06f;
+        constexpr float sawSheetW = 304.0f;
+        constexpr float sawSheetH = 38.0f;
+        constexpr float sawFrameW = 38.0f;
+        constexpr float sawFrameH = 38.0f;
+
+        // Standalone seasonal tile textures
+        AEGfxTexture* spring1Tex{};
+        AEGfxTexture* spring2Tex{};
+        AEGfxTexture* autumn1Tex{};
+        AEGfxTexture* autumn2Tex{};
 
 
         constexpr float texW = 224.0f;
@@ -84,14 +116,18 @@ namespace sprite
         if (!mmBackgroundTex) {
             mmBackgroundTex = AEGfxTextureLoad("Assets/mmf1.png");
             if (!mmBackgroundTex) mmBackgroundTex = AEGfxTextureLoad("Assets/mmf1.png");
-		}
+        }
         if (!summerBgTex) {
             summerBgTex = AEGfxTextureLoad("Assets/summerbg.png");
             if (!summerBgTex) summerBgTex = AEGfxTextureLoad("summerbg.jpg");
-		}
+        }
         if (!tutorialBgTex) {
             tutorialBgTex = AEGfxTextureLoad("Assets/bg_tutorial.png");
             if (!tutorialBgTex) tutorialBgTex = AEGfxTextureLoad("bg_tutorial.png");
+        }
+        if (!autumnBgTex) {
+            autumnBgTex = AEGfxTextureLoad("Assets/autumnbg.jpg");
+            if (!autumnBgTex) autumnBgTex = AEGfxTextureLoad("autumnbg.jpg");
         }
         if (!tilesetTex) {
             tilesetTex = AEGfxTextureLoad("Assets/winter_.png");
@@ -127,14 +163,14 @@ namespace sprite
         }
         if (!tile12Tex) {
             // Support both your project asset paths and direct project-root drops.
-            tile12Tex = AEGfxTextureLoad("Assets/Tile_12.png");
+            tile12Tex = AEGfxTextureLoad("Assets/center.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Assets/center.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Tile_12.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Tile_12.jpg");
         }
         if (!tile02Tex) {
-            tile02Tex = AEGfxTextureLoad("Assets/Tile_02.png");
-            if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Assets/top.png");
+            tile02Tex = AEGfxTextureLoad("Assets/top1.png");
+            if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Assets/top1.png");
             if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Tile_02.png");
             if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Tile_02.jpg");
         }
@@ -142,6 +178,17 @@ namespace sprite
             bottleTex = AEGfxTextureLoad("Assets/bottle.png");
             if (!bottleTex) bottleTex = AEGfxTextureLoad("bottle.jpg");
         }
+
+        // Seasonal tile textures (standalone images)
+        if (!spring1Tex) spring1Tex = AEGfxTextureLoad("Assets/spring1.png");
+        if (!spring2Tex) spring2Tex = AEGfxTextureLoad("Assets/spring2.png");
+        if (!autumn1Tex) autumn1Tex = AEGfxTextureLoad("Assets/autumn1.png");
+        if (!autumn2Tex) autumn2Tex = AEGfxTextureLoad("Assets/autumn2.png");
+
+        // New tile textures
+        if (!grassTex)  grassTex = AEGfxTextureLoad("Assets/grasss.png");
+        if (!fireTex_)  fireTex_ = AEGfxTextureLoad("Assets/fire.png");
+        if (!sawTex_)   sawTex_ = AEGfxTextureLoad("Assets/saw.png");
     }
 
 
@@ -169,9 +216,9 @@ namespace sprite
         {
             AEGfxTextureUnload(summerBgTex);
             summerBgTex = nullptr;
-		}
+        }
 
-		if (mmBackgroundTex)
+        if (mmBackgroundTex)
         {
             AEGfxTextureUnload(mmBackgroundTex);
             mmBackgroundTex = nullptr;
@@ -181,6 +228,12 @@ namespace sprite
         {
             AEGfxTextureUnload(tutorialBgTex);
             tutorialBgTex = nullptr;
+        }
+
+        if (autumnBgTex)
+        {
+            AEGfxTextureUnload(autumnBgTex);
+            autumnBgTex = nullptr;
         }
 
         if (coinTex)
@@ -220,6 +273,15 @@ namespace sprite
         if (tile02Tex) { AEGfxTextureUnload(tile02Tex); tile02Tex = nullptr; }
         if (bottleTex) { AEGfxTextureUnload(bottleTex); bottleTex = nullptr; }
 
+        if (spring1Tex) { AEGfxTextureUnload(spring1Tex); spring1Tex = nullptr; }
+        if (spring2Tex) { AEGfxTextureUnload(spring2Tex); spring2Tex = nullptr; }
+        if (autumn1Tex) { AEGfxTextureUnload(autumn1Tex); autumn1Tex = nullptr; }
+        if (autumn2Tex) { AEGfxTextureUnload(autumn2Tex); autumn2Tex = nullptr; }
+
+        if (grassTex) { AEGfxTextureUnload(grassTex);  grassTex = nullptr; }
+        if (fireTex_) { AEGfxTextureUnload(fireTex_);  fireTex_ = nullptr; }
+        if (sawTex_) { AEGfxTextureUnload(sawTex_);   sawTex_ = nullptr; }
+
     }
 
     AEGfxTexture* tileset()
@@ -240,16 +302,21 @@ namespace sprite
     AEGfxTexture* summerBackground()
     {
         return summerBgTex;
-	}
+    }
 
     AEGfxTexture* mmBackground()
     {
         return mmBackgroundTex;
-	}
+    }
 
     AEGfxTexture* tutorialBackground()
     {
         return tutorialBgTex;
+    }
+
+    AEGfxTexture* autumnBackground()
+    {
+        return autumnBgTex;
     }
 
     AEGfxTexture* coin()
@@ -277,6 +344,41 @@ namespace sprite
     AEGfxTexture* tile12() { return tile12Tex; }
     AEGfxTexture* tile02() { return tile02Tex; }
     AEGfxTexture* bottle() { return bottleTex; }
+
+    AEGfxTexture* spring1() { return spring1Tex; }
+    AEGfxTexture* spring2() { return spring2Tex; }
+    AEGfxTexture* autumn1() { return autumn1Tex; }
+    AEGfxTexture* autumn2() { return autumn2Tex; }
+
+    AEGfxTexture* grass() { return grassTex; }
+    AEGfxTexture* fireTex() { return fireTex_; }
+    AEGfxTexture* sawTex() { return sawTex_; }
+
+    bool getFireUv(int frame, float& u0, float& v0, float& u1, float& v1)
+    {
+        if (frame < 0) frame = 0;
+        frame %= fireFrameCount;
+        constexpr float insetPx = 0.5f;
+        float px = frame * fireFrameW;
+        u0 = (px + insetPx) / fireSheetW;
+        u1 = (px + fireFrameW - insetPx) / fireSheetW;
+        v0 = insetPx / fireSheetH;
+        v1 = (fireFrameH - insetPx) / fireSheetH;
+        return true;
+    }
+
+    bool getSawUv(int frame, float& u0, float& v0, float& u1, float& v1)
+    {
+        if (frame < 0) frame = 0;
+        frame %= sawFrameCount;
+        constexpr float insetPx = 0.5f;
+        float px = frame * sawFrameW;
+        u0 = (px + insetPx) / sawSheetW;
+        u1 = (px + sawFrameW - insetPx) / sawSheetW;
+        v0 = insetPx / sawSheetH;
+        v1 = (sawFrameH - insetPx) / sawSheetH;
+        return true;
+    }
 
 
 
@@ -395,6 +497,22 @@ namespace sprite
             checkpointTimer -= checkpointFrameTime;
             checkpointFrame = (checkpointFrame + 1) % checkpointFrameCount;
         }
+
+        // fire (tile 24)
+        fireTimer += dt;
+        while (fireTimer >= fireFrameTime)
+        {
+            fireTimer -= fireFrameTime;
+            fireFrame = (fireFrame + 1) % fireFrameCount;
+        }
+
+        // saw (tile 25)
+        sawTimer += dt;
+        while (sawTimer >= sawFrameTime)
+        {
+            sawTimer -= sawFrameTime;
+            sawFrame = (sawFrame + 1) % sawFrameCount;
+        }
     }
 
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size)
@@ -424,6 +542,26 @@ namespace sprite
 
             gfx::Vec2 cpSize{ size.x * 0.85f, size.y * 0.85f };
             gfx::drawSprite(checkpointTex, pos, 0.0f, cpSize, u0, v0, u1, v1);
+            return true;
+        }
+
+        // Tile 24 = fire (animated, fits exactly in cell)
+        if (tileType == 24)
+        {
+            if (!fireTex_) return true;
+            float u0{}, v0{}, u1{}, v1{};
+            getFireUv(fireFrame, u0, v0, u1, v1);
+            gfx::drawSprite(fireTex_, pos, 0.0f, size, u0, v0, u1, v1);
+            return true;
+        }
+
+        // Tile 25 = saw (animated, fits exactly in cell)
+        if (tileType == 25)
+        {
+            if (!sawTex_) return true;
+            float u0{}, v0{}, u1{}, v1{};
+            getSawUv(sawFrame, u0, v0, u1, v1);
+            gfx::drawSprite(sawTex_, pos, 0.0f, size, u0, v0, u1, v1);
             return true;
         }
 

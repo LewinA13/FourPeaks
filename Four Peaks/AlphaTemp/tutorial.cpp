@@ -127,6 +127,75 @@ namespace
                     continue;
                 }
 
+                // Inverted spike (9)
+                if (tileType == 9)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        gfx::Vec2 spikeSize{ size.x, size.y * 1.5f };
+                        gfx::Vec2 spikePos = pos;
+                        spikePos.y -= (spikeSize.y - size.y) * 0.5f;
+                        gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, 0.0f, 1.0f, 1.0f, 0.0f);
+                    }
+                    continue;
+                }
+
+                // Left-facing spike (26) and right-facing spike (27)
+                if (tileType == 26 || tileType == 27)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        gfx::Vec2 ss{ size.x * 1.5f, size.y };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                    continue;
+                }
+
+                // Grass tile (ID 23)
+                if (tileType == 23)
+                {
+                    AEGfxTexture* t = sprite::grass();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                    continue;
+                }
+
+                // Standalone seasonal tiles (replace old sprites for IDs 1,3,5,7)
+                if (tileType == 1)
+                {
+                    AEGfxTexture* t = sprite::spring1();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+                if (tileType == 3)
+                {
+                    AEGfxTexture* t = sprite::spring2();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+                if (tileType == 5)
+                {
+                    AEGfxTexture* t = sprite::autumn1();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+                if (tileType == 7)
+                {
+                    AEGfxTexture* t = sprite::autumn2();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+
                 // Tileset UV tiles (6/7 etc.)
                 float u0{}, v0{}, u1{}, v1{};
                 AEGfxTexture* tex = sprite::tileset();

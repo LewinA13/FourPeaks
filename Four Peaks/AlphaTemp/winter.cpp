@@ -305,7 +305,7 @@ namespace game {
                 // Melon (animated, type 8)
                 if (tileType == 8)
                 {
-                    
+
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(8, pos, size);
@@ -317,7 +317,7 @@ namespace game {
                 // Checkpoint (animated, type 10)
                 if (tileType == 10)
                 {
-                    
+
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(10, pos, size);
@@ -382,6 +382,32 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
+                }
+                // Left-facing spike (26) and right-facing spike (27)
+                else if (tileType == 26 || tileType == 27)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        gfx::Vec2 ss{ size.x * 1.5f, size.y };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
+                // Grass tile (ID 23)
+                else if (tileType == 23)
+                {
+                    AEGfxTexture* t = sprite::grass();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
+                else if (sprite::drawAnimatedTile(tileType, pos, size))
+                {
+                    // handled
                 }
                 // Normal tiles
                 else
@@ -680,7 +706,7 @@ namespace game {
 
                 if (tileType == 8)
                 {
-                    
+
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(8, pos, size);
@@ -692,7 +718,7 @@ namespace game {
                 // Checkpoint (animated, type 10)
                 if (tileType == 10)
                 {
-                    
+
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(10, pos, size);
@@ -742,6 +768,32 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
+                }
+                // Left-facing spike (26) and right-facing spike (27)
+                else if (tileType == 26 || tileType == 27)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        gfx::Vec2 ss{ size.x * 1.5f, size.y };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
+                // Grass tile (ID 23)
+                else if (tileType == 23)
+                {
+                    AEGfxTexture* t = sprite::grass();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
+                else if (sprite::drawAnimatedTile(tileType, pos, size))
+                {
+                    // handled
                 }
                 // Normal tiles
                 else
@@ -930,7 +982,7 @@ namespace game {
         }
 
         for (auto& ice : iceTiles) {
-            ice.triggered = false; 
+            ice.triggered = false;
         }
 
 
@@ -949,7 +1001,7 @@ namespace game {
 
         //! check only if breakingIce is triggered but havent being destroyed
         for (auto& ice : iceTiles) {
-            if (ice.triggered && !ice.destroyed ) {
+            if (ice.triggered && !ice.destroyed) {
                 ice.timer += dt;
                 //! update the frame
                 int newFrame = static_cast<int>(ice.timer / sprite::crackFrameTime);
@@ -968,7 +1020,7 @@ namespace game {
         //! if player dead and respawning, reset all ice states 
         if (gGame.player.respawning) {
             for (auto& ice : iceTiles) {
-                tileMap[ice.row][ice.col] = 1; 
+                tileMap[ice.row][ice.col] = 1;
                 ice.triggered = false;
                 ice.timer = 0.0f;
                 ice.crackFrame = 0;
@@ -1174,6 +1226,32 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
+                }
+                // Left-facing spike (26) and right-facing spike (27)
+                else if (tileType == 26 || tileType == 27)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        gfx::Vec2 ss{ size.x * 1.5f, size.y };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
+                // Grass tile (ID 23)
+                else if (tileType == 23)
+                {
+                    AEGfxTexture* t = sprite::grass();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
+                else if (sprite::drawAnimatedTile(tileType, pos, size))
+                {
+                    // handled
                 }
                 // Normal tiles
                 else
@@ -1546,6 +1624,32 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
+                }
+                // Left-facing spike (26) and right-facing spike (27)
+                else if (tileType == 26 || tileType == 27)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        gfx::Vec2 ss{ size.x * 1.5f, size.y };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
+                // Grass tile (ID 23)
+                else if (tileType == 23)
+                {
+                    AEGfxTexture* t = sprite::grass();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
+                else if (sprite::drawAnimatedTile(tileType, pos, size))
+                {
+                    // handled
                 }
                 // Normal tiles
                 else

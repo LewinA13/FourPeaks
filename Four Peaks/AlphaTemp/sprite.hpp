@@ -24,6 +24,9 @@ namespace sprite
     // summer background texture summerbg.png
     AEGfxTexture* summerBackground();
 
+    // autumn background texture autumnbg.jpg
+    AEGfxTexture* autumnBackground();
+
     // coin spritesheet (coin_.png)
     AEGfxTexture* coin();
 
@@ -39,7 +42,7 @@ namespace sprite
     // heatbar spritesheet (heatbar.png)
     AEGfxTexture* heatbar();
 
-	AEGfxTexture* mmBackground();
+    AEGfxTexture* mmBackground();
 
     // sign texture (sign.jpg)
     AEGfxTexture* sign();
@@ -49,6 +52,34 @@ namespace sprite
     AEGfxTexture* tile02();
     // bottle texture (bottle.jpg)
     AEGfxTexture* bottle();
+
+    // -----------------------------------------------------------------
+    // Standalone seasonal tile textures
+    // Tile IDs:
+    //   1 -> spring1
+    //   3 -> spring2
+    //   5 -> autumn1
+    //   7 -> autumn2
+    // -----------------------------------------------------------------
+    AEGfxTexture* spring1();
+    AEGfxTexture* spring2();
+    AEGfxTexture* autumn1();
+    AEGfxTexture* autumn2();
+
+    // -----------------------------------------------------------------
+    // New tile textures
+    // 23 -> grass (grasss.png, single frame)
+    // 24 -> fire  (fire.png,   animated spritesheet, 8 frames 20x24)
+    // 25 -> saw   (saw.png,    animated spritesheet, 8 frames 38x38)
+    // 26 -> spike facing LEFT  (uses spikes texture, rotated)
+    // 27 -> spike facing RIGHT (uses spikes texture, rotated)
+    // -----------------------------------------------------------------
+    AEGfxTexture* grass();
+    AEGfxTexture* fireTex();
+    AEGfxTexture* sawTex();
+
+    bool getFireUv(int frame, float& u0, float& v0, float& u1, float& v1);
+    bool getSawUv(int frame, float& u0, float& v0, float& u1, float& v1);
 
 
     // UVs for checkpoint animation frames
@@ -65,7 +96,7 @@ namespace sprite
 
     // Update shared animated tiles (coin/checkpoint/crack) once per frame
     void updateAnimatedTiles(f32 dt);
-    
+
     // Draw animated tiles by tileType. Returns true if it drew something.
     // Use this inside any stage tile loop.
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size);
