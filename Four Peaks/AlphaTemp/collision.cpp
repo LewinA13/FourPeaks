@@ -219,12 +219,11 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				if (screenY < 0) screenY += (float)AEGfxGetWindowHeight();
 				float playerHeadY = screenY + player.colliderSize.y / 2.0f;
 
-				//! set this val to check if playerfeet is over 40% of tile, further check overlap, otherwise dont check and return
-				float tileDeadZoneY = (r + 0.4f) * tileH;
+				bool spikeNotAtHead = (r != box.rowEnd);
 
-				bool spikeNotAtFeet = (r != box.rowStart);
+				float tileDeadZoneY = (r + 0.5f) * tileH;
 
-				if (spikeNotAtFeet) {
+				if (spikeNotAtHead) {
 					float overlapRatio = calculateSpikeOverlapRatio(player, r, box, levelLayout);
 					if (overlapRatio > 0.0f) {
 						player.currGroundType = Player::GroundType::Spikes;
