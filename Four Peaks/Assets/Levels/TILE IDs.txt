@@ -33,3 +33,9 @@ TILE IDs
 18 = bottle 
 
 19 = sign 
+
+23 - grass
+
+24 - fire
+
+25 - wheel of death
