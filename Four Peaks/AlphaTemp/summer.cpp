@@ -64,6 +64,43 @@ namespace game {
         return false;
     }
 
+
+    // -------------------------------------------------------------------
+    // Heat for summer
+    // -------------------------------------------------------------------
+    void HeatUpdate(float dt)
+    {
+        gGame.player.heat -= 0.04f * dt;
+        if (gGame.player.heat < 0.0f) gGame.player.heat = 0.0f;
+        if (gGame.player.heat <= 0.0f && gGame.player.alive)
+            PlayerKill(gGame.player);
+    }
+
+    void HeatDraw()
+    {
+        AEGfxTexture* hbTex = sprite::heatbar();
+        if (!hbTex) return;
+
+        int frame = (int)((1.0f - gGame.player.heat) * 5.0f);  // was 11.0f
+        if (frame < 0) frame = 0;
+        if (frame > 5) frame = 5;
+
+        float u0, v0, u1, v1;
+        sprite::getHeatBarUv(frame, u0, v0, u1, v1);
+
+        float maxX = AEGfxGetWinMaxX();
+        float maxY = AEGfxGetWinMaxY();
+        gfx::Vec2 hbPos{ maxX - 55.0f, maxY - 55.0f };
+        gfx::Vec2 hbSize{ 90.0f, 90.0f };
+
+        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+        gfx::drawSprite(hbTex, hbPos, 0.0f, hbSize, u0, v0, u1, v1);
+        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+        AEGfxSetBlendMode(AE_GFX_BM_NONE);
+    }
+
+
     // ===================================================================
     // SUMMER STAGE 1
     // ===================================================================
@@ -101,6 +138,8 @@ namespace game {
             float dx = gGame.player.pos.x - (gx + cw * 0.5f);
             float dy = gGame.player.pos.y - (gy + ch * 0.5f);
             if (sqrt(dx * dx + dy * dy) < cw * 1.5f) return 20;
+
+            HeatUpdate(dt);
         }
         sprite::updateAnimatedTiles(dt);
         return 0;
@@ -136,6 +175,7 @@ namespace game {
                 }
             }
         }
+        HeatDraw();
         PlayerDraw(gGame.player);
     }
 
@@ -281,6 +321,7 @@ namespace game {
             float dx = gGame.player.pos.x - (gx + cw * 0.5f);
             float dy = gGame.player.pos.y - (gy + ch * 1.0f);
             if (sqrt(dx * dx + dy * dy) < cw * 1.5f) return 21;
+            HeatUpdate(dt);
         }
         sprite::updateAnimatedTiles(dt);
         return 0;
@@ -311,6 +352,7 @@ namespace game {
                 }
             }
         }
+        HeatDraw();
         PlayerDraw(gGame.player);
     }
 
@@ -448,6 +490,7 @@ namespace game {
             float dx = gGame.player.pos.x - (gx + cw * 1.0f);
             float dy = gGame.player.pos.y - (gy + ch * 0.5f);
             if (sqrt(dx * dx + dy * dy) < cw * 1.5f) return 22;
+            HeatUpdate(dt);
         }
         for (auto& trigger : g_triggeredIceTiles)
             for (auto& ice : iceTiles)
@@ -490,6 +533,7 @@ namespace game {
                 }
             }
         }
+        HeatDraw();
         PlayerDraw(gGame.player);
     }
 
@@ -643,7 +687,10 @@ namespace game {
     int SummerS4::update(float dt) {
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
         if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
-        if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
+        if (!camera::isTransitioning()) {
+            PlayerUpdate(gGame.player, dt);
+            HeatUpdate(dt);
+        } 
         sprite::updateAnimatedTiles(dt);
         for (auto& trigger : g_triggeredIceTiles)
             for (auto& ice : iceTiles)
@@ -674,6 +721,7 @@ namespace game {
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 4 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+        HeatDraw();
         PlayerDraw(gGame.player);
     }
 

@@ -16,92 +16,208 @@ namespace UI {
         timePerChar = 1.0f / 20.0f;
         wordSize = 2.0f;
 
-        for (int i = 0; i < 10; i++) {
-            hasShown[i] = false;
-        }
 
      
 
     }
 
     void Dialog::initialize() {
+
+
+        // =========================================================
+        // Prologue
+        // =========================================================
+        levelDialogs[50] = {
+            "For generations, my family sought the four seasonal relics hidden atop this mountain.",
+            "No archaeologist has ever returned with all four.",
+            "My father... and his father before him... never came back.",
+            "All they left behind was this map - and their notes.",
+            "The mountain only reveals its path during specific seasons.",
+            "This time... I will finish what they started."
+        };
+
    
-        levelDialogs[1] = {  // WinterS1
-
-
-          /*  "Stage 1!",
-            "Hello there..."*/
-          "Have you even wondered",
-          "Why must we serve?",
-          "When we holding gun",
-          "Children having fun"
+        // =========================================================
+        // Tutorial stage
+        // =========================================================
+        levelDialogs[0] = {  // Tutorial 1
+            "I've trained my whole life for this climb.",
+            "Move with care. Every step matters.",
+            "Press [W]/ [A]/ [S]/ [D] for moving",
+            "[SHIFT] for dashing",
+            "[SPACE] for jumping"
         };
 
-        levelDialogs[2] = {  // WinterS2
-           /* "Stage 2!",
-            "Watch out for spikes."*/
-            "Where is my song?"
+        levelDialogs[1] = {  // Tutorial 2
+            "The flag play a crucial part!!!",
+            "Touch it to save your progress."
         };
 
-        levelDialogs[3] = {  // WinterS3
-            /*"You're doing great!",
-            "The summit is near."*/
-            "Count by the count by the left foot count yay!",
-            "1"
+        levelDialogs[2] = {  // Tutorial 3
+            "At the peak lie four relics - Frost, Flame, Wind, and Harvest.",
+            "Winter is the first path to open. The climb begins now."
         };
 
-        levelDialogs[4] = {  // WinterS4
-            //"One last push!"
-            "Cant hear you lah"
+
+        // =========================================================
+        // Winter stage
+        // =========================================================
+        levelDialogs[10] = {  // WinterS1
+            "Remembering Dad's Note:",
+            "The ice will betray your footing. Don't trust the ground.",
+            "...but first, watch your step. Those spikes are unforgiving."
         };
+
+        levelDialogs[11] = {  // WinterS2
+            "Remembering Dad's Note:",
+            "The ice will betray your footing. Don't trust the ground.",
+            "...but first, watch your step. Those spikes are unforgiving."
+        };
+
+        levelDialogs[12] = {  // WinterS3
+            "The ice... it doesn't feel stable."
+        };
+
+        levelDialogs[13] = {  // WinterS4 sign
+            "Relic of Frost obtained.",
+            "One relic down. I'm closer than they ever were."
+        };
+
+
+        // =========================================================
+        // Summer stage
+        // =========================================================
+        levelDialogs[20] = {  // SummerS1
+            "Dad's Note:",
+            "Heat kills faster than hunger. Find water - or faint.",
+            "I can already feel the scorching heat.",
+            "I need to find water bottles to stay cool."
+        };
+
+        levelDialogs[21] = {  // SummerS2
+            "The heat is getting worse the higher I climb."
+        };
+
+        levelDialogs[22] = {  // SummerS3
+            "Water... I need water.",
+            "Dad never mentioned it would be this bad."
+        };
+
+        levelDialogs[23] = {  // SummerS4 sign
+            "Relic of Flame obtained.",
+            "The mountain grows harsher. But so do I."
+        };
+
+        // =========================================================
+        // Spring stage
+        // =========================================================
+        levelDialogs[30] = {  // SpringS1
+            "The winds push against me.",
+            "Every step forward is a fight."
+        };
+
+        levelDialogs[31] = {  // SpringS2
+            "Dad's Note:",
+            "The giant mushrooms can launch you higher.",
+            "Use them wisely."
+        };
+
+        levelDialogs[32] = {  // SpringS3
+            "The wind howls louder the higher I climb.",
+            "One wrong jump... and I'm gone."
+        };
+
+        levelDialogs[33] = {  // SpringS4 sign
+            "Relic of Wind obtained.",
+            "Just one more season."
+        };
+
+        // =========================================================
+        // Autumn stage
+        // =========================================================
+        levelDialogs[40] = {  // AutumnS1
+            "Dad's Note:",
+            "When the leaves fall thick... you won't see what's ahead.",
+            "Wonder what that means."
+        };
+
+        levelDialogs[41] = {  // AutumnS2
+            "The ground is buried in leaves.",
+            "Every step drags."
+        };
+
+        levelDialogs[42] = {  // AutumnS3
+            "I can't see the traps beneath.",
+            "I have to trust my instincts."
+        };
+
+        levelDialogs[43] = {  // AutumnS4 sign
+            "This must be the final stretch."
+        };
+
+        levelDialogs[44] = {  // AutumnS5 relic
+            "Relic of Harvest obtained.",
+            "Four relics.",
+            "The mountain is conquered."
+        };
+
+
     }
+
 
     //! check current level and show dialog for that level
     void Dialog::showForLevel(int levelID) {
         //! skip if already shown or no dialog exists at that level
-        if (hasShown[levelID]) return;
         if (levelDialogs.find(levelID) == levelDialogs.end()) return;
 
+        if (currentLevelID == levelID) {
+            isShowing = true;
+            return;
+        }
 
+        currentLevelID = levelID;
         texts = levelDialogs[levelID];
         currentIndex = 0;
-        displayedChars = 0;      
-        typeWriterTimer = 0.0f;    
+        displayedChars = 0;
+        typeWriterTimer = 0.0f;
         isShowing = true;
-        hasShown[levelID] = true;
     }
 
     void Dialog::update(float dt) {
         if (!isShowing) return;
 
+        if (!playerNearSign) {
+            isShowing = false;
+            return;
+        }
+
+
         size_t currentTextLength = texts[currentIndex].length();
 
-        //! check if current showing char is less than length of string
         if (displayedChars < currentTextLength) {
-
             typeWriterTimer += dt;
-
-            //! if reach the timing set before, display another char, reset typewriterTimer
             if (typeWriterTimer >= timePerChar) {
-                displayedChars++;        
-                typeWriterTimer = 0.0f;     
+                displayedChars++;
+                typeWriterTimer = 0.0f;
             }
         }
 
-        if (AEInputCheckTriggered(AEVK_RETURN)) {
-            // skip typewriter animation if ENTER pressed mid-sentence
+        if (playerNearSign && AEInputCheckTriggered(AEVK_UP)) {
+            if (currentIndex > 0) {
+                currentIndex--;
+                displayedChars = 0;
+                typeWriterTimer = 0.0f;
+            }
+        }
+
+        if (playerNearSign && AEInputCheckTriggered(AEVK_DOWN)) {
             if (displayedChars < currentTextLength) {
                 displayedChars = currentTextLength;
             }
-            else {//! if string finished
-
-                currentIndex++;
-
-                if (currentIndex >= texts.size()) {
-                    isShowing = false;  
-                }
-                else { 
-                    displayedChars = 0;   
+            else {
+                if (currentIndex+1 < (int)texts.size()) {
+                    currentIndex++;
+                    displayedChars = 0;
                     typeWriterTimer = 0.0f;
                 }
             }
@@ -133,8 +249,11 @@ namespace UI {
         float boxHeight = 100.0f;
         gfx::drawRectangle({ boxX, boxY }, 0.0f, { boxWidth, boxHeight }, 0x88000000);
 
-        if (currentIndex < texts.size())
-        {
+
+
+    
+
+        if (currentIndex < texts.size()){
             std::string fullText = texts[currentIndex];
             std::string visibleText = fullText.substr(0, displayedChars);
                                                  
@@ -154,9 +273,30 @@ namespace UI {
             AEGfxPrint(gFontId, pText, drawX, drawY, wordSize, 1.0f, 1.0f, 1.0f, 1.0f);
         }
 
+        if (currentIndex > 0) {
+            gfx::drawTriangle({ 550,350 }, 0.0f, { 25.0f,25.0f }, 0xFF00FF00);
+        }
+        if (currentIndex + 1 < (int)texts.size() || displayedChars < texts[currentIndex].length()) {
+            gfx::drawTriangle({ 550,250 }, PI, { 25.0f,25.0f }, 0xFF00FF00);
+        }
+
         AEGfxSetCamPosition(oldX, oldY);
     }
 
+
+    
+
+    void Dialog::reset() {
+        isShowing = false;
+        currentIndex = 0;
+        displayedChars = 0;
+        typeWriterTimer = 0.0f;
+    
+    }
+
+    void Dialog::PLAYERNEARSIGN(bool detect) {
+        playerNearSign = detect;
+    }
    
 }
 	

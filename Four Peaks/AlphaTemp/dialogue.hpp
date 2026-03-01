@@ -24,6 +24,9 @@ namespace UI{
         void showForLevel(int levelID);
         void next();
         bool isActive() const { return isShowing; }
+        void reset();
+
+        void PLAYERNEARSIGN(bool detect);
 
     private:
 
@@ -38,11 +41,16 @@ namespace UI{
         //! check dialog is showing currently or not
         bool isShowing;
 
+        bool playerNearSign = false;
+
+        int currentLevelID = -1;
+
+
         //! check which level have been shown up
-        bool hasShown[10];
 
         float toNormalizedX(float pixelX);
         float toNormalizedY(float pixelY);
+
 
         // *****************************        TYPEWRITER                   **************************************************************************
         size_t displayedChars;   
@@ -53,4 +61,7 @@ namespace UI{
 
 
     };
+
+    extern Dialog gDialog;  
+
 }

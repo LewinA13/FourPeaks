@@ -36,41 +36,6 @@ namespace game {
     }
 
 
-    // -------------------------------------------------------------------
-    // Heat for summer
-    // -------------------------------------------------------------------
-    void HeatUpdate(float dt)
-    {
-        gGame.player.heat -= 0.04f * dt;
-        if (gGame.player.heat < 0.0f) gGame.player.heat = 0.0f;
-        if (gGame.player.heat <= 0.0f && gGame.player.alive)
-            PlayerKill(gGame.player);
-    }
-
-    void HeatDraw()
-    {
-        AEGfxTexture* hbTex = sprite::heatbar();
-        if (!hbTex) return;
-
-        int frame = (int)((1.0f - gGame.player.heat) * 5.0f);  // was 11.0f
-        if (frame < 0) frame = 0;
-        if (frame > 5) frame = 5;
-
-        float u0, v0, u1, v1;
-        sprite::getHeatBarUv(frame, u0, v0, u1, v1);
-
-        float maxX = AEGfxGetWinMaxX();
-        float maxY = AEGfxGetWinMaxY();
-        gfx::Vec2 hbPos{ maxX - 55.0f, maxY - 55.0f };
-        gfx::Vec2 hbSize{ 90.0f, 90.0f };
-
-        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-        gfx::drawSprite(hbTex, hbPos, 0.0f, hbSize, u0, v0, u1, v1);
-        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-        AEGfxSetBlendMode(AE_GFX_BM_NONE);
-    }
-
 
     // ===================================================================
     // SUMMER STAGE 1 IMPLEMENTATION
@@ -141,7 +106,6 @@ namespace game {
         if (!camera::isTransitioning())
         {
             PlayerUpdate(gGame.player, dt);
-            HeatUpdate(dt);
         }
 
         // Check if player reached the teleport zone
@@ -243,7 +207,6 @@ namespace game {
 
 
         PlayerDraw(gGame.player);
-        HeatDraw();
     }
 
     // -------------------------------------------------------------------
@@ -325,6 +288,14 @@ namespace game {
                     AEGfxSetBlendMode(AE_GFX_BM_NONE);
                     continue; // Not solid, skip border drawing
                 }
+
+                if (tileType == 19)
+                {
+                    AEGfxTexture* tex = sprite::sign();
+                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                }
+
 
                 if (tileType == 12)
                 {
@@ -725,6 +696,13 @@ namespace game {
                     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                     AEGfxSetBlendMode(AE_GFX_BM_NONE);
                     continue;
+                }
+
+                if (tileType == 19)
+                {
+                    AEGfxTexture* tex = sprite::sign();
+                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }
 
                 // Ice tile
@@ -1159,6 +1137,14 @@ namespace game {
                     continue;
                 }
 
+                if (tileType == 19)
+                {
+                    AEGfxTexture* tex = sprite::sign();
+                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                }
+
+
                 // Ice tile
                 if (tileType == 11)
                 {
@@ -1556,6 +1542,13 @@ namespace game {
                     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                     AEGfxSetBlendMode(AE_GFX_BM_NONE);
                     continue;
+                }
+
+                if (tileType == 19)
+                {
+                    AEGfxTexture* tex = sprite::sign();
+                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }
 
                 //Breaking Ice tile (type 1)

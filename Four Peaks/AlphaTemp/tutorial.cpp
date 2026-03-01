@@ -196,6 +196,13 @@ namespace
                     continue;
                 }
 
+                if (tileType == 19)
+                {
+                    AEGfxTexture* tex = sprite::sign();
+                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                }
+
                 // Tileset UV tiles (6/7 etc.)
                 float u0{}, v0{}, u1{}, v1{};
                 AEGfxTexture* tex = sprite::tileset();
