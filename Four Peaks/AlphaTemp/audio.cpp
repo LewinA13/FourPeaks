@@ -76,14 +76,12 @@ static void PlayBgm_Internal(BgmType type)
 
 void audio::update(BgmType desiredBgm)
 {
-    // Ensures audio plays continuosly
     AEAudioUpdate();
 
-    // Apply volume changes every frame
+    // Both groups now follow the same slider
     AEAudioSetGroupVolume(s_musicGroup, gGame.musicVol);
-    AEAudioSetGroupVolume(s_sfxGroup, gGame.sfxVol);
+    AEAudioSetGroupVolume(s_sfxGroup, gGame.musicVol);
 
-    // Switch BGM only when needed
     if (desiredBgm != s_currentBgm)
     {
         PlayBgm_Internal(desiredBgm);

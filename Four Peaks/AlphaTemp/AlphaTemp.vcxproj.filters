@@ -57,6 +57,12 @@
     <ClCompile Include="audio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="splash.hpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="splash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gamestate.hpp">

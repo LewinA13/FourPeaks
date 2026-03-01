@@ -11,6 +11,7 @@
 #include "AEEngine.h"
 #include "AEFrameRateController.h"
 #include "sprite.hpp"
+#include "gamestate.hpp"
 #include <cstdint>
 #include <cstring>
 
@@ -55,8 +56,9 @@ namespace game
     // -------------------------------------------------------------------------
     static f32 textHalfWidth(const char* text, f32 scale = 1.0f)
     {
-        const f32 charWidth = 0.014f;   // measured: ~0.151 units for "How To Play" (11 chars) at scale 1.0
-        return static_cast<int>(strlen(text)) * charWidth * scale * 0.5f;
+        f32 w = 0.f, h = 0.f;
+        AEGfxGetPrintSize(gFontId, text, scale, &w, &h);
+        return w * 0.5f;
     }
 
     // Dynamic centered print — x shifts based on actual string length
@@ -64,7 +66,7 @@ namespace game
         const char* text, f32 scale = 1.0f)
     {
         f32 x = -textHalfWidth(text, scale);
-        printText(x + 0.01f, y, color, text, scale);
+        printText(x, y, color, text, scale);
     }
 
     // -------------------------------------------------------------------------
@@ -89,8 +91,7 @@ namespace game
     // Constructor — load frames + build the full-screen quad mesh
     // -------------------------------------------------------------------------
     // Settings state
-    static float gVolume = 1.0f;   // 0.0 – 1.0
-    static bool  gMuted = false;
+
 
     MainMenu::MainMenu()
         : selectedIndex(0)
@@ -172,20 +173,23 @@ namespace game
             // Volume UP — right arrow or '='
             if (AEInputCheckTriggered(AEVK_RIGHT))
             {
-                gMuted = false;
-                gVolume = min(gVolume + 0.1f, 1.0f);
+                gGame.musicVol = min(gGame.musicVol + 0.1f, 1.0f);
             }
-            // Volume DOWN — left arrow or '-'
             if (AEInputCheckTriggered(AEVK_LEFT))
             {
-                gVolume = max(gVolume - 0.1f, 0.0f);
-                gMuted = (gVolume <= 0.0f);
-
+                gGame.musicVol = max(gGame.musicVol - 0.1f, 0.0f);
             }
-            // Mute toggle — M key
             if (AEInputCheckTriggered(AEVK_M))
             {
-                gMuted = !gMuted;
+                // Store pre-mute volume, then toggle mute by zeroing musicVol
+                static float sMuteSave = 1.0f;
+                if (gGame.musicVol > 0.0f) {
+                    sMuteSave = gGame.musicVol;
+                    gGame.musicVol = 0.0f;
+                }
+                else {
+                    gGame.musicVol = sMuteSave;
+                }
             }
             // Fullscreen toggle — F key or Enter
             if (AEInputCheckTriggered(AEVK_I))
@@ -213,11 +217,11 @@ namespace game
         {
             switch (selectedIndex)
             {
-            case 0: return 1;                        // Play  → winter state
-            case 1: showHowTo = true; return 0;   // How To Play
-            case 2: showSettings = true; return 0;   // Settings
-            case 3: return 4;                        // Tutorial (handle in game loop)
-            case 4: return 2;                        // Exit
+            case 0: return 1;                           // Play  → winter state
+            case 1: showHowTo = true; return 0;         // How To Play
+            case 2: showSettings = true; return 0;      // Settings
+            case 3: return 4;                           // Tutorial (handle in game loop)
+            case 4: return 2;                           // Exit
             }
         }
 
@@ -238,7 +242,7 @@ namespace game
         // Delete after completing allignment (Uselss for Production)
         // ------------------------------------------------------------------
         //for (f32 cy = -0.95f; cy <= 0.95f; cy += 0.06f)
-        //    printText(0.0f, y, 0xFFFF0000u, "|", 0.8f);
+        //  printText(0.0f, cy, 0xFFFF0000u, "|", 0.8f);
 
         // ------------------------------------------------------------------
         // 1. Draw the animated background
@@ -277,17 +281,17 @@ namespace game
         }
 
         // Title — large and prominent
-        printCentered(0.60f, 0xFFFFFF00u, "FOUR SEASONS PLATFORMER", 1.9f);
+        printCentered(0.60f, 0xFFFFFF00u, "FOUR SEASONS PLATFORMER", 3.5f);
 
         // Subtitle — well below title
-        printCentered(0.45f, 0xFF88CCFFu, "- A Journey Through the Seasons -", 0.75f);
+        printCentered(0.35f, 0xFF88CCFFu, "- A Journey Through the Seasons -", 1.25f);
 
         // Separator — large gap below subtitle before menu starts
-        printCentered(0.35f, 0xFF446644u, "================================", 0.8f);
+        printCentered(0.15f, 0xFF446644u, "=============================================", 1.0f);
 
         // Menu items — start low, leaving a big gap from the subtitle
         const f32 spacing = 0.13f;
-        f32       startY = 0.20f;
+        f32       startY = 0.00f;
 
         for (int i = 0; i < kMenuItemCount; ++i)
         {
@@ -296,12 +300,12 @@ namespace game
             if (i == selectedIndex)
             {
                 // Compute where the text starts so arrows sit flush beside it
-                f32 hw = textHalfWidth(kMenuItems[i], 1.1f);  // half text width
+                f32 hw = textHalfWidth(kMenuItems[i], 2.0f);  // half text width
                 f32 arrowGap = 0.07f;                               // gap between arrow and text edge
 
-                printCentered(y, 0xFF00FF44u, kMenuItems[i], 1.1f);
-                printText(-hw + 0.01f - arrowGap, y, 0xFF00FF44u, ">", 1.1f);
-                printText(hw + 0.01f + arrowGap - 0.03f, y, 0xFF00FF44u, "<", 1.1f);
+                printCentered(y, 0xFF00FF44u, kMenuItems[i], 2.0f);
+                printText(-hw + 0.01f - arrowGap, y, 0xFF00FF44u, ">", 2.0f);
+                printText(hw + 0.01f + arrowGap - 0.03f, y, 0xFF00FF44u, "<", 2.0f);
             }
             else
             {
@@ -311,8 +315,8 @@ namespace game
 
         // Bottom separator and hint — sit just below last item
         const f32 bottomY = startY - (kMenuItemCount - 1) * spacing - 0.12f;
-        printCentered(bottomY, 0xFF446644u, "================================", 0.8f);
-        printCentered(bottomY - 0.1f, 0xFF666666u, "UP / DOWN to navigate   ENTER to select", 0.65f);
+        printCentered(bottomY, 0xFF446644u, "=============================================", 1.0f);
+        printCentered(bottomY - 0.1f, 0xFF666666u, "UP / DOWN to navigate   ENTER to select", 0.85f);
     }
 
     // -------------------------------------------------------------------------
@@ -332,35 +336,31 @@ namespace game
     // -------------------------------------------------------------------------
     void MainMenu::drawSettings() const
     {
-        // Title
         printCentered(0.75f, 0xFF00FFFFu, "Settings", 1.3f);
 
-        // --- Fullscreen ---
         printCentered(0.40f, 0xFFFFFF00u, "Fullscreen");
         printCentered(0.20f, 0xFFFFFFFFu,
-            gIsFullscreen ? "[ ON ]  Press I or Enter to toggle"
-            : "[ OFF ] Press I or Enter to toggle");
+            gIsFullscreen ? "[ ON ]  Press I to toggle"
+            : "[ OFF ] Press I to toggle");
 
-        // --- Volume ---
         printCentered(-0.05f, 0xFFFFFF00u, "Volume");
 
-        // Build a simple ASCII bar: [########  ] 
         char volBar[32];
-        int  filled = static_cast<int>(gVolume * 10.0f + 0.5f);   // 0-10 segments
+        int filled = static_cast<int>(gGame.musicVol * 10.0f + 0.5f);
         volBar[0] = '[';
         for (int i = 0; i < 10; ++i)
             volBar[1 + i] = (i < filled) ? '#' : '-';
         volBar[11] = ']';
         volBar[12] = '\0';
 
-        u32 volColor = gMuted ? 0xFF888888u : 0xFFFFFFFFu;
-        printCentered(-0.22f, volColor, volBar, 1.0f);
+        bool muted = (gGame.musicVol <= 0.0f);
+        u32 volColor = muted ? 0xFF888888u : 0xFFFFFFFFu;
+        printCentered(-0.22f, volColor, volBar);
         printCentered(-0.38f, 0xFFAAAAAA, "Left / Right arrows to adjust   M to mute");
 
-        if (gMuted)
+        if (muted)
             printCentered(-0.52f, 0xFFFF4444u, "MUTED");
 
-        // --- Back ---
         printCentered(-0.75f, 0xFFFFFF00u, "Press ESC or Space to go back");
     }
 

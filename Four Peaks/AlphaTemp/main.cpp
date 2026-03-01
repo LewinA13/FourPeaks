@@ -9,6 +9,7 @@
 #include "gamestate.hpp"
 #include "sprite.hpp"
 #include "mainmenu.hpp"
+#include "splash.hpp"
 #include "tutorial.hpp"
 #include "winter.hpp"
 #include "summer.hpp"
@@ -23,6 +24,7 @@ s8 gFontId = -1;
 
 enum class SceneState
 {
+    Splash,
     MainMenu,
     HowToPlay,
     Tutorial1,
@@ -156,12 +158,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Load font once and share it.
     // Make sure this path points to a valid .ttf in your Assets folder.
-    gFontId = AEGfxCreateFont("Assets/Super Mellow.ttf", 24);
+    gFontId = AEGfxCreateFont("Assets/Font/L.ttf", 24);
 
     // Audio system + loading (done in audio.cpp)
     audio::init();
 
     // Game state objects.
+    game::SplashScreen splashScreen;
     game::MainMenu mainMenu;
 
     // Tutorial stages (3 levels before Winter)
@@ -180,8 +183,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     game::SummerS4 summerStage4;
 
 
-    // Start on the main menu.
-    SceneState currentState = SceneState::MainMenu;
+    // Start on the splash screen.
+    SceneState currentState = SceneState::Splash;
 
 
 
@@ -451,6 +454,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         switch (currentState)
         {
+        case SceneState::Splash:
+        {
+            action = splashScreen.update();
+            splashScreen.draw();
+
+            if (action == 1)
+                currentState = SceneState::MainMenu;
+        }
+        break;
+
         case SceneState::MainMenu:
         {
             action = mainMenu.update();
@@ -484,7 +497,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (action == 4) {
                 currentState = SceneState::Tutorial1;
-				camera::setY(0.0f);
+                camera::setY(0.0f);
             }
         }
         break;
