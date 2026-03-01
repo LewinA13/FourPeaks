@@ -195,6 +195,8 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 					float overlapRatio = calculateSpikeOverlapRatio(player, r, box, levelLayout);
 					if (overlapRatio > 0.0f) {
 						player.currGroundType = Player::GroundType::Spikes;
+						printf("detect spikes\n");
+
 						return;
 					}
 				}
@@ -207,6 +209,8 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 						float overlapRatio = calculateSpikeOverlapRatio(player, r, box, levelLayout);
 						if (overlapRatio >= 0.5f) {
 							player.currGroundType = Player::GroundType::Spikes;
+							printf("detect spikes\n");
+
 							return;
 						}
 					}
@@ -221,7 +225,7 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 
 				bool spikeNotAtHead = (r != box.rowEnd);
 
-				float tileDeadZoneY = (r + 0.5f) * tileH;
+				float tileDeadZoneY = (r + 0.6f) * tileH;
 
 				if (spikeNotAtHead) {
 					float overlapRatio = calculateSpikeOverlapRatio(player, r, box, levelLayout);
@@ -231,9 +235,7 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 					}
 				}
 				else {
-					bool edgeCase = (box.colStart != box.colEnd) &&
-						((levelLayout[r][box.colStart] == 0) || (levelLayout[r][box.colEnd] == 0));
-					if (edgeCase || playerHeadY >= tileDeadZoneY) {
+					if (playerHeadY >= tileDeadZoneY) {
 						float overlapRatio = calculateSpikeOverlapRatio(player, r, box, levelLayout);
 						if (overlapRatio >= 0.5f) {
 							player.currGroundType = Player::GroundType::Spikes;
