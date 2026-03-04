@@ -157,7 +157,8 @@ void PlayerRespawn(Player& p)
 
 void PlayerKill(Player& p) // PlayerKill(gGame.player)
 {
-    if (p.dead) return; // already dead, ignore repeated kills
+    if (p.dead) return;
+    if (gGame.cheatsOn) return;
 
     p.hp = 0;
     p.alive = false;
@@ -185,6 +186,7 @@ void PlayerKill(Player& p) // PlayerKill(gGame.player)
 void PlayerDamage(Player& p, int dmg)
 {
     if (p.dead) return;
+    if (gGame.cheatsOn) return;
     if (dmg <= 0) return;
 
     p.hp -= dmg;
@@ -533,6 +535,23 @@ void PlayerUpdate(Player& p, float dt)
     // Convert to velocity used for integration
     p.velX = p.horzSpeed * p.speed;
 
+    if (gGame.cheatsOn)
+    {
+        // Fly controls (replace jump in no-gravity mode)
+        const float flySpeed = 450.0f;
+
+        if (AEInputCheckCurr(AEVK_W)
+            || AEInputCheckCurr(AEVK_SPACE))
+            p.velY = flySpeed;
+        else if (AEInputCheckCurr(AEVK_S))
+            p.velY = -flySpeed;
+        else
+            p.velY = 0.0f;
+
+        // Optional: keep dash refilled
+        p.dashCount = p.maxDashCount;
+    }
+
     // =========================================================
     // 5) JUMP (ground / coyote)
     // coyote jump is allowing jump for a mini micro time even
@@ -557,7 +576,7 @@ void PlayerUpdate(Player& p, float dt)
     // 6) GRAVITY (vertical physics)
     //    Note: wall hanging/climb will override velY later.
     // =========================================================
-    if (!p.dashing)
+    if (!p.dashing && !gGame.cheatsOn)
     {
         float gravityScale = 1.0f;
 
@@ -630,7 +649,7 @@ void PlayerUpdate(Player& p, float dt)
     const float GROUND_PROBE_SPEED = 60.0f;
     const bool doingSpecialVertical = p.dashing || p.wallHanging || jumpPressed;
 
-    if (wasGrounded && !doingSpecialVertical)
+    if (!gGame.cheatsOn && wasGrounded && !doingSpecialVertical)
     {
         if (p.velY <= 0.0f)
             p.velY = -GROUND_PROBE_SPEED;
@@ -670,8 +689,16 @@ void PlayerUpdate(Player& p, float dt)
     {
         PlayerKill(p);
     }
-    CollisionUpdate(p, dt);
-    CollisionUpdateWallFlags(p);
+
+    if (!gGame.noClip)
+    {
+        CollisionUpdate(p, dt);
+        CollisionUpdateWallFlags(p);
+    }
+    else
+    {
+        p.grounded = false;
+    }
 
     const bool touchingWall = (p.onWallLeft || p.onWallRight);
 

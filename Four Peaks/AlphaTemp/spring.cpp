@@ -245,6 +245,7 @@ void game::SpringS1::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+    PlayerDraw(gGame.player);
 }
 
 u32 game::SpringS1::getTileColor(int tileType) const { return getTileColorCommon(tileType); }
@@ -292,6 +293,7 @@ void game::SpringS2::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+    PlayerDraw(gGame.player);
 }
 
 u32 game::SpringS2::getTileColor(int tileType) const { return getTileColorCommon(tileType); }
@@ -339,6 +341,7 @@ void game::SpringS3::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+    PlayerDraw(gGame.player);
 }
 
 u32 game::SpringS3::getTileColor(int tileType) const { return getTileColorCommon(tileType); }
@@ -376,6 +379,7 @@ void game::SpringS4::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+    PlayerDraw(gGame.player);
 }
 
 u32 game::SpringS4::getTileColor(int tileType) const { return getTileColorCommon(tileType); }
