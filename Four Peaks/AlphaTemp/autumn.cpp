@@ -88,6 +88,12 @@ namespace
 
     static void drawTilesCommon(int gridRows, int gridCols, int tileMap[][32], float stageBaseY = 0.0f)
     {
+        auto isSolid = [&](int r, int c) -> bool {
+            if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
+            int t = tileMap[r][c];
+            return (t == 1 || t == 3 || t == 5 || t == 6 || t == 7);
+            };
+
         for (int r = 0; r < gridRows; ++r)
         {
             for (int c = 0; c < gridCols; ++c)
@@ -97,132 +103,91 @@ namespace
 
                 float xWorld{}, yWorld{}, cellW{}, cellH{};
                 gridToWorldCommon(c, r, gridCols, gridRows, xWorld, yWorld, cellW, cellH);
-
-                // If you ever stack stages vertically, you can pass stageBaseY in.
                 yWorld += stageBaseY;
 
-                gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
+                gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f), std::round(yWorld + cellH * 0.5f) };
                 gfx::Vec2 size{ cellW, cellH };
 
-                // Animated tiles first (coin/checkpoint/fire/saw).
-                if (sprite::drawAnimatedTile(tileType, pos, size))
-                    continue;
+                float border = (cellW < cellH ? cellW : cellH) * 0.05f;
+                u32 borderColor = 0xFF000000;
 
-                // Grass tile (ID 23) - single static sprite
-                if (tileType == 23)
-                {
+                if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
+
+                if (tileType == 23) {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
-                    continue;
+                    // falls through to border pass
                 }
-
-                // Spikes - rendered taller than the cell, anchored to correct edge
-                // tileType 2  = up-facing spike
-                // tileType 9  = down-facing (inverted) spike
-                // tileType 26 = left-facing spike  (rotate spikes 90° CW via UV swap)
-                // tileType 27 = right-facing spike (rotate spikes 90° CCW via UV swap)
-                if (tileType == 2 || tileType == 9 || tileType == 26 || tileType == 27)
+                else if (tileType == 2 || tileType == 9 || tileType == 26 || tileType == 27)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
                         float heightScale = 1.5f;
-
                         if (tileType == 26 || tileType == 27)
                         {
-                            // Left/right spikes: scale width instead, fit exactly in cell
                             gfx::Vec2 spikeSize{ size.x * heightScale, size.y };
                             gfx::Vec2 spikePos = pos;
                             float u0, v0, u1, v1;
-                            if (tileType == 27)
-                            {
-                                // Right-facing: rotate 90 CCW  ? swap UV axes
-                                // Original: u goes left->right, v goes top->bottom
-                                // Rotate 90 CCW: map (u,v) -> (v, 1-u)
-                                u0 = 0.0f; v0 = 0.0f; u1 = 1.0f; v1 = 1.0f;
-                                // Use swapped UVs by drawing with transposed coords
-                                // We achieve 90° rotation by swapping U/V mapping:
-                                // draw with: u0=v_start, v0=u_start, u1=v_end, v1=u_end  but on a square that's same
-                                // Simplest: for right-facing, flip the spike horizontally from left
-                                // Left-facing = spike points left: v goes 0->1 top to bottom, u goes 0->1 left to right
-                                // To make it point right, flip U: u0=1,u1=0
-                                u0 = 1.0f; v0 = 0.0f; u1 = 0.0f; v1 = 1.0f;
-                                spikePos.x -= (spikeSize.x - size.x) * 0.5f;
-                            }
-                            else
-                            {
-                                // Left-facing: spike points left
-                                u0 = 0.0f; v0 = 0.0f; u1 = 1.0f; v1 = 1.0f;
-                                spikePos.x += (spikeSize.x - size.x) * 0.5f;
-                            }
+                            if (tileType == 27) { u0 = 1.0f; v0 = 0.0f; u1 = 0.0f; v1 = 1.0f; spikePos.x -= (spikeSize.x - size.x) * 0.5f; }
+                            else { u0 = 0.0f; v0 = 0.0f; u1 = 1.0f; v1 = 1.0f; spikePos.x += (spikeSize.x - size.x) * 0.5f; }
                             gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                         }
                         else
                         {
                             gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
                             gfx::Vec2 spikePos = pos;
-
                             float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-
-                            if (tileType == 2)
-                            {
-                                // UP-facing: anchor bottom to cell bottom
-                                spikePos.y += (spikeSize.y - size.y) * 0.5f;
-                            }
-                            else // tileType == 9
-                            {
-                                // DOWN-facing: anchor top to cell top, flip texture vertically
-                                spikePos.y -= (spikeSize.y - size.y) * 0.5f;
-                                v0 = 1.0f;
-                                v1 = 0.0f;
-                            }
-
+                            if (tileType == 2) { spikePos.y += (spikeSize.y - size.y) * 0.5f; }
+                            else { spikePos.y -= (spikeSize.y - size.y) * 0.5f; v0 = 1.0f; v1 = 0.0f; }
                             gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                         }
                     }
-                    continue;
+                    continue; // spikes are never solid
                 }
-
-                // Standalone seasonal tiles (replace old sprites for IDs 1,3,5,7)
-                if (tileType == 1)
-                {
+                else if (tileType == 1) {
                     AEGfxTexture* t = sprite::spring1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
-                    continue;
                 }
-                if (tileType == 3)
-                {
+                else if (tileType == 3) {
                     AEGfxTexture* t = sprite::spring2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
-                    continue;
                 }
-                if (tileType == 5)
-                {
+                else if (tileType == 5) {
                     AEGfxTexture* t = sprite::autumn1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
-                    continue;
                 }
-                if (tileType == 7)
-                {
+                else if (tileType == 7) {
                     AEGfxTexture* t = sprite::autumn2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
-                    continue;
+                }
+                else {
+                    float u0{}, v0{}, u1{}, v1{};
+                    if (sprite::getTileUv(tileType, u0, v0, u1, v1))
+                        gfx::drawSprite(sprite::tileset(), pos, 0.0f, size, u0, v0, u1, v1);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
                 }
 
-                // Regular tiles from tileset.
-                float u0{}, v0{}, u1{}, v1{};
-                if (sprite::getTileUv(tileType, u0, v0, u1, v1))
-                {
-                    gfx::drawSprite(sprite::tileset(), pos, 0.0f, size, u0, v0, u1, v1);
+                // ---- Borders (solid tiles only) ----
+                if (!isSolid(r, c)) continue;
+
+                if (!isSolid(r + 1, c)) {
+                    gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
                 }
-                else
-                {
-                    gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
+                if (!isSolid(r - 1, c)) {
+                    gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
+                }
+                if (!isSolid(r, c - 1)) {
+                    gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
+                }
+                if (!isSolid(r, c + 1)) {
+                    gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
                 }
             }
         }

@@ -97,6 +97,7 @@ namespace game
         : selectedIndex(0)
         , showHowTo(false)
         , showSettings(false)
+        , settingsRow(0)
     {
         // Load all 6 background frames
         bgFrames[0] = AEGfxTextureLoad("Assets/mmf1.png");
@@ -170,36 +171,47 @@ namespace game
         // ---- Settings sub-screen ----
         if (showSettings)
         {
-            // Volume UP — right arrow or '='
+            // settingsRow: 0 = Music volume, 1 = SFX volume
+            // UP / DOWN — switch between rows
+            if (AEInputCheckTriggered(AEVK_UP))
+                settingsRow = (settingsRow + 1) % 2;
+            if (AEInputCheckTriggered(AEVK_DOWN))
+                settingsRow = (settingsRow + 1) % 2;
+
+            // Convenience reference to whichever volume is active
+            float& activeVol = (settingsRow == 0) ? gGame.musicVol : gGame.sfxVol;
+
+            // LEFT / RIGHT — adjust volume of selected row
             if (AEInputCheckTriggered(AEVK_RIGHT))
-            {
-                gGame.musicVol = min(gGame.musicVol + 0.1f, 1.0f);
-            }
+                activeVol = min(activeVol + 0.1f, 1.0f);
             if (AEInputCheckTriggered(AEVK_LEFT))
-            {
-                gGame.musicVol = max(gGame.musicVol - 0.1f, 0.0f);
-            }
+                activeVol = max(activeVol - 0.1f, 0.0f);
+
+            // M — mute / unmute selected row
             if (AEInputCheckTriggered(AEVK_M))
             {
-                // Store pre-mute volume, then toggle mute by zeroing musicVol
-                static float sMuteSave = 1.0f;
-                if (gGame.musicVol > 0.0f) {
-                    sMuteSave = gGame.musicVol;
-                    gGame.musicVol = 0.0f;
+                static float sMusicMuteSave = 1.0f;
+                static float sSfxMuteSave = 1.0f;
+                float& muteSave = (settingsRow == 0) ? sMusicMuteSave : sSfxMuteSave;
+
+                if (activeVol > 0.0f) {
+                    muteSave = activeVol;
+                    activeVol = 0.0f;
                 }
                 else {
-                    gGame.musicVol = sMuteSave;
+                    activeVol = muteSave;
                 }
             }
-            // Fullscreen toggle — F key or Enter
+
+            // Fullscreen toggle — I key
             if (AEInputCheckTriggered(AEVK_I))
-            {
                 ToggleFullscreen();
-            }
+
             // Back — Escape or Space
             if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_SPACE))
             {
                 showSettings = false;
+                settingsRow = 0;   // reset cursor for next visit
             }
             return 0;
         }
@@ -338,30 +350,66 @@ namespace game
     {
         printCentered(0.75f, 0xFF00FFFFu, "Settings", 1.3f);
 
-        printCentered(0.40f, 0xFFFFFF00u, "Fullscreen");
-        printCentered(0.20f, 0xFFFFFFFFu,
+        // ------------------------------------------------------------------
+        // Fullscreen row
+        // ------------------------------------------------------------------
+        printCentered(0.50f, 0xFFFFFF00u, "Fullscreen");
+        printCentered(0.35f, 0xFFFFFFFFu,
             gIsFullscreen ? "[ ON ]  Press I to toggle"
             : "[ OFF ] Press I to toggle");
 
-        printCentered(-0.05f, 0xFFFFFF00u, "Volume");
+        // ------------------------------------------------------------------
+        // Helper lambda — builds the bar string and picks a color
+        // ------------------------------------------------------------------
+        auto buildBar = [](float vol, char* out) {
+            int filled = static_cast<int>(vol * 10.0f + 0.5f);
+            out[0] = '[';
+            for (int i = 0; i < 10; ++i)
+                out[1 + i] = (i < filled) ? '#' : '-';
+            out[11] = ']';
+            out[12] = '\0';
+            };
 
-        char volBar[32];
-        int filled = static_cast<int>(gGame.musicVol * 10.0f + 0.5f);
-        volBar[0] = '[';
-        for (int i = 0; i < 10; ++i)
-            volBar[1 + i] = (i < filled) ? '#' : '-';
-        volBar[11] = ']';
-        volBar[12] = '\0';
+        // ------------------------------------------------------------------
+        // Music volume row  (settingsRow == 0  → highlighted)
+        // ------------------------------------------------------------------
+        {
+            bool   selected = (settingsRow == 0);
+            u32    labelCol = selected ? 0xFF00FF44u : 0xFFFFFF00u;
+            bool   muted = (gGame.musicVol <= 0.0f);
+            u32    barCol = muted ? 0xFF888888u : (selected ? 0xFF00FF44u : 0xFFFFFFFFu);
 
-        bool muted = (gGame.musicVol <= 0.0f);
-        u32 volColor = muted ? 0xFF888888u : 0xFFFFFFFFu;
-        printCentered(-0.22f, volColor, volBar);
-        printCentered(-0.38f, 0xFFAAAAAA, "Left / Right arrows to adjust   M to mute");
+            printCentered(0.12f, labelCol, selected ? "> Music Volume <" : "  Music Volume  ");
 
-        if (muted)
-            printCentered(-0.52f, 0xFFFF4444u, "MUTED");
+            char bar[16];
+            buildBar(gGame.musicVol, bar);
+            printCentered(-0.03f, barCol, bar);
+            if (muted) printCentered(-0.15f, 0xFFFF4444u, "MUTED");
+        }
 
-        printCentered(-0.75f, 0xFFFFFF00u, "Press ESC or Space to go back");
+        // ------------------------------------------------------------------
+        // SFX volume row  (settingsRow == 1  → highlighted)
+        // ------------------------------------------------------------------
+        {
+            bool   selected = (settingsRow == 1);
+            u32    labelCol = selected ? 0xFF00FF44u : 0xFFFFFF00u;
+            bool   muted = (gGame.sfxVol <= 0.0f);
+            u32    barCol = muted ? 0xFF888888u : (selected ? 0xFF00FF44u : 0xFFFFFFFFu);
+
+            printCentered(-0.30f, labelCol, selected ? "> SFX Volume <" : "  SFX Volume  ");
+
+            char bar[16];
+            buildBar(gGame.sfxVol, bar);
+            printCentered(-0.45f, barCol, bar);
+            if (muted) printCentered(-0.57f, 0xFFFF4444u, "MUTED");
+        }
+
+        // ------------------------------------------------------------------
+        // Hint text
+        // ------------------------------------------------------------------
+        printCentered(-0.68f, 0xFFAAAAAA,
+            "UP/DOWN to switch   LEFT/RIGHT to adjust   M to mute");
+        printCentered(-0.80f, 0xFFFFFF00u, "Press ESC or Space to go back");
     }
 
 } // namespace game

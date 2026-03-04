@@ -31,6 +31,7 @@ namespace game
         int  selectedIndex; // 0=Play, 1=How To Play, 2=Exit
         bool showHowTo;     // true when help screen is shown
         bool showSettings;
+		int  settingsRow;    //For Background and SFX Selection
 
         void drawHowToPlay() const;
         void drawSettings() const;

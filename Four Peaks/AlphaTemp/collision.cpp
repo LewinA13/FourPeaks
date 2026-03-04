@@ -260,6 +260,9 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				//! only when player above on ice &&  player (stay or down)
 				if ((r == box.rowStart) && player.velY <= 0.0f) {
 					g_triggeredIceTiles.push_back({ r, c });
+
+					//This sets the ground that the player is currently standing on to be ice.
+					player.currGroundType = Player::GroundType::Ice;
 				}
 				break;
 			}
@@ -416,8 +419,8 @@ void applyGroundPhysics(Player& player) {
 		break;
 
 	case Player::GroundType::Ice:
-		player.accel = 20.0f;
-		player.decel = 2.0f;
+		player.accel = 25.0f;
+		player.decel = 1.0f;
 		break;
 
 	default:

@@ -189,6 +189,12 @@ namespace game {
     }
 
     void SummerS1::drawTiles() const {
+        auto isSolid = [&](int r, int c) -> bool {
+            if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
+            int t = tileMap[r][c];
+            return (t == 1 || t == 3 || t == 5 || t == 7 || t == 16 || t == 17 || t == 23);
+            };
+
         for (int row = 0; row < gridRows; ++row) {
             for (int col = 0; col < gridCols; ++col) {
                 int tileType = tileMap[row][col];
@@ -197,6 +203,9 @@ namespace game {
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
                 gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f), std::round(yWorld + cellH * 0.5f) };
                 gfx::Vec2 size{ cellW, cellH };
+
+                float border = (cellW < cellH ? cellW : cellH) * 0.05f;
+                u32 borderColor = 0xFF000000;
 
                 if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
 
@@ -211,7 +220,6 @@ namespace game {
                     continue;
                 }
 
-
                 if (tileType == 9) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
@@ -223,62 +231,69 @@ namespace game {
                     continue;
                 }
 
-                // Left-facing spike (26) and right-facing spike (27)
                 if (tileType == 26 || tileType == 27) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
                         gfx::Vec2 ss{ size.x * 1.5f, size.y };
                         gfx::Vec2 sp = pos;
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; } // left: anchor right edge
-                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; } // right: flip U
+                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                     continue;
                 }
 
-                // Grass tile (ID 23)
                 if (tileType == 23) {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
-                    continue;
                 }
-
-                if (drawSpecialTile(tileType, pos, size)) continue;
-
-                // Standalone seasonal tiles (replace old sprites for IDs 1,3,5,7)
-                if (tileType == 1) {
+                else if (drawSpecialTile(tileType, pos, size)) { /* drawn */ }
+                else if (tileType == 1) {
                     AEGfxTexture* t = sprite::spring1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
                 }
-                if (tileType == 3) {
+                else if (tileType == 3) {
                     AEGfxTexture* t = sprite::spring2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
                 }
-                if (tileType == 5) {
+                else if (tileType == 5) {
                     AEGfxTexture* t = sprite::autumn1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
                 }
-                if (tileType == 7) {
+                else if (tileType == 7) {
                     AEGfxTexture* t = sprite::autumn2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
+                }
+                else {
+                    float u0{}, v0{}, u1{}, v1{};
+                    AEGfxTexture* tex = sprite::tileset();
+                    if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                        gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                 }
 
-                float u0{}, v0{}, u1{}, v1{};
-                AEGfxTexture* tex = sprite::tileset();
-                if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                    gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                else
-                    gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                // ---- Borders (solid tiles only) ----
+                if (!isSolid(row, col)) continue;
+
+                if (!isSolid(row + 1, col)) {
+                    gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
+                }
+                if (!isSolid(row - 1, col)) {
+                    gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
+                }
+                if (!isSolid(row, col - 1)) {
+                    gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
+                }
+                if (!isSolid(row, col + 1)) {
+                    gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
+                }
             }
         }
     }
@@ -364,29 +379,48 @@ namespace game {
     }
 
     void SummerS2::drawTiles() const {
+        auto isSolid = [&](int r, int c) -> bool {
+            if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
+            int t = tileMap[r][c];
+            return (t == 1 || t == 3 || t == 5 || t == 7 || t == 16 || t == 17 || t == 23);
+            };
+
         for (int row = 0; row < gridRows; ++row) {
             for (int col = 0; col < gridCols; ++col) {
                 int tileType = tileMap[row][col];
                 if (tileType <= 0) continue;
                 float xWorld{}, yWorld{}, cellW{}, cellH{};
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
-                gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f),std::round(yWorld + cellH * 0.5f) };
-                gfx::Vec2 size{ cellW,cellH };
+                gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f), std::round(yWorld + cellH * 0.5f) };
+                gfx::Vec2 size{ cellW, cellH };
 
-                if (tileType == 2 || tileType == 9) {
+                float border = (cellW < cellH ? cellW : cellH) * 0.05f;
+                u32 borderColor = 0xFF000000;
+
+                if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
+
+                if (tileType == 2) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
-                        gfx::Vec2 ss{ size.x,size.y * 1.5f };
-                        gfx::Vec2 sp = pos;
-                        sp.y += (tileType == 2) ? (ss.y - size.y) * 0.5f : -(ss.y - size.y) * 0.5f;
-                        float u0 = 0, v0 = 0, u1 = 1, v1 = 1;
-                        if (tileType == 9) { v0 = 1.0f; v1 = 0.0f; }
-                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                        gfx::Vec2 ss{ size.x, size.y * 1.5f };
+                        gfx::Vec2 sp = pos; sp.y += (ss.y - size.y) * 0.5f;
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, 0.0f, 0.0f, 1.0f, 1.0f);
                     }
+                    else gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                     continue;
                 }
 
-                // Left-facing spike (26) and right-facing spike (27)
+                if (tileType == 9) {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex) {
+                        gfx::Vec2 ss{ size.x, size.y * 1.5f };
+                        gfx::Vec2 sp = pos; sp.y -= (ss.y - size.y) * 0.5f;
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, 0.0f, 1.0f, 1.0f, 0.0f);
+                    }
+                    else gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    continue;
+                }
+
                 if (tileType == 26 || tileType == 27) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
@@ -400,50 +434,56 @@ namespace game {
                     continue;
                 }
 
-                // Grass tile (ID 23)
                 if (tileType == 23) {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
-                    continue;
                 }
-
-                if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
-
-                if (drawSpecialTile(tileType, pos, size)) continue;
-
-                // Standalone seasonal tiles (replace old sprites for IDs 1,3,5,7)
-                if (tileType == 1) {
+                else if (drawSpecialTile(tileType, pos, size)) { /* drawn */ }
+                else if (tileType == 1) {
                     AEGfxTexture* t = sprite::spring1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
                 }
-                if (tileType == 3) {
+                else if (tileType == 3) {
                     AEGfxTexture* t = sprite::spring2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
                 }
-                if (tileType == 5) {
+                else if (tileType == 5) {
                     AEGfxTexture* t = sprite::autumn1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
                 }
-                if (tileType == 7) {
+                else if (tileType == 7) {
                     AEGfxTexture* t = sprite::autumn2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
+                }
+                else {
+                    float u0{}, v0{}, u1{}, v1{};
+                    AEGfxTexture* tex = sprite::tileset();
+                    if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                        gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                 }
 
-                float u0{}, v0{}, u1{}, v1{};
-                AEGfxTexture* tex = sprite::tileset();
-                if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                    gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                else
-                    gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                // ---- Borders (solid tiles only) ----
+                if (!isSolid(row, col)) continue;
+
+                if (!isSolid(row + 1, col)) {
+                    gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
+                }
+                if (!isSolid(row - 1, col)) {
+                    gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
+                }
+                if (!isSolid(row, col - 1)) {
+                    gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
+                }
+                if (!isSolid(row, col + 1)) {
+                    gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
+                }
             }
         }
     }
@@ -545,19 +585,29 @@ namespace game {
     }
 
     void SummerS3::drawTiles() const {
+        auto isSolid = [&](int r, int c) -> bool {
+            if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
+            int t = tileMap[r][c];
+            // type 1 is cracking ice — handled with continue, never reaches borders
+            return (t == 3 || t == 5 || t == 7 || t == 16 || t == 17 || t == 23);
+            };
+
         for (int row = 0; row < gridRows; ++row) {
             for (int col = 0; col < gridCols; ++col) {
                 int tileType = tileMap[row][col];
                 if (tileType <= 0) continue;
                 float xWorld{}, yWorld{}, cellW{}, cellH{};
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
-                gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f),std::round(yWorld + cellH * 0.5f) };
-                gfx::Vec2 size{ cellW,cellH };
+                gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f), std::round(yWorld + cellH * 0.5f) };
+                gfx::Vec2 size{ cellW, cellH };
+
+                float border = (cellW < cellH ? cellW : cellH) * 0.05f;
+                u32 borderColor = 0xFF000000;
 
                 if (tileType == 2 || tileType == 9) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
-                        gfx::Vec2 ss{ size.x,size.y * 1.5f };
+                        gfx::Vec2 ss{ size.x, size.y * 1.5f };
                         gfx::Vec2 sp = pos;
                         sp.y += (tileType == 2) ? (ss.y - size.y) * 0.5f : -(ss.y - size.y) * 0.5f;
                         float u0 = 0, v0 = 0, u1 = 1, v1 = 1;
@@ -567,7 +617,6 @@ namespace game {
                     continue;
                 }
 
-                // Left-facing spike (26) and right-facing spike (27)
                 if (tileType == 26 || tileType == 27) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
@@ -581,15 +630,14 @@ namespace game {
                     continue;
                 }
 
-                // Grass tile (ID 23)
                 if (tileType == 23) {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
-                    continue;
+                    // falls through to border pass (grass IS solid)
                 }
-
-                if (tileType == 1) {
+                else if (tileType == 1) {
+                    // Cracking ice — per-tile frame
                     AEGfxTexture* crackTex = sprite::crack();
                     if (crackTex) {
                         int frameToUse = 0;
@@ -599,58 +647,53 @@ namespace game {
                         sprite::getCrackUv(frameToUse, u0, v0, u1, v1);
                         gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
                     }
-                    continue;
+                    continue; // not in isSolid, skip borders
                 }
-
-                if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
-
-                if (tileType == 9) {
-                    // Inverted spike (ID 9) - uses the same texture you use in winter
-                    AEGfxTexture* invSpikeTex = sprite::ice();
-                    if (invSpikeTex)
-                        gfx::drawSprite(invSpikeTex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else
-                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
-                }
-
-                if (drawSpecialTile(tileType, pos, size)) continue;
-
-                // Standalone seasonal tiles (replace old sprites for IDs 1,3,5,7)
-                if (tileType == 1) {
-                    AEGfxTexture* t = sprite::spring1();
-                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
-                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
-                }
-                if (tileType == 3) {
+                else if (sprite::drawAnimatedTile(tileType, pos, size)) { continue; }
+                else if (drawSpecialTile(tileType, pos, size)) { /* drawn */ }
+                else if (tileType == 3) {
                     AEGfxTexture* t = sprite::spring2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
                 }
-                if (tileType == 5) {
+                else if (tileType == 5) {
                     AEGfxTexture* t = sprite::autumn1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
                 }
-                if (tileType == 7) {
+                else if (tileType == 7) {
                     AEGfxTexture* t = sprite::autumn2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
+                }
+                else {
+                    float u0{}, v0{}, u1{}, v1{};
+                    AEGfxTexture* tex = sprite::tileset();
+                    if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                        gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                 }
 
-                float u0{}, v0{}, u1{}, v1{};
-                AEGfxTexture* tex = sprite::tileset();
-                if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                    gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                else
-                    gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                // ---- Borders (solid tiles only) ----
+                if (!isSolid(row, col)) continue;
+
+                if (!isSolid(row + 1, col)) {
+                    gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
+                }
+                if (!isSolid(row - 1, col)) {
+                    gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
+                }
+                if (!isSolid(row, col - 1)) {
+                    gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
+                }
+                if (!isSolid(row, col + 1)) {
+                    gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
+                }
             }
         }
     }
+    // SummerS4::drawTiles() is identical to S3 above — same body, different class name
 
     void SummerS3::drawGrid() const {
         const u32 gc = 0x80FFFFFFu;
@@ -733,19 +776,29 @@ namespace game {
     }
 
     void SummerS4::drawTiles() const {
+        auto isSolid = [&](int r, int c) -> bool {
+            if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
+            int t = tileMap[r][c];
+            // type 1 is cracking ice — handled with continue, never reaches borders
+            return (t == 3 || t == 5 || t == 7 || t == 16 || t == 17 || t == 23);
+            };
+
         for (int row = 0; row < gridRows; ++row) {
             for (int col = 0; col < gridCols; ++col) {
                 int tileType = tileMap[row][col];
                 if (tileType <= 0) continue;
                 float xWorld{}, yWorld{}, cellW{}, cellH{};
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
-                gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f),std::round(yWorld + cellH * 0.5f) };
-                gfx::Vec2 size{ cellW,cellH };
+                gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f), std::round(yWorld + cellH * 0.5f) };
+                gfx::Vec2 size{ cellW, cellH };
+
+                float border = (cellW < cellH ? cellW : cellH) * 0.05f;
+                u32 borderColor = 0xFF000000;
 
                 if (tileType == 2 || tileType == 9) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
-                        gfx::Vec2 ss{ size.x,size.y * 1.5f };
+                        gfx::Vec2 ss{ size.x, size.y * 1.5f };
                         gfx::Vec2 sp = pos;
                         sp.y += (tileType == 2) ? (ss.y - size.y) * 0.5f : -(ss.y - size.y) * 0.5f;
                         float u0 = 0, v0 = 0, u1 = 1, v1 = 1;
@@ -755,7 +808,6 @@ namespace game {
                     continue;
                 }
 
-                // Left-facing spike (26) and right-facing spike (27)
                 if (tileType == 26 || tileType == 27) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
@@ -769,15 +821,14 @@ namespace game {
                     continue;
                 }
 
-                // Grass tile (ID 23)
                 if (tileType == 23) {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
-                    continue;
+                    // falls through to border pass (grass IS solid)
                 }
-
-                if (tileType == 1) {
+                else if (tileType == 1) {
+                    // Cracking ice — per-tile frame
                     AEGfxTexture* crackTex = sprite::crack();
                     if (crackTex) {
                         int frameToUse = 0;
@@ -787,58 +838,53 @@ namespace game {
                         sprite::getCrackUv(frameToUse, u0, v0, u1, v1);
                         gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
                     }
-                    continue;
+                    continue; // not in isSolid, skip borders
                 }
-
-                if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
-
-                if (tileType == 9) {
-                    // Inverted spike (ID 9) - uses the same texture you use in winter
-                    AEGfxTexture* invSpikeTex = sprite::ice();
-                    if (invSpikeTex)
-                        gfx::drawSprite(invSpikeTex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else
-                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
-                }
-
-                if (drawSpecialTile(tileType, pos, size)) continue;
-
-                // Standalone seasonal tiles (replace old sprites for IDs 1,3,5,7)
-                if (tileType == 1) {
-                    AEGfxTexture* t = sprite::spring1();
-                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
-                    else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
-                }
-                if (tileType == 3) {
+                else if (sprite::drawAnimatedTile(tileType, pos, size)) { continue; }
+                else if (drawSpecialTile(tileType, pos, size)) { /* drawn */ }
+                else if (tileType == 3) {
                     AEGfxTexture* t = sprite::spring2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
                 }
-                if (tileType == 5) {
+                else if (tileType == 5) {
                     AEGfxTexture* t = sprite::autumn1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
                 }
-                if (tileType == 7) {
+                else if (tileType == 7) {
                     AEGfxTexture* t = sprite::autumn2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
+                }
+                else {
+                    float u0{}, v0{}, u1{}, v1{};
+                    AEGfxTexture* tex = sprite::tileset();
+                    if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                        gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                 }
 
-                float u0{}, v0{}, u1{}, v1{};
-                AEGfxTexture* tex = sprite::tileset();
-                if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                    gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                else
-                    gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                // ---- Borders (solid tiles only) ----
+                if (!isSolid(row, col)) continue;
+
+                if (!isSolid(row + 1, col)) {
+                    gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
+                }
+                if (!isSolid(row - 1, col)) {
+                    gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
+                }
+                if (!isSolid(row, col - 1)) {
+                    gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
+                }
+                if (!isSolid(row, col + 1)) {
+                    gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
+                }
             }
         }
     }
+    // SummerS4::drawTiles() is identical to S3 above — same body, different class name
 
     void SummerS4::drawGrid() const {
         const u32 gc = 0x80FFFFFFu;
