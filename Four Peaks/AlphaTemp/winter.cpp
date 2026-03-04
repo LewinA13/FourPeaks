@@ -253,7 +253,7 @@ namespace game {
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
-                gfx::Vec2 size{ cellW, cellH };
+                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
 
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
@@ -666,7 +666,7 @@ namespace game {
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
-                gfx::Vec2 size{ cellW, cellH };
+                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
 
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
@@ -1088,7 +1088,7 @@ namespace game {
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
-                gfx::Vec2 size{ cellW, cellH };
+                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
 
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
@@ -1403,6 +1403,22 @@ namespace game {
         }
 
 
+        // Check if player reached the teleport zone to Summer Stage 1
+        if (!camera::isTransitioning())
+        {
+            int teleportCol = 1;
+            int teleportRow = 19;
+            float gridWorldX, gridWorldY, cellW, cellH;
+            gridToWorld(teleportCol, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
+            float teleportCenterX = gridWorldX + cellW * 1.0f;
+            float teleportCenterY = gridWorldY + cellH * 0.5f;
+            float dx = gGame.player.pos.x - teleportCenterX;
+            float dy = gGame.player.pos.y - teleportCenterY;
+            float distance = sqrtf(dx * dx + dy * dy);
+            if (distance < cellW * 1.5f)
+                return 23; // Signal teleport to Summer Stage 1
+        }
+
         return 0;
     }
 
@@ -1431,6 +1447,22 @@ namespace game {
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 4 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
+        // Draw teleport indicator to Summer Stage 1 (2 cells at col 1-2, row 19)
+        if (!camera::isTransitioning())
+        {
+            for (int c = 0; c < 2; c++)
+            {
+                int col = 1 + c;
+                float gridWorldX, gridWorldY, cellW, cellH;
+                gridToWorld(col, 19, gridWorldX, gridWorldY, cellW, cellH);
+                gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
+                portalPos.x = std::round(portalPos.x);
+                portalPos.y = std::round(portalPos.y);
+                gfx::Vec2 portalSize{ cellW, cellH };
+                gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFF8800u); // Orange = leads to Summer
+            }
+        }
 
         PlayerDraw(gGame.player);
     }
@@ -1469,7 +1501,7 @@ namespace game {
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
-                gfx::Vec2 size{ cellW, cellH };
+                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
 
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);

@@ -609,7 +609,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 // Exit selected.
                 gGameRunning = 0;
-                
+
             }
             // action == 3 is reserved for "How To Play".
 
@@ -632,7 +632,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                
+
             }
             break;
         }
@@ -649,7 +649,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                
+
             }
             break;
         }
@@ -666,7 +666,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                
+
             }
             break;
         }
@@ -685,6 +685,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             summerStage.draw();
 
             if (action == 20) { currentState = SceneState::SummerS2; camera::setY(camera::screenHeight()); }
+            if (action == 24)
+            {
+                // Back-teleport to Winter Stage 4
+                currentState = SceneState::WinterS4;
+                float h = camera::screenHeight();
+                camera::setY(h * 3.0f);
+                float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+                float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+                float cellW = (maxX - minX) / 32.0f;
+                float cellH = (maxY - minY) / 20.0f;
+                gGame.player.pos.x = minX + 2 * cellW + cellW * 0.5f;
+                gGame.player.pos.y = h * 3.0f + minY + 2 * cellH + cellH * 0.5f;
+                lastState = SceneState::Exit;
+            }
             if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
             break;
         }
@@ -780,7 +794,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                
+
             }
             else if (action == 3)
             {
@@ -812,7 +826,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                
+
             }
             else if (action == 3)
             {
@@ -836,7 +850,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                
+
             }
             else if (action == 3)
             {
@@ -850,11 +864,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = winterStage4.update(dt);
             winterStage4.draw();
 
+            if (action == 23)
+            {
+                // Teleport from Winter Stage 4 to Summer Stage 1
+                currentState = SceneState::SummerS1;
+                camera::setY(0.0f);
+                float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+                float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+                float cellW = (maxX - minX) / 32.0f;
+                float cellH = (maxY - minY) / 20.0f;
+                gGame.player.pos.x = minX + 29 * cellW + cellW * 0.5f;
+                gGame.player.pos.y = minY + 2 * cellH + cellH * 0.5f;
+                lastState = SceneState::Exit;
+            }
+
             if (action == 2)
             {
                 currentState = SceneState::MainMenu;
                 camera::setY(0.0f);
-                
+
             }
             else if (action == 3)
             {
