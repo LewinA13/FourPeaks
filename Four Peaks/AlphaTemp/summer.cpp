@@ -33,7 +33,7 @@ namespace game {
     // ===================================================================
     // HELPER: Draw tiles 16-19 (shared logic, inlined per stage)
     // ===================================================================
-    static bool drawSpecialTile(int tileType, const gfx::Vec2& pos, const gfx::Vec2& size)
+    static bool drawSpecialTile(int tileType, gfx::Vec2& pos, gfx::Vec2& size)
     {
         // Tile ID mapping (as per your request):
         // 16 = Tile_02, 17 = Tile_12, 18 = bottle, 19 = sign
@@ -57,6 +57,9 @@ namespace game {
         }
         if (tileType == 19) {
             AEGfxTexture* tex = sprite::sign();
+            size.x *= 0.8f;
+            size.y *= 0.8f;
+            pos.y -= (size.y - (size.y*0.8f)) * 0.5f;  // allign to btm
             if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
             else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
             return true;

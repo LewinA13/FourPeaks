@@ -199,6 +199,9 @@ namespace
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
+                    size.x *= 0.8f;
+                    size.y *= 0.8f;
+                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
                     if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }

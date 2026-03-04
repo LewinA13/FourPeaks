@@ -28,6 +28,10 @@ namespace sprite
         AEGfxTexture* tile12Tex{};
         AEGfxTexture* tile02Tex{};
         AEGfxTexture* bottleTex{};
+        AEGfxTexture* textboxTex{};
+        AEGfxTexture* textboxUpTex{};
+        AEGfxTexture* textboxDownTex{};
+
 
         // New tile textures (IDs 23-25)
         AEGfxTexture* grassTex{};
@@ -178,7 +182,19 @@ namespace sprite
             bottleTex = AEGfxTextureLoad("Assets/bottle.png");
             if (!bottleTex) bottleTex = AEGfxTextureLoad("bottle.jpg");
         }
-
+        if (!textboxTex) {
+            textboxTex = AEGfxTextureLoad("Assets/textbox.png");
+            if (!textboxTex) textboxTex = AEGfxTextureLoad("textbox.jpg");
+        }
+        if (!textboxUpTex) {
+            textboxUpTex = AEGfxTextureLoad("Assets/textboxUp.png");
+            if (!textboxUpTex) textboxUpTex = AEGfxTextureLoad("textboxUp.jpg");
+        }  
+        if (!textboxDownTex) {
+            textboxDownTex = AEGfxTextureLoad("Assets/textboxDown.png");
+            if (!textboxDownTex) textboxDownTex = AEGfxTextureLoad("textboxDown.jpg");
+        }
+    
         // Seasonal tile textures (standalone images)
         if (!spring1Tex) spring1Tex = AEGfxTextureLoad("Assets/spring1.png");
         if (!spring2Tex) spring2Tex = AEGfxTextureLoad("Assets/spring2.png");
@@ -272,6 +288,9 @@ namespace sprite
         if (tile12Tex) { AEGfxTextureUnload(tile12Tex); tile12Tex = nullptr; }
         if (tile02Tex) { AEGfxTextureUnload(tile02Tex); tile02Tex = nullptr; }
         if (bottleTex) { AEGfxTextureUnload(bottleTex); bottleTex = nullptr; }
+        if (textboxTex) { AEGfxTextureUnload(textboxTex); textboxTex = nullptr; }
+        if (textboxUpTex) { AEGfxTextureUnload(textboxUpTex); textboxUpTex = nullptr; }
+        if (textboxDownTex) { AEGfxTextureUnload(textboxDownTex); textboxDownTex = nullptr; }
 
         if (spring1Tex) { AEGfxTextureUnload(spring1Tex); spring1Tex = nullptr; }
         if (spring2Tex) { AEGfxTextureUnload(spring2Tex); spring2Tex = nullptr; }
@@ -344,6 +363,12 @@ namespace sprite
     AEGfxTexture* tile12() { return tile12Tex; }
     AEGfxTexture* tile02() { return tile02Tex; }
     AEGfxTexture* bottle() { return bottleTex; }
+    AEGfxTexture* textbox(){ return textboxTex; }
+    AEGfxTexture* textboxUp() { return textboxUpTex; }
+    AEGfxTexture* textboxDown() { return textboxDownTex; }
+
+
+
 
     AEGfxTexture* spring1() { return spring1Tex; }
     AEGfxTexture* spring2() { return spring2Tex; }
@@ -540,7 +565,8 @@ namespace sprite
             float u0{}, v0{}, u1{}, v1{};
             getCheckpointUv(checkpointFrame, u0, v0, u1, v1);
 
-            gfx::Vec2 cpSize{ size.x * 0.85f, size.y * 0.85f };
+            gfx::Vec2 cpSize{ size.x * 1.4f, size.y * 1.4f };
+            pos.y += (cpSize.y - (size.y)) * 0.5f;  
             gfx::drawSprite(checkpointTex, pos, 0.0f, cpSize, u0, v0, u1, v1);
             return true;
         }
