@@ -110,27 +110,63 @@ static std::string SceneToString(SceneState s)
 
 static SceneState StringToScene(const std::string& s)
 {
-    if (s == "Tutorial1")
-        if (s == "SpringS1") return SceneState::SpringS1;
-    if (s == "SpringS2") return SceneState::SpringS2;
-    if (s == "SpringS3") return SceneState::SpringS3;
-    if (s == "SpringS4") return SceneState::SpringS4;
-    if (s == "AutumnS1") return SceneState::AutumnS1;
-    if (s == "AutumnS2") return SceneState::AutumnS2;
-    if (s == "AutumnS3") return SceneState::AutumnS3;
-    if (s == "AutumnS4") return SceneState::AutumnS4;
-    return SceneState::Tutorial1;
+    if (s == "Tutorial1") return SceneState::Tutorial1;
     if (s == "Tutorial2") return SceneState::Tutorial2;
     if (s == "Tutorial3") return SceneState::Tutorial3;
+
     if (s == "WinterS1")  return SceneState::WinterS1;
     if (s == "WinterS2")  return SceneState::WinterS2;
     if (s == "WinterS3")  return SceneState::WinterS3;
     if (s == "WinterS4")  return SceneState::WinterS4;
+
     if (s == "SummerS1")  return SceneState::SummerS1;
     if (s == "SummerS2")  return SceneState::SummerS2;
     if (s == "SummerS3")  return SceneState::SummerS3;
     if (s == "SummerS4")  return SceneState::SummerS4;
-    return SceneState::Tutorial1; // default if unrecognised
+
+    if (s == "SpringS1")  return SceneState::SpringS1;
+    if (s == "SpringS2")  return SceneState::SpringS2;
+    if (s == "SpringS3")  return SceneState::SpringS3;
+    if (s == "SpringS4")  return SceneState::SpringS4;
+
+    if (s == "AutumnS1")  return SceneState::AutumnS1;
+    if (s == "AutumnS2")  return SceneState::AutumnS2;
+    if (s == "AutumnS3")  return SceneState::AutumnS3;
+    if (s == "AutumnS4")  return SceneState::AutumnS4;
+
+    return SceneState::Tutorial1; // fallback
+}
+
+// save what stage number we are in, regardless of season
+static int StageIndex(SceneState s)
+{
+    switch (s)
+    {
+    case SceneState::WinterS1:  case SceneState::SummerS1:  case SceneState::SpringS1:  case SceneState::AutumnS1:  return 0;
+    case SceneState::WinterS2:  case SceneState::SummerS2:  case SceneState::SpringS2:  case SceneState::AutumnS2:  return 1;
+    case SceneState::WinterS3:  case SceneState::SummerS3:  case SceneState::SpringS3:  case SceneState::AutumnS3:  return 2;
+    case SceneState::WinterS4:  case SceneState::SummerS4:  case SceneState::SpringS4:  case SceneState::AutumnS4:  return 3;
+    default: return 0;
+    }
+}
+
+static gfx::Vec2 GridToWorld(int gridX, int gridY, float screenYOffset)
+{
+    // Use constant screen half-dimensions instead of AEGfxGetWinMin/Max,
+    // because those return stale values until camera::apply() is called.
+    float halfW = camera::screenWidth() * 0.5f;
+    float halfH = camera::screenHeight() * 0.5f;
+
+    float minX = -halfW;
+    float minY = -halfH;
+
+    float cellW = camera::screenWidth() / 32.0f;
+    float cellH = camera::screenHeight() / 20.0f;
+
+    float worldX = minX + gridX * cellW + cellW * 0.5f;
+    float worldY = screenYOffset + minY + gridY * cellH + cellH * 0.5f;
+
+    return { worldX, worldY };
 }
 
 
@@ -324,44 +360,88 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // Handle state changes (both transition-based and direct)
         if (currentState != lastState)
         {
-            if (currentState == SceneState::WinterS2)
+            const float h = camera::screenHeight();
+            const int idx = StageIndex(currentState);
+
+            // 1) Snap camera to the correct vertical band
+            camera::setY(h * idx);
+
+            // 2) Give EVERY playable scene a default spawn
+            gfx::Vec2 spawn;
+
+            switch (currentState)
             {
-                // Set camera to Stage 2
-                camera::setY(camera::screenHeight());
 
-                // Spawn player at grid stage 2 - change here for spawn location - A
-                float minX = AEGfxGetWinMinX();
-                float maxX = AEGfxGetWinMaxX();
-                float minY = AEGfxGetWinMinY();
-                float maxY = AEGfxGetWinMaxY();
+            /* ---------- TUTORIAL ---------- */
+            case SceneState::Tutorial1: spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::Tutorial2: spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::Tutorial3: spawn = GridToWorld(2, 2, h * idx); break;
 
-                float cellW = (maxX - minX) / 32.0f;
-                float cellH = (maxY - minY) / 20.0f;
+            /* ---------- WINTER ---------- */
+            case SceneState::WinterS1:  spawn = GridToWorld(3, 3, h * idx); break;
+            case SceneState::WinterS2:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::WinterS3:  spawn = GridToWorld(1, 6, h * idx); break;
+            case SceneState::WinterS4:  spawn = GridToWorld(3, 3, h * idx); break;
 
-                // Grid (3,3) in Stage 2's world space
-                float worldX = minX + 2 * cellW + cellW * 0.5f;
-                float worldY = camera::screenHeight() + minY + 1 * cellH + cellH * 0.5f;
+            /* ---------- SUMMER ---------- */
+            case SceneState::SummerS1:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::SummerS2:  spawn = GridToWorld(2, 17, h * idx); break;
+            case SceneState::SummerS3:  spawn = GridToWorld(1, 16, h * idx); break;
+            case SceneState::SummerS4:  spawn = GridToWorld(2, 2, h * idx); break;
 
-                gGame.player.pos.x = worldX;
-                gGame.player.pos.y = worldY;
+            /* ---------- SPRING ---------- */
+            case SceneState::SpringS1:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::SpringS2:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::SpringS3:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::SpringS4:  spawn = GridToWorld(2, 2, h * idx); break;
 
+            /* ---------- AUTUMN ---------- */
+            case SceneState::AutumnS1:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::AutumnS2:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::AutumnS3:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::AutumnS4:  spawn = GridToWorld(2, 2, h * idx); break;
+
+            default:
+                spawn = GridToWorld(2, 2, h * idx);
+                break;
             }
-            else if (currentState == SceneState::WinterS1)
-            {
-                camera::setY(0.0f);
-                // Optionally set spawn position for Stage 1 too
-            }
 
-            // Reset player physics
+            // Prefer using your helper so feet align nicely with tiles
+            PlayerSetFeetWorld(gGame.player, spawn);
+
+            // Also update respawn so dying in this scene returns here
+            PlayerSetRespawn(gGame.player, spawn);
+
+            // 3) Reset player physics
             gGame.player.velY = 0.0f;
             gGame.player.grounded = false;
 
             lastState = currentState;
         }
+        
 
         // Apply camera
         camera::apply();
 
+        // --------------------------------------------------------
+        // CHEATS: F11 toggles ALL cheats
+        // --------------------------------------------------------
+        if (AEInputCheckTriggered(AEVK_F11))
+        {
+            gGame.cheatsOn = !gGame.cheatsOn;
+
+            // Optional: clean up physics instantly when enabling cheats
+            if (gGame.cheatsOn)
+            {
+                gGame.player.grounded = false;
+                gGame.player.dashCount = gGame.player.maxDashCount;
+            }
+        }
+
+        if (gGame.cheatsOn && AEInputCheckTriggered(AEVK_F10))
+        {
+            gGame.noClip = !gGame.noClip;
+        }
 
         // --------------------------------------------------------
         // DEBUG: STAGE SWITCH (no animation)
@@ -372,190 +452,87 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (AEInputCheckTriggered(AEVK_F1))
         {
             currentState = SceneState::Tutorial1;
-            camera::setY(0.0f);
             lastState = SceneState::Exit;
         }
         if (AEInputCheckTriggered(AEVK_F2))
         {
             currentState = SceneState::Tutorial2;
-            camera::setY(0.0f);
             lastState = SceneState::Exit;
         }
         if (AEInputCheckTriggered(AEVK_F3))
         {
             currentState = SceneState::Tutorial3;
-            camera::setY(0.0f);
             lastState = SceneState::Exit;
         }
-
-        // Autumn: F4/F5/F6/F7
         if (AEInputCheckTriggered(AEVK_F4))
         {
             currentState = SceneState::AutumnS1;
-            camera::setY(0.0f);
             lastState = SceneState::Exit;
         }
         if (AEInputCheckTriggered(AEVK_F5))
         {
             currentState = SceneState::AutumnS2;
-            camera::setY(camera::screenHeight());
             lastState = SceneState::Exit;
         }
         if (AEInputCheckTriggered(AEVK_F6))
         {
             currentState = SceneState::AutumnS3;
-            camera::setY(camera::screenHeight() * 2.0f);
             lastState = SceneState::Exit;
         }
         if (AEInputCheckTriggered(AEVK_F7))
         {
             currentState = SceneState::AutumnS4;
-            camera::setY(camera::screenHeight() * 3.0f);
             lastState = SceneState::Exit;
         }
-
         if (AEInputCheckTriggered(AEVK_1))
         {
-            // Go to Stage 1
-            if (currentState != SceneState::WinterS1)
-            {
-                currentState = SceneState::WinterS1;
-                float h = camera::screenHeight();
-                camera::setY(0.0f);
-                // If you came from another Winter stage, keep screen-relative position.
-                // If you came from Tutorial/Menu, don't apply the offset.
-                if (lastState == SceneState::WinterS2 || lastState == SceneState::WinterS3 || lastState == SceneState::WinterS4)
-                    gGame.player.pos.y -= h;
-                lastState = SceneState::Exit;
-            }
+            currentState = SceneState::WinterS1;
+            lastState = SceneState::Exit;
         }
-
         if (AEInputCheckTriggered(AEVK_2))
         {
-            // Go to Stage 2
-            if (currentState != SceneState::WinterS2)
-            {
-                currentState = SceneState::WinterS2;
-                // Snap camera to Stage 2 (one screen above Stage 1)
-                float h = camera::screenHeight();
-                camera::setY(h);
-                // Keep player in same screen-relative position
-                // If you were in Stage 1, move player up by one screen.
-                if (lastState == SceneState::WinterS1)
-                    gGame.player.pos.y += h;
-                // Force entry logic to run cleanly
-                lastState = SceneState::Exit;
-            }
+            currentState = SceneState::WinterS2;
+            lastState = SceneState::Exit;
         }
-
         if (AEInputCheckTriggered(AEVK_3))
         {
-            // Go to Stage 3
-            if (currentState != SceneState::WinterS3)
-            {
-                currentState = SceneState::WinterS3;
-                float h = camera::screenHeight();
-                camera::setY(h * 2.0f);  // Two screens above Stage 1
-                gGame.player.pos.y = h * 2.0f + 100.0f;  // Spawn at Stage 3
-                lastState = SceneState::Exit;
-            }
+            currentState = SceneState::WinterS3;
+            lastState = SceneState::Exit;
         }
-
         if (AEInputCheckTriggered(AEVK_4))
         {
-            // Go to Stage 4
-            if (currentState != SceneState::WinterS4)
-            {
-                currentState = SceneState::WinterS4;
-                float h = camera::screenHeight();
-                camera::setY(h * 3.0f);  // Three screens above Stage 1
-                gGame.player.pos.y = h * 3.0f + 100.0f;  // Spawn at Stage 4
-                lastState = SceneState::Exit;
-            }
+            currentState = SceneState::WinterS4;
+            lastState = SceneState::Exit;
         }
-
-
         if (AEInputCheckTriggered(AEVK_5))
         {
-            // Go to Summer Stage 1
-            if (currentState != SceneState::SummerS1)
-            {
-                currentState = SceneState::SummerS1;
-                float h = camera::screenHeight();
-                camera::setY(0.0f);
-
-                if (lastState == SceneState::SummerS2 || lastState == SceneState::SummerS3 || lastState == SceneState::SummerS4)
-                    gGame.player.pos.y -= h;
-
-                lastState = SceneState::Exit;
-            }
+            currentState = SceneState::SummerS1;
+            lastState = SceneState::Exit;
         }
-
         if (AEInputCheckTriggered(AEVK_6))
         {
-            // Go to Summer Stage 2
-            if (currentState != SceneState::SummerS2)
-            {
-                currentState = SceneState::SummerS2;
-                float h = camera::screenHeight();
-                camera::setY(h);
-
-                if (lastState == SceneState::SummerS1)
-                    gGame.player.pos.y += h;
-
-                lastState = SceneState::Exit;
-            }
+            currentState = SceneState::SummerS2;
+            lastState = SceneState::Exit;
         }
-
         if (AEInputCheckTriggered(AEVK_7))
         {
-            // Go to Summer Stage 3
-            if (currentState != SceneState::SummerS3)
-            {
-                currentState = SceneState::SummerS3;
-                float h = camera::screenHeight();
-                camera::setY(h * 2.0f);
-                gGame.player.pos.y = h * 2.0f + 100.0f;
-
-                lastState = SceneState::Exit;
-            }
+            currentState = SceneState::SummerS3;
+            lastState = SceneState::Exit;
         }
-
         if (AEInputCheckTriggered(AEVK_8))
         {
-            // Go to Summer Stage 4
-            if (currentState != SceneState::SummerS4)
-            {
-                currentState = SceneState::SummerS4;
-                float h = camera::screenHeight();
-                camera::setY(h * 3.0f);
-                gGame.player.pos.y = h * 3.0f + 100.0f;
-
-                lastState = SceneState::Exit;
-            }
+            currentState = SceneState::SummerS4;
+            lastState = SceneState::Exit;
         }
-
-
         if (AEInputCheckTriggered(AEVK_9))
         {
-            // Go to Spring Stage 1
-            if (currentState != SceneState::SpringS1)
-            {
-                currentState = SceneState::SpringS1;
-                camera::setY(0.0f);
-                lastState = SceneState::Exit;
-            }
+            currentState = SceneState::SpringS1;
+            lastState = SceneState::Exit;
         }
-
         if (AEInputCheckTriggered(AEVK_0))
         {
-            // Go to Autumn Stage 1
-            if (currentState != SceneState::AutumnS1)
-            {
-                currentState = SceneState::AutumnS1;
-                camera::setY(0.0f);
-                lastState = SceneState::Exit;
-            }
+            currentState = SceneState::AutumnS1;
+            lastState = SceneState::Exit;
         }
 
         // Optionally let the window close terminate the game.

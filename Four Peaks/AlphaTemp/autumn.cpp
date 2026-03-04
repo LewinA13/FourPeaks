@@ -244,6 +244,7 @@ void game::AutumnS1::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+    PlayerDraw(gGame.player);
 }
 
 u32 game::AutumnS1::getTileColor(int tileType) const { return getTileColorCommon(tileType); }
@@ -291,6 +292,7 @@ void game::AutumnS2::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+    PlayerDraw(gGame.player);
 }
 
 u32 game::AutumnS2::getTileColor(int tileType) const { return getTileColorCommon(tileType); }
@@ -338,6 +340,7 @@ void game::AutumnS3::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+    PlayerDraw(gGame.player);
 }
 
 u32 game::AutumnS3::getTileColor(int tileType) const { return getTileColorCommon(tileType); }
@@ -375,6 +378,7 @@ void game::AutumnS4::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+    PlayerDraw(gGame.player);
 }
 
 u32 game::AutumnS4::getTileColor(int tileType) const { return getTileColorCommon(tileType); }

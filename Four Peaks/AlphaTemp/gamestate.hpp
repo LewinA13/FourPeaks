@@ -11,6 +11,9 @@ struct GameState
     // Volume settings (0.0f to 1.0f)
     float musicVol = 0.6f;
     float sfxVol = 0.9f;
+
+    bool cheatsOn = false;
+    bool noClip = false;
 };
 
 // One global world object (declared here)
