@@ -292,6 +292,9 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
+                    size.x *= 0.8f;
+                    size.y *= 0.8f;
+                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
                     if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }
@@ -701,6 +704,9 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
+                    size.x *= 0.8f;
+                    size.y *= 0.8f;
+                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
                     if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }
@@ -959,38 +965,18 @@ namespace game {
             }
         }
 
-        for (auto& ice : iceTiles) {
-            ice.triggered = false;
-        }
+        for (auto& trigger : g_triggeredIceTiles)
+            for (auto& ice : iceTiles)
+                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) ice.triggered = true;
 
-
-        for (auto& trigger : g_triggeredIceTiles) {
-            for (auto& ice : iceTiles) {
-                //! check the ice pos whether equal and never set state befote
-                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
-                    ice.triggered = true;
-                    ice.triggered = true;
-                }
-            }
-        }
-
-        //! clear the list to save the memory
         g_triggeredIceTiles.clear();
 
-        //! check only if breakingIce is triggered but havent being destroyed
         for (auto& ice : iceTiles) {
             if (ice.triggered && !ice.destroyed) {
                 ice.timer += dt;
-                //! update the frame
-                int newFrame = static_cast<int>(ice.timer / sprite::crackFrameTime);
-                //! if reach end of the craking frame, then set to 0(destroyed) and set the state
-                if (newFrame >= sprite::crackFrameCount - 1) {
-                    tileMap[ice.row][ice.col] = 0;
-                    ice.destroyed = true;
-                }
-                else {
-                    ice.crackFrame = newFrame;
-                }
+                int nf = static_cast<int>(ice.timer / sprite::crackFrameTime);
+                if (nf >= sprite::crackFrameCount - 1) { tileMap[ice.row][ice.col] = 0; ice.destroyed = true; }
+                else ice.crackFrame = nf;
             }
         }
 
@@ -1140,6 +1126,9 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
+                    size.x *= 0.8f;
+                    size.y *= 0.8f;
+                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
                     if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }
@@ -1156,26 +1145,15 @@ namespace game {
                 }
 
                 //Breaking Ice tile (type 1)
-                if (tileType == 1)
-                {
+                if (tileType == 1) {
                     AEGfxTexture* crackTex = sprite::crack();
-                    if (crackTex)
-                    {
-                        int thisCrackFrame = 0;
-                        for (const auto& ice : iceTiles) {
-                            if (ice.row == row && ice.col == col) {
-                                thisCrackFrame = ice.crackFrame;
-                                break;
-                            }
-                        }
-
+                    if (crackTex) {
+                        int frameToUse = 0;
+                        for (const auto& ice : iceTiles)
+                            if (ice.row == row && ice.col == col) { frameToUse = ice.crackFrame; break; }
                         float u0{}, v0{}, u1{}, v1{};
-                        sprite::getCrackUv(thisCrackFrame, u0, v0, u1, v1);
-                        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-                        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                        sprite::getCrackUv(frameToUse, u0, v0, u1, v1);
                         gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
-                        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-                        AEGfxSetBlendMode(AE_GFX_BM_NONE);
                     }
                     continue;
                 }
@@ -1397,37 +1375,19 @@ namespace game {
         }
 
         sprite::updateAnimatedTiles(dt);
+ 
+        for (auto& trigger : g_triggeredIceTiles)
+            for (auto& ice : iceTiles)
+                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) ice.triggered = true;
 
-
-        for (auto& ice : iceTiles) {
-            ice.triggered = false;
-        }
-
-        //! g_triggeredIceTiles is the list to store triggered breaking ice
-        for (auto& trigger : g_triggeredIceTiles) {
-            for (auto& ice : iceTiles) {
-                //! if breaking ice havent been change the state, set triggered state to true          
-                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
-                    ice.triggered = true;
-                }
-            }
-        }
-
-        //! clear the list to save the memory
         g_triggeredIceTiles.clear();
 
-        //! handle ice have been triggered but tileType havent change to 0(destroyed)
         for (auto& ice : iceTiles) {
             if (ice.triggered && !ice.destroyed) {
                 ice.timer += dt;
-                int newFrame = static_cast<int>(ice.timer / sprite::crackFrameTime);
-                if (newFrame >= sprite::crackFrameCount - 1) {
-                    tileMap[ice.row][ice.col] = 0;
-                    ice.destroyed = true;
-                }
-                else {
-                    ice.crackFrame = newFrame;
-                }
+                int nf = static_cast<int>(ice.timer / sprite::crackFrameTime);
+                if (nf >= sprite::crackFrameCount - 1) { tileMap[ice.row][ice.col] = 0; ice.destroyed = true; }
+                else ice.crackFrame = nf;
             }
         }
 
@@ -1547,6 +1507,9 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
+                    size.x *= 0.8f;
+                    size.y *= 0.8f;
+                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
                     if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }

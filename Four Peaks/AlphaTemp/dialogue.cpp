@@ -1,6 +1,6 @@
 #include "dialogue.hpp"
 #include "graphics.hpp"
-
+#include "sprite.hpp"
 extern s8 gFontId;      // Font handle created in main.cpp
 
 
@@ -243,15 +243,30 @@ namespace UI {
         AEGfxGetCamPosition(&oldX, &oldY);
         AEGfxSetCamPosition(0.0f, 0.0f);
 
+
+
         float boxX = 0.0f;
         float boxY = 300.0f;
-        float boxWidth = 1000.0f;
-        float boxHeight = 100.0f;
-        gfx::drawRectangle({ boxX, boxY }, 0.0f, { boxWidth, boxHeight }, 0x88000000);
+        float boxWidth = 1200.0f;
+        float boxHeight = 200.0f;
+        AEGfxTexture* textboxTexture = sprite::textbox();
+        AEGfxTexture* textboxUpTexture = sprite::textboxUp();
+        AEGfxTexture* textboxDownTexture = sprite::textboxDown();
 
+        // If not this line code, sprite dont show up
+        gfx::drawRectangle({ -99999.0f, -99999.0f }, 0.0f, { 1.0f, 1.0f }, 0x00000000u);
 
+        if (textboxTexture) {
+            gfx::drawSprite(textboxTexture, { boxX, boxY }, 0.0f, { boxWidth, boxHeight }, 0.0f, 0.0f, 1.0f, 1.0f);
+        }
 
-    
+        if (currentIndex > 0) {
+            gfx::drawSprite(textboxUpTexture, { 500, 310 }, 0.0f, { 30.0f, 30.0f }, 0.0f, 0.0f, 1.0f, 1.0f);
+        }
+        if (currentIndex + 1 < (int)texts.size() || displayedChars < texts[currentIndex].length()) {
+            gfx::drawSprite(textboxDownTexture, { 500, 270 }, 0.0f, { 30.0f, 30.0f }, 0.0f, 0.0f, 1.0f, 1.0f);
+        }
+     
 
         if (currentIndex < texts.size()){
             std::string fullText = texts[currentIndex];
@@ -273,13 +288,7 @@ namespace UI {
             AEGfxPrint(gFontId, pText, drawX, drawY, wordSize, 1.0f, 1.0f, 1.0f, 1.0f);
         }
 
-        if (currentIndex > 0) {
-            gfx::drawTriangle({ 550,350 }, 0.0f, { 25.0f,25.0f }, 0xFF00FF00);
-        }
-        if (currentIndex + 1 < (int)texts.size() || displayedChars < texts[currentIndex].length()) {
-            gfx::drawTriangle({ 550,250 }, PI, { 25.0f,25.0f }, 0xFF00FF00);
-        }
-
+  
         AEGfxSetCamPosition(oldX, oldY);
     }
 

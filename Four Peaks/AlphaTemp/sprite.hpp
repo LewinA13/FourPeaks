@@ -53,6 +53,15 @@ namespace sprite
     // bottle texture (bottle.jpg)
     AEGfxTexture* bottle();
 
+    // textbox texture (textbox.png)
+    AEGfxTexture* textbox(); 
+
+    // textbox arrow texture
+    AEGfxTexture* textboxUp();    // (textboxUp.png)
+    AEGfxTexture* textboxDown();    // (textboxDown.png)
+
+
+
     // -----------------------------------------------------------------
     // Standalone seasonal tile textures
     // Tile IDs:

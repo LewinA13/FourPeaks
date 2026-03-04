@@ -181,7 +181,8 @@ struct Player
         Spikes,
         Ice,
         CheckPoint,
-        BreakingIce
+        BreakingIce,
+        Fire
     };
 
     GroundType currGroundType = Player::GroundType::Normal;
