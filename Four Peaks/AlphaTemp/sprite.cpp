@@ -1,6 +1,7 @@
 #include "sprite.hpp"
 #include <AEGraphics.h>
 #include "graphics.hpp"
+#include <cmath>
 
 
 
@@ -101,6 +102,11 @@ namespace sprite
         // ice crack sprite sheet is 224x32, 7 frames, each 32x32 (horizontal strip)
         int crackFrame = 0;
         float crackTimer = 0.0f;
+
+        // Bottle float animation
+        float bottleFloatTimer = 0.0f;
+        constexpr float bottleFloatSpeed = 2.0f;   // radians per second
+        constexpr float bottleFloatAmp = 6.0f;    // pixels up/down
 
 
 
@@ -513,6 +519,9 @@ namespace sprite
             sawTimer -= sawFrameTime;
             sawFrame = (sawFrame + 1) % sawFrameCount;
         }
+
+        // bottle float (tile 18)
+        bottleFloatTimer += dt;
     }
 
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size)
@@ -545,13 +554,16 @@ namespace sprite
             return true;
         }
 
-        // Tile 24 = fire (animated, fits exactly in cell)
+        // Tile 24 = fire (animated, bigger to look denser)
         if (tileType == 24)
         {
             if (!fireTex_) return true;
             float u0{}, v0{}, u1{}, v1{};
             getFireUv(fireFrame, u0, v0, u1, v1);
-            gfx::drawSprite(fireTex_, pos, 0.0f, size, u0, v0, u1, v1);
+            // Make fire 1.5x wider and 2x taller, anchored at bottom of cell
+            gfx::Vec2 fireSize{ size.x * 1.5f, size.y * 2.0f };
+            gfx::Vec2 firePos{ pos.x, pos.y + (fireSize.y - size.y) * 0.5f };
+            gfx::drawSprite(fireTex_, firePos, 0.0f, fireSize, u0, v0, u1, v1);
             return true;
         }
 
@@ -562,6 +574,17 @@ namespace sprite
             float u0{}, v0{}, u1{}, v1{};
             getSawUv(sawFrame, u0, v0, u1, v1);
             gfx::drawSprite(sawTex_, pos, 0.0f, size, u0, v0, u1, v1);
+            return true;
+        }
+
+        // Tile 18 = bottle (floating animation on Y axis)
+        if (tileType == 18)
+        {
+            if (!bottleTex) return true;
+            float yOffset = sinf(bottleFloatTimer * bottleFloatSpeed) * bottleFloatAmp;
+            gfx::Vec2 floatPos{ pos.x, pos.y + yOffset };
+            gfx::Vec2 bottleSize{ size.x * 0.75f, size.y * 0.75f };
+            gfx::drawSprite(bottleTex, floatPos, 0.0f, bottleSize, 0.0f, 0.0f, 1.0f, 1.0f);
             return true;
         }
 

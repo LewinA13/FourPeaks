@@ -139,6 +139,13 @@ namespace game {
             float dy = gGame.player.pos.y - (gy + ch * 0.5f);
             if (sqrt(dx * dx + dy * dy) < cw * 1.5f) return 20;
 
+            // Back-teleport to Winter Stage 4 (at col 1-2, row 2)
+            float bx, by, bcw, bch;
+            gridToWorld(30, 19, bx, by, bcw, bch);
+            float bdx = gGame.player.pos.x - (bx + bcw * 0.5f);
+            float bdy = gGame.player.pos.y - (by + bch * 0.5f);
+            if (sqrt(bdx * bdx + bdy * bdy) < bcw * 1.5f) return 24; // back to WinterS4
+
             HeatUpdate(dt);
         }
         sprite::updateAnimatedTiles(dt);
@@ -174,6 +181,13 @@ namespace game {
                     gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAA00FFFFu);
                 }
             }
+            // Draw back-teleport to WinterS4 indicator (col 1-2, row 2)
+            for (int c = 0; c < 2; c++) {
+                float gx, gy, cw, ch;
+                gridToWorld(30 + c, 19, gx, gy, cw, ch);
+                gfx::Vec2 pp{ std::round(gx + cw * 0.5f), std::round(gy + ch * 0.5f) };
+                gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAA4488FFu); // Blue = leads to Winter
+            }
         }
         HeatDraw();
         PlayerDraw(gGame.player);
@@ -196,7 +210,7 @@ namespace game {
                 float xWorld{}, yWorld{}, cellW{}, cellH{};
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
                 gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f), std::round(yWorld + cellH * 0.5f) };
-                gfx::Vec2 size{ cellW, cellH };
+                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
 
                 if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
 
@@ -371,7 +385,7 @@ namespace game {
                 float xWorld{}, yWorld{}, cellW{}, cellH{};
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
                 gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f),std::round(yWorld + cellH * 0.5f) };
-                gfx::Vec2 size{ cellW,cellH };
+                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
 
                 if (tileType == 2 || tileType == 9) {
                     AEGfxTexture* spikeTex = sprite::spikes();
@@ -552,7 +566,7 @@ namespace game {
                 float xWorld{}, yWorld{}, cellW{}, cellH{};
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
                 gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f),std::round(yWorld + cellH * 0.5f) };
-                gfx::Vec2 size{ cellW,cellH };
+                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
 
                 if (tileType == 2 || tileType == 9) {
                     AEGfxTexture* spikeTex = sprite::spikes();
@@ -690,7 +704,7 @@ namespace game {
         if (!camera::isTransitioning()) {
             PlayerUpdate(gGame.player, dt);
             HeatUpdate(dt);
-        } 
+        }
         sprite::updateAnimatedTiles(dt);
         for (auto& trigger : g_triggeredIceTiles)
             for (auto& ice : iceTiles)
@@ -740,7 +754,7 @@ namespace game {
                 float xWorld{}, yWorld{}, cellW{}, cellH{};
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
                 gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f),std::round(yWorld + cellH * 0.5f) };
-                gfx::Vec2 size{ cellW,cellH };
+                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
 
                 if (tileType == 2 || tileType == 9) {
                     AEGfxTexture* spikeTex = sprite::spikes();
