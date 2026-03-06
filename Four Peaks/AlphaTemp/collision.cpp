@@ -26,52 +26,67 @@ int tileH = 45;
 
 int (*g_currentMap)[32] = nullptr;
 int g_currentSignID = 0;  
+int g_currentY = 0;
+
+
+
+
+
+
 
 
 TileRange calTileRange(f32 x, f32 y, f32 width, f32 height) {
 	TileRange box{};
 
-	const float fullH = static_cast<float>(AEGfxGetWindowHeight());       
-	const float halfH = fullH / 2.0f;  
-
+	const float fullH = static_cast<float>(AEGfxGetWindowHeight());
+	const float halfH = fullH / 2.0f;
 	const float halfW = AEGfxGetWindowWidth() / 2.0f;
 
-
-	//! Convert x from center coordinates to left coordinates [-900, 900] to [0, 1600]
+	//! Convert x from center coordinates to left coordinates
 	float btmCoordPostX = x + halfW;
-	//! Convert y from center coordinates to bottom coordinates [-450, 450] to [0, 900]
-	float btmCoordPostY = y + halfH;        
+	//! Convert y from center coordinates to bottom coordinates
+	float btmCoordPostY = y + halfH;
 
-	//! Since in different map, y will be different value, so use "fmodf()" get relatively heigth
-	float screenY = fmodf(btmCoordPostY, fullH); 
+	//! Use g_currentY instead of fmodf to get relative height within current layer
+	float screenY = btmCoordPostY - g_currentY;
 
-	if (screenY < 0) screenY += fullH;  
+	//! Only invalidate box if player bottom exceeds layer top
+	float playerBottom = screenY - height / 2.0f;
+	if (playerBottom > fullH) {
+		box.colStart = box.colEnd = box.rowStart = box.rowEnd = -1;
+		return box;
+	}
+
+	//! Invalidate box if player is below current layer
+	if (screenY < 0) {
+		box.colStart = box.colEnd = box.rowStart = box.rowEnd = -1;
+		return box;
+	}
 
 	float left = btmCoordPostX - (width / 2.0f) + 0.1f;
 	float right = btmCoordPostX + (width / 2.0f) - 0.1f;
 	float top = screenY + (height / 2.0f) - 0.1f;
 	float bottom = screenY - (height / 2.0f) + 0.1f;
 
-
 	box.colStart = static_cast<int>((left) / tileW);
 	box.colEnd = static_cast<int>((right) / tileW);
-	box.rowStart = static_cast<int>((bottom) / tileH); 
+	box.rowStart = static_cast<int>((bottom) / tileH);
 	box.rowEnd = static_cast<int>((top) / tileH);
 
-	//! clamp "colstart" and "colEnd" value in (0, mapColm]
-	if (box.colStart < 0) box.colStart = 0;
+	//! Clamp colStart and colEnd within [0, mapColm)
+	if (box.colStart < 0)      box.colStart = 0;
 	if (box.colEnd >= mapColm) box.colEnd = mapColm - 1;
-	//! clamp "rowStart" and "rowEnd" value in (0, mapRows]
-	if (box.rowStart < 0) box.rowStart = 0;
+	//! Clamp rowStart and rowEnd within [0, mapRows)
+	if (box.rowStart < 0)      box.rowStart = 0;
 	if (box.rowEnd >= mapRows) box.rowEnd = mapRows - 1;
 
-	//! check if player out of screen then take as no collision and set all to -1
-	if (box.colStart >= mapColm || box.rowStart >= mapRows || box.colEnd < 0 || box.rowEnd < 0) {
+	if (box.rowStart > box.rowEnd || box.colStart > box.colEnd) {
 		box.colStart = box.colEnd = box.rowStart = box.rowEnd = -1;
 	}
 
 	return box;
 }
+
 
 //! Helper function for checking solid tile
 static bool isSolidTile(int tile) {
@@ -85,7 +100,6 @@ static bool isSolidTile(int tile) {
 	case 11:	// winter ice tile
 	case 16:	// tile_02 summer tile top
 	case 17:	// tile_12 summer tile bottom
-	case 23:	// grass
 		return true;
 
 	default:
@@ -123,6 +137,7 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm], float velY = -
 	//! return false if not collision with solid block
 	return false;
 }
+
 
 
 static bool isDamageTile(int tile) {
@@ -175,8 +190,9 @@ float calculateDamageOverlapRatio(const Player& player, int row, TileRange box, 
 
 static void checkDamageTile(Player& player, int r, TileRange box, int levelLayout[][mapColm], int tileCase){
 	float halfWinH = (float)AEGfxGetWindowHeight() / 2.0f;
-	float screenY = fmodf(player.pos.y + halfWinH, (float)AEGfxGetWindowHeight());
+	float screenY = (player.pos.y + halfWinH) - g_currentY;
 	if (screenY < 0) screenY += (float)AEGfxGetWindowHeight();
+
 
 	float tileDeadZoneY = (r + 0.6f) * tileH;
 
@@ -258,18 +274,27 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				break;
 			}
 
+			case 23:
+				player.currGroundType = Player::GroundType::Grass;
+				break;
+
 			case 4:
 			case 6:
 			case 7:
+			case 5:
 				player.currGroundType = Player::GroundType::Normal;
 				break;
 
+	
 			case 24:	// fire
 			case 2:		// upward spikes
 			case 9:		// downward spikes
 				checkDamageTile(player, r, box, levelLayout, levelLayout[r][c]);
 				break;
 				
+			case 25:  // saw
+				player.currGroundType = Player::GroundType::Saw;  
+				break;
 					
 
 			case 8:	// melon 
@@ -299,14 +324,12 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				levelLayout[r][c] = 0;   // remove after pickup
 				break;
 
+	
+
 			case 19:
 				UI::gDialog.showForLevel(g_currentSignID);
 				UI::gDialog.PLAYERNEARSIGN(true);
 				break;
-				
-				break;
-
-
 
 			default:
 				break;
@@ -366,71 +389,84 @@ void CollisionResolveSpawn(Player& player) // justin function
 
 
 
-void resolvePlayerCollision(Player &player, int levelLayout[][mapColm], f32 dt) {
+void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt) {
 
 	static const float GROUND_Y = -450.0f;
 
 	float currentY = player.pos.y;
 	float oldY = currentY - player.velY * dt;
 
-	//! Set player y coordinates to coordinates before this frame, to seperately handling horizontal and vertical collision
+	// Set player y coordinates to coordinates before this frame, to seperately handling horizontal and vertical collision
 	player.pos.y = oldY;
 
 
-    // Horizontal collision resolution:
-    // Only resolve X when the player actually moved in X this frame.
-    if (player.velX != 0.0f && checkPlayerCollision(player, levelLayout))
-    {
-        const float step = 0.5f;
-        float push = (player.velX > 0.0f) ? -step : +step;
+	if (player.velX != 0.0f && checkPlayerCollision(player, levelLayout))
+	{
+		const float step = 0.5f;
+		float push = (player.velX > 0.0f) ? -step : +step;
+		int pushCount = 0;
+		while (checkPlayerCollision(player, levelLayout) && pushCount < 200)
+		{
+			player.pos.x += push;
+			pushCount++;
+		}
+		player.velX = 0.0f;
+	}
 
-        int pushCount = 0;
-        while (checkPlayerCollision(player, levelLayout) && pushCount < 200)
-        {
-            player.pos.x += push;
-            pushCount++;
-        }
+	const float halfWinW = AEGfxGetWindowWidth() / 2.0f;
+	const float halfPlayerW = player.colliderSize.x / 2.0f;
 
-        player.velX = 0.0f;
-    }
+	// resolution left border and right border 
+	if (player.pos.x - halfPlayerW < -halfWinW || player.pos.x + halfPlayerW > halfWinW) {
+		player.pos.x = AEClamp(player.pos.x, -halfWinW + halfPlayerW, halfWinW - halfPlayerW);
+		player.velX = 0.0f;
+		player.horzSpeed = 0.0f;
+	}
 
-	//! Set back player y coordinates to this frame
+	// Set back player y coordinates to this frame
 	player.pos.y = currentY;
 
-	//! Convert y from center coordinates to bottom coordinates [-450, 450] to [0, 900]
-	float btmCoordPostY = player.pos.y + AEGfxGetWindowHeight()/2.0f;
+	// Check if player fell out of bottom of current layer kill
+	const float fullH = static_cast<float>(AEGfxGetWindowHeight());
+	float btmCoordPostY = player.pos.y + fullH / 2.0f;
+	float screenY = btmCoordPostY - g_currentY;
 
-	//! Since in different map, y will be different value, so use "fmodf()" get relatively heigth
-	float screenY = fmodf(btmCoordPostY, static_cast<float>(AEGfxGetWindowHeight()));
+	if (screenY < (0 - 50.0f)) {
+		PlayerKill(player);
+		return;
+	}
 
 
+
+	// Convert y from center coordinates to bottom coordinates [-450, 450] to [0, 900]
 	float feetY = screenY - player.colliderSize.y / 2.0f;
+
+	printf("feetY: %.2f, GROUND_Y+10: %.2f\n", feetY, GROUND_Y + 10.0f);  
 
 	if (feetY > GROUND_Y + 10.0f) { //! Check player bottom whether greater than "GROUND_Y", if lower, "PlayerUpdate" will handle
 		if (checkPlayerCollision(player, levelLayout)) {
 
-
-			//! Check player moving up or down and determine "push" value
+			// Check player moving up or down and determine "push" value
 			f32 push = (player.velY > 0) ? -0.5f : 0.5f;
 
-			//! Set "pushCount" to 0 in case happens infinity loops
+			// Set "pushCount" to 0 in case happens infinity loops
 			int pushCount = 0;
 
-			//! use while loops to force push player until not detect collision with solid block
+			// use while loops to force push player until not detect collision with solid block
 			while (checkPlayerCollision(player, levelLayout) && pushCount < 100) {
 				player.pos.y += push;
 				pushCount++;
 			}
 
-			//! Check if player are falling then set player on grounded
+			// Check if player are falling then set player on grounded
 			player.grounded = (player.velY < 0) ? true : player.grounded;
 			player.velY = 0;
 
-		} //! end of checking collision
+		} // end of checking collision
 
-	}//! end of checking player bottom
-
+	}// end of checking player bottom
 }
+
 
 
 
@@ -439,12 +475,11 @@ void applyGroundPhysics(Player& player) {
 	case Player::GroundType::Normal:
 		player.accel = 8.0f;
 		player.decel = 4.0f;
+		player.speed = 120.0f;
 		break;
 
 	case Player::GroundType::Spikes:
-		PlayerKill(player);
-		break;
-
+	case Player::GroundType::Saw:
 	case Player::GroundType::Fire:
 		PlayerKill(player);
 		break;
@@ -453,6 +488,9 @@ void applyGroundPhysics(Player& player) {
 		player.accel = 25.0f;
 		player.decel = 1.0f;
 		break;
+
+	case Player::GroundType::Grass:
+		player.speed = 50.0f;
 
 	default:
 		break;
@@ -501,6 +539,8 @@ void CheckPathForCheckpoint(Player& player, gfx::Vec2 startPos, gfx::Vec2 endPos
 	//! Make collision detect less strict 
 	float fakeWidth = player.colliderSize.x + 5.0f;
 	float fakeHeight = player.colliderSize.y + 5.0f;
+
+	
 
 	for (int i = 0; i <= numSamples; ++i) {
 		float t = (float)i / (float)numSamples;

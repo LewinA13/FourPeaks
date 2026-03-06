@@ -14,7 +14,7 @@ namespace UI {
         displayedChars = 0;
         typeWriterTimer = 0.0f;
         timePerChar = 1.0f / 20.0f;
-        wordSize = 2.0f;
+        wordSize = 1.6f;
 
 
      
@@ -247,13 +247,13 @@ namespace UI {
 
         float boxX = 0.0f;
         float boxY = 300.0f;
-        float boxWidth = 1200.0f;
+        float boxWidth = 950.0f;
         float boxHeight = 200.0f;
         AEGfxTexture* textboxTexture = sprite::textbox();
         AEGfxTexture* textboxUpTexture = sprite::textboxUp();
         AEGfxTexture* textboxDownTexture = sprite::textboxDown();
 
-        // If not this line code, sprite dont show up
+        // If not add this line code, sprite dont show up
         gfx::drawRectangle({ -99999.0f, -99999.0f }, 0.0f, { 1.0f, 1.0f }, 0x00000000u);
 
         if (textboxTexture) {
@@ -261,10 +261,10 @@ namespace UI {
         }
 
         if (currentIndex > 0) {
-            gfx::drawSprite(textboxUpTexture, { 500, 310 }, 0.0f, { 30.0f, 30.0f }, 0.0f, 0.0f, 1.0f, 1.0f);
+            gfx::drawSprite(textboxUpTexture, { 400, 310 }, 0.0f, { 30.0f, 30.0f }, 0.0f, 0.0f, 1.0f, 1.0f);
         }
         if (currentIndex + 1 < (int)texts.size() || displayedChars < texts[currentIndex].length()) {
-            gfx::drawSprite(textboxDownTexture, { 500, 270 }, 0.0f, { 30.0f, 30.0f }, 0.0f, 0.0f, 1.0f, 1.0f);
+            gfx::drawSprite(textboxDownTexture, { 400, 270 }, 0.0f, { 30.0f, 30.0f }, 0.0f, 0.0f, 1.0f, 1.0f);
         }
      
 
