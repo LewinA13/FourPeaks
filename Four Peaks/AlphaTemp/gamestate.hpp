@@ -14,6 +14,9 @@ struct GameState
 
     bool cheatsOn = false;
     bool noClip = false;
+
+    // total game run time. only when playing. pause doesnt affect
+    float runTimeSeconds = 0.0f;
 };
 
 // One global world object (declared here)

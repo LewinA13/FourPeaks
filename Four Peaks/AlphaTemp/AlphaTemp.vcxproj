@@ -18,6 +18,7 @@
     <ClCompile Include="dialogue.cpp" />
     <ClCompile Include="gamestate.cpp" />
     <ClCompile Include="graphics.cpp" />
+    <ClCompile Include="hud.cpp" />
     <ClCompile Include="level_loader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainmenu.cpp" />
@@ -46,6 +47,9 @@
     <ClInclude Include="summer.hpp" />
     <ClInclude Include="tutorial.hpp" />
     <ClInclude Include="winter.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="hud.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

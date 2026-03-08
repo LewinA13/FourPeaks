@@ -9,7 +9,9 @@ static AEAudioGroup s_sfxGroup{};
 
 // Music
 static AEAudio s_winterMusic{};
-// static AEAudio s_summerMusic{}; // future
+static AEAudio s_summerMusic{};
+static AEAudio s_springMusic{};
+static AEAudio s_autumnMusic{};
 
 // SFX
 static AEAudio s_jumpSfx{};
@@ -32,6 +34,9 @@ void audio::init()
 
     // Load audio assets
     s_winterMusic = AEAudioLoadMusic("Assets/Music/winter.mp3");
+    s_summerMusic = AEAudioLoadMusic("Assets/Music/summer.mp3");
+    s_springMusic = AEAudioLoadMusic("Assets/Music/spring.mp3");
+    s_autumnMusic = AEAudioLoadMusic("Assets/Music/autumn.mp3");
 
     s_jumpSfx = AEAudioLoadSound("Assets/SFX/jump.mp3");
     s_dashSfx = AEAudioLoadSound("Assets/SFX/dash.mp3");
@@ -64,7 +69,15 @@ static void PlayBgm_Internal(BgmType type)
         break;
 
     case BgmType::Summer:
-        // AEAudioPlay(s_summerMusic, s_musicGroup, 1.0f, 1.0f, -1);
+        AEAudioPlay(s_summerMusic, s_musicGroup, 1.0f, 1.0f, -1);
+        break;
+
+    case BgmType::Spring:
+        AEAudioPlay(s_springMusic, s_musicGroup, 1.0f, 1.0f, -1);
+        break;
+
+    case BgmType::Autumn:
+        AEAudioPlay(s_autumnMusic, s_musicGroup, 1.0f, 1.0f, -1);
         break;
 
     case BgmType::None:

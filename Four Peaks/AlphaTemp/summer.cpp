@@ -170,10 +170,8 @@ namespace game {
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
-        std::ostringstream ss;
-        ss << "Melons: " << gGame.player.melonsCollected;
-        std::string hud = ss.str();
-        printText(-0.95f, 0.5f, 0xFFFFFF00u, hud.c_str(), 1);
+
+
         if (!camera::isTransitioning()) {
             for (int c = 0; c < 2; c++) {
                 int col = 30 + c;
