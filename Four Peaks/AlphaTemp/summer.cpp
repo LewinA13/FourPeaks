@@ -167,9 +167,11 @@ namespace game {
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
         drawTiles();
         if (gridVisible) drawGrid();
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");
-        printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
+        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");
+        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
+        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
         std::ostringstream ss;
         ss << "Melons: " << gGame.player.melonsCollected;
         std::string hud = ss.str();
@@ -370,9 +372,11 @@ namespace game {
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
         drawTiles();
         if (gridVisible) drawGrid();
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 2 - 32x20 Grid");
-        printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
+        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 2 - 32x20 Grid");
+        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
+        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
         if (!camera::isTransitioning()) {
             for (int c = 0; c < 2; c++) {
                 int col = 30 + c;
@@ -576,9 +580,11 @@ namespace game {
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
         drawTiles();
         if (gridVisible) drawGrid();
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 3 - 32x20 Grid");
-        printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
+        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 3 - 32x20 Grid");
+        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
+        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
         if (!camera::isTransitioning()) {
             for (int c = 0; c < 2; c++) {
                 int col = 29 + c;
@@ -778,9 +784,11 @@ namespace game {
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
         drawTiles();
         if (gridVisible) drawGrid();
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 4 - 32x20 Grid");
-        printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
+        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 4 - 32x20 Grid");
+        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
+        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
         HeatDraw();
         PlayerDraw(gGame.player);
     }

@@ -8,6 +8,16 @@
 
 typedef uint32_t u32;
 
+struct SnowParticle {
+    float x, y;
+    float velX, velY;
+    float size;
+    float alpha;
+    bool active = false;  // ← ADD THIS
+};
+
+static constexpr int MAX_SNOW = 120;
+
 namespace game {
     // -------------------------------------------------------------------
     // WinterS1 - First Stage
@@ -29,6 +39,12 @@ namespace game {
         bool gridVisible;
         // Tile map: 0=empty, 1=ground, 2=spikes, etc.
         int tileMap[gridRows][gridCols];
+
+		//For Snow Particles
+        mutable std::array<SnowParticle, MAX_SNOW> snowParticles{};
+        bool snowInitialized = false;
+        float snowSpawnTimer = 0.0f;
+
         u32 getTileColor(int tileType) const;
         void drawGrid() const;
         void drawTiles() const;
@@ -55,6 +71,12 @@ namespace game {
         bool gridVisible;
         // Tile map: 0=empty, 1=ground, 2=spikes, etc.
         int tileMap[gridRows][gridCols];
+
+        //For Snow Particles
+        mutable std::array<SnowParticle, MAX_SNOW> snowParticles{};
+        bool snowInitialized = false;
+        float snowSpawnTimer = 0.0f;
+
         u32 getTileColor(int tileType) const;
         void drawGrid() const;
         void drawTiles() const;
@@ -89,6 +111,12 @@ namespace game {
         bool gridVisible;
         // Tile map: 0=empty, 1=ground, 2=spikes, etc.
         int tileMap[gridRows][gridCols];
+
+        //For Snow Particles
+        mutable std::array<SnowParticle, MAX_SNOW> snowParticles{};
+        bool snowInitialized = false;
+        float snowSpawnTimer = 0.0f;
+
         u32 getTileColor(int tileType) const;
         void drawGrid() const;
         void drawTiles() const;
@@ -118,6 +146,12 @@ namespace game {
         bool gridVisible;
         // Tile map: 0=empty, 1=ground, 2=spikes, etc.
         int tileMap[gridRows][gridCols];
+
+        //For Snow Particles
+        mutable std::array<SnowParticle, MAX_SNOW> snowParticles{};
+        bool snowInitialized = false;
+        float snowSpawnTimer = 0.0f;
+
         u32 getTileColor(int tileType) const;
         void drawGrid() const;
         void drawTiles() const;

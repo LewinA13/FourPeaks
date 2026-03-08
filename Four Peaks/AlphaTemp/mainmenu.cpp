@@ -14,6 +14,7 @@
 #include "gamestate.hpp"
 #include <cstdint>
 #include <cstring>
+#include <fstream>
 
 extern s8 gFontId;
 static bool gIsFullscreen = false;
@@ -88,6 +89,35 @@ namespace game
     static const u32 kColorSelected = 0xFF00FF00;
 
     // -------------------------------------------------------------------------
+    // Volume persistence — saves / loads musicVol and sfxVol to a text file
+    // -------------------------------------------------------------------------
+    static constexpr const char* kSettingsFile = "Assets/settings.txt";
+
+    static void saveVolumeSettings()
+    {
+        std::ofstream out(kSettingsFile);
+        if (out.is_open())
+        {
+            out << "musicVol " << gGame.musicVol << "\n";
+            out << "sfxVol " << gGame.sfxVol << "\n";
+        }
+    }
+
+    static void loadVolumeSettings()
+    {
+        std::ifstream in(kSettingsFile);
+        if (!in.is_open()) return;   // first run — keep defaults
+
+        char key[32];
+        float val;
+        while (in >> key >> val)
+        {
+            if (std::strcmp(key, "musicVol") == 0) gGame.musicVol = val;
+            if (std::strcmp(key, "sfxVol") == 0) gGame.sfxVol = val;
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Constructor — load frames + build the full-screen quad mesh
     // -------------------------------------------------------------------------
     // Settings state
@@ -100,12 +130,12 @@ namespace game
         , settingsRow(0)
     {
         // Load all 6 background frames
-        bgFrames[0] = AEGfxTextureLoad("Assets/mmf1.png");
-        bgFrames[1] = AEGfxTextureLoad("Assets/mmf2.png");
-        bgFrames[2] = AEGfxTextureLoad("Assets/mmf3.png");
-        bgFrames[3] = AEGfxTextureLoad("Assets/mmf4.png");
-        bgFrames[4] = AEGfxTextureLoad("Assets/mmf5.png");
-        bgFrames[5] = AEGfxTextureLoad("Assets/mmf6.png");
+        bgFrames[0] = AEGfxTextureLoad("Assets/background_/mmf1.png");
+        bgFrames[1] = AEGfxTextureLoad("Assets/background_/mmf2.png");
+        bgFrames[2] = AEGfxTextureLoad("Assets/background_/mmf3.png");
+        bgFrames[3] = AEGfxTextureLoad("Assets/background_/mmf4.png");
+        bgFrames[4] = AEGfxTextureLoad("Assets/background_/mmf5.png");
+        bgFrames[5] = AEGfxTextureLoad("Assets/background_/mmf6.png");
 
         // Build a full-screen textured quad (only needs to be created once)
         if (!bgMesh)
@@ -130,6 +160,9 @@ namespace game
 
             bgMesh = AEGfxMeshEnd();
         }
+
+        // Restore volume settings from last session
+        loadVolumeSettings();
     }
 
     // -------------------------------------------------------------------------
@@ -210,6 +243,7 @@ namespace game
             // Back — Escape or Space
             if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_SPACE))
             {
+                saveVolumeSettings();   // persist before leaving
                 showSettings = false;
                 settingsRow = 0;   // reset cursor for next visit
             }

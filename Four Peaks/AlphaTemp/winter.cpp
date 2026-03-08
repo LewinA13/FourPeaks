@@ -14,6 +14,7 @@
 #include <string>
 #include <cstdint>
 #include <cmath>
+#include <cstdlib>
 #include "collision.hpp"
 
 typedef uint32_t u32;
@@ -35,10 +36,86 @@ namespace game {
         AEGfxPrint(gFontId, text, x, y, scale, r, g, b, a);
     }
 
+    // -------------------------------------------------------------------
+    // Snow particle helpers - shared by all winter stages
+    // -------------------------------------------------------------------
+    static void initSnow(std::array<SnowParticle, MAX_SNOW>& particles)
+    {
+        for (auto& p : particles)
+        {
+            p.active = false;  // all start inactive — they spawn in gradually
+        }
+    }
+
+    static void updateSnow(std::array<SnowParticle, MAX_SNOW>& particles, float& spawnTimer, float dt)
+    {
+        float minX = AEGfxGetWinMinX();
+        float maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY();
+        float maxY = AEGfxGetWinMaxY();
+
+        // Spawn a new flake every 0.08 seconds
+        spawnTimer += dt;
+        const float spawnInterval = 0.08f;
+        if (spawnTimer >= spawnInterval)
+        {
+            spawnTimer = 0.0f;
+            // Find the first inactive particle and activate it
+            for (auto& p : particles)
+            {
+                if (!p.active)
+                {
+                    p.x = minX + (static_cast<float>(rand()) / RAND_MAX) * (maxX - minX);
+                    p.y = maxY; // spawn at the top
+                    p.velX = -20.0f + (static_cast<float>(rand()) / RAND_MAX) * 40.0f;
+                    p.velY = -(30.0f + (static_cast<float>(rand()) / RAND_MAX) * 60.0f);
+                    p.size = 4.0f + (static_cast<float>(rand()) / RAND_MAX) * 6.0f;
+                    p.alpha = 0.4f + (static_cast<float>(rand()) / RAND_MAX) * 0.6f;
+                    p.active = true;
+                    break;
+                }
+            }
+        }
+
+        // Move active particles; recycle ones that fall off screen
+        for (auto& p : particles)
+        {
+            if (!p.active) continue;
+
+            p.x += p.velX * dt;
+            p.y += p.velY * dt;
+
+            // Wrap horizontally
+            if (p.x < minX) p.x = maxX;
+            if (p.x > maxX) p.x = minX;
+
+            // When fallen off the bottom, deactivate so it can be respawned at the top
+            if (p.y < minY)
+            {
+                p.active = false;
+            }
+        }
+    }
+
+    static void drawSnow(const std::array<SnowParticle, MAX_SNOW>& particles)
+    {
+        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+        for (const auto& p : particles)
+        {
+            if (!p.active) continue;
+            u32 alpha8 = static_cast<u32>(p.alpha * 255.0f) & 0xFF;
+            u32 snowColor = (alpha8 << 24) | 0x00FFFFFF; // white with variable alpha
+            gfx::Vec2 pos{ p.x, p.y };
+            gfx::Vec2 size{ p.size, p.size };
+            gfx::drawRectangle(pos, 0.0f, size, snowColor);
+        }
+        AEGfxSetBlendMode(AE_GFX_BM_NONE);
+    }
 
 
     // ===================================================================
-    // SUMMER STAGE 1 IMPLEMENTATION
+    // WINTER STAGE 1 IMPLEMENTATION
     // ===================================================================
 
     u32 WinterS1::getTileColor(int tileType) const {
@@ -56,6 +133,7 @@ namespace game {
     WinterS1::WinterS1()
         : gridVisible(false)
         , tileMap{}
+        , snowInitialized(false)
     {
         // LEVEL DESIGN: 0 = empty, 1 = solid block
         // 32 columns wide, 20 rows tall
@@ -80,6 +158,12 @@ namespace game {
     // -------------------------------------------------------------------
     int WinterS1::update(float dt)
     {
+        // Initialize snow on first update (window is guaranteed ready here)
+        if (!snowInitialized)
+        {
+            initSnow(snowParticles);
+            snowInitialized = true;
+        }
 
         if (AEInputCheckTriggered(AEVK_G))
         {
@@ -135,6 +219,10 @@ namespace game {
         }
 
         sprite::updateAnimatedTiles(dt);
+
+        // Update snow particles
+        updateSnow(snowParticles, snowSpawnTimer, dt);
+
         return 0;
     }
 
@@ -168,9 +256,9 @@ namespace game {
         if (gridVisible)
             drawGrid();
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 1 - 32x20 Grid");
-        printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 1 - 32x20 Grid");
+        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
+        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
         // melon counter and display
         std::ostringstream ss;
@@ -204,9 +292,10 @@ namespace game {
             }
         }
 
-
-
         PlayerDraw(gGame.player);
+
+        // ---- DRAW SNOW (on top of everything) ----
+        drawSnow(snowParticles);
     }
 
     // -------------------------------------------------------------------
@@ -253,7 +342,7 @@ namespace game {
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
-                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
+                gfx::Vec2 size{ cellW, cellH };
 
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
@@ -262,7 +351,7 @@ namespace game {
                 u32 borderColor = 0xFF000000;
 
                 // -------------------------
-                // 1️⃣ Draw Tile First
+                // 1. Draw Tile First
                 // -------------------------
 
                 // Melon (animated, type 8)
@@ -292,9 +381,6 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    size.x *= 0.8f;
-                    size.y *= 0.8f;
-                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
                     if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }
@@ -400,7 +486,7 @@ namespace game {
                 }
 
                 // -------------------------
-                // 2️⃣ Draw Borders LAST (Only Solid Tiles)
+                // 2. Draw Borders LAST (Only Solid Tiles)
                 // -------------------------
 
                 if (!isSolid(row, col))
@@ -477,7 +563,7 @@ namespace game {
     }
 
     // ===================================================================
-    // Winter STAGE 2 IMPLEMENTATION
+    // WINTER STAGE 2 IMPLEMENTATION
     // ===================================================================
 
     u32 WinterS2::getTileColor(int tileType) const {
@@ -495,6 +581,7 @@ namespace game {
     WinterS2::WinterS2()
         : gridVisible(false)
         , tileMap{}
+        , snowInitialized(false)
     {
         // LEVEL DESIGN: 0 = empty, 1 = solid block
         // 32 columns wide, 20 rows tall
@@ -519,6 +606,13 @@ namespace game {
     // -------------------------------------------------------------------
     int WinterS2::update(float dt)
     {
+        // Initialize snow on first update (window is guaranteed ready here)
+        if (!snowInitialized)
+        {
+            initSnow(snowParticles);
+            snowInitialized = true;
+        }
+
         if (AEInputCheckTriggered(AEVK_G))
         {
             gridVisible = !gridVisible;
@@ -535,7 +629,7 @@ namespace game {
             PlayerUpdate(gGame.player, dt);
         }
 
-        // ADD THIS: Check if player reached the teleport zone to Stage 3
+        // Check if player reached the teleport zone to Stage 3
         if (!camera::isTransitioning())
         {
             // Define teleport zone in grid coordinates (31,19 and 31,18 - 2 vertical cells)
@@ -563,6 +657,10 @@ namespace game {
         }
 
         sprite::updateAnimatedTiles(dt);
+
+        // Update snow particles
+        updateSnow(snowParticles, snowSpawnTimer, dt);
+
         return 0;
     }
 
@@ -594,11 +692,11 @@ namespace game {
         if (gridVisible)
             drawGrid();
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 2 - 32x20 Grid");
-        printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 2 - 32x20 Grid");
+        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
+        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
-        // ADD THIS: Draw teleport indicator (1x2 cells at column 31, rows 18-19)
+        // Draw teleport indicator (1x2 cells at column 31, rows 18-19)
         if (!camera::isTransitioning())
         {
             int teleportCol = 31;
@@ -619,6 +717,9 @@ namespace game {
         }
 
         PlayerDraw(gGame.player);
+
+        // ---- DRAW SNOW (on top of everything) ----
+        drawSnow(snowParticles);
     }
 
 
@@ -666,7 +767,7 @@ namespace game {
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
-                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
+                gfx::Vec2 size{ cellW, cellH };
 
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
@@ -675,7 +776,7 @@ namespace game {
                 u32 borderColor = 0xFF000000;
 
                 // -------------------------
-                // 1️⃣ Draw Tile First
+                // 1. Draw Tile First
                 // -------------------------
 
                 if (tileType == 8)
@@ -704,9 +805,6 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    size.x *= 0.8f;
-                    size.y *= 0.8f;
-                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
                     if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }
@@ -796,7 +894,7 @@ namespace game {
                 }
 
                 // -------------------------
-                // 2️⃣ Draw Borders LAST (Only Solid Tiles)
+                // 2. Draw Borders LAST (Only Solid Tiles)
                 // -------------------------
 
                 if (!isSolid(row, col))
@@ -877,7 +975,7 @@ namespace game {
     }
 
     // ===================================================================
-    // SUMMER STAGE 3 IMPLEMENTATION
+    // WINTER STAGE 3 IMPLEMENTATION
     // ===================================================================
 
     u32 WinterS3::getTileColor(int tileType) const {
@@ -892,6 +990,7 @@ namespace game {
     WinterS3::WinterS3()
         : gridVisible(false)
         , tileMap{}
+        , snowInitialized(false)
     {
         const bool loaded = level::loadTileMap("Assets/Levels/winter_s3.txt", gridRows, gridCols, &tileMap[0][0]);
 
@@ -923,6 +1022,13 @@ namespace game {
     // -------------------------------------------------------------------
     int WinterS3::update(float dt)
     {
+        // Initialize snow on first update (window is guaranteed ready here)
+        if (!snowInitialized)
+        {
+            initSnow(snowParticles);
+            snowInitialized = true;
+        }
+
         if (AEInputCheckTriggered(AEVK_G))
         {
             gridVisible = !gridVisible;
@@ -938,7 +1044,7 @@ namespace game {
             PlayerUpdate(gGame.player, dt);
         }
 
-        // ADD THIS: Check if player reached the teleport zone to Stage 4
+        // Check if player reached the teleport zone to Stage 4
         if (!camera::isTransitioning())
         {
             // Define teleport zone in grid coordinates (columns 2-3, row 19)
@@ -965,18 +1071,38 @@ namespace game {
             }
         }
 
-        for (auto& trigger : g_triggeredIceTiles)
-            for (auto& ice : iceTiles)
-                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) ice.triggered = true;
+        for (auto& ice : iceTiles) {
+            ice.triggered = false;
+        }
 
+
+        for (auto& trigger : g_triggeredIceTiles) {
+            for (auto& ice : iceTiles) {
+                //! check the ice pos whether equal and never set state before
+                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
+                    ice.triggered = true;
+                    ice.triggered = true;
+                }
+            }
+        }
+
+        //! clear the list to save the memory
         g_triggeredIceTiles.clear();
 
+        //! check only if breakingIce is triggered but havent being destroyed
         for (auto& ice : iceTiles) {
             if (ice.triggered && !ice.destroyed) {
                 ice.timer += dt;
-                int nf = static_cast<int>(ice.timer / sprite::crackFrameTime);
-                if (nf >= sprite::crackFrameCount - 1) { tileMap[ice.row][ice.col] = 0; ice.destroyed = true; }
-                else ice.crackFrame = nf;
+                //! update the frame
+                int newFrame = static_cast<int>(ice.timer / sprite::crackFrameTime);
+                //! if reach end of the craking frame, then set to 0(destroyed) and set the state
+                if (newFrame >= sprite::crackFrameCount - 1) {
+                    tileMap[ice.row][ice.col] = 0;
+                    ice.destroyed = true;
+                }
+                else {
+                    ice.crackFrame = newFrame;
+                }
             }
         }
 
@@ -992,6 +1118,8 @@ namespace game {
             }
         }
 
+        // Update snow particles
+        updateSnow(snowParticles, snowSpawnTimer, dt);
 
         return 0;
     }
@@ -1021,11 +1149,11 @@ namespace game {
         if (gridVisible)
             drawGrid();
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 3 - 32x20 Grid");
-        printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 3 - 32x20 Grid");
+        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
+        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
-        // ADD THIS: Draw teleport indicator (2x1 cells at row 19, columns 2-3)
+        // Draw teleport indicator (2x1 cells at row 19, columns 2-3)
         if (!camera::isTransitioning())
         {
             int teleportRow = 19;
@@ -1046,6 +1174,9 @@ namespace game {
         }
 
         PlayerDraw(gGame.player);
+
+        // ---- DRAW SNOW (on top of everything) ----
+        drawSnow(snowParticles);
     }
 
     // -------------------------------------------------------------------
@@ -1088,7 +1219,7 @@ namespace game {
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
-                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
+                gfx::Vec2 size{ cellW, cellH };
 
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
@@ -1097,7 +1228,7 @@ namespace game {
                 u32 borderColor = 0xFF000000;
 
                 // -------------------------
-                // 1️⃣ Draw Tile First
+                // 1. Draw Tile First
                 // -------------------------
 
                 if (tileType == 8)
@@ -1126,9 +1257,6 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    size.x *= 0.8f;
-                    size.y *= 0.8f;
-                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
                     if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }
@@ -1145,15 +1273,26 @@ namespace game {
                 }
 
                 //Breaking Ice tile (type 1)
-                if (tileType == 1) {
+                if (tileType == 1)
+                {
                     AEGfxTexture* crackTex = sprite::crack();
-                    if (crackTex) {
-                        int frameToUse = 0;
-                        for (const auto& ice : iceTiles)
-                            if (ice.row == row && ice.col == col) { frameToUse = ice.crackFrame; break; }
+                    if (crackTex)
+                    {
+                        int thisCrackFrame = 0;
+                        for (const auto& ice : iceTiles) {
+                            if (ice.row == row && ice.col == col) {
+                                thisCrackFrame = ice.crackFrame;
+                                break;
+                            }
+                        }
+
                         float u0{}, v0{}, u1{}, v1{};
-                        sprite::getCrackUv(frameToUse, u0, v0, u1, v1);
+                        sprite::getCrackUv(thisCrackFrame, u0, v0, u1, v1);
+                        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                         gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
+                        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                        AEGfxSetBlendMode(AE_GFX_BM_NONE);
                     }
                     continue;
                 }
@@ -1234,7 +1373,7 @@ namespace game {
                 }
 
                 // -------------------------
-                // 2️⃣ Draw Borders LAST (Only Solid Tiles)
+                // 2. Draw Borders LAST (Only Solid Tiles)
                 // -------------------------
 
                 if (!isSolid(row, col))
@@ -1310,7 +1449,7 @@ namespace game {
     }
 
     // ===================================================================
-    // SUMMER STAGE 4 IMPLEMENTATION
+    // WINTER STAGE 4 IMPLEMENTATION
     // ===================================================================
 
     u32 WinterS4::getTileColor(int tileType) const {
@@ -1321,12 +1460,14 @@ namespace game {
         default: return 0x00000000u;
         }
     }
+
     // -------------------------------------------------------------------
-    // Winter S4 constructor
+    // WinterS4 Constructor
     // -------------------------------------------------------------------
     WinterS4::WinterS4()
         : gridVisible(false)
         , tileMap{}
+        , snowInitialized(false)
     {
         const bool loaded = level::loadTileMap("Assets/Levels/winter_s4.txt", gridRows, gridCols, &tileMap[0][0]);
 
@@ -1354,11 +1495,19 @@ namespace game {
     }
 
     WinterS4::~WinterS4() = default;
+
     // -------------------------------------------------------------------
     // WinterS4 update
     // -------------------------------------------------------------------
     int WinterS4::update(float dt)
     {
+        // Initialize snow on first update (window is guaranteed ready here)
+        if (!snowInitialized)
+        {
+            initSnow(snowParticles);
+            snowInitialized = true;
+        }
+
         if (AEInputCheckTriggered(AEVK_G))
         {
             gridVisible = !gridVisible;
@@ -1375,19 +1524,37 @@ namespace game {
         }
 
         sprite::updateAnimatedTiles(dt);
- 
-        for (auto& trigger : g_triggeredIceTiles)
-            for (auto& ice : iceTiles)
-                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) ice.triggered = true;
 
+
+        for (auto& ice : iceTiles) {
+            ice.triggered = false;
+        }
+
+        //! g_triggeredIceTiles is the list to store triggered breaking ice
+        for (auto& trigger : g_triggeredIceTiles) {
+            for (auto& ice : iceTiles) {
+                //! if breaking ice havent been change the state, set triggered state to true          
+                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
+                    ice.triggered = true;
+                }
+            }
+        }
+
+        //! clear the list to save the memory
         g_triggeredIceTiles.clear();
 
+        //! handle ice have been triggered but tileType havent change to 0(destroyed)
         for (auto& ice : iceTiles) {
             if (ice.triggered && !ice.destroyed) {
                 ice.timer += dt;
-                int nf = static_cast<int>(ice.timer / sprite::crackFrameTime);
-                if (nf >= sprite::crackFrameCount - 1) { tileMap[ice.row][ice.col] = 0; ice.destroyed = true; }
-                else ice.crackFrame = nf;
+                int newFrame = static_cast<int>(ice.timer / sprite::crackFrameTime);
+                if (newFrame >= sprite::crackFrameCount - 1) {
+                    tileMap[ice.row][ice.col] = 0;
+                    ice.destroyed = true;
+                }
+                else {
+                    ice.crackFrame = newFrame;
+                }
             }
         }
 
@@ -1402,26 +1569,15 @@ namespace game {
             }
         }
 
-
-        // Check if player reached the teleport zone to Summer Stage 1
-        if (!camera::isTransitioning())
-        {
-            int teleportCol = 1;
-            int teleportRow = 19;
-            float gridWorldX, gridWorldY, cellW, cellH;
-            gridToWorld(teleportCol, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
-            float teleportCenterX = gridWorldX + cellW * 1.0f;
-            float teleportCenterY = gridWorldY + cellH * 0.5f;
-            float dx = gGame.player.pos.x - teleportCenterX;
-            float dy = gGame.player.pos.y - teleportCenterY;
-            float distance = sqrtf(dx * dx + dy * dy);
-            if (distance < cellW * 1.5f)
-                return 23; // Signal teleport to Summer Stage 1
-        }
+        // Update snow particles
+        updateSnow(snowParticles, snowSpawnTimer, dt);
 
         return 0;
     }
 
+    // -------------------------------------------------------------------
+    // WinterS4 draw
+    // -------------------------------------------------------------------
     void WinterS4::draw() const
     {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
@@ -1444,29 +1600,19 @@ namespace game {
         if (gridVisible)
             drawGrid();
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 4 - 32x20 Grid");
-        printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
-
-        // Draw teleport indicator to Summer Stage 1 (2 cells at col 1-2, row 19)
-        if (!camera::isTransitioning())
-        {
-            for (int c = 0; c < 2; c++)
-            {
-                int col = 1 + c;
-                float gridWorldX, gridWorldY, cellW, cellH;
-                gridToWorld(col, 19, gridWorldX, gridWorldY, cellW, cellH);
-                gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
-                portalPos.x = std::round(portalPos.x);
-                portalPos.y = std::round(portalPos.y);
-                gfx::Vec2 portalSize{ cellW, cellH };
-                gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFF8800u); // Orange = leads to Summer
-            }
-        }
+        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 4 - 32x20 Grid");
+        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
+        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
         PlayerDraw(gGame.player);
+
+        // ---- DRAW SNOW (on top of everything) ----
+        drawSnow(snowParticles);
     }
 
+    // -------------------------------------------------------------------
+    // WinterS4 gridToWorld
+    // -------------------------------------------------------------------
     void WinterS4::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
     {
         float minX = AEGfxGetWinMinX();
@@ -1479,6 +1625,9 @@ namespace game {
         yWorld = minY + row * cellH;
     }
 
+    // -------------------------------------------------------------------
+    // WinterS4 drawTiles
+    // -------------------------------------------------------------------
     void WinterS4::drawTiles() const
     {
         auto isSolid = [&](int r, int c) -> bool
@@ -1501,7 +1650,7 @@ namespace game {
                 gridToWorld(col, row, xWorld, yWorld, cellW, cellH);
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
-                gfx::Vec2 size{ cellW + 1.0f, cellH + 1.0f };
+                gfx::Vec2 size{ cellW, cellH };
 
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
@@ -1510,7 +1659,7 @@ namespace game {
                 u32 borderColor = 0xFF000000;
 
                 // -------------------------
-                // 1️. Draw Tile First
+                // 1. Draw Tile First
                 // -------------------------
 
                 if (tileType == 8)
@@ -1539,9 +1688,6 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    size.x *= 0.8f;
-                    size.y *= 0.8f;
-                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
                     if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
                 }
@@ -1656,7 +1802,7 @@ namespace game {
                 }
 
                 // -------------------------
-                // 2️. Draw Borders LAST (Only Solid Tiles)
+                // 2. Draw Borders LAST (Only Solid Tiles)
                 // -------------------------
 
                 if (!isSolid(row, col))
@@ -1697,6 +1843,9 @@ namespace game {
         }
     }
 
+    // -------------------------------------------------------------------
+    // WinterS4 drawGrid
+    // -------------------------------------------------------------------
     void WinterS4::drawGrid() const
     {
         const u32 gridColor = 0x80FFFFFF;
