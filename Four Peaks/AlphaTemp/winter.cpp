@@ -292,11 +292,15 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    size.x *= 0.8f;
-                    size.y *= 0.8f;
-                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
-                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                    // Draw sign 2 tiles tall, anchored to bottom of tile
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 2.0f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
 
 
@@ -377,6 +381,27 @@ namespace game {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                else if (tileType == 4)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                }
+                else if (tileType == 6)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t2 = sprite::winterT();
+                    if (t2) gfx::drawSprite(t2, pos, 0.0f, size, 0, 0, 1, 1);
+                    else    gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
                 // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
                 else if (sprite::drawAnimatedTile(tileType, pos, size))
@@ -704,11 +729,15 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    size.x *= 0.8f;
-                    size.y *= 0.8f;
-                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
-                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                    // Draw sign 2 tiles tall, anchored to bottom of tile
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 2.0f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
 
                 // Ice tile
@@ -773,6 +802,27 @@ namespace game {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                else if (tileType == 4)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                }
+                else if (tileType == 6)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t2 = sprite::winterT();
+                    if (t2) gfx::drawSprite(t2, pos, 0.0f, size, 0, 0, 1, 1);
+                    else    gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
                 // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
                 else if (sprite::drawAnimatedTile(tileType, pos, size))
@@ -1126,11 +1176,15 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    size.x *= 0.8f;
-                    size.y *= 0.8f;
-                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
-                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                    // Draw sign 2 tiles tall, anchored to bottom of tile
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 2.0f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
 
 
@@ -1211,6 +1265,27 @@ namespace game {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                else if (tileType == 4)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                }
+                else if (tileType == 6)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t2 = sprite::winterT();
+                    if (t2) gfx::drawSprite(t2, pos, 0.0f, size, 0, 0, 1, 1);
+                    else    gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
                 // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
                 else if (sprite::drawAnimatedTile(tileType, pos, size))
@@ -1375,7 +1450,7 @@ namespace game {
         }
 
         sprite::updateAnimatedTiles(dt);
- 
+
         for (auto& trigger : g_triggeredIceTiles)
             for (auto& ice : iceTiles)
                 if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) ice.triggered = true;
@@ -1406,7 +1481,7 @@ namespace game {
         // Check if player reached the teleport zone to Summer Stage 1
         if (!camera::isTransitioning())
         {
-            int teleportCol = 1;
+            int teleportCol = 29;
             int teleportRow = 19;
             float gridWorldX, gridWorldY, cellW, cellH;
             gridToWorld(teleportCol, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
@@ -1451,9 +1526,9 @@ namespace game {
         // Draw teleport indicator to Summer Stage 1 (2 cells at col 1-2, row 19)
         if (!camera::isTransitioning())
         {
-            for (int c = 0; c < 2; c++)
+            for (int c = 0; c < 30; c++)
             {
-                int col = 1 + c;
+                int col = 29 + c;
                 float gridWorldX, gridWorldY, cellW, cellH;
                 gridToWorld(col, 19, gridWorldX, gridWorldY, cellW, cellH);
                 gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
@@ -1539,11 +1614,15 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    size.x *= 0.8f;
-                    size.y *= 0.8f;
-                    pos.y -= (cellH - size.y) * 0.5f;  // allign to btm
-                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                    // Draw sign 2 tiles tall, anchored to bottom of tile
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 2.0f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
 
                 //Breaking Ice tile (type 1)
@@ -1633,6 +1712,27 @@ namespace game {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                else if (tileType == 4)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                }
+                else if (tileType == 6)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t2 = sprite::winterT();
+                    if (t2) gfx::drawSprite(t2, pos, 0.0f, size, 0, 0, 1, 1);
+                    else    gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
                 // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
                 else if (sprite::drawAnimatedTile(tileType, pos, size))

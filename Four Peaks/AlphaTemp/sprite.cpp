@@ -32,6 +32,8 @@ namespace sprite
         AEGfxTexture* textboxTex{};
         AEGfxTexture* textboxUpTex{};
         AEGfxTexture* textboxDownTex{};
+        AEGfxTexture* winterCTex{};   // tile ID 4 -> WinterC.png
+        AEGfxTexture* winterTTex{};   // tile ID 6 -> WinterT.png
 
 
         // New tile textures (IDs 23-25)
@@ -195,12 +197,16 @@ namespace sprite
         if (!textboxUpTex) {
             textboxUpTex = AEGfxTextureLoad("Assets/textboxUp.png");
             if (!textboxUpTex) textboxUpTex = AEGfxTextureLoad("textboxUp.jpg");
-        }  
+        }
         if (!textboxDownTex) {
             textboxDownTex = AEGfxTextureLoad("Assets/textboxDown.png");
             if (!textboxDownTex) textboxDownTex = AEGfxTextureLoad("textboxDown.jpg");
         }
-    
+
+        // Winter tile overrides (standalone images)
+        if (!winterCTex) winterCTex = AEGfxTextureLoad("Assets/WinterC.png");
+        if (!winterTTex) winterTTex = AEGfxTextureLoad("Assets/WinterT.png");
+
         // Seasonal tile textures (standalone images)
         if (!spring1Tex) spring1Tex = AEGfxTextureLoad("Assets/spring1.png");
         if (!spring2Tex) spring2Tex = AEGfxTextureLoad("Assets/spring2.png");
@@ -298,6 +304,9 @@ namespace sprite
         if (textboxUpTex) { AEGfxTextureUnload(textboxUpTex); textboxUpTex = nullptr; }
         if (textboxDownTex) { AEGfxTextureUnload(textboxDownTex); textboxDownTex = nullptr; }
 
+        if (winterCTex) { AEGfxTextureUnload(winterCTex); winterCTex = nullptr; }
+        if (winterTTex) { AEGfxTextureUnload(winterTTex); winterTTex = nullptr; }
+
         if (spring1Tex) { AEGfxTextureUnload(spring1Tex); spring1Tex = nullptr; }
         if (spring2Tex) { AEGfxTextureUnload(spring2Tex); spring2Tex = nullptr; }
         if (autumn1Tex) { AEGfxTextureUnload(autumn1Tex); autumn1Tex = nullptr; }
@@ -369,7 +378,7 @@ namespace sprite
     AEGfxTexture* tile12() { return tile12Tex; }
     AEGfxTexture* tile02() { return tile02Tex; }
     AEGfxTexture* bottle() { return bottleTex; }
-    AEGfxTexture* textbox(){ return textboxTex; }
+    AEGfxTexture* textbox() { return textboxTex; }
     AEGfxTexture* textboxUp() { return textboxUpTex; }
     AEGfxTexture* textboxDown() { return textboxDownTex; }
 
@@ -380,6 +389,9 @@ namespace sprite
     AEGfxTexture* spring2() { return spring2Tex; }
     AEGfxTexture* autumn1() { return autumn1Tex; }
     AEGfxTexture* autumn2() { return autumn2Tex; }
+
+    AEGfxTexture* winterC() { return winterCTex; }   // tile ID 4 -> WinterC.png
+    AEGfxTexture* winterT() { return winterTTex; }   // tile ID 6 -> WinterT.png
 
     AEGfxTexture* grass() { return grassTex; }
     AEGfxTexture* fireTex() { return fireTex_; }
@@ -574,8 +586,9 @@ namespace sprite
             float u0{}, v0{}, u1{}, v1{};
             getCheckpointUv(checkpointFrame, u0, v0, u1, v1);
 
-            gfx::Vec2 cpSize{ size.x * 1.4f, size.y * 1.4f };
-            pos.y += (cpSize.y - (size.y)) * 0.5f;  
+            // Draw 2 tiles tall: stretch height to 2x cell, anchored at bottom
+            gfx::Vec2 cpSize{ size.x * 1.4f, size.y * 2.0f };
+            pos.y += (cpSize.y - size.y) * 0.5f;  // shift up so bottom aligns with tile bottom
             gfx::drawSprite(checkpointTex, pos, 0.0f, cpSize, u0, v0, u1, v1);
             return true;
         }
@@ -630,10 +643,9 @@ namespace sprite
             // New tiles (leave 2 for spikes)
         // New tiles (32x32 versions from the spritesheet)
         case 3: uvFromPixels(144, 48, 32, 32, u0, v0, u1, v1); return true; // brown (32x32 version of big)
-        case 4: uvFromPixels(144, 128, 32, 32, u0, v0, u1, v1); return true; // grey  (32x32 version of big)
+            // case 4 and 6 are now standalone textures (WinterC.png / WinterT.png)
         case 5: uvFromPixels(144, 288, 32, 32, u0, v0, u1, v1); return true; // ice   (32x32 version of big)
 
-        case 6: uvFromPixels(0, 128, 32, 32, u0, v0, u1, v1); return true; // grey (your red 4)
         case 7: uvFromPixels(48, 128, 32, 32, u0, v0, u1, v1); return true; // grey+ice (your red 5)
 
         }

@@ -166,6 +166,17 @@ namespace
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
                 }
+                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                else if (tileType == 4) {
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                }
+                else if (tileType == 6) {
+                    AEGfxTexture* t = sprite::winterT();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                }
                 else {
                     float u0{}, v0{}, u1{}, v1{};
                     if (sprite::getTileUv(tileType, u0, v0, u1, v1))
@@ -228,10 +239,10 @@ int game::AutumnS1::update(float dt)
     if (!camera::isTransitioning())
     {
         float gx{}, gy{}, cw{}, ch{};
-        gridToWorld(30, 19, gx, gy, cw, ch);
+        gridToWorld(31, 7, gx, gy, cw, ch);
         float dx = gGame.player.pos.x - (gx + cw * 0.5f);
         float dy = gGame.player.pos.y - (gy + ch * 0.5f);
-        if (sqrt(dx * dx + dy * dy) < cw * 1.5f) return 60;
+        if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 60;
     }
 
     sprite::updateAnimatedTiles(dt);
@@ -244,6 +255,26 @@ void game::AutumnS1::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+
+    // Teleporter visual: AutumnS1: col 31, row 7-9
+    {
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 7 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 8 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 9 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+    }
     PlayerDraw(gGame.player);
 }
 
@@ -282,6 +313,15 @@ int game::AutumnS2::update(float dt)
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
 
+    if (!camera::isTransitioning())
+    {
+        float gx{}, gy{}, cw{}, ch{};
+        gridToWorld(31, 17, gx, gy, cw, ch);
+        float dx = gGame.player.pos.x - (gx + cw * 0.5f);
+        float dy = gGame.player.pos.y - (gy + ch * 0.5f);
+        if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 61;
+    }
+
     sprite::updateAnimatedTiles(dt);
     return 0;
 }
@@ -292,6 +332,26 @@ void game::AutumnS2::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+
+    // Teleporter visual: AutumnS2: col 31, row 17-19
+    {
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 17 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+    }
     PlayerDraw(gGame.player);
 }
 
@@ -330,6 +390,15 @@ int game::AutumnS3::update(float dt)
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
 
+    if (!camera::isTransitioning())
+    {
+        float gx{}, gy{}, cw{}, ch{};
+        gridToWorld(31, 1, gx, gy, cw, ch);
+        float dx = gGame.player.pos.x - (gx + cw * 0.5f);
+        float dy = gGame.player.pos.y - (gy + ch * 0.5f);
+        if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 62;
+    }
+
     sprite::updateAnimatedTiles(dt);
     return 0;
 }
@@ -340,6 +409,26 @@ void game::AutumnS3::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+
+    // Teleporter visual: AutumnS3: col 31, row 1-3
+    {
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 1 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 2 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 3 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+    }
     PlayerDraw(gGame.player);
 }
 
@@ -368,6 +457,16 @@ int game::AutumnS4::update(float dt)
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
 
+    // Teleporter to Tutorial1 (last level of Autumn - completes the loop)
+    if (!camera::isTransitioning())
+    {
+        float gx{}, gy{}, cw{}, ch{};
+        gridToWorld(31, 18, gx, gy, cw, ch);
+        float dx = gGame.player.pos.x - (gx + cw * 0.5f);
+        float dy = gGame.player.pos.y - (gy + ch * 0.5f);
+        if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 63; // -> Tutorial1
+    }
+
     sprite::updateAnimatedTiles(dt);
     return 0;
 }
@@ -378,6 +477,22 @@ void game::AutumnS4::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+
+    // Teleporter visual: AutumnS4: col 31, row 18-19
+    {
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+    }
     PlayerDraw(gGame.player);
 }
 
