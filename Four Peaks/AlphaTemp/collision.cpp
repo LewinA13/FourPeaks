@@ -8,7 +8,8 @@
 
 
 
-std::vector<IceTrigger> g_triggeredIceTiles;
+std::vector<breakableTileTrigger> g_triggeredIceTiles;
+std::vector<breakableTileTrigger> g_triggeredbrkTiles;
 std::string g_currentScene = "";
 
 const int mapRows = 20;
@@ -317,6 +318,16 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 				break;
 			}
 
+			case -1:
+			{
+			
+					//! only when player above on ice &&  player (stay or down)
+					if ((r == box.rowStart) && player.velY <= 0.0f) {
+						g_triggeredbrkTiles.push_back({ r, c });
+					}
+					break;
+			
+			}
 
 			case 18:  // water bottle
 				player.heat += 0.35f;

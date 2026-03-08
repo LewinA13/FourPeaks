@@ -13,7 +13,10 @@ void CollisionResolveSpawn(Player& player);
 
 void CheckPathForCheckpoint(Player& player, gfx::Vec2 startPos, gfx::Vec2 endPos);
 
-struct IceTrigger{
+
+struct breakableTileTrigger{
     int row, col;
 };
-extern std::vector<IceTrigger> g_triggeredIceTiles;
+
+extern std::vector<breakableTileTrigger> g_triggeredIceTiles;
+extern std::vector<breakableTileTrigger> g_triggeredbrkTiles;

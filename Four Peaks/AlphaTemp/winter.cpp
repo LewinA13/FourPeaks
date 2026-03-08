@@ -1375,7 +1375,8 @@ namespace game {
         }
 
         sprite::updateAnimatedTiles(dt);
- 
+
+      
         for (auto& trigger : g_triggeredIceTiles)
             for (auto& ice : iceTiles)
                 if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) ice.triggered = true;
