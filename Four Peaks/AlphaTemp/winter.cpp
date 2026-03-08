@@ -450,12 +450,48 @@ namespace game {
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
+                // Cell-fit left spike (21) and right spike (22)
+                else if (tileType == 21 || tileType == 22)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        // Draw sideways: swap width/height so portrait spike lies on side
+                        gfx::Vec2 ss{ size.y, size.x };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
+                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
                 // Grass tile (ID 23)
                 else if (tileType == 23)
                 {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                else if (tileType == 4)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                }
+                else if (tileType == 6)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t2 = sprite::winterT();
+                    if (t2) gfx::drawSprite(t2, pos, 0.0f, size, 0, 0, 1, 1);
+                    else    gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
                 // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
                 else if (sprite::drawAnimatedTile(tileType, pos, size))
@@ -858,12 +894,48 @@ namespace game {
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
+                // Cell-fit left spike (21) and right spike (22)
+                else if (tileType == 21 || tileType == 22)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        // Draw sideways: swap width/height so portrait spike lies on side
+                        gfx::Vec2 ss{ size.y, size.x };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
+                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
                 // Grass tile (ID 23)
                 else if (tileType == 23)
                 {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                else if (tileType == 4)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                }
+                else if (tileType == 6)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t2 = sprite::winterT();
+                    if (t2) gfx::drawSprite(t2, pos, 0.0f, size, 0, 0, 1, 1);
+                    else    gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
                 // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
                 else if (sprite::drawAnimatedTile(tileType, pos, size))
@@ -1337,12 +1409,48 @@ namespace game {
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
+                // Cell-fit left spike (21) and right spike (22)
+                else if (tileType == 21 || tileType == 22)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        // Draw sideways: swap width/height so portrait spike lies on side
+                        gfx::Vec2 ss{ size.y, size.x };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
+                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
                 // Grass tile (ID 23)
                 else if (tileType == 23)
                 {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                else if (tileType == 4)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                }
+                else if (tileType == 6)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t2 = sprite::winterT();
+                    if (t2) gfx::drawSprite(t2, pos, 0.0f, size, 0, 0, 1, 1);
+                    else    gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
                 // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
                 else if (sprite::drawAnimatedTile(tileType, pos, size))
@@ -1562,6 +1670,22 @@ namespace game {
             }
         }
 
+
+        // Check if player reached the teleport zone to Summer Stage 1
+        if (!camera::isTransitioning())
+        {
+            int teleportCol = 29;
+            int teleportRow = 19;
+            float gridWorldX, gridWorldY, cellW, cellH;
+            gridToWorld(teleportCol, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
+            float teleportCenterX = gridWorldX + cellW * 1.0f;
+            float teleportCenterY = gridWorldY + cellH * 0.5f;
+            float dx = gGame.player.pos.x - teleportCenterX;
+            float dy = gGame.player.pos.y - teleportCenterY;
+            float distance = sqrtf(dx * dx + dy * dy);
+            if (distance < cellW * 1.5f)
+                return 23; // Signal teleport to Summer Stage 1
+        }
         // Update snow particles
         updateSnow(snowParticles, snowSpawnTimer, dt);
 
@@ -1593,9 +1717,23 @@ namespace game {
         if (gridVisible)
             drawGrid();
 
-        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 4 - 32x20 Grid");
-        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
+
+
+        // Draw teleport indicator to Summer Stage 1 (2 cells at col 1-2, row 19)
+        if (!camera::isTransitioning())
+        {
+            for (int c = 0; c < 30; c++)
+            {
+                int col = 29 + c;
+                float gridWorldX, gridWorldY, cellW, cellH;
+                gridToWorld(col, 19, gridWorldX, gridWorldY, cellW, cellH);
+                gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
+                portalPos.x = std::round(portalPos.x);
+                portalPos.y = std::round(portalPos.y);
+                gfx::Vec2 portalSize{ cellW, cellH };
+                gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFF8800u); // Orange = leads to Summer
+            }
+        }
 
         PlayerDraw(gGame.player);
 
@@ -1766,12 +1904,48 @@ namespace game {
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
+                // Cell-fit left spike (21) and right spike (22)
+                else if (tileType == 21 || tileType == 22)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        // Draw sideways: swap width/height so portrait spike lies on side
+                        gfx::Vec2 ss{ size.y, size.x };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
+                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
                 // Grass tile (ID 23)
                 else if (tileType == 23)
                 {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                else if (tileType == 4)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                }
+                else if (tileType == 6)
+                {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    AEGfxTexture* t2 = sprite::winterT();
+                    if (t2) gfx::drawSprite(t2, pos, 0.0f, size, 0, 0, 1, 1);
+                    else    gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
                 // Animated tiles (fire=24, saw=25 handled by drawAnimatedTile)
                 else if (sprite::drawAnimatedTile(tileType, pos, size))

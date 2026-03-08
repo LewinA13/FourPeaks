@@ -17,9 +17,7 @@ namespace
 
     static void drawBackground()
     {
-        // Re-use an existing background if you don't have a dedicated Spring BG yet.
-        // Change this later to sprite::springBackground() when you add it.
-        AEGfxTexture* bg = sprite::summerBackground();
+        AEGfxTexture* bg = sprite::springBackground();
         if (!bg) bg = sprite::background();
 
         if (bg)
@@ -180,6 +178,22 @@ namespace
                     continue;
                 }
 
+                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                if (tileType == 4)
+                {
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                    continue;
+                }
+                if (tileType == 6)
+                {
+                    AEGfxTexture* t = sprite::winterT();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                    continue;
+                }
+
                 // Regular tiles from tileset.
                 float u0{}, v0{}, u1{}, v1{};
                 if (sprite::getTileUv(tileType, u0, v0, u1, v1))
@@ -229,10 +243,10 @@ int game::SpringS1::update(float dt)
     if (!camera::isTransitioning())
     {
         float gx{}, gy{}, cw{}, ch{};
-        gridToWorld(30, 19, gx, gy, cw, ch);
+        gridToWorld(0, 16, gx, gy, cw, ch);
         float dx = gGame.player.pos.x - (gx + cw * 0.5f);
         float dy = gGame.player.pos.y - (gy + ch * 0.5f);
-        if (sqrt(dx * dx + dy * dy) < cw * 1.5f) return 40;
+        if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 40;
     }
 
     sprite::updateAnimatedTiles(dt);
@@ -245,6 +259,27 @@ void game::SpringS1::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+
+    // Teleporter visual: S1: col0 row16-18
+    {
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        {
+            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 16 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 17 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+    }
+
     PlayerDraw(gGame.player);
 }
 
@@ -283,6 +318,15 @@ int game::SpringS2::update(float dt)
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
 
+    if (!camera::isTransitioning())
+    {
+        float gx{}, gy{}, cw{}, ch{};
+        gridToWorld(31, 17, gx, gy, cw, ch);
+        float dx = gGame.player.pos.x - (gx + cw * 0.5f);
+        float dy = gGame.player.pos.y - (gy + ch * 0.5f);
+        if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 41;
+    }
+
     sprite::updateAnimatedTiles(dt);
     return 0;
 }
@@ -293,6 +337,27 @@ void game::SpringS2::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+
+    // Teleporter visual: S2: col31 row17-19
+    {
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 17 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+    }
+
     PlayerDraw(gGame.player);
 }
 
@@ -331,6 +396,15 @@ int game::SpringS3::update(float dt)
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
 
+    if (!camera::isTransitioning())
+    {
+        float gx{}, gy{}, cw{}, ch{};
+        gridToWorld(0, 17, gx, gy, cw, ch);
+        float dx = gGame.player.pos.x - (gx + cw * 0.5f);
+        float dy = gGame.player.pos.y - (gy + ch * 0.5f);
+        if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 42;
+    }
+
     sprite::updateAnimatedTiles(dt);
     return 0;
 }
@@ -341,6 +415,27 @@ void game::SpringS3::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+
+    // Teleporter visual: S3: col0 row17-19
+    {
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        {
+            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 17 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+        {
+            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+        }
+    }
+
     PlayerDraw(gGame.player);
 }
 
@@ -369,6 +464,33 @@ int game::SpringS4::update(float dt)
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
 
+    // Teleporter to Autumn Stage 1 (last level of Spring)
+    if (!camera::isTransitioning())
+    {
+        // Define teleport zone in grid coordinates (31,19 and 31,18 - 2 vertical cells)
+        int teleportCol = 31;
+        int teleportRow1 = 19;  // Top cell
+        int teleportRow2 = 18;  // Bottom cell
+
+        // Convert grid position to world coordinates
+        float gridWorldX, gridWorldY, cellW, cellH;
+        gridToWorld(teleportCol, teleportRow2, gridWorldX, gridWorldY, cellW, cellH);
+
+        // Check if player is within the teleport zone (2 cells tall)
+        float teleportCenterX = gridWorldX + cellW * 0.5f;
+        float teleportCenterY = gridWorldY + cellH * 1.0f; // Center between 2 cells
+
+        // Distance check (within 1.5 cells)
+        float dx = gGame.player.pos.x - teleportCenterX;
+        float dy = gGame.player.pos.y - teleportCenterY;
+        float distance = sqrt(dx * dx + dy * dy);
+
+        if (distance < cellW * 1.5f)
+        {
+			return 43; // autumn stage 1
+        }
+    }
+
     sprite::updateAnimatedTiles(dt);
     return 0;
 }
@@ -379,6 +501,27 @@ void game::SpringS4::draw() const
     drawBackground();
     drawTiles();
     if (gridVisible) drawGrid();
+
+    // Draw teleporter indicator (2x1 cells, cyan)
+    if (!camera::isTransitioning())
+    {
+        int teleportCol = 31;
+        for (int r = 0; r < 2; r++)
+        {
+            int row = 18 + r; // Rows 18 and 19
+            if (row < gridRows)
+            {
+                float gridWorldX, gridWorldY, cellW, cellH;
+                gridToWorld(teleportCol, row, gridWorldX, gridWorldY, cellW, cellH);
+                gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
+                portalPos.x = std::round(portalPos.x);
+                portalPos.y = std::round(portalPos.y);
+                gfx::Vec2 portalSize{ cellW, cellH };
+                gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAA00FFFF); // Green portal
+            }
+        }
+    }
+
     PlayerDraw(gGame.player);
 }
 

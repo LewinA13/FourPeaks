@@ -6,6 +6,7 @@
 #include "gamestate.hpp"
 #include "sprite.hpp"
 #include "level_loader.hpp"
+#include "camera.hpp"
 
 #include <cstdint>
 #include <cmath>
@@ -140,6 +141,22 @@ namespace
                     continue;
                 }
 
+                // Cell-fit left spike (21) and right spike (22)
+                if (tileType == 21 || tileType == 22)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        gfx::Vec2 ss{ size.y, size.x };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 22) { u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                    continue;
+                }
+
+                // Left-facing spike (26) and right-facing spike (27)
                 if (tileType == 26 || tileType == 27)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
@@ -197,27 +214,44 @@ namespace
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                 }
-                else
+
+                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                if (tileType == 4)
                 {
-                    float u0{}, v0{}, u1{}, v1{};
-                    AEGfxTexture* tex = sprite::tileset();
-                    if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                        gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                    else
-                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                    continue;
+                }
+                if (tileType == 6)
+                {
+                    AEGfxTexture* t = sprite::winterT();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                    continue;
                 }
 
-                // ---- Borders (solid tiles only) ----
-                if (!isSolid(row, col)) continue;
+                if (tileType == 19)
+                {
+                    AEGfxTexture* tex = sprite::sign();
+                    // Draw sign 2 tiles tall, anchored to bottom of tile
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                }
 
-                if (!isSolid(row + 1, col))
-                    gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
-                if (!isSolid(row - 1, col))
-                    gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
-                if (!isSolid(row, col - 1))
-                    gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
-                if (!isSolid(row, col + 1))
-                    gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
+                // Tileset UV tiles (6/7 etc.)
+                float u0{}, v0{}, u1{}, v1{};
+                AEGfxTexture* tex = sprite::tileset();
+                if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
+                    gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
+                else
+                    gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
             }
         }
     }
@@ -240,6 +274,9 @@ namespace
 
         return (std::sqrt(dx * dx + dy * dy) < cellW * 1.0f);
     }
+
+    // Per-level teleporters defined inline below
+
 
     // ------------------------------------------------------------
     // Tutorial background (full-screen sprite)
@@ -361,7 +398,15 @@ namespace game
         PlayerUpdate(gGame.player, dt);
         sprite::updateAnimatedTiles(dt);
 
-        if (reachedGoalTopRight(gGame.player)) return 30; // -> Tutorial2
+        if (!camera::isTransitioning())
+        {
+            constexpr int gridRows = 20, gridCols = 32;
+            float gx{}, gy{}, cw{}, ch{};
+            gridToWorld(1, 19, gridCols, gridRows, gx, gy, cw, ch);
+            float dx = gGame.player.pos.x - (gx + cw * 0.5f);
+            float dy = gGame.player.pos.y - (gy + ch * 0.5f);
+            if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 30;
+        }  // -> Tutorial2
         return 0;
     }
 
@@ -371,6 +416,23 @@ namespace game
         drawTutorialBackground();
         drawTilesFromMap(tileMap);
         if (gridVisible) drawGridLines(32, 20);
+
+        // Teleporter visual: T1: row19 col1-2
+        {
+            float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+            const int gridCols = 32, gridRows = 20;
+            float cw = (maxX - minX) / static_cast<float>(gridCols);
+            float ch = (maxY - minY) / static_cast<float>(gridRows);
+            {
+                gfx::Vec2 p{ std::round(minX + 1 * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            }
+            {
+                gfx::Vec2 p{ std::round(minX + 2 * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            }
+        }
 
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Tutorial 1");
         printText(-0.95f, 0.8f, 0xFFFFFFFFu, "G: grid   ESC: menu");
@@ -398,7 +460,15 @@ namespace game
         PlayerUpdate(gGame.player, dt);
         sprite::updateAnimatedTiles(dt);
 
-        if (reachedGoalTopRight(gGame.player)) return 31; // -> Tutorial3
+        if (!camera::isTransitioning())
+        {
+            constexpr int gridRows = 20, gridCols = 32;
+            float gx{}, gy{}, cw{}, ch{};
+            gridToWorld(31, 3, gridCols, gridRows, gx, gy, cw, ch);
+            float dx = gGame.player.pos.x - (gx + cw * 0.5f);
+            float dy = gGame.player.pos.y - (gy + ch * 0.5f);
+            if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 31;
+        }  // -> Tutorial3
         return 0;
     }
 
@@ -408,6 +478,23 @@ namespace game
         drawTutorialBackground();
         drawTilesFromMap(tileMap);
         if (gridVisible) drawGridLines(32, 20);
+
+        // Teleporter visual: T2: col31 row3-4
+        {
+            float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+            const int gridCols = 32, gridRows = 20;
+            float cw = (maxX - minX) / static_cast<float>(gridCols);
+            float ch = (maxY - minY) / static_cast<float>(gridRows);
+            {
+                gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 3 * ch + ch * 0.5f) };
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            }
+            {
+                gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 4 * ch + ch * 0.5f) };
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            }
+        }
 
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Tutorial 2");
         PlayerDraw(gGame.player);
@@ -433,7 +520,15 @@ namespace game
         PlayerUpdate(gGame.player, dt);
         sprite::updateAnimatedTiles(dt);
 
-        if (reachedGoalTopRight(gGame.player)) return 32; // -> WinterS1
+        if (!camera::isTransitioning())
+        {
+            constexpr int gridRows = 20, gridCols = 32;
+            float gx{}, gy{}, cw{}, ch{};
+            gridToWorld(31, 16, gridCols, gridRows, gx, gy, cw, ch);
+            float dx = gGame.player.pos.x - (gx + cw * 0.5f);
+            float dy = gGame.player.pos.y - (gy + ch * 0.5f);
+            if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 32;
+        }  // -> WinterS1
         return 0;
     }
 
@@ -443,6 +538,27 @@ namespace game
         drawTutorialBackground();
         drawTilesFromMap(tileMap);
         if (gridVisible) drawGridLines(32, 20);
+
+        // Teleporter visual: T3: col31 row16-18
+        {
+            float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+            const int gridCols = 32, gridRows = 20;
+            float cw = (maxX - minX) / static_cast<float>(gridCols);
+            float ch = (maxY - minY) / static_cast<float>(gridRows);
+            {
+                gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 16 * ch + ch * 0.5f) };
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            }
+            {
+                gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 17 * ch + ch * 0.5f) };
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            }
+            {
+                gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            }
+        }
 
         printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Tutorial 3");
         PlayerDraw(gGame.player);

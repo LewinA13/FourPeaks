@@ -57,11 +57,11 @@ namespace game {
         }
         if (tileType == 19) {
             AEGfxTexture* tex = sprite::sign();
-            size.x *= 0.8f;
-            size.y *= 0.8f;
-            pos.y -= (size.y - (size.y*0.8f)) * 0.5f;  // allign to btm
-            if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-            else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+            // Draw sign 2 tiles tall, anchored to bottom of tile
+            gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+            gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+            if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+            else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
             return true;
         }
         return false;
@@ -253,6 +253,22 @@ namespace game {
                         gfx::Vec2 sp = pos;
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
                         if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+
+                        // Cell-fit left spike (21) and right spike (22)
+                        else if (tileType == 21 || tileType == 22)
+                        {
+                            AEGfxTexture* spikeTex = sprite::spikes();
+                            if (spikeTex)
+                            {
+                                // Draw sideways: swap width/height so portrait spike lies on side
+                                gfx::Vec2 ss{ size.y, size.x };
+                                gfx::Vec2 sp = pos;
+                                float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                                if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
+                                else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
+                                gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                            }
+                        }
                         else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
@@ -284,6 +300,16 @@ namespace game {
                     AEGfxTexture* t = sprite::autumn2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                }
+                else if (tileType == 4) {
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                }
+                else if (tileType == 6) {
+                    AEGfxTexture* t = sprite::winterT();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
                 }
                 else {
                     float u0{}, v0{}, u1{}, v1{};
@@ -476,6 +502,16 @@ namespace game {
                     AEGfxTexture* t = sprite::autumn2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                }
+                else if (tileType == 4) {
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                }
+                else if (tileType == 6) {
+                    AEGfxTexture* t = sprite::winterT();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
                 }
                 else {
                     float u0{}, v0{}, u1{}, v1{};
@@ -685,6 +721,16 @@ namespace game {
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                 }
+                else if (tileType == 4) {
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                }
+                else if (tileType == 6) {
+                    AEGfxTexture* t = sprite::winterT();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
+                }
                 else {
                     float u0{}, v0{}, u1{}, v1{};
                     AEGfxTexture* tex = sprite::tileset();
@@ -753,6 +799,15 @@ namespace game {
             PlayerUpdate(gGame.player, dt);
             HeatUpdate(dt);
         }
+        // Teleporter to SpringS1 at col31 row18-19
+        if (!camera::isTransitioning())
+        {
+            float gx{}, gy{}, cw{}, ch{};
+            gridToWorld(31, 18, gx, gy, cw, ch);
+            float dx = gGame.player.pos.x - (gx + cw * 0.5f);
+            float dy = gGame.player.pos.y - (gy + ch * 0.5f);
+            if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 25; // -> SpringS1
+        }
         sprite::updateAnimatedTiles(dt);
         for (auto& trigger : g_triggeredIceTiles)
             for (auto& ice : iceTiles)
@@ -786,6 +841,21 @@ namespace game {
         //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
         HeatDraw();
+        // Teleporter visual: S4: col31 row18-19
+        {
+            float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+            float cw = (maxX - minX) / static_cast<float>(gridCols);
+            float ch = (maxY - minY) / static_cast<float>(gridRows);
+            {
+                gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            }
+            {
+                gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            }
+        }
         PlayerDraw(gGame.player);
     }
 
@@ -877,6 +947,16 @@ namespace game {
                     AEGfxTexture* t = sprite::autumn2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
+                }
+                else if (tileType == 4) {
+                    AEGfxTexture* t = sprite::winterC();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
+                }
+                else if (tileType == 6) {
+                    AEGfxTexture* t = sprite::winterT();
+                    if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
                 }
                 else {
                     float u0{}, v0{}, u1{}, v1{};

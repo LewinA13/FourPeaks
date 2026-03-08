@@ -27,6 +27,9 @@ namespace sprite
     // autumn background texture autumnbg.jpg
     AEGfxTexture* autumnBackground();
 
+    // spring background texture springBG.jpg
+    AEGfxTexture* springBackground();
+
     // coin spritesheet (coin_.png)
     AEGfxTexture* coin();
 
@@ -54,7 +57,7 @@ namespace sprite
     AEGfxTexture* bottle();
 
     // textbox texture (textbox.png)
-    AEGfxTexture* textbox(); 
+    AEGfxTexture* textbox();
 
     // textbox arrow texture
     AEGfxTexture* textboxUp();    // (textboxUp.png)
@@ -74,6 +77,10 @@ namespace sprite
     AEGfxTexture* spring2();
     AEGfxTexture* autumn1();
     AEGfxTexture* autumn2();
+
+    // Tile ID 4 -> WinterC.png, Tile ID 6 -> WinterT.png
+    AEGfxTexture* winterC();
+    AEGfxTexture* winterT();
 
     // -----------------------------------------------------------------
     // New tile textures

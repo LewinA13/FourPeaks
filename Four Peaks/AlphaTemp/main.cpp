@@ -15,6 +15,8 @@
 #include "summer.hpp"
 #include "spring.hpp"
 #include "autumn.hpp"
+#include "thankyou.hpp"
+#include "transition.hpp"
 #include "camera.hpp"
 #include "collision.hpp"
 #include "dialogue.hpp"
@@ -51,6 +53,7 @@ enum class SceneState
     AutumnS2,
     AutumnS3,
     AutumnS4,
+    ThankYou,
     Exit
 };
 
@@ -59,6 +62,8 @@ enum class SceneState
 // We start the game flow at Tutorial 1, not Winter.
 SceneState pendingScene = SceneState::Tutorial1;
 SceneState lastState = SceneState::Exit;
+Transition      gTransition;
+SceneState      transitionTarget = SceneState::MainMenu;
 
 
 enum StateID {
@@ -104,6 +109,7 @@ static std::string SceneToString(SceneState s)
     case SceneState::AutumnS2:  return "AutumnS2";
     case SceneState::AutumnS3:  return "AutumnS3";
     case SceneState::AutumnS4:  return "AutumnS4";
+    case SceneState::ThankYou:  return "ThankYou";
 
     default:                    return "";
     }
@@ -134,6 +140,7 @@ static SceneState StringToScene(const std::string& s)
     if (s == "AutumnS2")  return SceneState::AutumnS2;
     if (s == "AutumnS3")  return SceneState::AutumnS3;
     if (s == "AutumnS4")  return SceneState::AutumnS4;
+    if (s == "ThankYou")   return SceneState::ThankYou;
 
     return SceneState::Tutorial1; // fallback
 }
@@ -324,6 +331,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     game::AutumnS2 autumnStage2;
     game::AutumnS3 autumnStage3;
     game::AutumnS4 autumnStage4;
+    game::ThankYouScreen thankYouScreen;
+
+    game::SpringS1 springStage;
+    game::SpringS2 springStage2;
+    game::SpringS3 springStage3;
+    game::SpringS4 springStage4;
 
 
     // Start on the splash screen.
@@ -394,6 +407,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             g_currentMap = autumnStage4.getTileMap();
         }
 
+        // Spring stages
+        else if (currentState == SceneState::SpringS1) {
+            g_currentMap = springStage.getTileMap();
+            g_currentSignID = 30;
+        }
+        else if (currentState == SceneState::SpringS2) {
+            g_currentMap = springStage2.getTileMap();
+            g_currentSignID = 31;
+        }
+        else if (currentState == SceneState::SpringS3) {
+            g_currentMap = springStage3.getTileMap();
+            g_currentSignID = 32;
+        }
+        else if (currentState == SceneState::SpringS4) {
+            g_currentMap = springStage4.getTileMap();
+            g_currentSignID = 33;
+        }
+
         // Summer stages (so collision + pickups use the correct current map)
         // ==================================================================
         else if (currentState == SceneState::SummerS1) {
@@ -446,30 +477,30 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             switch (currentState)
             {
 
-            /* ---------- TUTORIAL ---------- */
+                /* ---------- TUTORIAL ---------- */
             case SceneState::Tutorial1: spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::Tutorial2: spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::Tutorial3: spawn = GridToWorld(2, 2, h * idx); break;
 
-            /* ---------- WINTER ---------- */
+                /* ---------- WINTER ---------- */
             case SceneState::WinterS1:  spawn = GridToWorld(3, 3, h * idx); break;
             case SceneState::WinterS2:  spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::WinterS3:  spawn = GridToWorld(1, 6, h * idx); break;
             case SceneState::WinterS4:  spawn = GridToWorld(3, 3, h * idx); break;
 
-            /* ---------- SUMMER ---------- */
+                /* ---------- SUMMER ---------- */
             case SceneState::SummerS1:  spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::SummerS2:  spawn = GridToWorld(2, 17, h * idx); break;
             case SceneState::SummerS3:  spawn = GridToWorld(1, 16, h * idx); break;
             case SceneState::SummerS4:  spawn = GridToWorld(2, 2, h * idx); break;
 
-            /* ---------- SPRING ---------- */
+                /* ---------- SPRING ---------- */
             case SceneState::SpringS1:  spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::SpringS2:  spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::SpringS3:  spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::SpringS4:  spawn = GridToWorld(2, 2, h * idx); break;
 
-            /* ---------- AUTUMN ---------- */
+                /* ---------- AUTUMN ---------- */
             case SceneState::AutumnS1:  spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::AutumnS2:  spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::AutumnS3:  spawn = GridToWorld(2, 2, h * idx); break;
@@ -492,7 +523,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             lastState = currentState;
         }
-        
+
 
         // Apply camera
         camera::apply();
@@ -609,6 +640,35 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             lastState = SceneState::Exit;
         }
 
+        // Spring levels: V=S1, B=S2, N=S3, M=S4
+        if (AEInputCheckTriggered(AEVK_V))
+        {
+            currentState = SceneState::SpringS1;
+            lastState = SceneState::Exit;
+        }
+        if (AEInputCheckTriggered(AEVK_B))
+        {
+            currentState = SceneState::SpringS2;
+            lastState = SceneState::Exit;
+        }
+        if (AEInputCheckTriggered(AEVK_N))
+        {
+            currentState = SceneState::SpringS3;
+            lastState = SceneState::Exit;
+        }
+        if (AEInputCheckTriggered(AEVK_M))
+        {
+            currentState = SceneState::SpringS4;
+            lastState = SceneState::Exit;
+        }
+        // T key: test the transition effect (PokemonWipe then goes to MainMenu)
+        if (AEInputCheckTriggered(AEVK_T))
+        {
+            gTransition.style = TransitionStyle::PokemonWipe;
+            gTransition.start();
+            transitionTarget = SceneState::MainMenu;
+        }
+
         // Optionally let the window close terminate the game.
         if (AESysDoesWindowExist() == 0)
         {
@@ -619,6 +679,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         int action = 0;
 
         UI::gDialog.PLAYERNEARSIGN(false);
+
+        // ?? Transition: fire scene switch at mid-point, draw overlay on top ??
+        gTransition.update(dt);
+        if (gTransition.isReadyToSwitch())
+        {
+            currentState = transitionTarget;
+            camera::setY(0.0f);
+            lastState = SceneState::Exit;
+            gTransition.notifySwitch();
+        }
 
         switch (currentState)
         {
@@ -779,6 +849,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = summerStage4.update(dt);
             summerStage4.draw();
 
+            if (action == 25) { currentState = SceneState::SpringS1; camera::setY(0.0f); lastState = SceneState::Exit; } // teleport -> SpringS1
             if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
             break;
         }
@@ -826,6 +897,71 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = autumnStage4.update(dt);
             autumnStage4.draw();
 
+            if (action == 63) { currentState = SceneState::ThankYou; camera::setY(0.0f); }  // End game
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            break;
+        }
+
+        case SceneState::ThankYou:
+        {
+            float dt_ty = AEFrameRateControllerGetFrameTime();
+            int ty_action = thankYouScreen.update(dt_ty);
+            thankYouScreen.draw();
+            if (ty_action == 1) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            break;
+        }
+
+        // --------------------------------------------------------
+        // SPRING (Stages 1..4)
+        // action codes from spring.cpp:
+        // 40 -> go SpringS2
+        // 41 -> go SpringS3
+        // 42 -> go SpringS4
+        // 43 -> go AutumnS1 (last spring level teleports to Autumn)
+        // 2  -> back to MainMenu
+        // --------------------------------------------------------
+        case SceneState::SpringS1:
+        {
+            action = springStage.update(dt);
+            springStage.draw();
+
+            if (action == 40) { currentState = SceneState::SpringS2; camera::setY(camera::screenHeight()); }
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            break;
+        }
+
+        case SceneState::SpringS2:
+        {
+            action = springStage2.update(dt);
+            springStage2.draw();
+
+            if (action == 41) { currentState = SceneState::SpringS3; camera::setY(camera::screenHeight() * 2.0f); }
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            break;
+        }
+
+        case SceneState::SpringS3:
+        {
+            action = springStage3.update(dt);
+            springStage3.draw();
+
+            if (action == 42) { currentState = SceneState::SpringS4; camera::setY(camera::screenHeight() * 3.0f); }
+            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            break;
+        }
+
+        case SceneState::SpringS4:
+        {
+            action = springStage4.update(dt);
+            springStage4.draw();
+
+            if (action == 43)
+            {
+                // Teleport from Spring Stage 4 to Autumn Stage 1
+                currentState = SceneState::AutumnS1;
+                camera::setY(0.0f);
+                lastState = SceneState::Exit;
+            }
             if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
             break;
         }
@@ -964,6 +1100,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
         // End frame.
+        gTransition.draw();  // overlay drawn last, on top of everything
         AESysFrameEnd();
     }
 
