@@ -64,10 +64,14 @@ TileRange calTileRange(f32 x, f32 y, f32 width, f32 height) {
 		return box;
 	}
 
-	float left = btmCoordPostX - (width / 2.0f) + 0.1f;
-	float right = btmCoordPostX + (width / 2.0f) - 0.1f;
-	float top = screenY + (height / 2.0f) - 0.1f;
-	float bottom = screenY - (height / 2.0f) + 0.1f;
+
+
+	float left = btmCoordPostX - (width / 2.0f) + 1.0f;
+	float right = btmCoordPostX + (width / 2.0f) - 1.0f;
+	float top = screenY + (height / 2.0f) - 1.0f;
+	float bottom = screenY - (height / 2.0f) + 1.0f;
+
+
 
 	box.colStart = static_cast<int>((left) / tileW);
 	box.colEnd = static_cast<int>((right) / tileW);
@@ -120,14 +124,14 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm], float velY = -
 			int tile = levelLayout[r][c];
 
 			//! Assume platform is 7 first, ****change in future
-			if (tile == 7) {
-				// If (player is dropping or staying) and (player bottom is near with platform), collision detect
-				if (velY <= 0 && (box.rowStart == r || box.rowStart == r + 1)) {
-					return true;
-				}
-				//! Skip this tile, check remaining tiles for collision
-				continue;
-			}
+			//if (tile == 7) {
+			//	// If (player is dropping or staying) and (player bottom is near with platform), collision detect
+			//	if (velY <= 0 && (box.rowStart == r || box.rowStart == r + 1)) {
+			//		return true;
+			//	}
+			//	//! Skip this tile, check remaining tiles for collision
+			//	continue;
+			//}
 
 			if (isSolidTile(tile)) {
 				return true;
