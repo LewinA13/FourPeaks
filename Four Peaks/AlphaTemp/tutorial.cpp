@@ -142,6 +142,21 @@ namespace
                     continue;
                 }
 
+                // Cell-fit left spike (21) and right spike (22)
+                if (tileType == 21 || tileType == 22)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        gfx::Vec2 ss{ size.y, size.x };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 22) { u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                    continue;
+                }
+
                 // Left-facing spike (26) and right-facing spike (27)
                 if (tileType == 26 || tileType == 27)
                 {
@@ -217,7 +232,7 @@ namespace
                 {
                     AEGfxTexture* tex = sprite::sign();
                     // Draw sign 2 tiles tall, anchored to bottom of tile
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 2.0f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
@@ -257,7 +272,8 @@ namespace
         return (std::sqrt(dx * dx + dy * dy) < cellW * 1.0f);
     }
 
-    // Per-level teleporters defined inline in each stage below
+    // Per-level teleporters defined inline below
+
 
     // ------------------------------------------------------------
     // Tutorial background (full-screen sprite)
@@ -386,8 +402,8 @@ namespace game
             gridToWorld(1, 19, gridCols, gridRows, gx, gy, cw, ch);
             float dx = gGame.player.pos.x - (gx + cw * 0.5f);
             float dy = gGame.player.pos.y - (gy + ch * 0.5f);
-            if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 30; // -> Tutorial2
-        }
+            if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 30;
+        }  // -> Tutorial2
         return 0;
     }
 
@@ -398,10 +414,11 @@ namespace game
         drawTilesFromMap(tileMap);
         if (gridVisible) drawGridLines(32, 20);
 
-        // Teleporter visual: Tutorial1: row 19, col 1-2
+        // Teleporter visual: T1: row19 col1-2
         {
             float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
             float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+            const int gridCols = 32, gridRows = 20;
             float cw = (maxX - minX) / static_cast<float>(gridCols);
             float ch = (maxY - minY) / static_cast<float>(gridRows);
             {
@@ -447,8 +464,8 @@ namespace game
             gridToWorld(31, 3, gridCols, gridRows, gx, gy, cw, ch);
             float dx = gGame.player.pos.x - (gx + cw * 0.5f);
             float dy = gGame.player.pos.y - (gy + ch * 0.5f);
-            if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 31; // -> Tutorial3
-        }
+            if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 31;
+        }  // -> Tutorial3
         return 0;
     }
 
@@ -459,10 +476,11 @@ namespace game
         drawTilesFromMap(tileMap);
         if (gridVisible) drawGridLines(32, 20);
 
-        // Teleporter visual: Tutorial2: col 31, row 3-4
+        // Teleporter visual: T2: col31 row3-4
         {
             float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
             float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+            const int gridCols = 32, gridRows = 20;
             float cw = (maxX - minX) / static_cast<float>(gridCols);
             float ch = (maxY - minY) / static_cast<float>(gridRows);
             {
@@ -506,8 +524,8 @@ namespace game
             gridToWorld(31, 16, gridCols, gridRows, gx, gy, cw, ch);
             float dx = gGame.player.pos.x - (gx + cw * 0.5f);
             float dy = gGame.player.pos.y - (gy + ch * 0.5f);
-            if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 32; // -> WinterS1
-        }
+            if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 32;
+        }  // -> WinterS1
         return 0;
     }
 
@@ -518,10 +536,11 @@ namespace game
         drawTilesFromMap(tileMap);
         if (gridVisible) drawGridLines(32, 20);
 
-        // Teleporter visual: Tutorial3: col 31, row 16-18
+        // Teleporter visual: T3: col31 row16-18
         {
             float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
             float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+            const int gridCols = 32, gridRows = 20;
             float cw = (maxX - minX) / static_cast<float>(gridCols);
             float ch = (maxY - minY) / static_cast<float>(gridRows);
             {

@@ -15,6 +15,8 @@
 #include "summer.hpp"
 #include "spring.hpp"
 #include "autumn.hpp"
+#include "thankyou.hpp"
+#include "transition.hpp"
 #include "camera.hpp"
 #include "collision.hpp"
 #include "dialogue.hpp"
@@ -50,6 +52,7 @@ enum class SceneState
     AutumnS2,
     AutumnS3,
     AutumnS4,
+    ThankYou,
     Exit
 };
 
@@ -58,6 +61,8 @@ enum class SceneState
 // We start the game flow at Tutorial 1, not Winter.
 SceneState pendingScene = SceneState::Tutorial1;
 SceneState lastState = SceneState::Exit;
+Transition      gTransition;
+SceneState      transitionTarget = SceneState::MainMenu;
 
 
 enum StateID {
@@ -103,6 +108,7 @@ static std::string SceneToString(SceneState s)
     case SceneState::AutumnS2:  return "AutumnS2";
     case SceneState::AutumnS3:  return "AutumnS3";
     case SceneState::AutumnS4:  return "AutumnS4";
+    case SceneState::ThankYou:  return "ThankYou";
 
     default:                    return "";
     }
@@ -133,6 +139,7 @@ static SceneState StringToScene(const std::string& s)
     if (s == "AutumnS2")  return SceneState::AutumnS2;
     if (s == "AutumnS3")  return SceneState::AutumnS3;
     if (s == "AutumnS4")  return SceneState::AutumnS4;
+    if (s == "ThankYou")   return SceneState::ThankYou;
 
     return SceneState::Tutorial1; // fallback
 }
@@ -257,6 +264,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     game::AutumnS2 autumnStage2;
     game::AutumnS3 autumnStage3;
     game::AutumnS4 autumnStage4;
+    game::ThankYouScreen thankYouScreen;
 
     game::SpringS1 springStage;
     game::SpringS2 springStage2;
@@ -579,6 +587,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             currentState = SceneState::SpringS4;
             lastState = SceneState::Exit;
         }
+        // T key: test the transition effect (PokemonWipe then goes to MainMenu)
+        if (AEInputCheckTriggered(AEVK_T))
+        {
+            gTransition.style = TransitionStyle::PokemonWipe;
+            gTransition.start();
+            transitionTarget = SceneState::MainMenu;
+        }
 
         // Optionally let the window close terminate the game.
         if (AESysDoesWindowExist() == 0)
@@ -590,6 +605,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         int action = 0;
 
         UI::gDialog.PLAYERNEARSIGN(false);
+
+        // ?? Transition: fire scene switch at mid-point, draw overlay on top ??
+        gTransition.update(dt);
+        if (gTransition.isReadyToSwitch())
+        {
+            currentState = transitionTarget;
+            camera::setY(0.0f);
+            lastState = SceneState::Exit;
+            gTransition.notifySwitch();
+        }
 
         switch (currentState)
         {
@@ -750,13 +775,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = summerStage4.update(dt);
             summerStage4.draw();
 
-            if (action == 25)
-            {
-                // Teleport from Summer Stage 4 to Spring Stage 1
-                currentState = SceneState::SpringS1;
-                camera::setY(0.0f);
-                lastState = SceneState::Exit;
-            }
+            if (action == 25) { currentState = SceneState::SpringS1; camera::setY(0.0f); lastState = SceneState::Exit; } // teleport -> SpringS1
             if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
             break;
         }
@@ -804,8 +823,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = autumnStage4.update(dt);
             autumnStage4.draw();
 
-            if (action == 63) { currentState = SceneState::Tutorial1; camera::setY(0.0f); } // loop back to Tutorial
+            if (action == 63) { currentState = SceneState::ThankYou; camera::setY(0.0f); }  // End game
             if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            break;
+        }
+
+        case SceneState::ThankYou:
+        {
+            float dt_ty = AEFrameRateControllerGetFrameTime();
+            int ty_action = thankYouScreen.update(dt_ty);
+            thankYouScreen.draw();
+            if (ty_action == 1) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
             break;
         }
 
@@ -985,6 +1013,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
         // End frame.
+        gTransition.draw();  // overlay drawn last, on top of everything
         AESysFrameEnd();
     }
 

@@ -27,6 +27,9 @@ namespace sprite
     // autumn background texture autumnbg.jpg
     AEGfxTexture* autumnBackground();
 
+    // spring background texture springBG.jpg
+    AEGfxTexture* springBackground();
+
     // coin spritesheet (coin_.png)
     AEGfxTexture* coin();
 

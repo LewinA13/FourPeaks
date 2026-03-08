@@ -1,118 +1,44 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
+    <ClCompile Include="audio.cpp" />
+    <ClCompile Include="autumn.cpp" />
+    <ClCompile Include="camera.cpp" />
+    <ClCompile Include="collision.cpp" />
+    <ClCompile Include="dialogue.cpp" />
+    <ClCompile Include="gamestate.cpp" />
+    <ClCompile Include="graphics.cpp" />
+    <ClCompile Include="level_loader.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="mainmenu.cpp" />
+    <ClCompile Include="player.cpp" />
+    <ClCompile Include="spring.cpp" />
+    <ClCompile Include="splash.cpp" />
+    <ClCompile Include="splash.hpp" />
+    <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="summer.cpp" />
+    <ClCompile Include="tutorial.cpp" />
+    <ClCompile Include="winter.cpp" />
+    <ClCompile Include="transition.cpp" />
+    <ClCompile Include="thankyou.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gamestate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="graphics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mainmenu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sprite.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="winter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="collision.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="level_loader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tutorial.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dialogue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="summer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="audio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="spring.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="autumn.cpp">
-    <ClCompile Include="splash.hpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="splash.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="gamestate.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="graphics.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mainmenu.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="player.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="winter.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="collision.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sprite.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="camera.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="level_loader.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tutorial.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dialogue.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="summer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="audio.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="spring.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="autumn.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClInclude Include="audio.hpp" />
+    <ClInclude Include="autumn.hpp" />
+    <ClInclude Include="camera.hpp" />
+    <ClInclude Include="collision.hpp" />
+    <ClInclude Include="dialogue.hpp" />
+    <ClInclude Include="gamestate.hpp" />
+    <ClInclude Include="graphics.hpp" />
+    <ClInclude Include="level_loader.hpp" />
+    <ClInclude Include="mainmenu.hpp" />
+    <ClInclude Include="player.hpp" />
+    <ClInclude Include="spring.hpp" />
+    <ClInclude Include="sprite.hpp" />
+    <ClInclude Include="summer.hpp" />
+    <ClInclude Include="tutorial.hpp" />
+    <ClInclude Include="winter.hpp" />
+    <ClInclude Include="transition.hpp" />
+    <ClInclude Include="thankyou.hpp" />
   </ItemGroup>
 </Project>

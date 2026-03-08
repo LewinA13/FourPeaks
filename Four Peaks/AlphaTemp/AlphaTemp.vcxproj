@@ -27,6 +27,8 @@
     <ClCompile Include="splash.hpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="summer.cpp" />
+    <ClCompile Include="thankyou.cpp" />
+    <ClCompile Include="transition.cpp" />
     <ClCompile Include="tutorial.cpp" />
     <ClCompile Include="winter.cpp" />
   </ItemGroup>
@@ -44,6 +46,8 @@
     <ClInclude Include="spring.hpp" />
     <ClInclude Include="sprite.hpp" />
     <ClInclude Include="summer.hpp" />
+    <ClInclude Include="thankyou.hpp" />
+    <ClInclude Include="transition.hpp" />
     <ClInclude Include="tutorial.hpp" />
     <ClInclude Include="winter.hpp" />
   </ItemGroup>

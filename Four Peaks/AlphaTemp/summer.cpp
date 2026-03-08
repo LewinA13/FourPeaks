@@ -58,7 +58,7 @@ namespace game {
         if (tileType == 19) {
             AEGfxTexture* tex = sprite::sign();
             // Draw sign 2 tiles tall, anchored to bottom of tile
-            gfx::Vec2 signSize{ size.x * 0.9f, size.y * 2.0f };
+            gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
             gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
             if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
             else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
@@ -255,6 +255,22 @@ namespace game {
                         gfx::Vec2 sp = pos;
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
                         if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
+
+                        // Cell-fit left spike (21) and right spike (22)
+                        else if (tileType == 21 || tileType == 22)
+                        {
+                            AEGfxTexture* spikeTex = sprite::spikes();
+                            if (spikeTex)
+                            {
+                                // Draw sideways: swap width/height so portrait spike lies on side
+                                gfx::Vec2 ss{ size.y, size.x };
+                                gfx::Vec2 sp = pos;
+                                float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                                if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
+                                else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
+                                gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                            }
+                        }
                         else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
@@ -781,7 +797,7 @@ namespace game {
             PlayerUpdate(gGame.player, dt);
             HeatUpdate(dt);
         }
-        // Teleporter to SpringS1 at col 31, row 18-19
+        // Teleporter to SpringS1 at col31 row18-19
         if (!camera::isTransitioning())
         {
             float gx{}, gy{}, cw{}, ch{};
@@ -821,7 +837,7 @@ namespace game {
         printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
         HeatDraw();
-        // Teleporter visual: SummerS4: col 31, row 18-19
+        // Teleporter visual: S4: col31 row18-19
         {
             float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
             float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();

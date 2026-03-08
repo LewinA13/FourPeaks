@@ -19,6 +19,7 @@ namespace sprite
         AEGfxTexture* summerBgTex{};
         AEGfxTexture* tutorialBgTex{};
         AEGfxTexture* autumnBgTex{};
+        AEGfxTexture* springBgTex{};
         AEGfxTexture* coinTex{};
         AEGfxTexture* bgStripTex{};
         AEGfxTexture* iceTex{};
@@ -140,6 +141,10 @@ namespace sprite
         if (!autumnBgTex) {
             autumnBgTex = AEGfxTextureLoad("Assets/autumnbg.jpg");
             if (!autumnBgTex) autumnBgTex = AEGfxTextureLoad("autumnbg.jpg");
+        }
+        if (!springBgTex) {
+            springBgTex = AEGfxTextureLoad("Assets/springBG2.jpg");
+            if (!springBgTex) springBgTex = AEGfxTextureLoad("springBG2.jpg");
         }
         if (!tilesetTex) {
             tilesetTex = AEGfxTextureLoad("Assets/winter_.png");
@@ -263,6 +268,7 @@ namespace sprite
             AEGfxTextureUnload(autumnBgTex);
             autumnBgTex = nullptr;
         }
+        if (springBgTex) { AEGfxTextureUnload(springBgTex); springBgTex = nullptr; }
 
         if (coinTex)
         {
@@ -351,6 +357,11 @@ namespace sprite
     AEGfxTexture* autumnBackground()
     {
         return autumnBgTex;
+    }
+
+    AEGfxTexture* springBackground()
+    {
+        return springBgTex;
     }
 
     AEGfxTexture* coin()

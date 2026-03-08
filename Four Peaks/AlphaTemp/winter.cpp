@@ -293,7 +293,7 @@ namespace game {
                 {
                     AEGfxTexture* tex = sprite::sign();
                     // Draw sign 2 tiles tall, anchored to bottom of tile
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 2.0f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
@@ -372,6 +372,21 @@ namespace game {
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
                         if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
                         else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
+                // Cell-fit left spike (21) and right spike (22)
+                else if (tileType == 21 || tileType == 22)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        // Draw sideways: swap width/height so portrait spike lies on side
+                        gfx::Vec2 ss{ size.y, size.x };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
+                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
@@ -730,7 +745,7 @@ namespace game {
                 {
                     AEGfxTexture* tex = sprite::sign();
                     // Draw sign 2 tiles tall, anchored to bottom of tile
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 2.0f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
@@ -793,6 +808,21 @@ namespace game {
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
                         if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
                         else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
+                // Cell-fit left spike (21) and right spike (22)
+                else if (tileType == 21 || tileType == 22)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        // Draw sideways: swap width/height so portrait spike lies on side
+                        gfx::Vec2 ss{ size.y, size.x };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
+                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
@@ -1177,7 +1207,7 @@ namespace game {
                 {
                     AEGfxTexture* tex = sprite::sign();
                     // Draw sign 2 tiles tall, anchored to bottom of tile
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 2.0f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
@@ -1256,6 +1286,21 @@ namespace game {
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
                         if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
                         else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
+                // Cell-fit left spike (21) and right spike (22)
+                else if (tileType == 21 || tileType == 22)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        // Draw sideways: swap width/height so portrait spike lies on side
+                        gfx::Vec2 ss{ size.y, size.x };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
+                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
@@ -1615,7 +1660,7 @@ namespace game {
                 {
                     AEGfxTexture* tex = sprite::sign();
                     // Draw sign 2 tiles tall, anchored to bottom of tile
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 2.0f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
@@ -1703,6 +1748,21 @@ namespace game {
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
                         if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
                         else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                }
+                // Cell-fit left spike (21) and right spike (22)
+                else if (tileType == 21 || tileType == 22)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        // Draw sideways: swap width/height so portrait spike lies on side
+                        gfx::Vec2 ss{ size.y, size.x };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
+                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
