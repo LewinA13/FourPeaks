@@ -47,10 +47,16 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
     if (!out.is_open())
         return false;
 
-    out << "checkpoint_v3\n";
+    out << "checkpoint_v5\n";
     out << p.checkpointScene << "\n";
     out << std::fixed << std::setprecision(3);
-    out << p.respawnPos.x << " " << p.respawnPos.y << " " << p.melonsCollected << "\n";
+
+    // Save respawn position, melon count, death count, and run timer.
+    out << p.respawnPos.x << " "
+        << p.respawnPos.y << " "
+        << p.melonsCollected << " "
+        << p.deathCount << " "
+        << gGame.runTimeSeconds << "\n";
 
     std::cout << "Saved checkpoint to file";
     return out.good();
@@ -71,15 +77,44 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     float x = 0.0f;
     float y = 0.0f;
 
-    if(header != "checkpoint_v3")
-        return false;
+    // Safe defaults if file is old or missing values
+    p.melonsCollected = 0;
+    p.deathCount = 0;
+    gGame.runTimeSeconds = 0.0f;
 
     std::string scene;
     if (!(in >> scene))
         return false;
+
     p.checkpointScene = scene;
-    if (!(in >> x >> y >> p.melonsCollected))
+
+    // Newest format: checkpoint_v5
+    if (header == "checkpoint_v5")
+    {
+        if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
+            return false;
+    }
+    // Old format support: checkpoint_v4
+    else if (header == "checkpoint_v4")
+    {
+        if (!(in >> x >> y >> p.melonsCollected >> p.deathCount))
+            return false;
+
+        gGame.runTimeSeconds = 0.0f;
+    }
+    // Older format support: checkpoint_v3
+    else if (header == "checkpoint_v3")
+    {
+        if (!(in >> x >> y >> p.melonsCollected))
+            return false;
+
+        p.deathCount = 0;
+        gGame.runTimeSeconds = 0.0f;
+    }
+    else
+    {
         return false;
+    }
 
     p.respawnPos = { x, y };
 
@@ -164,6 +199,15 @@ void PlayerKill(Player& p) // PlayerKill(gGame.player)
     p.alive = false;
     p.dead = true;
 
+    // increase death count
+    p.deathCount += 1;
+
+    // save updated death count, only save if we have valid checkpoint
+    if (!p.checkpointScene.empty())
+    {
+        PlayerSaveCheckpoint(p, "checkpoint.txt");
+    }
+
     // Start death delay timer
     p.deadTimer = p.deadDuration;
 
@@ -222,6 +266,10 @@ void PlayerInit(Player& p)
 
     p.alive = true;
     p.dead = false;
+
+    p.melonsCollected = 0;
+    p.deathCount = 0;
+    gGame.runTimeSeconds = 0.0f;
 
     PlayerLoadCheckpoint(p, "checkpoint.txt", true);
     PlayerLoadMelons(p, "melons.txt");

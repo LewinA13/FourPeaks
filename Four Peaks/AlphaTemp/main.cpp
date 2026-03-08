@@ -19,6 +19,7 @@
 #include "collision.hpp"
 #include "dialogue.hpp"
 #include "audio.hpp"
+#include "hud.hpp"
 
 
 // Global font handle used by all states
@@ -68,7 +69,7 @@ enum StateID {
     WINTER_S4 = 4
 };
 
-int getStateID(SceneState scene) {
+int static getStateID(SceneState scene) {
     switch (scene) {
     case SceneState::WinterS1: return WINTER_S1;
     case SceneState::WinterS2: return WINTER_S2;
@@ -172,23 +173,89 @@ static gfx::Vec2 GridToWorld(int gridX, int gridY, float screenYOffset)
 
 static BgmType Audio_GetDesiredBgmType(SceneState state)
 {
-    if (state == SceneState::WinterS1 ||
-        state == SceneState::WinterS2 ||
-        state == SceneState::WinterS3 ||
-        state == SceneState::WinterS4)
+    if (state == SceneState::WinterS1 || state == SceneState::WinterS2 || state == SceneState::WinterS3 || state == SceneState::WinterS4)
     {
         return BgmType::Winter;
     }
 
-    // Summer / Spring / Autumn
-    if (state == SceneState::SummerS1 || state == SceneState::SummerS2 || state == SceneState::SummerS3 || state == SceneState::SummerS4 ||
-        state == SceneState::SpringS1 || state == SceneState::SpringS2 || state == SceneState::SpringS3 || state == SceneState::SpringS4 ||
-        state == SceneState::AutumnS1 || state == SceneState::AutumnS2 || state == SceneState::AutumnS3 || state == SceneState::AutumnS4)
+    // Summer
+    if (state == SceneState::SummerS1 || state == SceneState::SummerS2 || state == SceneState::SummerS3 || state == SceneState::SummerS4)
     {
-        return BgmType::Summer; // currently silent unless you load a summer track in audio.cpp
+        return BgmType::Summer;
+    }
+
+    // Spring
+    if (state == SceneState::SpringS1 || state == SceneState::SpringS2 || state == SceneState::SpringS3 || state == SceneState::SpringS4)
+    {
+        return BgmType::Spring; // currently silent unless you load a summer track in audio.cpp
+    }
+
+    // Autumn
+    if (state == SceneState::AutumnS1 || state == SceneState::AutumnS2 || state == SceneState::AutumnS3 || state == SceneState::AutumnS4)
+    {
+        return BgmType::Autumn; // currently silent unless you load a summer track in audio.cpp
     }
 
     return BgmType::None;
+}
+
+//helper function for hud
+static bool IsGameplayScene(SceneState s)
+{
+    switch (s)
+    {
+    case SceneState::Tutorial1:
+    case SceneState::Tutorial2:
+    case SceneState::Tutorial3:
+    case SceneState::WinterS1:
+    case SceneState::WinterS2:
+    case SceneState::WinterS3:
+    case SceneState::WinterS4:
+    case SceneState::SummerS1:
+    case SceneState::SummerS2:
+    case SceneState::SummerS3:
+    case SceneState::SummerS4:
+    case SceneState::SpringS1:
+    case SceneState::SpringS2:
+    case SceneState::SpringS3:
+    case SceneState::SpringS4:
+    case SceneState::AutumnS1:
+    case SceneState::AutumnS2:
+    case SceneState::AutumnS3:
+    case SceneState::AutumnS4:
+        return true;
+
+    default:
+        return false;
+    }
+}
+
+// new one specifically for game run time, because we dont want to count tutorial
+static bool IsSeasonScene(SceneState s)
+{
+    switch (s)
+    {
+    case SceneState::WinterS1:
+    case SceneState::WinterS2:
+    case SceneState::WinterS3:
+    case SceneState::WinterS4:
+    case SceneState::SummerS1:
+    case SceneState::SummerS2:
+    case SceneState::SummerS3:
+    case SceneState::SummerS4:
+    case SceneState::SpringS1:
+    case SceneState::SpringS2:
+    case SceneState::SpringS3:
+    case SceneState::SpringS4:
+    case SceneState::AutumnS1:
+    case SceneState::AutumnS2:
+    case SceneState::AutumnS3:
+    case SceneState::AutumnS4:
+        return true;
+
+    default:
+        return false;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -349,6 +416,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // Begin frame.
         AESysFrameStart();
         f32 dt = (f32)AEFrameRateControllerGetFrameTime();
+
+        // only count time while the player is inside actual season stages.
+        // excludes splash screen, main menu, tutorial, and any future pause/settings states.
+        if (IsSeasonScene(currentState))
+        {
+            gGame.runTimeSeconds += dt;
+        }
 
 
         // frame audio maintenance + switching
@@ -875,9 +949,29 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         UI::gDialog.update(dt);
         UI::gDialog.render();
 
+        // draw hud last. putting it here allows it to be present in all season
+        if (IsGameplayScene(currentState))
+        {
+            hud::drawMelonCounter(gGame.player.melonsCollected);
+            hud::drawDeathCounter(gGame.player.deathCount);
+        }
+
+        // only draw timer during the actual season stages
+        if (IsSeasonScene(currentState))
+        {
+            hud::drawRunTimer(gGame.runTimeSeconds);
+        }
+
 
         // End frame.
         AESysFrameEnd();
+    }
+
+    // Save latest checkpoint data before shutting down.
+    // This also saves the latest run timer.
+    if (!gGame.player.checkpointScene.empty())
+    {
+        PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
     }
 
     // Clean up font.

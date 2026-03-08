@@ -38,6 +38,9 @@ struct Player
     // Collected in this run (persists while game is running)
     int melonsCollected;
 
+    // Total deaths (not part of life/respawn but part of saving in checkpoint.txt :] )
+    int deathCount;
+
     // Respawn point (world position)
     gfx::Vec2 respawnPos;
     std::string checkpointScene = "";

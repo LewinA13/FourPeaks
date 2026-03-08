@@ -5,7 +5,9 @@ enum class BgmType
 {
     None,
     Winter,
-    Summer   // future
+    Summer,
+    Spring,
+    Autumn
 };
 
 enum class SfxType
