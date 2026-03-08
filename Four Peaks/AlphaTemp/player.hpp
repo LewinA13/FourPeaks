@@ -185,7 +185,9 @@ struct Player
         Ice,
         CheckPoint,
         BreakingIce,
-        Fire
+        Fire,
+        Grass,
+        Saw
     };
 
     GroundType currGroundType = Player::GroundType::Normal;

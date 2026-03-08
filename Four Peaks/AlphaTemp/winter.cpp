@@ -1136,10 +1136,6 @@ namespace game {
             }
         }
 
-        for (auto& ice : iceTiles) {
-            ice.triggered = false;
-        }
-
 
         for (auto& trigger : g_triggeredIceTiles) {
             for (auto& ice : iceTiles) {
@@ -1626,20 +1622,10 @@ namespace game {
 
         sprite::updateAnimatedTiles(dt);
 
-
-        for (auto& ice : iceTiles) {
-            ice.triggered = false;
-        }
-
-        //! g_triggeredIceTiles is the list to store triggered breaking ice
-        for (auto& trigger : g_triggeredIceTiles) {
-            for (auto& ice : iceTiles) {
-                //! if breaking ice havent been change the state, set triggered state to true          
-                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
-                    ice.triggered = true;
-                }
-            }
-        }
+      
+        for (auto& trigger : g_triggeredIceTiles)
+            for (auto& ice : iceTiles)
+                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) ice.triggered = true;
 
         //! clear the list to save the memory
         g_triggeredIceTiles.clear();

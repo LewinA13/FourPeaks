@@ -11,6 +11,10 @@
 #include <cstdint>
 #include <cmath>
 
+#include "collision.hpp"
+
+
+
 namespace
 {
     using u32 = std::uint32_t;
@@ -86,13 +90,15 @@ namespace
         }
     }
 
-    static void drawTilesCommon(int gridRows, int gridCols, int tileMap[][32], float stageBaseY = 0.0f)
+    static void drawTilesCommon(int gridRows, int gridCols, int tileMap[][32], float stageBaseY = 0.0f, const std::vector<game::BreakableTileState>* breakableTiles = nullptr)
     {
         auto isSolid = [&](int r, int c) -> bool {
             if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
             int t = tileMap[r][c];
             return (t == 1 || t == 3 || t == 5 || t == 6 || t == 7);
             };
+
+        
 
         for (int r = 0; r < gridRows; ++r)
         {
@@ -166,6 +172,30 @@ namespace
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
                 }
+                else if (tileType == -1)
+                {
+                    // change later
+                    AEGfxTexture* crackTex = sprite::crack();
+                    if (crackTex && breakableTiles)
+                    {
+                        int thisCrackFrame = 0;
+                        for (const auto& brkTile : *breakableTiles) {
+                            if (brkTile.row == r && brkTile.col == c) {
+                                thisCrackFrame = brkTile.crackFrame;
+                                break;
+                            }
+                        }
+
+                        float u0{}, v0{}, u1{}, v1{};
+                        sprite::getCrackUv(thisCrackFrame, u0, v0, u1, v1);
+                        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                        gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
+                        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                        AEGfxSetBlendMode(AE_GFX_BM_NONE);
+                    }
+                    continue;
+                }
                 // WinterC (ID 4) and WinterT (ID 6) standalone textures
                 else if (tileType == 4) {
                     AEGfxTexture* t = sprite::winterC();
@@ -215,6 +245,18 @@ game::AutumnS1::AutumnS1()
 {
     gridVisible = false;
     level::loadTileMap("Assets/Levels/autumn_s1.txt", gridRows, gridCols, &tileMap[0][0]);
+
+    for (int row = 0; row < gridRows; ++row)
+        for (int col = 0; col < gridCols; ++col) {
+            //! all breaking ice will be store in vector "breakableTiles" and type will be struct "BreakableTileState"
+            //! temp set to -1
+            if (tileMap[row][col] == -1) {
+                BreakableTileState brkTile;
+                brkTile.row = row;
+                brkTile.col = col;
+                breakableTiles.push_back(brkTile);
+            }
+        }
 }
 game::AutumnS1::~AutumnS1() = default;
 
@@ -246,6 +288,26 @@ int game::AutumnS1::update(float dt)
     }
 
     sprite::updateAnimatedTiles(dt);
+
+    for (auto& brktile : breakableTiles)
+        brktile.triggered = false;
+
+    for (auto& trigger : g_triggeredbrkTiles)
+        for (auto& brktile : breakableTiles)
+            if (brktile.row == trigger.row && brktile.col == trigger.col && !brktile.triggered) brktile.triggered = true;
+
+    g_triggeredbrkTiles.clear();
+
+    for (auto& brktile : breakableTiles) {
+        if (brktile.triggered && !brktile.destroyed) {
+            brktile.timer += dt;
+            int nf = static_cast<int>(brktile.timer / sprite::crackFrameTime);
+            if (nf >= sprite::crackFrameCount - 1) { tileMap[brktile.row][brktile.col] = 0; brktile.destroyed = true; }
+            else brktile.crackFrame = nf;
+        }
+    }
+    
+
     return 0;
 }
 
@@ -284,7 +346,7 @@ void game::AutumnS1::gridToWorld(int col, int row, float& xWorld, float& yWorld,
     gridToWorldCommon(col, row, gridCols, gridRows, xWorld, yWorld, cellW, cellH);
 }
 void game::AutumnS1::drawGrid() const { drawGridLines(gridCols, gridRows); }
-void game::AutumnS1::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }
+void game::AutumnS1::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f, &breakableTiles); }
 
 // -------------------------------------------------------------------
 // AutumnS2
@@ -361,7 +423,7 @@ void game::AutumnS2::gridToWorld(int col, int row, float& xWorld, float& yWorld,
     gridToWorldCommon(col, row, gridCols, gridRows, xWorld, yWorld, cellW, cellH);
 }
 void game::AutumnS2::drawGrid() const { drawGridLines(gridCols, gridRows); }
-void game::AutumnS2::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }
+void game::AutumnS2::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f, &breakableTiles); }
 
 // -------------------------------------------------------------------
 // AutumnS3
@@ -438,7 +500,7 @@ void game::AutumnS3::gridToWorld(int col, int row, float& xWorld, float& yWorld,
     gridToWorldCommon(col, row, gridCols, gridRows, xWorld, yWorld, cellW, cellH);
 }
 void game::AutumnS3::drawGrid() const { drawGridLines(gridCols, gridRows); }
-void game::AutumnS3::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }
+void game::AutumnS3::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f, &breakableTiles); }
 
 // -------------------------------------------------------------------
 // AutumnS4 (end of Autumn - returns 2 to go back to menu by default)
@@ -502,4 +564,4 @@ void game::AutumnS4::gridToWorld(int col, int row, float& xWorld, float& yWorld,
     gridToWorldCommon(col, row, gridCols, gridRows, xWorld, yWorld, cellW, cellH);
 }
 void game::AutumnS4::drawGrid() const { drawGridLines(gridCols, gridRows); }
-void game::AutumnS4::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }
+void game::AutumnS4::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f, &breakableTiles); }

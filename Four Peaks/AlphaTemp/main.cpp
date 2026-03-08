@@ -468,8 +468,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             const float h = camera::screenHeight();
             const int idx = StageIndex(currentState);
 
+
             // 1) Snap camera to the correct vertical band
             camera::setY(h * idx);
+            g_currentY = h * idx;
 
             // 2) Give EVERY playable scene a default spawn
             gfx::Vec2 spawn;

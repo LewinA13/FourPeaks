@@ -3,11 +3,22 @@
 
 #include <cstdint>
 #include "sprite.hpp"
+#include <vector>
 
 typedef uint32_t u32;
 
 namespace game
 {
+
+    struct BreakableTileState {
+        int row{}, col{};
+        bool triggered = false;
+        float timer = 0.0f;
+        int crackFrame = 0;
+        bool destroyed = false;
+    };
+
+
     // -------------------------------------------------------------------
     // Autumn stages (4) - intended as the last season.
     // Layouts are loaded from Assets/Levels/autumn_sX.txt
@@ -31,6 +42,9 @@ namespace game
         void drawGrid() const;
         void drawTiles() const;
         void gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const;
+
+        std::vector<BreakableTileState> breakableTiles;
+
     };
 
     class AutumnS2 {
@@ -52,6 +66,9 @@ namespace game
         void drawGrid() const;
         void drawTiles() const;
         void gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const;
+
+        std::vector<BreakableTileState> breakableTiles;
+
     };
 
     class AutumnS3 {
@@ -73,6 +90,9 @@ namespace game
         void drawGrid() const;
         void drawTiles() const;
         void gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const;
+
+        std::vector<BreakableTileState> breakableTiles;
+
     };
 
     class AutumnS4 {
@@ -94,6 +114,8 @@ namespace game
         void drawGrid() const;
         void drawTiles() const;
         void gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const;
+
+        std::vector<BreakableTileState> breakableTiles;
     };
 }
 
