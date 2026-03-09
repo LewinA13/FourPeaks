@@ -24,7 +24,8 @@ namespace sprite
     // summer background texture summerbg.png
     AEGfxTexture* summerBackground();
 
-    // autumn background texture autumnbg.jpg
+    // autumn background texture 
+    // .jpg
     AEGfxTexture* autumnBackground();
 
     // spring background texture springBG.jpg
