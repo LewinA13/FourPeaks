@@ -15,6 +15,7 @@
     <ClCompile Include="autumn.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="collision.cpp" />
+    <ClCompile Include="credit.cpp" />
     <ClCompile Include="dialogue.cpp" />
     <ClCompile Include="gamestate.cpp" />
     <ClCompile Include="graphics.cpp" />
@@ -39,6 +40,7 @@
     <ClInclude Include="autumn.hpp" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="collision.hpp" />
+    <ClInclude Include="credit.hpp" />
     <ClInclude Include="dialogue.hpp" />
     <ClInclude Include="gamestate.hpp" />
     <ClInclude Include="graphics.hpp" />

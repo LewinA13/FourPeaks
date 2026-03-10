@@ -28,6 +28,7 @@ namespace sprite
     // .jpg
     AEGfxTexture* autumnBackground();
 
+
     // spring background texture springBG.jpg
     AEGfxTexture* springBackground();
 
@@ -64,6 +65,14 @@ namespace sprite
     AEGfxTexture* textboxUp();    // (textboxUp.png)
     AEGfxTexture* textboxDown();    // (textboxDown.png)
 
+    // breakable tile spritesheet (breakabletile.png)
+    AEGfxTexture* breakabletile();
+
+    // stage selection background texture (stgselectbg.png)
+    AEGfxTexture* stgselectBackground();
+
+    // center frame for stage selection (Centerframe.png)
+    AEGfxTexture* centerframe();
 
 
     // -----------------------------------------------------------------

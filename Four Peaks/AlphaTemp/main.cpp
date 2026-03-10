@@ -23,6 +23,7 @@
 #include "audio.hpp"
 #include "hud.hpp"
 #include "stageselection.hpp"
+#include "credit.hpp"
 
 
 // Global font handle used by all states
@@ -39,6 +40,7 @@ enum class SceneState
     Tutorial2,
     Tutorial3,
     StageSelect,
+    Credit,
     WinterS1,
     WinterS2,
     WinterS3,
@@ -313,7 +315,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Game state objects.
     game::SplashScreen splashScreen;
     game::MainMenu mainMenu;
-    game::StageSelect stageSelect;   
+    game::StageSelect stageSelect;  
+    game::Credits credit;
 
 
     // Tutorial stages (3 levels before Winter)
@@ -745,6 +748,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 currentState = SceneState::Tutorial1;
                 camera::setY(0.0f);
             }
+
+            if (action == 5) {
+                currentState = SceneState::Credit;
+            }
         }
         break;
 
@@ -813,20 +820,30 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             if (action == 13) { currentState = SceneState::WinterS4; lastState = SceneState::Exit; }
 
             if (action == 20) { currentState = SceneState::SummerS1; lastState = SceneState::Exit; }
-            if (action == 21) { currentState = SceneState::SummerS1; lastState = SceneState::Exit; }
-            if (action == 22) { currentState = SceneState::SummerS1; lastState = SceneState::Exit; }
-            if (action == 23) { currentState = SceneState::SummerS1; lastState = SceneState::Exit; }
+            if (action == 21) { currentState = SceneState::SummerS2; lastState = SceneState::Exit; }
+            if (action == 22) { currentState = SceneState::SummerS3; lastState = SceneState::Exit; }
+            if (action == 23) { currentState = SceneState::SummerS4; lastState = SceneState::Exit; }
 
-            if (action == 30) { currentState = SceneState::AutumnS1; lastState = SceneState::Exit; }
-            if (action == 31) { currentState = SceneState::AutumnS1; lastState = SceneState::Exit; }
-            if (action == 32) { currentState = SceneState::AutumnS1; lastState = SceneState::Exit; }
-            if (action == 33) { currentState = SceneState::AutumnS1; lastState = SceneState::Exit; }
+            if (action == 30) { currentState = SceneState::SpringS1; lastState = SceneState::Exit; }
+            if (action == 31) { currentState = SceneState::SpringS2; lastState = SceneState::Exit; }
+            if (action == 32) { currentState = SceneState::SpringS3; lastState = SceneState::Exit; }
+            if (action == 33) { currentState = SceneState::SpringS4; lastState = SceneState::Exit; }
 
-            if (action == 40) { currentState = SceneState::SpringS1; lastState = SceneState::Exit; }
-            if (action == 41) { currentState = SceneState::SpringS1; lastState = SceneState::Exit; }
-            if (action == 42) { currentState = SceneState::SpringS1; lastState = SceneState::Exit; }
-            if (action == 43) { currentState = SceneState::SpringS1; lastState = SceneState::Exit; }
+            if (action == 40) { currentState = SceneState::AutumnS1; lastState = SceneState::Exit; }
+            if (action == 41) { currentState = SceneState::AutumnS2; lastState = SceneState::Exit; }
+            if (action == 42) { currentState = SceneState::AutumnS3; lastState = SceneState::Exit; }
+            if (action == 43) { currentState = SceneState::AutumnS4; lastState = SceneState::Exit; }
 
+         
+
+            break;
+        }
+
+        case SceneState::Credit:
+        {
+            action = credit.update(dt);
+            credit.draw();
+            if (action == 2) { currentState = SceneState::MainMenu; }
             break;
         }
 

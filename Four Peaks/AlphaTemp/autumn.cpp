@@ -172,11 +172,11 @@ namespace
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
                 }
-                else if (tileType == -1)
+                else if (tileType == 15)
                 {
                     // change later
-                    AEGfxTexture* crackTex = sprite::crack();
-                    if (crackTex && breakableTiles)
+                    AEGfxTexture* breakabletileTex = sprite::breakabletile();
+                    if (breakabletileTex && breakableTiles)
                     {
                         int thisCrackFrame = 0;
                         for (const auto& brkTile : *breakableTiles) {
@@ -190,7 +190,7 @@ namespace
                         sprite::getCrackUv(thisCrackFrame, u0, v0, u1, v1);
                         AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                         AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-                        gfx::drawSprite(crackTex, pos, 0.0f, size, u0, v0, u1, v1);
+                        gfx::drawSprite(breakabletileTex, pos, 0.0f, size, u0, v0, u1, v1);
                         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                         AEGfxSetBlendMode(AE_GFX_BM_NONE);
                     }
@@ -248,9 +248,7 @@ game::AutumnS1::AutumnS1()
 
     for (int row = 0; row < gridRows; ++row)
         for (int col = 0; col < gridCols; ++col) {
-            //! all breaking ice will be store in vector "breakableTiles" and type will be struct "BreakableTileState"
-            //! temp set to -1
-            if (tileMap[row][col] == -1) {
+            if (tileMap[row][col] == 15) {
                 BreakableTileState brkTile;
                 brkTile.row = row;
                 brkTile.col = col;
@@ -307,6 +305,15 @@ int game::AutumnS1::update(float dt)
         }
     }
     
+    if (gGame.player.respawning) {
+        for (auto& brktile : breakableTiles) {
+            tileMap[brktile.row][brktile.col] = 15;
+            brktile.triggered = false;
+            brktile.timer = 0.0f;
+            brktile.crackFrame = 0;
+            brktile.destroyed = false;
+        }
+    }
 
     return 0;
 }
@@ -356,6 +363,16 @@ game::AutumnS2::AutumnS2()
 {
     gridVisible = false;
     level::loadTileMap("Assets/Levels/autumn_s2.txt", gridRows, gridCols, &tileMap[0][0]);
+
+    for (int row = 0; row < gridRows; ++row)
+        for (int col = 0; col < gridCols; ++col) {
+            if (tileMap[row][col] == 15) {
+                BreakableTileState brkTile;
+                brkTile.row = row;
+                brkTile.col = col;
+                breakableTiles.push_back(brkTile);
+            }
+        }
 }
 game::AutumnS2::~AutumnS2() = default;
 
@@ -385,6 +402,35 @@ int game::AutumnS2::update(float dt)
     }
 
     sprite::updateAnimatedTiles(dt);
+
+    for (auto& brktile : breakableTiles)
+        brktile.triggered = false;
+
+    for (auto& trigger : g_triggeredbrkTiles)
+        for (auto& brktile : breakableTiles)
+            if (brktile.row == trigger.row && brktile.col == trigger.col && !brktile.triggered) brktile.triggered = true;
+
+    g_triggeredbrkTiles.clear();
+
+    for (auto& brktile : breakableTiles) {
+        if (brktile.triggered && !brktile.destroyed) {
+            brktile.timer += dt;
+            int nf = static_cast<int>(brktile.timer / sprite::crackFrameTime);
+            if (nf >= sprite::crackFrameCount - 1) { tileMap[brktile.row][brktile.col] = 0; brktile.destroyed = true; }
+            else brktile.crackFrame = nf;
+        }
+    }
+
+    if (gGame.player.respawning) {
+        for (auto& brktile : breakableTiles) {
+            tileMap[brktile.row][brktile.col] = 15;
+            brktile.triggered = false;
+            brktile.timer = 0.0f;
+            brktile.crackFrame = 0;
+            brktile.destroyed = false;
+        }
+    }
+
     return 0;
 }
 
@@ -433,6 +479,16 @@ game::AutumnS3::AutumnS3()
 {
     gridVisible = false;
     level::loadTileMap("Assets/Levels/autumn_s3.txt", gridRows, gridCols, &tileMap[0][0]);
+
+    for (int row = 0; row < gridRows; ++row)
+        for (int col = 0; col < gridCols; ++col) {
+            if (tileMap[row][col] == 15) {
+                BreakableTileState brkTile;
+                brkTile.row = row;
+                brkTile.col = col;
+                breakableTiles.push_back(brkTile);
+            }
+        }
 }
 game::AutumnS3::~AutumnS3() = default;
 
@@ -462,6 +518,34 @@ int game::AutumnS3::update(float dt)
     }
 
     sprite::updateAnimatedTiles(dt);
+
+    for (auto& brktile : breakableTiles)
+        brktile.triggered = false;
+
+    for (auto& trigger : g_triggeredbrkTiles)
+        for (auto& brktile : breakableTiles)
+            if (brktile.row == trigger.row && brktile.col == trigger.col && !brktile.triggered) brktile.triggered = true;
+
+    g_triggeredbrkTiles.clear();
+
+    for (auto& brktile : breakableTiles) {
+        if (brktile.triggered && !brktile.destroyed) {
+            brktile.timer += dt;
+            int nf = static_cast<int>(brktile.timer / sprite::crackFrameTime);
+            if (nf >= sprite::crackFrameCount - 1) { tileMap[brktile.row][brktile.col] = 0; brktile.destroyed = true; }
+            else brktile.crackFrame = nf;
+        }
+    }
+
+    if (gGame.player.respawning) {
+        for (auto& brktile : breakableTiles) {
+            tileMap[brktile.row][brktile.col] = 15;
+            brktile.triggered = false;
+            brktile.timer = 0.0f;
+            brktile.crackFrame = 0;
+            brktile.destroyed = false;
+        }
+    }
     return 0;
 }
 
@@ -509,6 +593,16 @@ game::AutumnS4::AutumnS4()
 {
     gridVisible = false;
     level::loadTileMap("Assets/Levels/autumn_s4.txt", gridRows, gridCols, &tileMap[0][0]);
+
+    for (int row = 0; row < gridRows; ++row)
+        for (int col = 0; col < gridCols; ++col) {
+            if (tileMap[row][col] == 15) {
+                BreakableTileState brkTile;
+                brkTile.row = row;
+                brkTile.col = col;
+                breakableTiles.push_back(brkTile);
+            }
+        }
 }
 game::AutumnS4::~AutumnS4() = default;
 
@@ -530,6 +624,34 @@ int game::AutumnS4::update(float dt)
     }
 
     sprite::updateAnimatedTiles(dt);
+
+    for (auto& brktile : breakableTiles)
+        brktile.triggered = false;
+
+    for (auto& trigger : g_triggeredbrkTiles)
+        for (auto& brktile : breakableTiles)
+            if (brktile.row == trigger.row && brktile.col == trigger.col && !brktile.triggered) brktile.triggered = true;
+
+    g_triggeredbrkTiles.clear();
+
+    for (auto& brktile : breakableTiles) {
+        if (brktile.triggered && !brktile.destroyed) {
+            brktile.timer += dt;
+            int nf = static_cast<int>(brktile.timer / sprite::crackFrameTime);
+            if (nf >= sprite::crackFrameCount - 1) { tileMap[brktile.row][brktile.col] = 0; brktile.destroyed = true; }
+            else brktile.crackFrame = nf;
+        }
+    }
+
+    if (gGame.player.respawning) {
+        for (auto& brktile : breakableTiles) {
+            tileMap[brktile.row][brktile.col] = 15;
+            brktile.triggered = false;
+            brktile.timer = 0.0f;
+            brktile.crackFrame = 0;
+            brktile.destroyed = false;
+        }
+    }
     return 0;
 }
 

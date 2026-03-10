@@ -4,6 +4,12 @@
 
 extern s8 gFontId;      // Font handle created in main.cpp
 
+static AEVec2 WorldToNorm(float worldX, float worldY)
+{
+    float screenW = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
+    float screenH = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
+    return { worldX / (screenW * 0.5f), worldY / (screenH * 0.5f) };
+}
 
 namespace game {
 
@@ -57,23 +63,25 @@ namespace game {
     void StageSelect::draw() const
     {
 
-        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
-        float screenW = maxX - minX;
-        float screenH = maxY - minY;
-
-        //float screenW = AEGfxGetWindowWidth();
-        //float screenH = AEGfxGetWindowHeight();
-
-        float centerX = (minX + maxX) * 0.5f;
-        float centerY = (minY + maxY) * 0.5f;
+        float screenW = (float)AEGfxGetWindowWidth();
+        float screenH = (float)AEGfxGetWindowHeight();
+        float minX = -screenW * 0.5f;
+        float maxX = screenW * 0.5f;
+        float minY = -screenH * 0.5f;
+        float maxY = screenH * 0.5f;
 
 // ----------------------------------------------------------------
 // set up beackground
 // ----------------------------------------------------------------
         AEGfxSetBackgroundColor(0.05f, 0.05f, 0.1f);
 
-      
+        AEGfxTexture* bg = sprite::stgselectBackground();
+
+        if (bg)
+        {
+            gfx::drawSprite(bg, { (minX + maxX) * 0.5f, (minY + maxY) * 0.5f }, 0.0, { (maxX - minX), (maxY - minY) }, 0, 0, 1, 1);
+        }
+
 
 // ----------------------------------------------------------------
 // season bg + name + color
@@ -88,10 +96,10 @@ namespace game {
         static const char* seasonNames[] = { "WINTER", "SUMMER", "SPRING", "AUTUMN" };
 
         static const u32 seasonBorderColor[] = {
-            0xFF88CCFFu,   
-            0xFFFFCC00u,   
-            0xFF88FF88u,  
-            0xFFFF8844u,   
+            0xFF88CCFFu,
+            0xFFFFCC00u,
+            0xFF88FF88u,
+            0xFFFF8844u,
         };
 
         // Use for text color
@@ -102,10 +110,13 @@ namespace game {
 // ----------------------------------------------------------------
 // Season card 
 // ----------------------------------------------------------------
-        float mainCardW = screenW * 0.52f;
-        float mainCardH = screenH * 0.30f;
+
+        AEGfxTexture* centerframetex = sprite::centerframe();
+
+        float mainCardW = selectingStage ? screenW * 0.42f : screenW * 0.52f;
+        float mainCardH = selectingStage ? screenH * 0.30f : screenH * 0.48f;
         float sideCardW = screenW * 0.16f;
-        float cardY = centerY + screenH * 0.05f;
+        float cardY = 0.0f + screenH * 0.05f;
 
         int leftSeason = (seasonIndex + 3) % 4;
         int rightSeason = (seasonIndex + 1) % 4;
@@ -113,100 +124,112 @@ namespace game {
         float leftBgCX = minX + sideCardW - mainCardW * 0.5f;
         float rightBgCX = maxX - sideCardW + mainCardW * 0.5f;
 
-    // ----------------------------------------------------------------
-    // left half
-    // ----------------------------------------------------------------
+        // ----------------------------------------------------------------
+        // left half
+        // ----------------------------------------------------------------
         if (seasonBg[leftSeason])
         {
-            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f,{ mainCardW + 6, mainCardH + 6 }, 0xFF333333u);
-            gfx::drawSprite(seasonBg[leftSeason],{ leftBgCX, cardY }, 0.0f,{ mainCardW, mainCardH }, 0, 0, 1, 1);
-            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f,{ mainCardW, mainCardH }, 0x77000000u);
+            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { mainCardW + 6, mainCardH + 6 }, 0xFF333333u);
+            gfx::drawSprite(seasonBg[leftSeason], { leftBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
+            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0x77000000u);
         }
         // show grey if not being selected
-        AEGfxPrint(gFontId, seasonNames[leftSeason], minX / (screenW * 0.5f) + 0.02f, cardY / (screenH * 0.5f) + 0.05f, 1.2f, 0.6f, 0.6f, 0.6f, 1.0f);
+        {
+            float wx = AEGfxGetWinMinX() + 10.0f;
+            float wy = cardY + mainCardH * 0.5f - 30.0f;
+            AEVec2 pos = WorldToNorm(wx, wy);
+            AEGfxPrint(gFontId, seasonNames[leftSeason], pos.x, pos.y, 1.0f, 0.6f, 0.6f, 0.6f, 1.0f);
+        }
 
-    // ----------------------------------------------------------------
-    // right half
-    // ----------------------------------------------------------------
+        // ----------------------------------------------------------------
+        // right half
+        // ----------------------------------------------------------------
         if (seasonBg[rightSeason])
         {
-            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f,
-                { mainCardW + 6, mainCardH + 6 }, 0xFF333333u);
-            gfx::drawSprite(seasonBg[rightSeason],
-                { rightBgCX, cardY }, 0.0f,
-                { mainCardW, mainCardH }, 0, 0, 1, 1);
-            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f,
-                { mainCardW, mainCardH }, 0x77000000u);
+            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { mainCardW + 6, mainCardH + 6 }, 0xFF333333u);
+            gfx::drawSprite(seasonBg[rightSeason], { rightBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
+            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0x77000000u);
         }
-        AEGfxPrint(gFontId, seasonNames[rightSeason],
-            (maxX / (screenW * 0.5f)) - 0.25f,
-            cardY / (screenH * 0.5f) + 0.05f,
-            1.2f, 0.6f, 0.6f, 0.6f, 1.0f);
-
-    // ----------------------------------------------------------------
-    // center card
-    // ----------------------------------------------------------------
+        {
+            float wx = AEGfxGetWinMaxX() - sideCardW + 10.0f;
+            float wy = cardY + mainCardH * 0.5f - 30.0f;
+            AEVec2 pos = WorldToNorm(wx, wy);
+            AEGfxPrint(gFontId, seasonNames[rightSeason], pos.x, pos.y, 1.0f, 0.6f, 0.6f, 0.6f, 1.0f);
+        }
+      
+        // ----------------------------------------------------------------
+        // center 
+        // ----------------------------------------------------------------
         if (seasonBg[seasonIndex])
         {
-            gfx::drawRectangle({ centerX, cardY }, 0.0f,
-                { mainCardW + 10, mainCardH + 10 },
-                seasonBorderColor[seasonIndex]);
-            gfx::drawSprite(seasonBg[seasonIndex],
-                { centerX, cardY }, 0.0f,
-                { mainCardW, mainCardH }, 0, 0, 1, 1);
+
+            gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { mainCardW + 10, mainCardH + 10 }, seasonBorderColor[seasonIndex]);
+            //gfx::drawSprite(centerframetex, { -10.0f, cardY - 120.0f }, 0.0f, { mainCardW + 500, mainCardH + 590 }, 0, 0, 1, 1);
+            gfx::drawSprite(seasonBg[seasonIndex], { 0.0f, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
+          
+          
         }
+        {
+            float wx = 0.0f - mainCardW * 0.5f + 20.0f;
+            float wy = cardY + mainCardH * 0.5f - 40.0f;
+            AEVec2 pos = WorldToNorm(wx, wy);
+            AEGfxPrint(gFontId, seasonNames[seasonIndex], pos.x, pos.y, 2.0f, seasonR[seasonIndex], seasonG[seasonIndex], seasonB[seasonIndex], 1.0f);}
 
-        AEGfxPrint(gFontId, seasonNames[seasonIndex],
-            -0.48f, 0.22f, 2.5f,
-            seasonR[seasonIndex], seasonG[seasonIndex], seasonB[seasonIndex], 1.0f);
 
-    
+
+
         AEGfxPrint(gFontId, "STAGE SELECTION",
             -0.28f, 0.88f, 1.8f, 1.0f, 1.0f, 0.8f, 1.0f);
 
-// ----------------------------------------------------------------
-//  Stage card
-// ----------------------------------------------------------------
+        // ----------------------------------------------------------------
+        //  Stage card
+        // ----------------------------------------------------------------
         static const char* stageLabels[] = { "Stage 1", "Stage 2", "Stage 3", "Stage 4" };
 
         float stageCardW = screenW * 0.18f;
         float stageCardH = screenH * 0.22f;
         float stageRowY = minY + screenH * 0.22f;
         float stageSpacing = screenW * 0.21f;
-        float stageStartX = centerX - stageSpacing * 1.5f;
+        float stageStartX = 0.0f - stageSpacing * 1.5f;
 
-        for (int i = 0; i < 4; ++i)
-        {
-            float cx = stageStartX + i * stageSpacing;
-            bool  sel = selectingStage && (i == stageIndex);
-
-            // choose season color, otherwise choose grey
-            u32 borderCol = sel ? seasonBorderColor[seasonIndex] : 0xFF444444u;
-            u32 bgCol = sel ? 0xFF222222u : 0xFF111111u;
-
-            gfx::drawRectangle({ cx, stageRowY }, 0.0f,
-                { stageCardW + 6, stageCardH + 6 }, borderCol);
-            gfx::drawRectangle({ cx, stageRowY }, 0.0f,
-                { stageCardW, stageCardH }, bgCol);
-
-            char code[4];
-            code[0] = seasonNames[seasonIndex][0];
-            code[1] = '1' + i;
-            code[2] = '\0';
-
-            float tX = cx / (screenW * 0.5f) - 0.04f;
-            float tY = stageRowY / (screenH * 0.5f);
-            float tR = sel ? seasonR[seasonIndex] : 0.85f;
-            float tG = sel ? seasonG[seasonIndex] : 0.85f;
-            float tB = sel ? seasonB[seasonIndex] : 0.85f;
-
-            AEGfxPrint(gFontId, code, tX, tY + 0.08f, 1.4f, tR, tG, tB, 1.0f);
-            AEGfxPrint(gFontId, stageLabels[i], tX - 0.02f, tY - 0.10f, 0.75f, tR, tG, tB, 0.9f);
-        }
-
+      
     
         if (selectingStage)
         {
+
+
+            for (int i = 0; i < 4; ++i)
+            {
+                float cx = stageStartX + i * stageSpacing;
+                bool  sel = selectingStage && (i == stageIndex);
+
+                // choose season color, otherwise choose grey
+                u32 borderCol = sel ? seasonBorderColor[seasonIndex] : 0xFF444444u;
+                u32 bgCol = sel ? 0xFF222222u : 0xFF111111u;
+
+                gfx::drawRectangle({ cx, stageRowY }, 0.0f,
+                    { stageCardW + 6, stageCardH + 6 }, borderCol);
+                gfx::drawRectangle({ cx, stageRowY }, 0.0f,
+                    { stageCardW, stageCardH }, bgCol);
+
+                char code[4];
+                code[0] = seasonNames[seasonIndex][0];
+                code[1] = '1' + i;
+                code[2] = '\0';
+
+                float tX = cx / (screenW * 0.5f) - 0.04f;
+                float tY = stageRowY / (screenH * 0.5f);
+                float tR = sel ? seasonR[seasonIndex] : 0.85f;
+                float tG = sel ? seasonG[seasonIndex] : 0.85f;
+                float tB = sel ? seasonB[seasonIndex] : 0.85f;
+
+
+
+                AEGfxPrint(gFontId, code, tX, tY + 0.08f, 1.4f, tR, tG, tB, 1.0f);
+                AEGfxPrint(gFontId, stageLabels[i], tX - 0.02f, tY - 0.10f, 0.75f, tR, tG, tB, 0.9f);
+            }
+
+
             char selText[64];
             sprintf_s(selText, "SELECT STAGE: %c%d",
                 seasonNames[seasonIndex][0], stageIndex + 1);

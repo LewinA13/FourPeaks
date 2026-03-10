@@ -20,6 +20,10 @@
     <ClCompile Include="tutorial.cpp" />
     <ClCompile Include="winter.cpp" />
     <ClCompile Include="hud.cpp" />
+    <ClCompile Include="stageselection.cpp" />
+    <ClCompile Include="thankyou.cpp" />
+    <ClCompile Include="transition.cpp" />
+    <ClCompile Include="credit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="audio.hpp" />
@@ -37,6 +41,10 @@
     <ClInclude Include="summer.hpp" />
     <ClInclude Include="tutorial.hpp" />
     <ClInclude Include="winter.hpp" />
+    <ClInclude Include="stageselection.hpp" />
+    <ClInclude Include="thankyou.hpp" />
+    <ClInclude Include="transition.hpp" />
+    <ClInclude Include="credit.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="hud.hpp" />

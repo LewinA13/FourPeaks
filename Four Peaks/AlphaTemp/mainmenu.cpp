@@ -79,6 +79,7 @@ namespace game
         "How To Play",
         "Settings",
         "Tutorial",
+        "Credit",
         "Exit"
     };
 
@@ -267,7 +268,8 @@ namespace game
             case 1: showHowTo = true; return 0;         // How To Play
             case 2: showSettings = true; return 0;      // Settings
             case 3: return 4;                           // Tutorial (handle in game loop)
-            case 4: return 2;                           // Exit
+            case 4: return 5;                           // Credits
+            case 5: return 2;                           // Exit
             }
         }
 
