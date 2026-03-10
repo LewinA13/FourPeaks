@@ -3,11 +3,6 @@
 #include "AEEngine.h"
 #include <stdio.h>
 
-#define SCREEN_W  1600.0f
-#define SCREEN_H  900.0f
-#define HALF_W    800.0f
-#define HALF_H    450.0f
-
 extern s8 gFontId;  // Font handle created in main.cpp
 
 // ---- CREDIT DATA ----
@@ -36,8 +31,8 @@ static void DrawTextCentered(const char* text,
     float textW = 0.0f, textH = 0.0f;
     AEGfxGetPrintSize(gFontId, text, scale, &textW, &textH);
 
-    float ndcX = (ae_cx / HALF_W) - textW * 0.5f;
-    float ndcY = ae_cy / HALF_H;
+    float ndcX = (ae_cx / (AEGfxGetWindowWidth()/2.0f)) - textW * 0.5f;
+    float ndcY = ae_cy / (AEGfxGetWindowHeight() / 2.0f);
 
     AEGfxPrint(gFontId, text, ndcX, ndcY, scale, r, g, b, a);
 }
@@ -89,13 +84,13 @@ static void DrawRollingCredits(float baseY)
     y -= sec_spacing;
 
     // President
-    DrawTextCentered("President", cx, y, 116.0f, 1.0f, 0.94f, 0.71f, 1.0f);
+    DrawTextCentered("President", cx, y, 116.0f, 1.0f, 0.85f, 0.3f, 1.0f);
     y -= line_spacing;
     DrawTextCentered("CLAUDE COMAIR", cx, y, 112.0f, 1.0f, 1.0f, 1.0f, 1.0f);
     y -= sec_spacing * 0.8f;
 
     // Executives
-    DrawTextCentered("Executives", cx, y, 116.0f, 1.0f, 0.94f, 0.71f, 1.0f);
+    DrawTextCentered("Executives", cx, y, 116.0f, 1.0f, 0.85f, 0.3f, 1.0f);
     y -= line_spacing;
 
     const char* execs[] = {
@@ -146,7 +141,7 @@ namespace game {
         }
 
         // Auto return when scrolling finishes
-        if (scroll_offset >= credits_total_height + SCREEN_H + 100.0f)
+        if (scroll_offset >= credits_total_height + AEGfxGetWindowHeight() + 100.0f)
         {
             scroll_offset = 0.0f;
             return 2;
@@ -161,9 +156,9 @@ namespace game {
         AEGfxSetCamPosition(0.0f, 0.0f);
 
         gfx::drawRectangle({ 0.0f, 0.0f }, 0.0f,
-            { SCREEN_W, SCREEN_H }, 0xFF000000);
+            { static_cast<float>(AEGfxGetWindowWidth()), static_cast<float>(AEGfxGetWindowHeight())}, 0xFF000000);
 
-        float baseY = -(HALF_H + 100.0f) + scroll_offset;
+        float baseY = -((AEGfxGetWindowHeight() / 2.0f) + 100.0f) + scroll_offset;
         DrawRollingCredits(baseY);
     }
 

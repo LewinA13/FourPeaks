@@ -37,9 +37,9 @@ namespace game {
         }
         else
         {
-            if (AEInputCheckTriggered(AEVK_UP))
+            if (AEInputCheckTriggered(AEVK_LEFT))
                 stageIndex = (stageIndex + 3) % 4;
-            if (AEInputCheckTriggered(AEVK_DOWN))
+            if (AEInputCheckTriggered(AEVK_RIGHT))
                 stageIndex = (stageIndex + 1) % 4;
 
             if (AEInputCheckTriggered(AEVK_RETURN) || AEInputCheckTriggered(AEVK_SPACE))

@@ -15,7 +15,6 @@ namespace game {
         float         scroll_offset;
         float         scroll_speed;
         float         credits_total_height;
-       
     };
 
 } // namespace game
