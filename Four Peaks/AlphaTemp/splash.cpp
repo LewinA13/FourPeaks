@@ -57,7 +57,7 @@ namespace game
     // -------------------------------------------------------------------------
     int SplashScreen::update()
     {
-        float dt = AEFrameRateControllerGetFrameTime();
+        float dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
         timer += dt;
 
         // Allow the player to skip the splash early

@@ -374,8 +374,10 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
                 }
 
 
@@ -834,8 +836,10 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
                 }
 
                 // Ice tile
@@ -1318,8 +1322,10 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
                 }
 
 
@@ -1622,7 +1628,7 @@ namespace game {
 
         sprite::updateAnimatedTiles(dt);
 
-      
+
         for (auto& trigger : g_triggeredIceTiles)
             for (auto& ice : iceTiles)
                 if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) ice.triggered = true;
@@ -1805,8 +1811,10 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    if (tex) gfx::drawSprite(tex, pos, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
-                    else     gfx::drawRectangle(pos, 0.0f, size, 0xFF88FF88u);
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
                 }
 
                 //Breaking Ice tile (type 1)
