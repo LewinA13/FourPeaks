@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// transition.cpp  —  Pokemon-style screen-wipe transition effect
+// transition.cpp  ?  Pokemon-style screen-wipe transition effect
 // ---------------------------------------------------------------------------
 // Self-contained: no changes to existing game files needed.
 // See transition.hpp for integration instructions.
@@ -16,7 +16,7 @@
 //   A solid black panel slides in from the right, pauses, then slides out.
 //
 // Dissolve:
-//   Random 4×4 pixel blocks fade to black then fade back in.
+//   Random 4?4 pixel blocks fade to black then fade back in.
 // ---------------------------------------------------------------------------
 
 #define NOMINMAX           // prevent Windows.h from defining min/max macros
@@ -32,9 +32,9 @@
 typedef std::uint32_t u32;
 
 // ??? Timing constants ????????????????????????????????????????????????????????
-static constexpr float WIPE_IN_DURATION = 0.35f;
-static constexpr float HOLD_DURATION = 0.12f;
-static constexpr float WIPE_OUT_DURATION = 0.35f;
+static constexpr float WIPE_IN_DURATION = 0.75f;
+static constexpr float HOLD_DURATION = 0.25f;
+static constexpr float WIPE_OUT_DURATION = 0.75f;
 
 // ??? Dissolve block grid ?????????????????????????????????????????????????????
 static constexpr int DISSOLVE_COLS = 24;
@@ -188,7 +188,7 @@ void Transition::drawPokemonWipe(float progress, bool /*coverScreen*/) const
     float scW = maxX - minX;
     float scH = maxY - minY;
 
-    // Grid of diamond "tiles" — each is a rotated square that expands.
+    // Grid of diamond "tiles" ? each is a rotated square that expands.
     // We use a grid of circles (axis-aligned boxes that scale up) for performance.
     constexpr int GX = 12;  // grid columns
     constexpr int GY = 8;  // grid rows
@@ -210,7 +210,7 @@ void Transition::drawPokemonWipe(float progress, bool /*coverScreen*/) const
             float cy = minY + (gy + 0.5f) * tileH;
 
             // Draw a rotated square (diamond) approximated as a rectangle
-            // rotated 45° by drawing two overlapping rects
+            // rotated 45? by drawing two overlapping rects
             float h = tileSize * 0.5f;
             // Horizontal rect
             drawSolidRect(cx - h, cy - h * 0.45f, tileSize, tileSize * 0.45f, col);

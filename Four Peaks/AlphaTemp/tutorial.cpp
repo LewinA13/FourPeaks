@@ -1,5 +1,4 @@
 #include "tutorial.hpp"
-
 #include "AEEngine.h"
 #include "graphics.hpp"
 #include "player.hpp"
@@ -176,8 +175,8 @@ namespace
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    gfx::Vec2 signSize{ size.x * 0.8f, size.y * 0.8f };
-                    gfx::Vec2 signPos{ pos.x, pos.y - (cellH - signSize.y) * 0.5f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
                     continue;

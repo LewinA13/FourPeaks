@@ -597,8 +597,8 @@ namespace sprite
             float u0{}, v0{}, u1{}, v1{};
             getCheckpointUv(checkpointFrame, u0, v0, u1, v1);
 
-            // Draw 2 tiles tall: stretch height to 2x cell, anchored at bottom
-            gfx::Vec2 cpSize{ size.x * 1.4f, size.y * 2.0f };
+            // Draw same height as signboard (1.5x cell height), slightly wider
+            gfx::Vec2 cpSize{ size.x * 1.2f, size.y * 1.5f };
             pos.y += (cpSize.y - size.y) * 0.5f;  // shift up so bottom aligns with tile bottom
             gfx::drawSprite(checkpointTex, pos, 0.0f, cpSize, u0, v0, u1, v1);
             return true;
