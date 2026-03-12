@@ -10,11 +10,16 @@
 
 #include <cstdint>
 #include <cmath>
+#include <vector>
+#include <cstdlib>
 
 namespace
 {
     using u32 = std::uint32_t;
 
+    // ===================================================================
+    // BACKGROUND
+    // ===================================================================
     static void drawBackground()
     {
         AEGfxTexture* bg = sprite::springBackground();
@@ -29,13 +34,14 @@ namespace
         }
     }
 
+    // ===================================================================
+    // GRID HELPERS
+    // ===================================================================
     static void gridToWorldCommon(int col, int row, int gridCols, int gridRows,
         float& xWorld, float& yWorld, float& cellW, float& cellH)
     {
-        float minX = AEGfxGetWinMinX();
-        float maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY();
-        float maxY = AEGfxGetWinMaxY();
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
 
         cellW = (maxX - minX) / static_cast<f32>(gridCols);
         cellH = (maxY - minY) / static_cast<f32>(gridRows);
@@ -48,10 +54,8 @@ namespace
     {
         const u32 gridColor = 0x80FFFFFF;
 
-        float minX = AEGfxGetWinMinX();
-        float maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY();
-        float maxY = AEGfxGetWinMaxY();
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
 
         float cellW = (maxX - minX) / static_cast<f32>(gridCols);
         float cellH = (maxY - minY) / static_cast<f32>(gridRows);
@@ -62,7 +66,6 @@ namespace
             float x = minX + col * cellW;
             gfx::drawRectangle({ x, (minY + maxY) * 0.5f }, 0.0f, { thickness, maxY - minY }, gridColor);
         }
-
         for (int row = 0; row <= gridRows; ++row)
         {
             float y = minY + row * cellH;
@@ -70,22 +73,34 @@ namespace
         }
     }
 
+    // ===================================================================
+    // TILE COLOR FALLBACKS
+    // ===================================================================
     static u32 getTileColorCommon(int tileType)
     {
         switch (tileType)
         {
-        case 6: return 0xFF555555u; // underground
-        case 7: return 0xFF888888u; // top ground / platform
-        case 1: return 0xFF66AAFFu; // legacy
-        case 2: return 0xFFFF3333u; // spikes
-        case 8: return 0xFFFFFF00u; // pickup (coin/bottle depending on your build)
-        case 10: return 0xFF00FF00u; // checkpoint
+        case 6:  return 0xFF555555u;
+        case 7:  return 0xFF888888u;
+        case 1:  return 0xFF66AAFFu;
+        case 2:  return 0xFFFF3333u;
+        case 8:  return 0xFFFFFF00u;
+        case 10: return 0xFF00FF00u;
         default: return 0x00000000u;
         }
     }
 
+    // ===================================================================
+    // TILE DRAWING
+    // ===================================================================
     static void drawTilesCommon(int gridRows, int gridCols, int tileMap[][32], float stageBaseY = 0.0f)
     {
+        auto isSolid = [&](int r, int c) -> bool {
+            if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
+            int t = tileMap[r][c];
+            return (t == 1 || t == 3 || t == 4 || t == 5 || t == 6 || t == 7 || t == 23);
+            };
+
         for (int r = 0; r < gridRows; ++r)
         {
             for (int c = 0; c < gridCols; ++c)
@@ -95,18 +110,16 @@ namespace
 
                 float xWorld{}, yWorld{}, cellW{}, cellH{};
                 gridToWorldCommon(c, r, gridCols, gridRows, xWorld, yWorld, cellW, cellH);
-
-                // If you ever stack stages vertically, you can pass stageBaseY in.
                 yWorld += stageBaseY;
 
-                gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
+                gfx::Vec2 pos{ std::round(xWorld + cellW * 0.5f), std::round(yWorld + cellH * 0.5f) };
                 gfx::Vec2 size{ cellW, cellH };
 
-                // Animated tiles first (coin/checkpoint/fire/saw).
-                if (sprite::drawAnimatedTile(tileType, pos, size))
-                    continue;
+                float border = (cellW < cellH ? cellW : cellH) * 0.05f;
+                u32   borderColor = 0xFF000000;
 
-                // Spikes - taller than cell, anchored correctly
+                if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
+
                 if (tileType == 2 || tileType == 9)
                 {
                     AEGfxTexture* s = sprite::spikes();
@@ -122,8 +135,6 @@ namespace
                     else gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
                     continue;
                 }
-
-                // Left-facing spike (26) and right-facing spike (27)
                 if (tileType == 26 || tileType == 27)
                 {
                     AEGfxTexture* s = sprite::spikes();
@@ -138,83 +149,330 @@ namespace
                     }
                     continue;
                 }
-
-                // Grass tile (ID 23)
                 if (tileType == 23)
                 {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
-                    continue;
+                    // falls through to border pass
                 }
-
-                // Standalone seasonal tiles (replace old sprites for IDs 1,3,5,7)
-                if (tileType == 1)
+                else if (tileType == 1)
                 {
                     AEGfxTexture* t = sprite::spring1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
-                    continue;
                 }
-                if (tileType == 3)
+                else if (tileType == 3)
                 {
                     AEGfxTexture* t = sprite::spring2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
-                    continue;
                 }
-                if (tileType == 5)
+                else if (tileType == 5)
                 {
                     AEGfxTexture* t = sprite::autumn1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
-                    continue;
                 }
-                if (tileType == 7)
+                else if (tileType == 7)
                 {
                     AEGfxTexture* t = sprite::autumn2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
-                    continue;
                 }
-
-                // WinterC (ID 4) and WinterT (ID 6) standalone textures
-                if (tileType == 4)
+                else if (tileType == 4)
                 {
                     AEGfxTexture* t = sprite::winterC();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF808080u);
-                    continue;
                 }
-                if (tileType == 6)
+                else if (tileType == 6)
                 {
                     AEGfxTexture* t = sprite::winterT();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF555555u);
-                    continue;
-                }
-
-                // Regular tiles from tileset.
-                float u0{}, v0{}, u1{}, v1{};
-                if (sprite::getTileUv(tileType, u0, v0, u1, v1))
-                {
-                    gfx::drawSprite(sprite::tileset(), pos, 0.0f, size, u0, v0, u1, v1);
                 }
                 else
                 {
-                    gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
+                    float u0{}, v0{}, u1{}, v1{};
+                    if (sprite::getTileUv(tileType, u0, v0, u1, v1))
+                        gfx::drawSprite(sprite::tileset(), pos, 0.0f, size, u0, v0, u1, v1);
+                    else
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColorCommon(tileType));
                 }
+
+                // ---- Borders (solid tiles only) ----
+                if (!isSolid(r, c)) continue;
+
+                if (!isSolid(r + 1, c))
+                    gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
+                if (!isSolid(r - 1, c))
+                    gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
+                if (!isSolid(r, c - 1))
+                    gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
+                if (!isSolid(r, c + 1))
+                    gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
             }
         }
     }
-}
 
-// -------------------------------------------------------------------
-// SpringS1
-// action codes:
-// 40 -> SpringS2
-// 2  -> MainMenu
-// -------------------------------------------------------------------
+    // ===================================================================
+    // WIND SYSTEM
+    // Pushes the player left or right on a fixed interval. Visualised
+    // with streaking petal/dust particles that move with the wind.
+    // ===================================================================
+
+    // Direction: +1 = right, -1 = left
+    enum class WindDir { Right = 1, Left = -1 };
+
+    struct WindParticle
+    {
+        float x, y;
+        float velX, velY;   // pixels per second
+        float alpha;
+        float lifetime;
+        float maxLifetime;
+        float length;       // streak length
+        float thickness;
+        u32   color;
+        bool  active;
+    };
+
+    struct WindSystem
+    {
+        // ---- Tuning constants ----
+        static constexpr float WIND_INTERVAL = 8.0f;  // seconds between wind shifts
+        static constexpr float GUST_BUILDUP = 1.2f;  // ramp-up time (seconds)
+        static constexpr float GUST_HOLD = 3.5f;  // full-strength hold time
+        static constexpr float GUST_FADEOUT = 1.5f;  // fade-out time
+        static constexpr float GUST_TOTAL = GUST_BUILDUP + GUST_HOLD + GUST_FADEOUT;
+        static constexpr float WIND_FORCE = 180.0f; // peak push force on player (units/s)
+        static constexpr int   MAX_PARTICLES = 200;
+        static constexpr float PARTICLE_RATE = 0.018f; // seconds between particle spawns
+
+        std::vector<WindParticle> particles;
+
+        WindDir dir = WindDir::Right;
+        float   cycleTimer = 0.0f;  // counts to WIND_INTERVAL, then fires a gust
+        float   gustTimer = 0.0f;  // counts within the active gust
+        bool    gustActive = false;
+        float   currentForce = 0.0f;  // current force actually applied this frame
+        float   particleTimer = 0.0f;
+
+        bool initialised = false;
+
+        // Spring petal colours — soft pastels (ARGB)
+        static constexpr u32 COLORS[] = {
+            0xFFFFB6C1u,  // light pink
+            0xFFFFD1DCu,  // pastel pink
+            0xFFFFECF0u,  // blush white
+            0xFFFFC0CBu,  // pink
+            0xFFFFE4E1u,  // misty rose
+            0xFFFFFFFFu,  // white (petal edge)
+            0xFFE8F5E9u,  // pale green (leaf bits)
+            0xFFF8BBD0u,  // deeper pink
+        };
+        static constexpr int COLOR_COUNT = 8;
+
+        static float randF(float lo, float hi)
+        {
+            return lo + (hi - lo) * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+        }
+
+        void init()
+        {
+            if (initialised) return;
+            particles.reserve(MAX_PARTICLES);
+            initialised = true;
+        }
+
+        // Returns 0..1 strength of the current gust
+        float gustStrength() const
+        {
+            if (!gustActive) return 0.0f;
+            if (gustTimer < GUST_BUILDUP)
+                return gustTimer / GUST_BUILDUP;
+            if (gustTimer < GUST_BUILDUP + GUST_HOLD)
+                return 1.0f;
+            float fade = gustTimer - GUST_BUILDUP - GUST_HOLD;
+            return 1.0f - (fade / GUST_FADEOUT);
+        }
+
+        void spawnParticle()
+        {
+            float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+
+            float strength = gustStrength();
+            float speed = 300.0f + strength * 500.0f; // faster when wind is stronger
+            float dirSign = (dir == WindDir::Right) ? 1.0f : -1.0f;
+
+            WindParticle p{};
+            // Spawn from the upwind edge of the screen
+            p.x = (dirSign > 0.0f) ? minX - 10.0f : maxX + 10.0f;
+            p.y = randF(minY, maxY);
+
+            p.velX = dirSign * speed;
+            p.velY = randF(-30.0f, 30.0f);
+            p.alpha = randF(0.3f, 0.7f) * strength;
+            p.maxLifetime = randF(0.4f, 1.2f);
+            p.lifetime = 0.0f;
+            p.length = randF(8.0f, 30.0f) * strength;
+            p.thickness = randF(1.0f, 3.5f);
+            p.color = COLORS[rand() % COLOR_COUNT];
+            p.active = true;
+
+            for (auto& slot : particles)
+                if (!slot.active) { slot = p; return; }
+            if (static_cast<int>(particles.size()) < MAX_PARTICLES)
+                particles.push_back(p);
+        }
+
+        // Call this every frame from each stage's update().
+        // Returns the horizontal force to apply to the player this frame.
+        float update(float dt)
+        {
+            init();
+
+            // Cycle timer — fires gust and alternates direction
+            if (!gustActive)
+            {
+                cycleTimer += dt;
+                if (cycleTimer >= WIND_INTERVAL)
+                {
+                    cycleTimer = 0.0f;
+                    gustTimer = 0.0f;
+                    gustActive = true;
+                    // Flip direction each gust
+                    dir = (dir == WindDir::Right) ? WindDir::Left : WindDir::Right;
+                }
+            }
+            else
+            {
+                gustTimer += dt;
+                if (gustTimer >= GUST_TOTAL)
+                {
+                    gustActive = false;
+                    gustTimer = 0.0f;
+                }
+            }
+
+            float strength = gustStrength();
+            currentForce = strength * WIND_FORCE * static_cast<float>(dir == WindDir::Right ? 1 : -1);
+
+            // Spawn particles only while wind is blowing
+            if (gustActive && strength > 0.05f)
+            {
+                particleTimer += dt;
+                if (particleTimer >= PARTICLE_RATE)
+                {
+                    particleTimer -= PARTICLE_RATE;
+                    // Spawn several per tick so the screen fills nicely
+                    int burst = 1 + static_cast<int>(strength * 4.0f);
+                    for (int i = 0; i < burst; ++i)
+                        spawnParticle();
+                }
+            }
+
+            float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+
+            for (auto& p : particles)
+            {
+                if (!p.active) continue;
+
+                p.lifetime += dt;
+                p.x += p.velX * dt;
+                p.y += p.velY * dt;
+
+                // Fade out in last 30% of lifetime
+                float lifeRatio = p.lifetime / p.maxLifetime;
+                if (lifeRatio > 0.7f)
+                    p.alpha *= (1.0f - (lifeRatio - 0.7f) / 0.3f);
+
+                if (p.lifetime >= p.maxLifetime ||
+                    p.x < minX - 40.0f || p.x > maxX + 40.0f ||
+                    p.y < minY - 10.0f || p.y > maxY + 10.0f)
+                    p.active = false;
+            }
+
+            return currentForce;
+        }
+
+        // Draw streaking petal particles and a subtle wind-direction arrow UI
+        void draw() const
+        {
+            AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+            AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+
+            float strength = gustStrength();
+
+            for (const auto& p : particles)
+            {
+                if (!p.active) continue;
+
+                float a = p.alpha;
+                float r = ((p.color >> 16) & 0xFF) / 255.0f;
+                float g = ((p.color >> 8) & 0xFF) / 255.0f;
+                float b = ((p.color >> 0) & 0xFF) / 255.0f;
+
+                u32 col = (static_cast<u32>(a * 255) << 24)
+                    | (static_cast<u32>(r * 255) << 16)
+                    | (static_cast<u32>(g * 255) << 8)
+                    | static_cast<u32>(b * 255);
+
+                // Streak: a thin elongated rectangle aligned to velocity direction
+                float angle = std::atan2(p.velY, p.velX);
+                gfx::Vec2 pos{ p.x, p.y };
+                gfx::Vec2 streak{ p.length, p.thickness };
+                gfx::drawRectangle(pos, angle, streak, col);
+            }
+
+            // HUD: small wind-direction indicator in the top-centre of the screen
+            if (gustActive && strength > 0.05f)
+            {
+                float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+                float maxY = AEGfxGetWinMaxY();
+
+                float cx = (minX + maxX) * 0.5f;
+                float cy = maxY - 28.0f;
+                float arrowA = static_cast<u32>(strength * 200.0f);
+                u32   hudCol = (arrowA < 24) | 0x00AAFFAAu; // soft green tint
+
+                float dirSign = (dir == WindDir::Right) ? 1.0f : -1.0f;
+
+                // Arrow shaft
+                gfx::drawRectangle({ cx, cy }, 0.0f, { 60.0f * strength, 5.0f }, hudCol);
+                // Arrow head
+                float tipX = cx + dirSign * 30.0f * strength;
+                gfx::drawRectangle({ tipX, cy }, 0.785f, { 14.0f, 4.0f }, hudCol);
+                gfx::drawRectangle({ tipX, cy }, -0.785f, { 14.0f, 4.0f }, hudCol);
+            }
+
+            AEGfxSetBlendMode(AE_GFX_BM_NONE);
+        }
+
+        void reset()
+        {
+            particles.clear();
+            cycleTimer = 0.0f;
+            gustTimer = 0.0f;
+            gustActive = false;
+            currentForce = 0.0f;
+            particleTimer = 0.0f;
+            initialised = false;
+        }
+    };
+
+    // Single instance shared across all Spring stages
+    static WindSystem g_windSystem;
+
+} // anonymous namespace
+
+
+// ===================================================================
+// SpringS1  —  action codes: 40 -> SpringS2 | 2 -> MainMenu
+// ===================================================================
 game::SpringS1::SpringS1()
 {
     gridVisible = false;
@@ -224,11 +482,9 @@ game::SpringS1::~SpringS1() = default;
 
 int game::SpringS1::update(float dt)
 {
-    if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
+    if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
     if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
-    // Transition trigger (you can change this logic later):
-    // UP key or reaching a small trigger near (30,19)
     if (AEInputCheckTriggered(AEVK_UP))
     {
         if (!camera::isTransitioning())
@@ -236,6 +492,13 @@ int game::SpringS1::update(float dt)
             camera::startTransitionY(0.0f, camera::screenHeight(), 0.3f);
             return 40;
         }
+    }
+
+    // Apply wind force to player before movement update
+    float windForce = g_windSystem.update(dt);
+    if (!camera::isTransitioning())
+    {
+        gGame.player.pos.x += windForce * dt;
     }
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
@@ -260,41 +523,35 @@ void game::SpringS1::draw() const
     drawTiles();
     if (gridVisible) drawGrid();
 
-    // Teleporter visual: S1: col0 row16-18
+    // Teleporter visual: col 0, rows 16-18
     {
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
         float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         float cw = (maxX - minX) / static_cast<float>(gridCols);
         float ch = (maxY - minY) / static_cast<float>(gridRows);
+        for (int row : { 16, 17, 18 })
         {
-            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 16 * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
-        }
-        {
-            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 17 * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
-        }
-        {
-            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
+            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
             gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
         }
     }
 
     PlayerDraw(gGame.player);
+    g_windSystem.draw();
 }
 
-u32 game::SpringS1::getTileColor(int tileType) const { return getTileColorCommon(tileType); }
-void game::SpringS1::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
+u32  game::SpringS1::getTileColor(int t) const { return getTileColorCommon(t); }
+void game::SpringS1::gridToWorld(int col, int row, float& xW, float& yW, float& cW, float& cH) const
 {
-    gridToWorldCommon(col, row, gridCols, gridRows, xWorld, yWorld, cellW, cellH);
+    gridToWorldCommon(col, row, gridCols, gridRows, xW, yW, cW, cH);
 }
-void game::SpringS1::drawGrid() const { drawGridLines(gridCols, gridRows); }
+void game::SpringS1::drawGrid()  const { drawGridLines(gridCols, gridRows); }
 void game::SpringS1::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }
 
-// -------------------------------------------------------------------
-// SpringS2
-// 41 -> SpringS3
-// -------------------------------------------------------------------
+
+// ===================================================================
+// SpringS2  —  action codes: 41 -> SpringS3
+// ===================================================================
 game::SpringS2::SpringS2()
 {
     gridVisible = false;
@@ -304,7 +561,7 @@ game::SpringS2::~SpringS2() = default;
 
 int game::SpringS2::update(float dt)
 {
-    if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
+    if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
     if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (AEInputCheckTriggered(AEVK_UP))
@@ -314,6 +571,12 @@ int game::SpringS2::update(float dt)
             camera::startTransitionY(camera::screenHeight(), camera::screenHeight() * 2.0f, 0.3f);
             return 41;
         }
+    }
+
+    float windForce = g_windSystem.update(dt);
+    if (!camera::isTransitioning())
+    {
+        gGame.player.pos.x += windForce * dt;
     }
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
@@ -338,41 +601,35 @@ void game::SpringS2::draw() const
     drawTiles();
     if (gridVisible) drawGrid();
 
-    // Teleporter visual: S2: col31 row17-19
+    // Teleporter visual: col 31, rows 17-19
     {
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
         float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         float cw = (maxX - minX) / static_cast<float>(gridCols);
         float ch = (maxY - minY) / static_cast<float>(gridRows);
+        for (int row : { 17, 18, 19 })
         {
-            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 17 * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
-        }
-        {
-            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
-        }
-        {
-            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
             gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
         }
     }
 
     PlayerDraw(gGame.player);
+    g_windSystem.draw();
 }
 
-u32 game::SpringS2::getTileColor(int tileType) const { return getTileColorCommon(tileType); }
-void game::SpringS2::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
+u32  game::SpringS2::getTileColor(int t) const { return getTileColorCommon(t); }
+void game::SpringS2::gridToWorld(int col, int row, float& xW, float& yW, float& cW, float& cH) const
 {
-    gridToWorldCommon(col, row, gridCols, gridRows, xWorld, yWorld, cellW, cellH);
+    gridToWorldCommon(col, row, gridCols, gridRows, xW, yW, cW, cH);
 }
-void game::SpringS2::drawGrid() const { drawGridLines(gridCols, gridRows); }
+void game::SpringS2::drawGrid()  const { drawGridLines(gridCols, gridRows); }
 void game::SpringS2::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }
 
-// -------------------------------------------------------------------
-// SpringS3
-// 42 -> SpringS4
-// -------------------------------------------------------------------
+
+// ===================================================================
+// SpringS3  —  action codes: 42 -> SpringS4
+// ===================================================================
 game::SpringS3::SpringS3()
 {
     gridVisible = false;
@@ -382,7 +639,7 @@ game::SpringS3::~SpringS3() = default;
 
 int game::SpringS3::update(float dt)
 {
-    if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
+    if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
     if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (AEInputCheckTriggered(AEVK_UP))
@@ -392,6 +649,12 @@ int game::SpringS3::update(float dt)
             camera::startTransitionY(camera::screenHeight() * 2.0f, camera::screenHeight() * 3.0f, 0.3f);
             return 42;
         }
+    }
+
+    float windForce = g_windSystem.update(dt);
+    if (!camera::isTransitioning())
+    {
+        gGame.player.pos.x += windForce * dt;
     }
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
@@ -416,40 +679,35 @@ void game::SpringS3::draw() const
     drawTiles();
     if (gridVisible) drawGrid();
 
-    // Teleporter visual: S3: col0 row17-19
+    // Teleporter visual: col 0, rows 17-19
     {
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
         float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         float cw = (maxX - minX) / static_cast<float>(gridCols);
         float ch = (maxY - minY) / static_cast<float>(gridRows);
+        for (int row : { 17, 18, 19 })
         {
-            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 17 * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
-        }
-        {
-            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
-        }
-        {
-            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
+            gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
             gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
         }
     }
 
     PlayerDraw(gGame.player);
+    g_windSystem.draw();
 }
 
-u32 game::SpringS3::getTileColor(int tileType) const { return getTileColorCommon(tileType); }
-void game::SpringS3::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
+u32  game::SpringS3::getTileColor(int t) const { return getTileColorCommon(t); }
+void game::SpringS3::gridToWorld(int col, int row, float& xW, float& yW, float& cW, float& cH) const
 {
-    gridToWorldCommon(col, row, gridCols, gridRows, xWorld, yWorld, cellW, cellH);
+    gridToWorldCommon(col, row, gridCols, gridRows, xW, yW, cW, cH);
 }
-void game::SpringS3::drawGrid() const { drawGridLines(gridCols, gridRows); }
+void game::SpringS3::drawGrid()  const { drawGridLines(gridCols, gridRows); }
 void game::SpringS3::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }
 
-// -------------------------------------------------------------------
-// SpringS4 (end of Spring - returns 2 to go back to menu by default)
-// -------------------------------------------------------------------
+
+// ===================================================================
+// SpringS4  —  action codes: 43 -> AutumnS1
+// ===================================================================
 game::SpringS4::SpringS4()
 {
     gridVisible = false;
@@ -459,35 +717,36 @@ game::SpringS4::~SpringS4() = default;
 
 int game::SpringS4::update(float dt)
 {
-    if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
+    if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
     if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
+
+    float windForce = g_windSystem.update(dt);
+    if (!camera::isTransitioning())
+    {
+        gGame.player.pos.x += windForce * dt;
+    }
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
 
-    // Teleporter to Autumn Stage 1 (last level of Spring)
+    // Teleporter to AutumnS1
     if (!camera::isTransitioning())
     {
-        // Define teleport zone in grid coordinates (31,19 and 31,18 - 2 vertical cells)
-        int teleportCol = 31;
-        int teleportRow1 = 19;  // Top cell
-        int teleportRow2 = 18;  // Bottom cell
+        int   teleportCol = 31;
+        int   teleportRow2 = 18;
 
-        // Convert grid position to world coordinates
-        float gridWorldX, gridWorldY, cellW, cellH;
+        float gridWorldX{}, gridWorldY{}, cellW{}, cellH{};
         gridToWorld(teleportCol, teleportRow2, gridWorldX, gridWorldY, cellW, cellH);
 
-        // Check if player is within the teleport zone (2 cells tall)
         float teleportCenterX = gridWorldX + cellW * 0.5f;
-        float teleportCenterY = gridWorldY + cellH * 1.0f; // Center between 2 cells
+        float teleportCenterY = gridWorldY + cellH * 1.0f;
 
-        // Distance check (within 1.5 cells)
         float dx = gGame.player.pos.x - teleportCenterX;
         float dy = gGame.player.pos.y - teleportCenterY;
-        float distance = sqrt(dx * dx + dy * dy);
 
-        if (distance < cellW * 1.5f)
+        if (std::sqrt(dx * dx + dy * dy) < cellW * 1.5f)
         {
-			return 43; // autumn stage 1
+            g_windSystem.reset();
+            return 43;
         }
     }
 
@@ -502,33 +761,28 @@ void game::SpringS4::draw() const
     drawTiles();
     if (gridVisible) drawGrid();
 
-    // Draw teleporter indicator (2x1 cells, cyan)
+    // Teleporter visual: col 31, rows 18-19
     if (!camera::isTransitioning())
     {
-        int teleportCol = 31;
-        for (int r = 0; r < 2; r++)
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        for (int row : { 18, 19 })
         {
-            int row = 18 + r; // Rows 18 and 19
-            if (row < gridRows)
-            {
-                float gridWorldX, gridWorldY, cellW, cellH;
-                gridToWorld(teleportCol, row, gridWorldX, gridWorldY, cellW, cellH);
-                gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
-                portalPos.x = std::round(portalPos.x);
-                portalPos.y = std::round(portalPos.y);
-                gfx::Vec2 portalSize{ cellW, cellH };
-                gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAA00FFFF); // Green portal
-            }
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
         }
     }
 
     PlayerDraw(gGame.player);
+    g_windSystem.draw();
 }
 
-u32 game::SpringS4::getTileColor(int tileType) const { return getTileColorCommon(tileType); }
-void game::SpringS4::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
+u32  game::SpringS4::getTileColor(int t) const { return getTileColorCommon(t); }
+void game::SpringS4::gridToWorld(int col, int row, float& xW, float& yW, float& cW, float& cH) const
 {
-    gridToWorldCommon(col, row, gridCols, gridRows, xWorld, yWorld, cellW, cellH);
+    gridToWorldCommon(col, row, gridCols, gridRows, xW, yW, cW, cH);
 }
-void game::SpringS4::drawGrid() const { drawGridLines(gridCols, gridRows); }
+void game::SpringS4::drawGrid()  const { drawGridLines(gridCols, gridRows); }
 void game::SpringS4::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }
