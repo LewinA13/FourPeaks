@@ -35,7 +35,9 @@ namespace sprite
         AEGfxTexture* textboxDownTex{};
         AEGfxTexture* winterCTex{};   // tile ID 4 -> WinterC.png
         AEGfxTexture* winterTTex{};   // tile ID 6 -> WinterT.png
-
+        AEGfxTexture* breakabletileTex{};
+        AEGfxTexture* stgselectbgTex{};
+        AEGfxTexture* centerframeTex{};
 
         // New tile textures (IDs 23-25)
         AEGfxTexture* grassTex{};
@@ -208,6 +210,21 @@ namespace sprite
             if (!textboxDownTex) textboxDownTex = AEGfxTextureLoad("textboxDown.jpg");
         }
 
+        if (!breakabletileTex) {
+            breakabletileTex = AEGfxTextureLoad("Assets/breakabletile.png");
+            if (!breakabletileTex) breakabletileTex = AEGfxTextureLoad("breakabletile.jpg");
+        }
+
+        if (!stgselectbgTex) {
+            stgselectbgTex = AEGfxTextureLoad("Assets/stgselectbg.png");
+            if (!breakabletileTex) stgselectbgTex = AEGfxTextureLoad("stgselectbg.jpg");
+        }
+
+        if (!centerframeTex){
+            centerframeTex = AEGfxTextureLoad("Assets/Centerframe.png");
+            if (!breakabletileTex) centerframeTex = AEGfxTextureLoad("Centerframe.jpg");
+        }
+
         // Winter tile overrides (standalone images)
         if (!winterCTex) winterCTex = AEGfxTextureLoad("Assets/WinterC.png");
         if (!winterTTex) winterTTex = AEGfxTextureLoad("Assets/WinterT.png");
@@ -318,6 +335,10 @@ namespace sprite
         if (autumn1Tex) { AEGfxTextureUnload(autumn1Tex); autumn1Tex = nullptr; }
         if (autumn2Tex) { AEGfxTextureUnload(autumn2Tex); autumn2Tex = nullptr; }
 
+        if (breakabletileTex) { AEGfxTextureUnload(breakabletileTex); breakabletileTex = nullptr; }
+        if (stgselectbgTex) { AEGfxTextureUnload(stgselectbgTex); stgselectbgTex = nullptr; }
+        if (centerframeTex) { AEGfxTextureUnload(centerframeTex); centerframeTex = nullptr; }
+
         if (grassTex) { AEGfxTextureUnload(grassTex);  grassTex = nullptr; }
         if (fireTex_) { AEGfxTextureUnload(fireTex_);  fireTex_ = nullptr; }
         if (sawTex_) { AEGfxTextureUnload(sawTex_);   sawTex_ = nullptr; }
@@ -393,7 +414,9 @@ namespace sprite
     AEGfxTexture* textboxUp() { return textboxUpTex; }
     AEGfxTexture* textboxDown() { return textboxDownTex; }
 
-
+    AEGfxTexture* breakabletile() { return breakabletileTex; }
+    AEGfxTexture* stgselectBackground() { return stgselectbgTex; }
+    AEGfxTexture* centerframe() { return centerframeTex; }
 
 
     AEGfxTexture* spring1() { return spring1Tex; }

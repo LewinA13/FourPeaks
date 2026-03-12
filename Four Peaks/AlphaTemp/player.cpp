@@ -492,7 +492,7 @@ void PlayerUpdate(Player& p, float dt)
     const bool jumpPressed = AEInputCheckTriggered(AEVK_SPACE);
     const bool jumpHeld = AEInputCheckCurr(AEVK_SPACE);
 
-    const bool grabHeld = AEInputCheckCurr(AEVK_RBUTTON);
+    const bool grabHeld = AEInputCheckCurr(AEVK_L);
     const bool dashPressed = AEInputCheckTriggered(AEVK_LSHIFT);
 
     const bool pressUp = AEInputCheckCurr(AEVK_W);

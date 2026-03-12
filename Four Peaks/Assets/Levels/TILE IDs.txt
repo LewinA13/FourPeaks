@@ -26,6 +26,8 @@ TILE IDs
 
 12 = Winter crack tile
 
+15 = Autumn breakable tile
+
 16 = Tile_02 summer tile top
 
 17 = Tile_12 summer tile bottom
