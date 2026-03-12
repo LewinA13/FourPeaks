@@ -47,7 +47,7 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
     if (!out.is_open())
         return false;
 
-    out << "checkpoint_v5\n";
+    out << "checkpoint_v6\n";
     out << p.checkpointScene << "\n";
     out << std::fixed << std::setprecision(3);
 
@@ -57,6 +57,15 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
         << p.melonsCollected << " "
         << p.deathCount << " "
         << gGame.runTimeSeconds << "\n";
+
+    out << gGame.collectedMelons.size() << "\n";
+
+    for (const CollectedMelon& melon : gGame.collectedMelons)
+    {
+        out << melon.scene << " "
+            << melon.row << " "
+            << melon.col << "\n";
+    }
 
     std::cout << "Saved checkpoint to file";
     return out.good();
@@ -81,6 +90,7 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     p.melonsCollected = 0;
     p.deathCount = 0;
     gGame.runTimeSeconds = 0.0f;
+    gGame.collectedMelons.clear();
 
     std::string scene;
     if (!(in >> scene))
@@ -89,13 +99,29 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     p.checkpointScene = scene;
 
     // Newest format: checkpoint_v5
-    if (header == "checkpoint_v5")
+    if (header == "checkpoint_v6")
     {
         if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
             return false;
+
+        int collectedCount = 0;
+        if (!(in >> collectedCount))
+            return false;
+
+        for (int i = 0; i < collectedCount; ++i)
+        {
+            CollectedMelon melon;
+            if (!(in >> melon.scene >> melon.row >> melon.col))
+                return false;
+
+            gGame.collectedMelons.push_back(melon);
+        }
     }
-    // Old format support: checkpoint_v4
-    else if (header == "checkpoint_v4")
+    else if (header == "checkpoint_v5")
+    {
+        if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
+            return false;
+    }else if (header == "checkpoint_v4")
     {
         if (!(in >> x >> y >> p.melonsCollected >> p.deathCount))
             return false;
@@ -124,6 +150,7 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     return true;
 }
 
+/* revamp on melons 
 bool PlayerSaveMelons(const Player& p, const char* filename)
 {
     std::ofstream out(filename, std::ios::out | std::ios::trunc);
@@ -140,6 +167,56 @@ bool PlayerLoadMelons(Player& p, const char* filename)
     if (!(in >> melons)) return false;
     p.melonsCollected = melons;
     return true;
+}
+*/
+
+bool IsMelonCollected(const char* sceneName, int row, int col)
+{
+    if (!sceneName) return false;
+
+    for (const CollectedMelon& melon : gGame.collectedMelons)
+    {
+        if (melon.scene == sceneName && melon.row == row && melon.col == col)
+            return true;
+    }
+
+    return false;
+}
+
+bool MarkMelonCollected(const char* sceneName, int row, int col)
+{
+    if (!sceneName) return false;
+
+    if (IsMelonCollected(sceneName, row, col))
+        return false;
+
+    CollectedMelon melon;
+    melon.scene = sceneName;
+    melon.row = row;
+    melon.col = col;
+
+    gGame.collectedMelons.push_back(melon);
+    return true;
+}
+
+void ApplyCollectedMelonsToTileMap(const char* sceneName, int rows, int tileMap[][32])
+{
+    if (!sceneName || !tileMap) return;
+
+    for (const CollectedMelon& melon : gGame.collectedMelons)
+    {
+        if (melon.scene != sceneName)
+            continue;
+
+        if (melon.row < 0 || melon.row >= rows)
+            continue;
+
+        if (melon.col < 0 || melon.col >= 32)
+            continue;
+
+        if (tileMap[melon.row][melon.col] == 8)
+            tileMap[melon.row][melon.col] = 0;
+    }
 }
 
 void PlayerRespawn(Player& p)
@@ -272,7 +349,6 @@ void PlayerInit(Player& p)
     gGame.runTimeSeconds = 0.0f;
 
     PlayerLoadCheckpoint(p, "checkpoint.txt", true);
-    PlayerLoadMelons(p, "melons.txt");
     p.justRespawned = false;
 
 

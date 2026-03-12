@@ -125,7 +125,28 @@ namespace game {
     }
     SummerS1::~SummerS1() = default;
 
+    void SummerS1::reset(){
+        const bool loaded =
+            level::loadTileMap("Assets/Levels/summer_s1.txt",
+                gridRows, gridCols,
+                &tileMap[0][0]);
+
+        //basically a fail safe, if the above code fails, make the map empty
+        if (!loaded){
+            for (int r = 0; r < gridRows; ++r){
+                for (int c = 0; c < gridCols; ++c){
+                    tileMap[r][c] = 0;
+                }
+            }
+        }
+    }
+
     int SummerS1::update(float dt) {
+        if (gGame.player.justRespawned){
+            // basically reset the bottles
+            reset();
+            gGame.player.justRespawned = false;
+        }
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
         if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
         if (AEInputCheckTriggered(AEVK_UP)) {
@@ -367,7 +388,27 @@ namespace game {
     }
     SummerS2::~SummerS2() = default;
 
+    void SummerS2::reset()
+    {
+        const bool loaded =
+            level::loadTileMap("Assets/Levels/summer_s2.txt",
+                gridRows, gridCols,
+                &tileMap[0][0]);
+
+        if (!loaded){
+            for (int r = 0; r < gridRows; ++r){
+                for (int c = 0; c < gridCols; ++c){
+                    tileMap[r][c] = 0;
+                }
+            }
+        }
+    }
+
     int SummerS2::update(float dt) {
+        if (gGame.player.justRespawned){
+            reset();
+            gGame.player.justRespawned = false;
+        }
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
         if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
         if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
@@ -573,7 +614,40 @@ namespace game {
     }
     SummerS3::~SummerS3() = default;
 
+    void SummerS3::reset()
+    {
+        const bool loaded =
+            level::loadTileMap("Assets/Levels/summer_s3.txt",
+                gridRows, gridCols,
+                &tileMap[0][0]);
+
+        if (!loaded){
+            for (int r = 0; r < gridRows; ++r){
+                for (int c = 0; c < gridCols; ++c){
+                    tileMap[r][c] = 0;
+                }
+            }
+        }
+
+        iceTiles.clear();
+
+        for (int r = 0; r < gridRows; ++r){
+            for (int c = 0; c < gridCols; ++c){
+                if (tileMap[r][c] == 1){
+                    IceTileState ice;
+                    ice.row = r;
+                    ice.col = c;
+                    iceTiles.push_back(ice);
+                }
+            }
+        }
+    }
+
     int SummerS3::update(float dt) {
+        if (gGame.player.justRespawned){
+            reset(); // reset the bottle
+            gGame.player.justRespawned = false;
+        }
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
         if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
         if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
@@ -792,7 +866,42 @@ namespace game {
     }
     SummerS4::~SummerS4() = default;
 
+    void SummerS4::reset()
+    {
+        const bool loaded =
+            level::loadTileMap("Assets/Levels/summer_s4.txt",
+                gridRows, gridCols,
+                &tileMap[0][0]);
+
+        if (!loaded){
+            for (int r = 0; r < gridRows; ++r){
+                for (int c = 0; c < gridCols; ++c){
+                    tileMap[r][c] = 0;
+                }
+            }
+        }
+
+        iceTiles.clear();
+
+        for (int r = 0; r < gridRows; ++r){
+            for (int c = 0; c < gridCols; ++c){
+                if (tileMap[r][c] == 1){
+                    IceTileState ice;
+                    ice.row = r;
+                    ice.col = c;
+                    iceTiles.push_back(ice);
+                }
+            }
+        }
+    }
+
+
     int SummerS4::update(float dt) {
+        if (gGame.player.justRespawned)
+        {
+            reset(); // reset the spawning of bottle
+            gGame.player.justRespawned = false;
+        }
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
         if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
         if (!camera::isTransitioning()) {

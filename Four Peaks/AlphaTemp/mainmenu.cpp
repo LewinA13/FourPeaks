@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <cstring>
 #include <fstream>
+#include "graphics.hpp"
 
 extern s8 gFontId;
 static bool gIsFullscreen = false;
@@ -370,11 +371,34 @@ namespace game
     // -------------------------------------------------------------------------
     void MainMenu::drawHowToPlay() const
     {
-        printCentered(0.7f, 0xFF00FFFFu, "How To Play");
-        printCentered(0.3f, 0xFFFFFFFFu, "- Use arrow keys to move.");
-        printCentered(0.1f, 0xFFFFFFFFu, "- Reach the end of each stage.");
-        printCentered(-0.1f, 0xFFFFFFFFu, "- More mechanics coming soon.");
-        printCentered(-0.5f, 0xFFFFFF00u, "Press Enter, Space or ESC to return.");
+        // Make sure we are drawing with menu camera centred
+        AEGfxSetCamPosition(0.0f, 0.0f);
+        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+
+        // Big obvious debug box first
+        gfx::drawRectangle(
+            { 0.0f, -25.0f },
+            0.0f,
+            { 600.0f, 500.0f },
+            0x88000000
+        );
+
+        // Smaller box behind header only
+        gfx::drawRectangle(
+            { 0.0f, 320.0f },
+            0.0f,
+            { 600.0f, 110.0f },
+            0x88000000
+        );
+
+
+
+        printCentered(0.7f, 0xFF00FFFFu, "How To Play", 1.5);
+        printCentered(0.3f, 0xFFFFFFFFu, "- Use arrow keys to move.", 1.5);
+        printCentered(0.1f, 0xFFFFFFFFu, "- Reach the end of each stage.", 1.5);
+        printCentered(-0.1f, 0xFFFFFFFFu, "- More mechanics coming soon.", 1.5);
+        printCentered(-0.3f, 0xFFFFFF00u, "Press Enter, Space or ESC to return.", 1.5);
     }
 
     // -------------------------------------------------------------------------

@@ -30,6 +30,8 @@ namespace game {
         static const int gridCols = 32;
         static const int gridRows = 20;
         int (*getTileMap())[gridCols] { return tileMap; }
+
+        void reset(); // for spawning the water bottles again after death
     private:
         bool gridVisible;
         int tileMap[gridRows][gridCols];
@@ -51,6 +53,8 @@ namespace game {
         void draw() const;
         static const int gridCols = 32;
         static const int gridRows = 20;
+
+        void reset();
         int (*getTileMap())[gridCols] { return tileMap; }
     private:
         bool gridVisible;
@@ -74,6 +78,8 @@ namespace game {
         static const int gridCols = 32;
         static const int gridRows = 20;
         int (*getTileMap())[gridCols] { return tileMap; }
+
+        void reset();
     private:
         bool gridVisible;
         int tileMap[gridRows][gridCols];
@@ -97,6 +103,7 @@ namespace game {
         static const int gridCols = 32;
         static const int gridRows = 20;
         int (*getTileMap())[gridCols] { return tileMap; }
+        void reset();
     private:
         bool gridVisible;
         int tileMap[gridRows][gridCols];

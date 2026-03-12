@@ -228,6 +228,11 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
 bool PlayerSaveMelons(const Player& p, const char* filename);
 bool PlayerLoadMelons(Player& p, const char* filename);
 
+//melon part 2
+bool IsMelonCollected(const char* sceneName, int row, int col);
+bool MarkMelonCollected(const char* sceneName, int row, int col);
+void ApplyCollectedMelonsToTileMap(const char* sceneName, int rows, int tileMap[][32]);
+
 
 #endif
 

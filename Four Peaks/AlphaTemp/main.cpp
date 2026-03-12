@@ -347,6 +347,28 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Game Loop
     PlayerInit(gGame.player);
 
+    // Apply saved melon removals to all stage maps after checkpoint is loaded.
+
+    ApplyCollectedMelonsToTileMap("WinterS1", game::WinterS1::gridRows, winterStage.getTileMap());
+    ApplyCollectedMelonsToTileMap("WinterS2", game::WinterS2::gridRows, winterStage2.getTileMap());
+    ApplyCollectedMelonsToTileMap("WinterS3", game::WinterS3::gridRows, winterStage3.getTileMap());
+    ApplyCollectedMelonsToTileMap("WinterS4", game::WinterS4::gridRows, winterStage4.getTileMap());
+
+    ApplyCollectedMelonsToTileMap("SummerS1", game::SummerS1::gridRows, summerStage.getTileMap());
+    ApplyCollectedMelonsToTileMap("SummerS2", game::SummerS2::gridRows, summerStage2.getTileMap());
+    ApplyCollectedMelonsToTileMap("SummerS3", game::SummerS3::gridRows, summerStage3.getTileMap());
+    ApplyCollectedMelonsToTileMap("SummerS4", game::SummerS4::gridRows, summerStage4.getTileMap());
+
+    ApplyCollectedMelonsToTileMap("SpringS1", game::SpringS1::gridRows, springStage.getTileMap());
+    ApplyCollectedMelonsToTileMap("SpringS2", game::SpringS2::gridRows, springStage2.getTileMap());
+    ApplyCollectedMelonsToTileMap("SpringS3", game::SpringS3::gridRows, springStage3.getTileMap());
+    ApplyCollectedMelonsToTileMap("SpringS4", game::SpringS4::gridRows, springStage4.getTileMap());
+
+    ApplyCollectedMelonsToTileMap("AutumnS1", game::AutumnS1::gridRows, autumnStage.getTileMap());
+    ApplyCollectedMelonsToTileMap("AutumnS2", game::AutumnS2::gridRows, autumnStage2.getTileMap());
+    ApplyCollectedMelonsToTileMap("AutumnS3", game::AutumnS3::gridRows, autumnStage3.getTileMap());
+    ApplyCollectedMelonsToTileMap("AutumnS4", game::AutumnS4::gridRows, autumnStage4.getTileMap());
+
     // gDialog
     UI::gDialog.initialize();
 

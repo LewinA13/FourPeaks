@@ -303,13 +303,32 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm]) 
 					
 
 			case 8:	// melon 
-				player.melonsCollected += 1;
-				PlayerSaveMelons(player, "melons.txt");
-				levelLayout[r][c] = 0;
+				// only collect once
+				if (!IsMelonCollected(g_currentScene.c_str(), r, c))
+				{
+					player.melonsCollected += 1;
+					MarkMelonCollected(g_currentScene.c_str(), r, c);
+
+					// remove from current in-memory map immediately
+					levelLayout[r][c] = 0;
+
+					// if player has not touched any checkpoint yet, create a valid save anchor
+					if (player.checkpointScene.empty())
+					{
+						player.checkpointScene = g_currentScene;
+						PlayerSetRespawn(player, PlayerGetFeetWorld(player));
+					}
+
+					PlayerSaveCheckpoint(player, "checkpoint.txt");
+				}
+				else
+				{
+					// safety: if already collected, keep it removed
+					levelLayout[r][c] = 0;
+				}
 				break;
-
-
-
+				2
+			;
 			case 1:
 			{
 				//! only when player above on ice &&  player (stay or down)

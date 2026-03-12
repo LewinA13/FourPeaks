@@ -160,6 +160,10 @@ namespace gfx
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
         AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
+        // ADD THESE TWO LINES:
+        AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+        AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+
         u8 a = static_cast<u8>((color >> 24) & 0xFF);
         u8 r = static_cast<u8>((color >> 16) & 0xFF);
         u8 g = static_cast<u8>((color >> 8) & 0xFF);
@@ -178,6 +182,10 @@ namespace gfx
     {
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
         AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+
+        // ADD THESE TWO LINES:
+        AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+        AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
 
         AEMtx33 m = makeTransform(position, rotationRad, size);
         AEGfxSetTransform(m.m);

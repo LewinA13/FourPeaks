@@ -2,7 +2,16 @@
 #define GAME_STATE_HPP
 
 #include "player.hpp"
+#include <vector>
+#include <string>
 #include "AEAudio.h"   // audio types (AEAudio, AEAudioGroup)
+
+struct CollectedMelon
+{
+    std::string scene;
+    int row = 0;
+    int col = 0;
+};
 
 struct GameState
 {
@@ -17,6 +26,9 @@ struct GameState
 
     // total game run time. only when playing. pause doesnt affect
     float runTimeSeconds = 0.0f;
+
+    //vector to store the collected melons
+    std::vector<CollectedMelon> collectedMelons;
 };
 
 // One global world object (declared here)

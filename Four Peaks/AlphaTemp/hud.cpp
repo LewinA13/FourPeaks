@@ -30,48 +30,42 @@ namespace hud
 
     void drawMelonCounter(int melonCount)
     {
-        // reusing existing melon spritesheet loading in sprite.cpp
         AEGfxTexture* melonTex = sprite::coin();
         if (!melonTex)
             return;
 
-        // only using frame 0 so no animation
         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
         if (!sprite::getCoinUv(0, u0, v0, u1, v1))
             return;
 
-        // save current gameplay camera position.
-        float oldCamX = 0.0f;
-        float oldCamY = 0.0f;
-        AEGfxGetCamPosition(&oldCamX, &oldCamY);
+        // Get current camera centre
+        float camX = 0.0f;
+        float camY = 0.0f;
+        AEGfxGetCamPosition(&camX, &camY);
 
-        // put camera at screen centre so HUD is fixed to the screen.
-        AEGfxSetCamPosition(0.0f, 0.0f);
-        gfx::drawRectangle({ -99999.0f, -99999.0f }, 0.0f, { 1.0f, 1.0f }, 0x00000000u);
+        // HUD offsets relative to camera centre
+        const gfx::Vec2 boxPos{ camX - 700.0f, camY + 360.0f };
+        const gfx::Vec2 boxSize{ 120.0f, 120.0f };
 
-        // -----------------------------
-        // Draw melon icon
-        // -----------------------------
-        const gfx::Vec2 iconPos{ -730.0f, 395.0f };
+        const gfx::Vec2 iconPos{ camX - 730.0f, camY + 395.0f };
         const gfx::Vec2 iconSize{ 40.0f,  40.0f };
 
-        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); // tells AE next thing i draw is texture image
-        AEGfxSetBlendMode(AE_GFX_BM_BLEND);     // tells AE to blend, basically make sure png works as intended
+        // Draw HUD background box
+        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+        gfx::drawRectangle(boxPos, 0.0f, boxSize, 0xAA000000u);
+
+        // Draw melon icon
+        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
         gfx::drawSprite(melonTex, iconPos, 0.0f, iconSize, u0, v0, u1, v1);
 
-        // -----------------------------
-        // Draw melon count text
-        // -----------------------------
-        // puts number to the right of the melon icon.
+        // Draw text in screen space
         const std::string text = std::to_string(melonCount);
         printText(-0.86f, 0.86f, 0xFFFFFFFFu, text.c_str(), 1.1f);
 
-        // reset default render state after drawing HUD.
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
-
-        // restore original gameplay camera
-        AEGfxSetCamPosition(oldCamX, oldCamY);
     }
 
     void drawDeathCounter(int deathCount)
