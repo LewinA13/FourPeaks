@@ -179,7 +179,7 @@ namespace game
     // -------------------------------------------------------------------------
     int MainMenu::update()
     {
-        float dt = AEFrameRateControllerGetFrameTime();
+        float dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
 
         // Advance background animation
         backgroundTimer += dt;

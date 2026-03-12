@@ -3,6 +3,7 @@
 // ---------------------------------------------------------------------------
 
 #include <crtdbg.h>        // To check for memory leaks
+#include <memory>           // std::make_unique
 #include "AEEngine.h"
 #include "graphics.hpp"    // Graphics helper for shapes and initialization
 #include "player.hpp"
@@ -308,35 +309,53 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Audio system + loading (done in audio.cpp)
     audio::init();
 
-    // Game state objects.
-    game::SplashScreen splashScreen;
-    game::MainMenu mainMenu;
+    // Game state objects — allocated on the heap to avoid C6262 stack-size warning.
+    auto splashScreenPtr = std::make_unique<game::SplashScreen>();
+    auto mainMenuPtr = std::make_unique<game::MainMenu>();
+    auto tutorial1Ptr = std::make_unique<game::Tutorial1>();
+    auto tutorial2Ptr = std::make_unique<game::Tutorial2>();
+    auto tutorial3Ptr = std::make_unique<game::Tutorial3>();
+    auto winterStagePtr = std::make_unique<game::WinterS1>();
+    auto winterStage2Ptr = std::make_unique<game::WinterS2>();
+    auto winterStage3Ptr = std::make_unique<game::WinterS3>();
+    auto winterStage4Ptr = std::make_unique<game::WinterS4>();
+    auto summerStagePtr = std::make_unique<game::SummerS1>();
+    auto summerStage2Ptr = std::make_unique<game::SummerS2>();
+    auto summerStage3Ptr = std::make_unique<game::SummerS3>();
+    auto summerStage4Ptr = std::make_unique<game::SummerS4>();
+    auto autumnStagePtr = std::make_unique<game::AutumnS1>();
+    auto autumnStage2Ptr = std::make_unique<game::AutumnS2>();
+    auto autumnStage3Ptr = std::make_unique<game::AutumnS3>();
+    auto autumnStage4Ptr = std::make_unique<game::AutumnS4>();
+    auto thankYouScreenPtr = std::make_unique<game::ThankYouScreen>();
+    auto springStagePtr = std::make_unique<game::SpringS1>();
+    auto springStage2Ptr = std::make_unique<game::SpringS2>();
+    auto springStage3Ptr = std::make_unique<game::SpringS3>();
+    auto springStage4Ptr = std::make_unique<game::SpringS4>();
 
-    // Tutorial stages (3 levels before Winter)
-    game::Tutorial1 tutorial1;
-    game::Tutorial2 tutorial2;
-    game::Tutorial3 tutorial3;
-
-    game::WinterS1 winterStage;
-    game::WinterS2 winterStage2;
-    game::WinterS3 winterStage3;
-    game::WinterS4 winterStage4;
-
-    game::SummerS1 summerStage;
-    game::SummerS2 summerStage2;
-    game::SummerS3 summerStage3;
-    game::SummerS4 summerStage4;
-
-    game::AutumnS1 autumnStage;
-    game::AutumnS2 autumnStage2;
-    game::AutumnS3 autumnStage3;
-    game::AutumnS4 autumnStage4;
-    game::ThankYouScreen thankYouScreen;
-
-    game::SpringS1 springStage;
-    game::SpringS2 springStage2;
-    game::SpringS3 springStage3;
-    game::SpringS4 springStage4;
+    // Convenience references so the rest of the code is unchanged.
+    game::SplashScreen& splashScreen = *splashScreenPtr;
+    game::MainMenu& mainMenu = *mainMenuPtr;
+    game::Tutorial1& tutorial1 = *tutorial1Ptr;
+    game::Tutorial2& tutorial2 = *tutorial2Ptr;
+    game::Tutorial3& tutorial3 = *tutorial3Ptr;
+    game::WinterS1& winterStage = *winterStagePtr;
+    game::WinterS2& winterStage2 = *winterStage2Ptr;
+    game::WinterS3& winterStage3 = *winterStage3Ptr;
+    game::WinterS4& winterStage4 = *winterStage4Ptr;
+    game::SummerS1& summerStage = *summerStagePtr;
+    game::SummerS2& summerStage2 = *summerStage2Ptr;
+    game::SummerS3& summerStage3 = *summerStage3Ptr;
+    game::SummerS4& summerStage4 = *summerStage4Ptr;
+    game::AutumnS1& autumnStage = *autumnStagePtr;
+    game::AutumnS2& autumnStage2 = *autumnStage2Ptr;
+    game::AutumnS3& autumnStage3 = *autumnStage3Ptr;
+    game::AutumnS4& autumnStage4 = *autumnStage4Ptr;
+    game::ThankYouScreen& thankYouScreen = *thankYouScreenPtr;
+    game::SpringS1& springStage = *springStagePtr;
+    game::SpringS2& springStage2 = *springStage2Ptr;
+    game::SpringS3& springStage3 = *springStage3Ptr;
+    game::SpringS4& springStage4 = *springStage4Ptr;
 
 
     // Start on the splash screen.
@@ -471,7 +490,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             // 1) Snap camera to the correct vertical band
             camera::setY(h * idx);
-            g_currentY = h * idx;
+            g_currentY = static_cast<int>(h * idx);
 
             // 2) Give EVERY playable scene a default spawn
             gfx::Vec2 spawn;
@@ -890,7 +909,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         case SceneState::ThankYou:
         {
-            float dt_ty = AEFrameRateControllerGetFrameTime();
+            float dt_ty = static_cast<float>(AEFrameRateControllerGetFrameTime());
             int ty_action = thankYouScreen.update(dt_ty);
             thankYouScreen.draw();
             if (ty_action == 1) triggerTransition(SceneState::MainMenu);
