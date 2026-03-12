@@ -680,6 +680,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // Run current state.
         int action = 0;
 
+        // Helper: start a PokemonWipe transition to a target scene.
+        // Call this instead of setting currentState directly for level switches.
+        auto triggerTransition = [&](SceneState target)
+            {
+                if (!gTransition.isActive())
+                {
+                    gTransition.style = TransitionStyle::PokemonWipe;
+                    gTransition.reset();
+                    gTransition.start();
+                    transitionTarget = target;
+                }
+            };
+
         UI::gDialog.PLAYERNEARSIGN(false);
 
         // ?? Transition: fire scene switch at mid-point, draw overlay on top ??
@@ -687,8 +700,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (gTransition.isReadyToSwitch())
         {
             currentState = transitionTarget;
-            camera::setY(0.0f);
-            lastState = SceneState::Exit;
+            lastState = SceneState::Exit;  // triggers camera + spawn reset in the block below
             gTransition.notifySwitch();
         }
 
@@ -748,15 +760,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = tutorial1.update(dt);
             tutorial1.draw();
 
-            if (action == 30) { currentState = SceneState::Tutorial2; camera::setY(0.0f); }
-            if (action == 31) { currentState = SceneState::Tutorial3; camera::setY(0.0f); }
-            if (action == 32) { currentState = SceneState::WinterS1;  camera::setY(0.0f); }
-            if (action == 2)
-            {
-                currentState = SceneState::MainMenu;
-                camera::setY(0.0f);
-
-            }
+            if (action == 30) triggerTransition(SceneState::Tutorial2);
+            if (action == 31) triggerTransition(SceneState::Tutorial3);
+            if (action == 32) triggerTransition(SceneState::WinterS1);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -765,15 +772,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = tutorial2.update(dt);
             tutorial2.draw();
 
-            if (action == 30) { currentState = SceneState::Tutorial2; camera::setY(0.0f); }
-            if (action == 31) { currentState = SceneState::Tutorial3; camera::setY(0.0f); }
-            if (action == 32) { currentState = SceneState::WinterS1;  camera::setY(0.0f); }
-            if (action == 2)
-            {
-                currentState = SceneState::MainMenu;
-                camera::setY(0.0f);
-
-            }
+            if (action == 30) triggerTransition(SceneState::Tutorial2);
+            if (action == 31) triggerTransition(SceneState::Tutorial3);
+            if (action == 32) triggerTransition(SceneState::WinterS1);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -782,15 +784,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = tutorial3.update(dt);
             tutorial3.draw();
 
-            if (action == 30) { currentState = SceneState::Tutorial2; camera::setY(0.0f); }
-            if (action == 31) { currentState = SceneState::Tutorial3; camera::setY(0.0f); }
-            if (action == 32) { currentState = SceneState::WinterS1;  camera::setY(0.0f); }
-            if (action == 2)
-            {
-                currentState = SceneState::MainMenu;
-                camera::setY(0.0f);
-
-            }
+            if (action == 30) triggerTransition(SceneState::Tutorial2);
+            if (action == 31) triggerTransition(SceneState::Tutorial3);
+            if (action == 32) triggerTransition(SceneState::WinterS1);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -807,22 +804,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = summerStage.update(dt);
             summerStage.draw();
 
-            if (action == 20) { currentState = SceneState::SummerS2; camera::setY(camera::screenHeight()); }
-            if (action == 24)
-            {
-                // Back-teleport to Winter Stage 4
-                currentState = SceneState::WinterS4;
-                float h = camera::screenHeight();
-                camera::setY(h * 3.0f);
-                float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
-                float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
-                float cellW = (maxX - minX) / 32.0f;
-                float cellH = (maxY - minY) / 20.0f;
-                gGame.player.pos.x = minX + 2 * cellW + cellW * 0.5f;
-                gGame.player.pos.y = h * 3.0f + minY + 2 * cellH + cellH * 0.5f;
-                lastState = SceneState::Exit;
-            }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 20) triggerTransition(SceneState::SummerS2);
+            if (action == 24) triggerTransition(SceneState::WinterS4);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -831,8 +815,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = summerStage2.update(dt);
             summerStage2.draw();
 
-            if (action == 21) { currentState = SceneState::SummerS3; camera::setY(camera::screenHeight() * 2.0f); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 21) triggerTransition(SceneState::SummerS3);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -841,8 +825,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = summerStage3.update(dt);
             summerStage3.draw();
 
-            if (action == 22) { currentState = SceneState::SummerS4; camera::setY(camera::screenHeight() * 3.0f); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 22) triggerTransition(SceneState::SummerS4);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -851,8 +835,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = summerStage4.update(dt);
             summerStage4.draw();
 
-            if (action == 25) { currentState = SceneState::SpringS1; camera::setY(0.0f); lastState = SceneState::Exit; } // teleport -> SpringS1
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 25) triggerTransition(SceneState::SpringS1);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -869,8 +853,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = autumnStage.update(dt);
             autumnStage.draw();
 
-            if (action == 60) { currentState = SceneState::AutumnS2; camera::setY(camera::screenHeight()); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 60) triggerTransition(SceneState::AutumnS2);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -879,8 +863,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = autumnStage2.update(dt);
             autumnStage2.draw();
 
-            if (action == 61) { currentState = SceneState::AutumnS3; camera::setY(camera::screenHeight() * 2.0f); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 61) triggerTransition(SceneState::AutumnS3);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -889,8 +873,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = autumnStage3.update(dt);
             autumnStage3.draw();
 
-            if (action == 62) { currentState = SceneState::AutumnS4; camera::setY(camera::screenHeight() * 3.0f); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 62) triggerTransition(SceneState::AutumnS4);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -899,8 +883,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = autumnStage4.update(dt);
             autumnStage4.draw();
 
-            if (action == 63) { currentState = SceneState::ThankYou; camera::setY(0.0f); }  // End game
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 63) triggerTransition(SceneState::ThankYou);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -909,7 +893,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             float dt_ty = AEFrameRateControllerGetFrameTime();
             int ty_action = thankYouScreen.update(dt_ty);
             thankYouScreen.draw();
-            if (ty_action == 1) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (ty_action == 1) triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -927,8 +911,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = springStage.update(dt);
             springStage.draw();
 
-            if (action == 40) { currentState = SceneState::SpringS2; camera::setY(camera::screenHeight()); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 40) triggerTransition(SceneState::SpringS2);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -937,8 +921,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = springStage2.update(dt);
             springStage2.draw();
 
-            if (action == 41) { currentState = SceneState::SpringS3; camera::setY(camera::screenHeight() * 2.0f); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 41) triggerTransition(SceneState::SpringS3);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -947,8 +931,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = springStage3.update(dt);
             springStage3.draw();
 
-            if (action == 42) { currentState = SceneState::SpringS4; camera::setY(camera::screenHeight() * 3.0f); }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 42) triggerTransition(SceneState::SpringS4);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -957,14 +941,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = springStage4.update(dt);
             springStage4.draw();
 
-            if (action == 43)
-            {
-                // Teleport from Spring Stage 4 to Autumn Stage 1
-                currentState = SceneState::AutumnS1;
-                camera::setY(0.0f);
-                lastState = SceneState::Exit;
-            }
-            if (action == 2) { currentState = SceneState::MainMenu; camera::setY(0.0f); }
+            if (action == 43) triggerTransition(SceneState::AutumnS1);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
             break;
         }
 
@@ -973,22 +951,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = winterStage.update(dt);
             winterStage.draw();
 
-            // Handle action == 20 (instant teleport to Stage 2)
-            if (action == 20)
-            {
-                currentState = SceneState::WinterS2;
-            }
-
-            if (action == 2)
-            {
-                currentState = SceneState::MainMenu;
-                camera::setY(0.0f);
-
-            }
-            else if (action == 3)
-            {
-                gGameRunning = 0;
-            }
+            if (action == 20) triggerTransition(SceneState::WinterS2);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            else if (action == 3) gGameRunning = 0;
         }
         break;
 
@@ -997,30 +962,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = winterStage2.update(dt);
             winterStage2.draw();
 
-            // ADD THIS: Handle teleport to Stage 3
-            if (action == 21)
-            {
-                currentState = SceneState::WinterS3;
-            }
-
-            // Debug: back to stage 1 if you add return 5
-            if (action == 5)
-            {
-                currentState = SceneState::WinterS1;
-                camera::setY(0.0f);
-                gGame.player.pos.y -= camera::screenHeight();
-            }
-
-            if (action == 2)
-            {
-                currentState = SceneState::MainMenu;
-                camera::setY(0.0f);
-
-            }
-            else if (action == 3)
-            {
-                gGameRunning = 0;
-            }
+            if (action == 21) triggerTransition(SceneState::WinterS3);
+            if (action == 5)  triggerTransition(SceneState::WinterS1);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            else if (action == 3) gGameRunning = 0;
             break;
         }
 
@@ -1029,22 +974,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = winterStage3.update(dt);
             winterStage3.draw();
 
-            // ADD THIS: Handle teleport to Stage 4
-            if (action == 22)
-            {
-                currentState = SceneState::WinterS4;
-            }
-
-            if (action == 2)
-            {
-                currentState = SceneState::MainMenu;
-                camera::setY(0.0f);
-
-            }
-            else if (action == 3)
-            {
-                gGameRunning = 0;
-            }
+            if (action == 22) triggerTransition(SceneState::WinterS4);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            else if (action == 3) gGameRunning = 0;
             break;
         }
 
@@ -1053,30 +985,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             action = winterStage4.update(dt);
             winterStage4.draw();
 
-            if (action == 23)
-            {
-                // Teleport from Winter Stage 4 to Summer Stage 1
-                currentState = SceneState::SummerS1;
-                camera::setY(0.0f);
-                float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
-                float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
-                float cellW = (maxX - minX) / 32.0f;
-                float cellH = (maxY - minY) / 20.0f;
-                gGame.player.pos.x = minX + 29 * cellW + cellW * 0.5f;
-                gGame.player.pos.y = minY + 2 * cellH + cellH * 0.5f;
-                lastState = SceneState::Exit;
-            }
-
-            if (action == 2)
-            {
-                currentState = SceneState::MainMenu;
-                camera::setY(0.0f);
-
-            }
-            else if (action == 3)
-            {
-                gGameRunning = 0;
-            }
+            if (action == 23) triggerTransition(SceneState::SummerS1);
+            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            else if (action == 3) gGameRunning = 0;
             break;
         }
 
