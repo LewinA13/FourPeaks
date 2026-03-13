@@ -317,9 +317,9 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 // Only trigger when player feet are near the tile top.
                 // Prevents triggering when player brushes the tile from the side.
                 float feetY = getPlayerFeetY(player);
-                float tileTopY = (r + 1) * tileH;
+                float tileTopY = static_cast<float>(r + 1) * static_cast<float>(tileH);
 
-                if (feetY >= tileTopY - tileH * 0.1f) {
+                if (feetY >= tileTopY - static_cast<float>(tileH) * 0.1f) {
                     g_triggeredIceTiles.push_back({ r, c });
                     player.currGroundType = Player::GroundType::Ice;
                 }
@@ -330,9 +330,9 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
             {
                 // Mirror the upper-half solid logic in checkMapCollision.
                 float feetY = getPlayerFeetY(player);
-                float tileTopY = (r + 1) * tileH;
+                float tileTopY = static_cast<float>(r + 1) * static_cast<float>(tileH);
 
-                if (feetY >= tileTopY - tileH * 0.1f)
+                if (feetY >= tileTopY - static_cast<float>(tileH) * 0.1f)
                     g_triggeredbrkTiles.push_back({ r, c });
                 break;
             }
@@ -375,7 +375,7 @@ static bool checkAABBCollisionAt(float x, float y, float w, float h)
 }
 
 // ---------------------------------------------------------------------------
-// Spawn resolution — pushes player out of geometry after a respawn.
+// Spawn resolution ? pushes player out of geometry after a respawn.
 // ---------------------------------------------------------------------------
 void CollisionResolveSpawn(Player& player)
 {
@@ -461,7 +461,7 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
 }
 
 // ---------------------------------------------------------------------------
-// Ground physics — applies per-surface movement modifiers
+// Ground physics ? applies per-surface movement modifiers
 // ---------------------------------------------------------------------------
 void applyGroundPhysics(Player& player)
 {

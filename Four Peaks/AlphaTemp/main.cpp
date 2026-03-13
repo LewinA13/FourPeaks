@@ -313,7 +313,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Audio system + loading (done in audio.cpp)
     audio::init();
 
-    // Game state objects — allocated on the heap to avoid C6262 stack-size warning.
+    // Game state objects ? allocated on the heap to avoid C6262 stack-size warning.
     auto splashScreenPtr = std::make_unique<game::SplashScreen>();
     auto mainMenuPtr = std::make_unique<game::MainMenu>();
     auto tutorial1Ptr = std::make_unique<game::Tutorial1>();
@@ -336,16 +336,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     auto springStage2Ptr = std::make_unique<game::SpringS2>();
     auto springStage3Ptr = std::make_unique<game::SpringS3>();
     auto springStage4Ptr = std::make_unique<game::SpringS4>();
-    // Game state objects.
-    game::SplashScreen splashScreen;
-    game::MainMenu mainMenu;
-    game::StageSelect stageSelect;  
-    game::Credits credit;
-
+    auto stageSelectPtr = std::make_unique<game::StageSelect>();
+    auto creditPtr = std::make_unique<game::Credits>();
 
     // Convenience references so the rest of the code is unchanged.
-    //game::SplashScreen& splashScreen = *splashScreenPtr;
-    //game::MainMenu& mainMenu = *mainMenuPtr;
+    game::SplashScreen& splashScreen = *splashScreenPtr;
+    game::MainMenu& mainMenu = *mainMenuPtr;
     game::Tutorial1& tutorial1 = *tutorial1Ptr;
     game::Tutorial2& tutorial2 = *tutorial2Ptr;
     game::Tutorial3& tutorial3 = *tutorial3Ptr;
@@ -366,6 +362,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     game::SpringS2& springStage2 = *springStage2Ptr;
     game::SpringS3& springStage3 = *springStage3Ptr;
     game::SpringS4& springStage4 = *springStage4Ptr;
+    game::StageSelect& stageSelect = *stageSelectPtr;
+    game::Credits& credit = *creditPtr;
 
 
     // Start on the splash screen.
@@ -522,7 +520,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             // 1) Snap camera to the correct vertical band
             camera::setY(h * idx);
-            g_currentY = static_cast<int>(h * idx);
+            g_currentY = h * static_cast<float>(idx);
 
             // 2) Give EVERY playable scene a default spawn
             gfx::Vec2 spawn;
@@ -774,22 +772,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (action == 1)
             {
-              /*  if (!gGame.player.checkpointScene.empty())
-                {
-                    currentState = StringToScene(gGame.player.checkpointScene);
-                    lastState = SceneState::Exit;
+                /*  if (!gGame.player.checkpointScene.empty())
+                  {
+                      currentState = StringToScene(gGame.player.checkpointScene);
+                      lastState = SceneState::Exit;
 
-                    float h = camera::screenHeight();
-                    if (currentState == SceneState::WinterS2 || currentState == SceneState::SummerS2) camera::setY(h);
-                    else if (currentState == SceneState::WinterS3 || currentState == SceneState::SummerS3) camera::setY(h * 2.0f);
-                    else if (currentState == SceneState::WinterS4 || currentState == SceneState::SummerS4) camera::setY(h * 3.0f);
-                    else camera::setY(0.0f);
-                }
-                else
-                {
-                    currentState = SceneState::StageSelect;
-                    camera::setY(0.0f);
-                }*/
+                      float h = camera::screenHeight();
+                      if (currentState == SceneState::WinterS2 || currentState == SceneState::SummerS2) camera::setY(h);
+                      else if (currentState == SceneState::WinterS3 || currentState == SceneState::SummerS3) camera::setY(h * 2.0f);
+                      else if (currentState == SceneState::WinterS4 || currentState == SceneState::SummerS4) camera::setY(h * 3.0f);
+                      else camera::setY(0.0f);
+                  }
+                  else
+                  {
+                      currentState = SceneState::StageSelect;
+                      camera::setY(0.0f);
+                  }*/
                 currentState = SceneState::StageSelect;
             }
             else if (action == 2)
@@ -875,7 +873,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             if (action == 42) { currentState = SceneState::AutumnS3; lastState = SceneState::Exit; }
             if (action == 43) { currentState = SceneState::AutumnS4; lastState = SceneState::Exit; }
 
-         
+
 
             break;
         }

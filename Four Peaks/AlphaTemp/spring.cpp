@@ -436,8 +436,8 @@ namespace
 
                 float cx = (minX + maxX) * 0.5f;
                 float cy = maxY - 28.0f;
-                float arrowA = static_cast<u32>(strength * 200.0f);
-                u32   hudCol = (arrowA < 24) | 0x00AAFFAAu; // soft green tint
+                u32   arrowA = static_cast<u32>(strength * 200.0f);
+                u32   hudCol = (arrowA < 24u ? arrowA : 24u) | 0x00AAFFAAu; // soft green tint
 
                 float dirSign = (dir == WindDir::Right) ? 1.0f : -1.0f;
 
