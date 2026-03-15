@@ -26,13 +26,6 @@ namespace UI{
         //! collision
         void PLAYERNEARSIGN(bool detect);
 
-        void reset();
-
-
-        void next();
-        bool isActive() const { return isShowing; }
-
-
     private:
 
 

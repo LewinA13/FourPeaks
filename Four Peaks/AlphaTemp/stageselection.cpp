@@ -117,7 +117,9 @@ namespace game {
         float CardW = selectingStage ? screenW * 0.42f : screenW * 0.52f;
         float CardH = selectingStage ? screenH * 0.30f : screenH * 0.48f;
 
+        // offset to determine how width side card show
         float sideCardW = screenW * 0.16f;
+
         float cardY = 0.0f + screenH * 0.05f;
 
         int leftSeason = (seasonIndex + 3) % 4;

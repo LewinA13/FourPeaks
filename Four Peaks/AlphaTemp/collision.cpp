@@ -308,19 +308,6 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
     }
 }
 
-// ---------------------------------------------------------------------------
-// Public collision entry points
-// ---------------------------------------------------------------------------
-bool checkPlayerCollision(Player& player, int levelLayout[][mapColm])
-{
-    TileRange box = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
-    checkGroundType(player, box, levelLayout);
-
-    if (player.dead) return false;
-
-    return checkMapCollision(box, levelLayout, player.velY, getPlayerHeadY(player));
-}
-
 static bool checkAABBCollisionAt(float x, float y, float w, float h)
 {
     TileRange box = calTileRange(x, y, w, h);
@@ -335,21 +322,27 @@ void CollisionResolveSpawn(Player& player)
     const float step = 0.5f;
 
     // Push up until clear
-    for (int i = 0; i < 200 && checkPlayerCollision(player, g_currentMap); ++i)
+    TileRange box{};  
+    for (int i = 0; i < 200; ++i) {
+        box = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+        if (!checkMapCollision(box, g_currentMap, player.velY, getPlayerHeadY(player))) break;
         player.pos.y += step;
+    }
 
     // Snap down a small amount so player lands on the surface
     const int maxSteps = (int)(10.0f / step);
     bool landed = false;
     for (int i = 0; i < maxSteps; ++i) {
         player.pos.y -= step;
-        if (checkPlayerCollision(player, g_currentMap)) {
+        box = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+        if (checkMapCollision(box, g_currentMap, player.velY, getPlayerHeadY(player))) {
             player.pos.y += step;
             landed = true;
             break;
         }
     }
 
+ 
     player.grounded = landed;
     player.velX = 0.0f;
     player.velY = 0.0f;
@@ -369,10 +362,17 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
     // --- Horizontal collision ---
     // Temporarily revert to last frame Y so horizontal and vertical are resolved independently.
     player.pos.y = oldY;
-    if (player.velX != 0.0f && checkPlayerCollision(player, levelLayout)) {
+    TileRange hBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+
+    if (player.velX != 0.0f && checkMapCollision(hBox, levelLayout, player.velY, getPlayerHeadY(player))) {
         float push = (player.velX > 0.0f) ? -0.5f : 0.5f;
-        for (int i = 0; checkPlayerCollision(player, levelLayout) && i < 200; ++i)
+        for (int i = 0; i < 200; ++i) {
             player.pos.x += push;
+            hBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+            if (!checkMapCollision(hBox, levelLayout, player.velY, getPlayerHeadY(player))) {
+                break;
+            }
+        }
         player.velX = 0.0f;
     }
 
@@ -403,10 +403,20 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
   // Derived from window height so it adapts if resolution changes.
     const float GROUND_Y = -(float)AEGfxGetWindowHeight() * 0.5f;
 
-    if (feetY > GROUND_Y  && checkPlayerCollision(player, levelLayout)) {
+    TileRange vBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+
+
+    if (feetY > GROUND_Y  && checkMapCollision(vBox, levelLayout, player.velY, getPlayerHeadY(player))) {
         float push = (player.velY > 0) ? -0.5f : 0.5f;
-        for (int i = 0; checkPlayerCollision(player, levelLayout) && i < 100; ++i)
+        for (int i = 0; i < 200; ++i) {
             player.pos.y += push;
+            vBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+            if (!checkMapCollision(vBox, levelLayout, player.velY, getPlayerHeadY(player))) {
+                break;
+            }
+            
+        }
+
 
         player.grounded = (player.velY < 0) ? true : player.grounded;
         player.velY = 0;
@@ -414,7 +424,7 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
 }
 
 // ---------------------------------------------------------------------------
-// Ground physics ? applies per-surface movement modifiers
+// Ground physics 
 // ---------------------------------------------------------------------------
 void applyGroundPhysics(Player& player)
 {
@@ -448,6 +458,10 @@ void applyGroundPhysics(Player& player)
 void CollisionUpdate(Player& player, f32 dt)
 {
     resolvePlayerCollision(player, g_currentMap, dt);
+
+    TileRange box = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+    checkGroundType(player, box, g_currentMap);
+
     applyGroundPhysics(player);
 
     if (!player.grounded) {

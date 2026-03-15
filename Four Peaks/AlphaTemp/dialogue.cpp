@@ -235,9 +235,7 @@ namespace UI {
         if (!isShowing)
             return;
 
-        float cx, cy;
-        AEGfxGetCamPosition(&cx, &cy);
-        printf("before reset cam: %f %f\n", cx, cy);
+       
 
         //! record current camera coord
         float oldX, oldY;
@@ -246,8 +244,7 @@ namespace UI {
         AEGfxSetCamPosition(0.0f, 0.0f);
 
 
-        AEGfxGetCamPosition(&cx, &cy);
-        printf("after reset cam: %f %f\n", cx, cy);
+        
 
         float boxX = 0.0f;
         float boxY = 300.0f;
@@ -257,6 +254,9 @@ namespace UI {
         AEGfxTexture* textboxUpTexture = sprite::textboxUp();
         AEGfxTexture* textboxDownTexture = sprite::textboxDown();
 
+
+        // If not add this line code, sprite dont show up
+        gfx::drawRectangle({ -99999.0f, -99999.0f }, 0.0f, { 1.0f, 1.0f }, 0x00000000u);
 
         if (textboxTexture) {
             gfx::drawSprite(textboxTexture, { boxX, boxY }, 0.0f, { boxWidth, boxHeight }, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -302,16 +302,6 @@ namespace UI {
 
   
         AEGfxSetCamPosition(oldX, oldY);
-    }
-
-
-    
-
-    void Dialog::reset() {
-        isShowing = false;
-        currentIndex = 0;
-        displayedChars = 0;
-        typeWriterTimer = 0.0f;
     }
 
     void Dialog::PLAYERNEARSIGN(bool detect) {
