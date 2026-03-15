@@ -167,9 +167,10 @@ namespace UI {
 
     //! check current level and show dialog for that level
     void Dialog::showForLevel(int levelID) {
-        //! skip if already shown or no dialog exists at that level
+        //! skip if no dialog exists at that level
         if (levelDialogs.find(levelID) == levelDialogs.end()) return;
 
+        //! If same level dialog is already loaded, just show it without resetting progress
         if (currentLevelID == levelID) {
             isShowing = true;
             return;
@@ -194,6 +195,7 @@ namespace UI {
 
         size_t currentTextLength = texts[currentIndex].length();
 
+        // typewriter logic
         if (displayedChars < currentTextLength) {
             typeWriterTimer += dt;
             if (typeWriterTimer >= timePerChar) {
@@ -202,6 +204,7 @@ namespace UI {
             }
         }
 
+        // go to previos dialog line
         if (playerNearSign && AEInputCheckTriggered(AEVK_UP)) {
             if (currentIndex > 0) {
                 currentIndex--;
@@ -210,7 +213,9 @@ namespace UI {
             }
         }
 
+        // go to next dialog line 
         if (playerNearSign && AEInputCheckTriggered(AEVK_DOWN)) {
+            // skip typewriter effect and show full sentence
             if (displayedChars < currentTextLength) {
                 displayedChars = currentTextLength;
             }
@@ -224,26 +229,25 @@ namespace UI {
         }
     }
 
-    float Dialog::toNormalizedX(float pixelX) {
-        return pixelX / (AEGfxGetWindowWidth() / 2.0f);
-    }
-
-    float Dialog::toNormalizedY(float pixelY) {
-        return pixelY / (AEGfxGetWindowHeight() / 2.0f);
-    }
-
     void Dialog::render()
     {
+
         if (!isShowing)
             return;
 
+        float cx, cy;
+        AEGfxGetCamPosition(&cx, &cy);
+        printf("before reset cam: %f %f\n", cx, cy);
 
-        //! record current camera coord and set to center first
+        //! record current camera coord
         float oldX, oldY;
         AEGfxGetCamPosition(&oldX, &oldY);
+        // drawSprite using world coordinates, so set to (0,0) first
         AEGfxSetCamPosition(0.0f, 0.0f);
 
 
+        AEGfxGetCamPosition(&cx, &cy);
+        printf("after reset cam: %f %f\n", cx, cy);
 
         float boxX = 0.0f;
         float boxY = 300.0f;
@@ -253,12 +257,12 @@ namespace UI {
         AEGfxTexture* textboxUpTexture = sprite::textboxUp();
         AEGfxTexture* textboxDownTexture = sprite::textboxDown();
 
-        // If not add this line code, sprite dont show up
-        gfx::drawRectangle({ -99999.0f, -99999.0f }, 0.0f, { 1.0f, 1.0f }, 0x00000000u);
 
         if (textboxTexture) {
             gfx::drawSprite(textboxTexture, { boxX, boxY }, 0.0f, { boxWidth, boxHeight }, 0.0f, 0.0f, 1.0f, 1.0f);
         }
+
+
 
         if (currentIndex > 0) {
             gfx::drawSprite(textboxUpTexture, { 400, 310 }, 0.0f, { 30.0f, 30.0f }, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -270,18 +274,26 @@ namespace UI {
 
         if (currentIndex < texts.size()){
             std::string fullText = texts[currentIndex];
+
+            // typewriter effect
             std::string visibleText = fullText.substr(0, displayedChars);
                                                  
-
+            // .str() is convert from "std::string" to "const char*" 
+            // reason is let "AEGfxPrint" can use
             const char* pText = visibleText.c_str();
+
             AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
-            float normX = boxX / 800.0f;  // world half width
-            float normY = boxY / 450.0f;  // world half height
+            // norrmalise it so can handle with textWidth/textHeight 
+            float normX = boxX / (AEGfxGetWindowWidth() * 0.5f);  // world half width
+            float normY = boxY / (AEGfxGetWindowHeight() * 0.5f);  // world half height
 
             f32 textWidth, textHeight;
+            // get textWidth/ textHeight
             AEGfxGetPrintSize(gFontId, pText, wordSize, &textWidth, &textHeight);
 
+            // get center x and y
+            // "AEGfxPrint" start from left up 
             float drawX = normX - textWidth / 2.0f;
             float drawY = normY - textHeight / 2.0f;
 
@@ -300,7 +312,6 @@ namespace UI {
         currentIndex = 0;
         displayedChars = 0;
         typeWriterTimer = 0.0f;
-    
     }
 
     void Dialog::PLAYERNEARSIGN(bool detect) {

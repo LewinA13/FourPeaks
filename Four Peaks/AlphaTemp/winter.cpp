@@ -21,6 +21,7 @@ typedef uint32_t u32;
 
 extern s8 gFontId;
 
+
 namespace game {
 
     // -------------------------------------------------------------------
@@ -1145,7 +1146,6 @@ namespace game {
             for (auto& ice : iceTiles) {
                 //! check the ice pos whether equal and never set state before
                 if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
-                    ice.triggered = true;
                     ice.triggered = true;
                 }
             }

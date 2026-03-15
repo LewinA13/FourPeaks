@@ -26,15 +26,14 @@ static void DrawTextCentered(const char* text,
     float size,
     float r, float g, float b, float a)
 {
-    float scale = size / 54.0f;
 
     float textW = 0.0f, textH = 0.0f;
-    AEGfxGetPrintSize(gFontId, text, scale, &textW, &textH);
+    AEGfxGetPrintSize(gFontId, text, size, &textW, &textH);
 
     float ndcX = (ae_cx / (AEGfxGetWindowWidth()/2.0f)) - textW * 0.5f;
     float ndcY = ae_cy / (AEGfxGetWindowHeight() / 2.0f);
 
-    AEGfxPrint(gFontId, text, ndcX, ndcY, scale, r, g, b, a);
+    AEGfxPrint(gFontId, text, ndcX, ndcY, size, r, g, b, a);
 }
 
 // ---- ROLLING CREDITS ----
@@ -43,54 +42,54 @@ static void DrawRollingCredits(float baseY)
     const float cx = 0.0f;
     const float line_spacing = 80.0f;
     const float sec_spacing = 110.0f;
+    const float head_spacing = 88.0f;   
     float y = baseY;
 
     // Game title
-    DrawTextCentered(GAME_TITLE, cx, y, 260.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+    DrawTextCentered(GAME_TITLE, cx, y, 4.81f, 1.0f, 1.0f, 1.0f, 1.0f);
     y -= sec_spacing;
 
     // Team name
     char team_line[128];
     snprintf(team_line, sizeof team_line, "A Game by %s", TEAM_NAME);
-    DrawTextCentered(team_line, cx, y, 128.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+    DrawTextCentered(team_line, cx, y, 2.37f, 1.0f, 1.0f, 1.0f, 1.0f);
     y -= line_spacing;
-
     y -= 40.0f;
     y -= sec_spacing * 0.5f;
 
     // Development Team
-    DrawTextCentered("Development Team", cx, y, 128.0f, 1.0f, 0.85f, 0.3f, 1.0f);
-    y -= sec_spacing * 0.8f;
+    DrawTextCentered("Development Team", cx, y, 2.37f, 1.0f, 0.85f, 0.3f, 1.0f);
+    y -= head_spacing;
     for (int i = 0; i < TEAM_MEMBER_COUNT; ++i) {
-        DrawTextCentered(TEAM_MEMBERS[i], cx, y, 116.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+        DrawTextCentered(TEAM_MEMBERS[i], cx, y, 2.15f, 1.0f, 1.0f, 1.0f, 1.0f);
         y -= line_spacing;
     }
     y -= sec_spacing;
 
     // Faculty & Advisors
-    DrawTextCentered("Faculty & Advisors", cx, y, 128.0f, 1.0f, 0.85f, 0.3f, 1.0f);
-    y -= sec_spacing * 0.8f;
+    DrawTextCentered("Faculty & Advisors", cx, y, 2.37f, 1.0f, 0.85f, 0.3f, 1.0f);
+    y -= head_spacing;
     for (int i = 0; i < FACULTY_COUNT; ++i) {
-        DrawTextCentered(FACULTY[i], cx, y, 116.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+        DrawTextCentered(FACULTY[i], cx, y, 2.15f, 1.0f, 1.0f, 1.0f, 1.0f);
         y -= line_spacing;
     }
     y -= sec_spacing;
 
     // Created at DigiPen
-    DrawTextCentered("Created at", cx, y, 128.0f, 1.0f, 0.85f, 0.3f, 1.0f);
-    y -= sec_spacing * 0.8f;
+    DrawTextCentered("Created at", cx, y, 2.37f, 1.0f, 0.85f, 0.3f, 1.0f);
+    y -= head_spacing;
     DrawTextCentered("DigiPen Institute of Technology Singapore",
-        cx, y, 116.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+        cx, y, 2.15f, 1.0f, 1.0f, 1.0f, 1.0f);
     y -= sec_spacing;
 
     // President
-    DrawTextCentered("President", cx, y, 116.0f, 1.0f, 0.85f, 0.3f, 1.0f);
+    DrawTextCentered("President", cx, y, 2.15f, 1.0f, 0.85f, 0.3f, 1.0f);
     y -= line_spacing;
-    DrawTextCentered("CLAUDE COMAIR", cx, y, 112.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-    y -= sec_spacing * 0.8f;
+    DrawTextCentered("CLAUDE COMAIR", cx, y, 2.07f, 1.0f, 1.0f, 1.0f, 1.0f);
+    y -= head_spacing;
 
     // Executives
-    DrawTextCentered("Executives", cx, y, 116.0f, 1.0f, 0.85f, 0.3f, 1.0f);
+    DrawTextCentered("Executives", cx, y, 2.15f, 1.0f, 0.85f, 0.3f, 1.0f);
     y -= line_spacing;
 
     const char* execs[] = {
@@ -98,28 +97,29 @@ static void DrawRollingCredits(float baseY)
         "ANGELA KUGLER", "ERIK MOHRMANN", "BENJAMIN ELLINGER", "MELVIN GONSALVEZ"
     };
     for (int i = 0; i < 7; ++i) {
-        DrawTextCentered(execs[i], cx, y, 110.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+        DrawTextCentered(execs[i], cx, y, 2.04f, 1.0f, 1.0f, 1.0f, 1.0f);
         y -= (i < 6) ? line_spacing : sec_spacing;
     }
 
-    DrawTextCentered("www.digipen.edu", cx, y, 106.0f, 0.7f, 0.7f, 0.7f, 1.0f);
+    DrawTextCentered("www.digipen.edu", cx, y, 1.96f, 0.7f, 0.7f, 0.7f, 1.0f);
     y -= line_spacing;
 
     char copyright_line[160];
     snprintf(copyright_line, sizeof copyright_line,
         "All content (C) %d DigiPen Institute of Technology Singapore. All Rights Reserved",
         CREDITS_YEAR);
-    DrawTextCentered(copyright_line, cx, y, 100.0f, 0.7f, 0.7f, 0.7f, 1.0f);
-    y -= sec_spacing * 1.4f;
+    DrawTextCentered(copyright_line, cx, y, 1.85f, 0.7f, 0.7f, 0.7f, 1.0f);
+    y -= sec_spacing * 1.4f; // for larger spacing 
 
     // Additional Credits
-    DrawTextCentered("Additional Credits", cx, y, 128.0f, 1.0f, 0.85f, 0.3f, 1.0f);
-    y -= sec_spacing * 0.8f;
+    DrawTextCentered("Additional Credits", cx, y, 2.37f, 1.0f, 0.85f, 0.3f, 1.0f);
+    y -= head_spacing;
     DrawTextCentered("Sprite Assets: Kenney.nl & itch.io creators",
-        cx, y, 116.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+        cx, y, 2.15f, 1.0f, 1.0f, 1.0f, 1.0f);
     y -= line_spacing;
-    DrawTextCentered("Game Engine: Alpha Engine", cx, y, 116.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+    DrawTextCentered("Game Engine: Alpha Engine", cx, y, 2.15f, 1.0f, 1.0f, 1.0f, 1.0f);
 }
+
 
 // ============================================================
 //  class Credits

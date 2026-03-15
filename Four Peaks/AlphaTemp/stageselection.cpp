@@ -73,7 +73,6 @@ namespace game {
 // ----------------------------------------------------------------
 // set up beackground
 // ----------------------------------------------------------------
-        AEGfxSetBackgroundColor(0.05f, 0.05f, 0.1f);
 
         AEGfxTexture* bg = sprite::stgselectBackground();
 
@@ -86,8 +85,9 @@ namespace game {
 // ----------------------------------------------------------------
 // season bg + name + color
 // ----------------------------------------------------------------
+        // 0 - Winter,  1 - Summer,  2 - Spring,  3 - Autumn
         AEGfxTexture* seasonBg[4] = {
-            sprite::background(),
+            sprite::background(),      
             sprite::summerBackground(),
             sprite::springBackground(),
             sprite::autumnBackground()
@@ -96,13 +96,13 @@ namespace game {
         static const char* seasonNames[] = { "WINTER", "SUMMER", "SPRING", "AUTUMN" };
 
         static const u32 seasonBorderColor[] = {
-            0xFF88CCFFu,
-            0xFFFFCC00u,
-            0xFF88FF88u,
-            0xFFFF8844u,
+            0xFF88CCFFu,  // Winter - light blue
+            0xFFFFCC00u,  // Summer - golden yellow
+            0xFF88FF88u,  // Spring - light green
+            0xFFFF8844u,  // Autumn - orange
         };
 
-        // Use for text color
+        // Use for text color           Winter Summer Spring Autumn
         static const float seasonR[] = { 0.53f, 1.0f,  0.53f, 1.0f };
         static const float seasonG[] = { 0.80f, 0.80f, 1.0f,  0.53f };
         static const float seasonB[] = { 1.0f,  0.0f,  0.53f, 0.27f };
@@ -113,30 +113,32 @@ namespace game {
 
         AEGfxTexture* centerframetex = sprite::centerframe();
 
-        float mainCardW = selectingStage ? screenW * 0.42f : screenW * 0.52f;
-        float mainCardH = selectingStage ? screenH * 0.30f : screenH * 0.48f;
+        // scale bigger if choosing season
+        float CardW = selectingStage ? screenW * 0.42f : screenW * 0.52f;
+        float CardH = selectingStage ? screenH * 0.30f : screenH * 0.48f;
+
         float sideCardW = screenW * 0.16f;
         float cardY = 0.0f + screenH * 0.05f;
 
         int leftSeason = (seasonIndex + 3) % 4;
         int rightSeason = (seasonIndex + 1) % 4;
 
-        float leftBgCX = minX + sideCardW - mainCardW * 0.5f;
-        float rightBgCX = maxX - sideCardW + mainCardW * 0.5f;
+        float leftBgCX = minX + sideCardW - CardW * 0.5f;
+        float rightBgCX = maxX - sideCardW + CardW * 0.5f;
 
         // ----------------------------------------------------------------
         // left half
         // ----------------------------------------------------------------
         if (seasonBg[leftSeason])
         {
-            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { mainCardW + 6, mainCardH + 6 }, 0xFF333333u);
-            gfx::drawSprite(seasonBg[leftSeason], { leftBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
-            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0x77000000u);
+            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { CardW + 6, CardH + 6 }, 0xFF333333u);
+            gfx::drawSprite(seasonBg[leftSeason], { leftBgCX, cardY }, 0.0f, { CardW, CardH }, 0, 0, 1, 1);
+            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { CardW, CardH }, 0x77000000u);
         }
         // show grey if not being selected
         {
             float wx = AEGfxGetWinMinX() + 10.0f;
-            float wy = cardY + mainCardH * 0.5f - 30.0f;
+            float wy = cardY + CardH * 0.5f - 30.0f;
             AEVec2 pos = WorldToNorm(wx, wy);
             AEGfxPrint(gFontId, seasonNames[leftSeason], pos.x, pos.y, 1.0f, 0.6f, 0.6f, 0.6f, 1.0f);
         }
@@ -146,13 +148,13 @@ namespace game {
         // ----------------------------------------------------------------
         if (seasonBg[rightSeason])
         {
-            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { mainCardW + 6, mainCardH + 6 }, 0xFF333333u);
-            gfx::drawSprite(seasonBg[rightSeason], { rightBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
-            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0x77000000u);
+            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { CardW + 6, CardH + 6 }, 0xFF333333u);
+            gfx::drawSprite(seasonBg[rightSeason], { rightBgCX, cardY }, 0.0f, { CardW, CardH }, 0, 0, 1, 1);
+            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { CardW, CardH }, 0x77000000u);
         }
         {
             float wx = AEGfxGetWinMaxX() - sideCardW + 10.0f;
-            float wy = cardY + mainCardH * 0.5f - 30.0f;
+            float wy = cardY + CardH * 0.5f - 30.0f;
             AEVec2 pos = WorldToNorm(wx, wy);
             AEGfxPrint(gFontId, seasonNames[rightSeason], pos.x, pos.y, 1.0f, 0.6f, 0.6f, 0.6f, 1.0f);
         }
@@ -163,15 +165,15 @@ namespace game {
         if (seasonBg[seasonIndex])
         {
 
-            gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { mainCardW + 10, mainCardH + 10 }, seasonBorderColor[seasonIndex]);
+            gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { CardW + 10, CardH + 10 }, seasonBorderColor[seasonIndex]);
             //gfx::drawSprite(centerframetex, { -10.0f, cardY - 120.0f }, 0.0f, { mainCardW + 500, mainCardH + 590 }, 0, 0, 1, 1);
-            gfx::drawSprite(seasonBg[seasonIndex], { 0.0f, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
+            gfx::drawSprite(seasonBg[seasonIndex], { 0.0f, cardY }, 0.0f, { CardW, CardH }, 0, 0, 1, 1);
           
           
         }
         {
-            float wx = 0.0f - mainCardW * 0.5f + 20.0f;
-            float wy = cardY + mainCardH * 0.5f - 40.0f;
+            float wx = 0.0f - CardW * 0.5f + 20.0f;
+            float wy = cardY + CardH * 0.5f - 40.0f;
             AEVec2 pos = WorldToNorm(wx, wy);
             AEGfxPrint(gFontId, seasonNames[seasonIndex], pos.x, pos.y, 2.0f, seasonR[seasonIndex], seasonG[seasonIndex], seasonB[seasonIndex], 1.0f);}
 
@@ -181,9 +183,9 @@ namespace game {
         AEGfxPrint(gFontId, "STAGE SELECTION",
             -0.28f, 0.88f, 1.8f, 1.0f, 1.0f, 0.8f, 1.0f);
 
-        // ----------------------------------------------------------------
-        //  Stage card
-        // ----------------------------------------------------------------
+// ----------------------------------------------------------------
+//  Stage card
+// ----------------------------------------------------------------
         static const char* stageLabels[] = { "Stage 1", "Stage 2", "Stage 3", "Stage 4" };
 
         float stageCardW = screenW * 0.18f;
@@ -196,8 +198,6 @@ namespace game {
     
         if (selectingStage)
         {
-
-
             for (int i = 0; i < 4; ++i)
             {
                 float cx = stageStartX + i * stageSpacing;
@@ -213,6 +213,7 @@ namespace game {
                     { stageCardW, stageCardH }, bgCol);
 
                 char code[4];
+                // get each season first alphabet
                 code[0] = seasonNames[seasonIndex][0];
                 code[1] = '1' + i;
                 code[2] = '\0';
