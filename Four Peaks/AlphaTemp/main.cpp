@@ -443,17 +443,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             g_currentSignID = 13;
         }
 
-        else if (currentState == SceneState::AutumnS1) {
-            g_currentMap = autumnStage.getTileMap();
+        // Summer stages (so collision + pickups use the correct current map)
+        // ==================================================================
+        else if (currentState == SceneState::SummerS1) {
+            g_currentMap = summerStage.getTileMap();
+            g_currentSignID = 20;
         }
-        else if (currentState == SceneState::AutumnS2) {
-            g_currentMap = autumnStage2.getTileMap();
+        else if (currentState == SceneState::SummerS2) {
+            g_currentMap = summerStage2.getTileMap();
+            g_currentSignID = 21;
         }
-        else if (currentState == SceneState::AutumnS3) {
-            g_currentMap = autumnStage3.getTileMap();
+        else if (currentState == SceneState::SummerS3) {
+            g_currentMap = summerStage3.getTileMap();
+            g_currentSignID = 22;
         }
-        else if (currentState == SceneState::AutumnS4) {
-            g_currentMap = autumnStage4.getTileMap();
+        else if (currentState == SceneState::SummerS4) {
+            g_currentMap = summerStage4.getTileMap();
+            g_currentSignID = 23;
         }
 
         // Spring stages
@@ -474,23 +480,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             g_currentSignID = 33;
         }
 
-        // Summer stages (so collision + pickups use the correct current map)
-        // ==================================================================
-        else if (currentState == SceneState::SummerS1) {
-            g_currentMap = summerStage.getTileMap();
-            g_currentSignID = 20;
+        // Autumn stages
+        else if (currentState == SceneState::AutumnS1) {
+            g_currentMap = autumnStage.getTileMap();
+            g_currentSignID = 40;
         }
-        else if (currentState == SceneState::SummerS2) {
-            g_currentMap = summerStage2.getTileMap();
-            g_currentSignID = 21;
+        else if (currentState == SceneState::AutumnS2) {
+            g_currentMap = autumnStage2.getTileMap();
+            g_currentSignID = 41;
         }
-        else if (currentState == SceneState::SummerS3) {
-            g_currentMap = summerStage3.getTileMap();
-            g_currentSignID = 22;
+        else if (currentState == SceneState::AutumnS3) {
+            g_currentMap = autumnStage3.getTileMap();
+            g_currentSignID = 42;
         }
-        else if (currentState == SceneState::SummerS4) {
-            g_currentMap = summerStage4.getTileMap();
-            g_currentSignID = 23;
+        else if (currentState == SceneState::AutumnS4) {
+            g_currentMap = autumnStage4.getTileMap();
+            g_currentSignID = 43;
         }
 
         // Begin frame.

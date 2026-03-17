@@ -148,7 +148,7 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm],
     return false;
 }
 
-
+// helper function for damage tile
 static void checkDamageTile(Player& player, int r, TileRange box,
     int levelLayout[][mapColm], int tileCase)
 {
@@ -200,6 +200,10 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
 {
     for (int r = box.rowStart; r <= box.rowEnd; r++) {
         for (int c = box.colStart; c <= box.colEnd; c++) {
+
+            // immediately return if out of bound
+            if (box.colStart == -1) return;  
+
             printf("Current levelLayout[%i][%i]: %i\n", r, c, levelLayout[r][c]);
             switch (levelLayout[r][c]) {
 
@@ -271,7 +275,7 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 float feetY = getPlayerFeetY(player);
                 float tileTopY = static_cast<float>(r + 1) * static_cast<float>(tileH);
 
-                // trigger when feetY higher than top of ice tile 5%
+                // trigger when player feet are within the top 5% of the ice tile
                 if (feetY >= tileTopY - static_cast<float>(tileH) * 0.05f) {
                     g_triggeredIceTiles.push_back({ r, c });
                     player.currGroundType = Player::GroundType::Ice;
@@ -297,8 +301,8 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 break;
 
             case 19: // sign
-                UI::gDialog.showForLevel(g_currentSignID);
                 UI::gDialog.PLAYERNEARSIGN(true);
+                UI::gDialog.showForLevel(g_currentSignID);
                 break;
 
             default:
@@ -400,7 +404,7 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
 
     float feetY = getPlayerFeetY(player);
     // GROUND_Y: the minimum screen-space Y before the player is considered out of bounds.
-  // Derived from window height so it adapts if resolution changes.
+    // Derived from window height so it adapts if resolution changes.
     const float GROUND_Y = -(float)AEGfxGetWindowHeight() * 0.5f;
 
     TileRange vBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
@@ -457,9 +461,14 @@ void applyGroundPhysics(Player& player)
 
 void CollisionUpdate(Player& player, f32 dt)
 {
+
+    player.currGroundType = Player::GroundType::Normal;
     resolvePlayerCollision(player, g_currentMap, dt);
 
-    TileRange box = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+    // Player has been pushed out of tiles by resolvePlayerCollision, 
+    // and calTileRange shrinks the box by 1.0f at the bottom,
+    // so probe 2.0f downward to ensure checkGroundType can detect the tile below player's feet
+    TileRange box = calTileRange(player.pos.x, player.pos.y - 2.0f, player.colliderSize.x, player.colliderSize.y);
     checkGroundType(player, box, g_currentMap);
 
     applyGroundPhysics(player);
