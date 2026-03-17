@@ -416,12 +416,14 @@ namespace game {
 
                         gfx::Vec2 spikePos = pos;
                         if (tileType == 2) {
-                            // UP-facing
+                            // UP-facing: anchor base to cell bottom, sink slightly to close gap
                             spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                            spikePos.y -= size.y * 0.12f;
                         }
                         else {
-                            // DOWN-facing
+                            // DOWN-facing: anchor to cell top, sink slightly to close gap
                             spikePos.y -= (spikeSize.y - size.y) * 0.5f;
+                            spikePos.y += size.y * 0.12f;
                         }
 
                         float u0 = 0.0f;
@@ -437,6 +439,7 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
+                    continue;
                 }
                 // Left-facing spike (26) and right-facing spike (27)
                 else if (tileType == 26 || tileType == 27)
@@ -862,12 +865,14 @@ namespace game {
 
                         gfx::Vec2 spikePos = pos;
                         if (tileType == 2) {
-                            // UP-facing
+                            // UP-facing: anchor base to cell bottom, sink slightly to close gap
                             spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                            spikePos.y -= size.y * 0.12f;
                         }
                         else {
-                            // DOWN-facing
+                            // DOWN-facing: anchor to cell top, sink slightly to close gap
                             spikePos.y -= (spikeSize.y - size.y) * 0.5f;
+                            spikePos.y += size.y * 0.12f;
                         }
 
                         float u0 = 0.0f;
@@ -883,6 +888,7 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
+                    continue;
                 }
                 // Left-facing spike (26) and right-facing spike (27)
                 else if (tileType == 26 || tileType == 27)
@@ -1113,31 +1119,51 @@ namespace game {
             PlayerUpdate(gGame.player, dt);
         }
 
-        // Check if player reached the teleport zone to Stage 4
+        // Check if player reached the teleport zone to Stage 4.
+        // Scan every cell in the top row (row 19) that is marked as a portal tile (type 3),
+        // then also fall back to the hardcoded col 1-2 zone so the portal works even if
+        // the level file uses a different tile type for the exit.
         if (!camera::isTransitioning())
         {
-            // Define teleport zone in grid coordinates (columns 2-3, row 19)
             int teleportRow = 19;
-            int teleportCol1 = 1;
-            int teleportCol2 = 2;
 
-            // Convert grid position to world coordinates
-            float gridWorldX, gridWorldY, cellW, cellH;
-            gridToWorld(teleportCol1, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
+            float cellW0, cellH0, dummy;
+            float dummyX, dummyY;
+            gridToWorld(0, teleportRow, dummyX, dummyY, cellW0, cellH0);
 
-            // Check if player is within the teleport zone (2 cells wide)
-            float teleportCenterX = gridWorldX + cellW * 1.0f; // Center between 2 cells
-            float teleportCenterY = gridWorldY + cellH * 0.5f;
+            bool triggered = false;
 
-            // Distance check (within 1.5 cells)
-            float dx = gGame.player.pos.x - teleportCenterX;
-            float dy = gGame.player.pos.y - teleportCenterY;
-            float distance = sqrt(dx * dx + dy * dy);
-
-            if (distance < cellW * 1.5f)
+            // Pass 1: scan the whole top row for portal tiles (tile type 3)
+            for (int c = 0; c < gridCols && !triggered; ++c)
             {
-                return 22; // Signal teleport to Stage 4
+                if (tileMap[teleportRow][c] == 3)
+                {
+                    float gx, gy, cw, ch;
+                    gridToWorld(c, teleportRow, gx, gy, cw, ch);
+                    float cx = gx + cw * 0.5f;
+                    float cy = gy + ch * 0.5f;
+                    float dx = gGame.player.pos.x - cx;
+                    float dy = gGame.player.pos.y - cy;
+                    if ((dx * dx + dy * dy) < (cw * 2.0f) * (cw * 2.0f))
+                        triggered = true;
+                }
             }
+
+            // Pass 2: fallback hardcoded zone (cols 1-2, row 19) with generous radius
+            if (!triggered)
+            {
+                float gx, gy, cw, ch;
+                gridToWorld(1, teleportRow, gx, gy, cw, ch);
+                float cx = gx + cw * 1.0f; // midpoint between col 1 and col 2
+                float cy = gy + ch * 0.5f;
+                float dx = gGame.player.pos.x - cx;
+                float dy = gGame.player.pos.y - cy;
+                if ((dx * dx + dy * dy) < (cw * 2.0f) * (cw * 2.0f))
+                    triggered = true;
+            }
+
+            if (triggered)
+                return 22; // Signal teleport to Stage 4
         }
 
 
@@ -1183,6 +1209,9 @@ namespace game {
             }
         }
 
+        // Update animated tiles (melon, checkpoint, fire, saw)
+        sprite::updateAnimatedTiles(dt);
+
         // Update snow particles
         updateSnow(snowParticles, snowSpawnTimer, dt);
 
@@ -1218,14 +1247,16 @@ namespace game {
         //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
-        // Draw teleport indicator (2x1 cells at row 19, columns 2-3)
+        // Draw teleport indicator: highlight all portal tiles (type 3) in the top row.
+        // Falls back to cols 1-2 if no type-3 tile is found, matching the detection logic.
         if (!camera::isTransitioning())
         {
             int teleportRow = 19;
-            for (int c = 0; c < 2; c++)
+            bool drewAny = false;
+
+            for (int col = 0; col < gridCols; ++col)
             {
-                int col = 1 + c; // Columns 2 and 3
-                if (col < gridCols)
+                if (tileMap[teleportRow][col] == 3)
                 {
                     float gridWorldX, gridWorldY, cellW, cellH;
                     gridToWorld(col, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
@@ -1233,7 +1264,27 @@ namespace game {
                     portalPos.x = std::round(portalPos.x);
                     portalPos.y = std::round(portalPos.y);
                     gfx::Vec2 portalSize{ cellW, cellH };
-                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAA00FFFF); // portal draw 
+                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAA00FFFFu);
+                    drewAny = true;
+                }
+            }
+
+            // Fallback: draw at cols 1-2 if no portal tile found in tilemap
+            if (!drewAny)
+            {
+                for (int c = 0; c < 2; ++c)
+                {
+                    int col = 1 + c;
+                    if (col < gridCols)
+                    {
+                        float gridWorldX, gridWorldY, cellW, cellH;
+                        gridToWorld(col, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
+                        gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
+                        portalPos.x = std::round(portalPos.x);
+                        portalPos.y = std::round(portalPos.y);
+                        gfx::Vec2 portalSize{ cellW, cellH };
+                        gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAA00FFFFu);
+                    }
                 }
             }
         }
@@ -1375,12 +1426,14 @@ namespace game {
 
                         gfx::Vec2 spikePos = pos;
                         if (tileType == 2) {
-                            // UP-facing
+                            // UP-facing: anchor base to cell bottom, sink slightly to close gap
                             spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                            spikePos.y -= size.y * 0.12f;
                         }
                         else {
-                            // DOWN-facing
+                            // DOWN-facing: anchor to cell top, sink slightly to close gap
                             spikePos.y -= (spikeSize.y - size.y) * 0.5f;
+                            spikePos.y += size.y * 0.12f;
                         }
 
                         float u0 = 0.0f;
@@ -1396,6 +1449,7 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
+                    continue;
                 }
                 // Left-facing spike (26) and right-facing spike (27)
                 else if (tileType == 26 || tileType == 27)
@@ -1862,12 +1916,14 @@ namespace game {
 
                         gfx::Vec2 spikePos = pos;
                         if (tileType == 2) {
-                            // UP-facing
+                            // UP-facing: anchor base to cell bottom, sink slightly to close gap
                             spikePos.y += (spikeSize.y - size.y) * 0.5f;
+                            spikePos.y -= size.y * 0.12f;
                         }
                         else {
-                            // DOWN-facing
+                            // DOWN-facing: anchor to cell top, sink slightly to close gap
                             spikePos.y -= (spikeSize.y - size.y) * 0.5f;
+                            spikePos.y += size.y * 0.12f;
                         }
 
                         float u0 = 0.0f;
@@ -1883,6 +1939,7 @@ namespace game {
 
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
+                    continue;
                 }
                 // Left-facing spike (26) and right-facing spike (27)
                 else if (tileType == 26 || tileType == 27)

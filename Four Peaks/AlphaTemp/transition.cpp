@@ -188,20 +188,27 @@ void Transition::drawPokemonWipe(float progress, bool /*coverScreen*/) const
     float scW = maxX - minX;
     float scH = maxY - minY;
 
-    // Grid of diamond "tiles" ? each is a rotated square that expands.
-    // We use a grid of circles (axis-aligned boxes that scale up) for performance.
-    constexpr int GX = 12;  // grid columns
-    constexpr int GY = 8;  // grid rows
+    constexpr int GX = 12;
+    constexpr int GY = 8;
     float tileW = scW / GX;
     float tileH = scH / GY;
 
-    // Each tile grows from 0 to sqrt(2)*tileW at progress=1 (covers corners).
-    // For the Pokemon look: tiles close inward, then a full black overlay at end.
-    float maxSize = std::sqrt(tileW * tileW + tileH * tileH) * 1.1f;  // just past corner
+    float maxSize = std::sqrt(tileW * tileW + tileH * tileH) * 1.1f;
     float tileSize = maxSize * progress;
+    float h = tileSize * 0.5f;
 
     u32 col = 0xFF000000u;  // opaque black
 
+    // Batch ALL diamond rects into a single mesh to avoid per-cell draw call overhead.
+    // Each diamond = 2 overlapping rects (horizontal + vertical) = 4 tris = 12 verts per cell.
+    // 12 x 8 = 96 cells => 96 x 4 = 384 tris total, one mesh, one draw call.
+    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+    AEGfxSetTransparency(1.0f);
+    AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+    AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+
+    AEGfxMeshStart();
     for (int gy = 0; gy < GY; ++gy)
     {
         for (int gx = 0; gx < GX; ++gx)
@@ -209,22 +216,43 @@ void Transition::drawPokemonWipe(float progress, bool /*coverScreen*/) const
             float cx = minX + (gx + 0.5f) * tileW;
             float cy = minY + (gy + 0.5f) * tileH;
 
-            // Draw a rotated square (diamond) approximated as a rectangle
-            // rotated 45? by drawing two overlapping rects
-            float h = tileSize * 0.5f;
             // Horizontal rect
-            drawSolidRect(cx - h, cy - h * 0.45f, tileSize, tileSize * 0.45f, col);
+            float x1 = cx - h, y1 = cy - h * 0.45f;
+            float w1 = tileSize, h1 = tileSize * 0.45f;
+            AEGfxTriAdd(x1, y1 + h1, col, 0, 0,
+                x1 + w1, y1 + h1, col, 0, 0,
+                x1, y1, col, 0, 0);
+            AEGfxTriAdd(x1 + w1, y1 + h1, col, 0, 0,
+                x1 + w1, y1, col, 0, 0,
+                x1, y1, col, 0, 0);
+
             // Vertical rect
-            drawSolidRect(cx - h * 0.45f, cy - h, tileSize * 0.45f, tileSize, col);
+            float x2 = cx - h * 0.45f, y2 = cy - h;
+            float w2 = tileSize * 0.45f, h2 = tileSize;
+            AEGfxTriAdd(x2, y2 + h2, col, 0, 0,
+                x2 + w2, y2 + h2, col, 0, 0,
+                x2, y2, col, 0, 0);
+            AEGfxTriAdd(x2 + w2, y2 + h2, col, 0, 0,
+                x2 + w2, y2, col, 0, 0,
+                x2, y2, col, 0, 0);
         }
     }
+    AEGfxVertexList* mesh = AEGfxMeshEnd();
+    if (mesh)
+    {
+        AEMtx33 identity;
+        AEMtx33Identity(&identity);
+        AEGfxSetTransform(identity.m);
+        AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
+        AEGfxMeshFree(mesh);
+    }
 
-    // At high progress (>0.7) fill the screen completely to close any gaps
+    // At high progress (>0.7) fill the screen completely to close any remaining gaps
     if (progress > 0.7f)
     {
-        float gap = (progress - 0.7f) / 0.3f;   // 0..1
-        u32 fillCol = (static_cast<u32>(gap * 255) << 24);
-        drawSolidRect(minX, minY, scW, scH, 0xFF000000u & (fillCol | 0xFF000000u));
+        float gap = (progress - 0.7f) / 0.3f;
+        u32 fillCol = (static_cast<u32>(gap * 255) << 24) | 0x00000000u;
+        drawSolidRect(minX, minY, scW, scH, fillCol | 0xFF000000u);
     }
 }
 
