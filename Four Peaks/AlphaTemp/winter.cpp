@@ -1920,6 +1920,13 @@ namespace game {
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                 }
+                // artifacts
+                else if (tileType == 30) {
+                    AEGfxTexture* winterArtifactsTex = sprite::winterArtifacts();
+                    gfx::Vec2 artifactsSize{ size.x * 0.9f, size.y * 0.9f };
+                    if (winterArtifactsTex) gfx::drawSprite(winterArtifactsTex, pos, 0.0f, artifactsSize, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
                 // WinterC (ID 4) and WinterT (ID 6) standalone textures
                 else if (tileType == 4)
                 {

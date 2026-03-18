@@ -305,6 +305,22 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 UI::gDialog.showForLevel(g_currentSignID);
                 break;
 
+            case 30:
+                levelLayout[r][c] = 0;
+                break;
+
+            case 31:
+                levelLayout[r][c] = 0;
+                break;
+
+            case 32:
+                levelLayout[r][c] = 0;
+                break;
+
+            case 33:
+                levelLayout[r][c] = 0;
+                break;
+
             default:
                 break;
             }

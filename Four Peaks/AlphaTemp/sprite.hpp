@@ -104,6 +104,13 @@ namespace sprite
     AEGfxTexture* fireTex();
     AEGfxTexture* sawTex();
 
+    // artifacts 
+    AEGfxTexture* winterArtifacts();
+    AEGfxTexture* summerArtifacts();
+    AEGfxTexture* springArtifacts();
+    AEGfxTexture* autumnArtifacts();
+
+
     bool getFireUv(int frame, float& u0, float& v0, float& u1, float& v1);
     bool getSawUv(int frame, float& u0, float& v0, float& u1, float& v1);
 

@@ -164,6 +164,12 @@ namespace
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
                 }
+                else if (tileType == 32) {
+                    AEGfxTexture* springArtifactsTex = sprite::springArtifacts();
+                    gfx::Vec2 artifactsSize{ size.x * 0.9f, size.y * 0.9f };
+                    if (springArtifactsTex) gfx::drawSprite(springArtifactsTex, pos, 0.0f, artifactsSize, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
                 else if (tileType == 1)
                 {
                     AEGfxTexture* t = sprite::spring1();

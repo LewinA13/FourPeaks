@@ -44,6 +44,12 @@ namespace sprite
         AEGfxTexture* fireTex_{};
         AEGfxTexture* sawTex_{};
 
+        // artifacts 
+        AEGfxTexture* winterArtifactsTex{};
+        AEGfxTexture* summerArtifactsTex{};
+        AEGfxTexture* springArtifactsTex{};
+        AEGfxTexture* autumnArtifactsTex{};
+
         // Fire animation (fire.png = 160x24, 8 frames 20x24)
         int fireFrame = 0;
         float fireTimer = 0.0f;
@@ -239,6 +245,13 @@ namespace sprite
         if (!grassTex)  grassTex = AEGfxTextureLoad("Assets/grasss.png");
         if (!fireTex_)  fireTex_ = AEGfxTextureLoad("Assets/fire.png");
         if (!sawTex_)   sawTex_ = AEGfxTextureLoad("Assets/saw.png");
+
+        // artifacts 
+        if (!winterArtifactsTex)  winterArtifactsTex = AEGfxTextureLoad("Assets/winterArtifacts.png");
+        if (!summerArtifactsTex)  summerArtifactsTex = AEGfxTextureLoad("Assets/summerArtifacts.png");
+        if (!springArtifactsTex)  springArtifactsTex = AEGfxTextureLoad("Assets/springArtifacts.png");
+        if (!autumnArtifactsTex)  autumnArtifactsTex = AEGfxTextureLoad("Assets/autumnArtifacts.png");
+
     }
 
 
@@ -343,6 +356,10 @@ namespace sprite
         if (fireTex_) { AEGfxTextureUnload(fireTex_);  fireTex_ = nullptr; }
         if (sawTex_) { AEGfxTextureUnload(sawTex_);   sawTex_ = nullptr; }
 
+        if (winterArtifactsTex) { AEGfxTextureUnload(winterArtifactsTex); winterArtifactsTex = nullptr; }
+        if (summerArtifactsTex) { AEGfxTextureUnload(summerArtifactsTex); summerArtifactsTex = nullptr; }
+        if (springArtifactsTex) { AEGfxTextureUnload(springArtifactsTex); springArtifactsTex = nullptr; }
+        if (autumnArtifactsTex) { AEGfxTextureUnload(autumnArtifactsTex); autumnArtifactsTex = nullptr; }
     }
 
     AEGfxTexture* tileset()
@@ -430,6 +447,11 @@ namespace sprite
     AEGfxTexture* grass() { return grassTex; }
     AEGfxTexture* fireTex() { return fireTex_; }
     AEGfxTexture* sawTex() { return sawTex_; }
+
+    AEGfxTexture* winterArtifacts() { return winterArtifactsTex; }
+    AEGfxTexture* summerArtifacts() { return summerArtifactsTex; }
+    AEGfxTexture* springArtifacts() { return springArtifactsTex; }
+    AEGfxTexture* autumnArtifacts() { return autumnArtifactsTex; }
 
     bool getFireUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
