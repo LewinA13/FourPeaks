@@ -247,4 +247,11 @@ namespace game {
                 -0.50f, -0.90f, 0.75f, 0.6f, 0.6f, 0.6f, 1.0f);
         }
     }
+
+    void StageSelect::reset()
+    {
+        seasonIndex = 0;
+        stageIndex = 0;
+        selectingStage = false;
+    }
 }

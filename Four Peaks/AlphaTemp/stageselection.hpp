@@ -7,6 +7,7 @@ namespace game {
         StageSelect();
         int  update(float dt);  
         void draw() const;
+        void reset();
     private:
         int seasonIndex;   
         int stageIndex;   

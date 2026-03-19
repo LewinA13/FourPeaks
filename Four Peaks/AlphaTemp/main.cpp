@@ -777,22 +777,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (action == 1)
             {
-                /*  if (!gGame.player.checkpointScene.empty())
-                  {
-                      currentState = StringToScene(gGame.player.checkpointScene);
-                      lastState = SceneState::Exit;
-
-                      float h = camera::screenHeight();
-                      if (currentState == SceneState::WinterS2 || currentState == SceneState::SummerS2) camera::setY(h);
-                      else if (currentState == SceneState::WinterS3 || currentState == SceneState::SummerS3) camera::setY(h * 2.0f);
-                      else if (currentState == SceneState::WinterS4 || currentState == SceneState::SummerS4) camera::setY(h * 3.0f);
-                      else camera::setY(0.0f);
-                  }
-                  else
-                  {
-                      currentState = SceneState::StageSelect;
-                      camera::setY(0.0f);
-                  }*/
+                stageSelect.reset();
                 currentState = SceneState::StageSelect;
             }
             else if (action == 2)
