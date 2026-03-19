@@ -22,10 +22,8 @@ namespace UI{
 
         //! for specific level
         void showForLevel(int levelID);
-        void next();
-        bool isActive() const { return isShowing; }
-        void reset();
 
+        //! collision
         void PLAYERNEARSIGN(bool detect);
 
     private:
@@ -44,13 +42,6 @@ namespace UI{
         bool playerNearSign = false;
 
         int currentLevelID = -1;
-
-
-        //! check which level have been shown up
-
-        float toNormalizedX(float pixelX);
-        float toNormalizedY(float pixelY);
-
 
         // *****************************        TYPEWRITER                   **************************************************************************
         size_t displayedChars;   

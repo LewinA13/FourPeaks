@@ -13,8 +13,6 @@
     <ClCompile Include="mainmenu.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="spring.cpp" />
-    <ClCompile Include="splash.cpp" />
-    <ClCompile Include="splash.hpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="summer.cpp" />
     <ClCompile Include="tutorial.cpp" />
@@ -25,6 +23,7 @@
     <ClCompile Include="transition.cpp" />
     <ClCompile Include="credit.cpp" />
     <ClCompile Include="pause.cpp" />
+    <ClCompile Include="splash.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="audio.hpp" />
@@ -47,6 +46,7 @@
     <ClInclude Include="transition.hpp" />
     <ClInclude Include="credit.hpp" />
     <ClInclude Include="pause.hpp" />
+    <ClInclude Include="splash.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="hud.hpp" />

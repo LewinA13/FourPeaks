@@ -25,9 +25,8 @@
     <ClCompile Include="mainmenu.cpp" />
     <ClCompile Include="pause.cpp" />
     <ClCompile Include="player.cpp" />
-    <ClCompile Include="spring.cpp" />
     <ClCompile Include="splash.cpp" />
-    <ClCompile Include="splash.hpp" />
+    <ClCompile Include="spring.cpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="stageselection.cpp" />
     <ClCompile Include="summer.cpp" />
@@ -49,6 +48,7 @@
     <ClInclude Include="mainmenu.hpp" />
     <ClInclude Include="pause.hpp" />
     <ClInclude Include="player.hpp" />
+    <ClInclude Include="splash.hpp" />
     <ClInclude Include="spring.hpp" />
     <ClInclude Include="sprite.hpp" />
     <ClInclude Include="stageselection.hpp" />

@@ -183,7 +183,6 @@ namespace
                 }
                 else if (tileType == 15)
                 {
-                    // change later
                     AEGfxTexture* breakabletileTex = sprite::breakabletile();
                     if (breakabletileTex && breakableTiles)
                     {
@@ -205,6 +204,20 @@ namespace
                         AEGfxSetBlendMode(AE_GFX_BM_NONE);
                     }
                     continue;
+                }
+                else if (tileType == 19) {
+                    AEGfxTexture* tex = sprite::sign();
+                    // Draw sign 2 tiles tall, anchored to bottom of tile
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
+                }
+                else if (tileType == 33) {
+                    AEGfxTexture* autumnArtifactsTex = sprite::autumnArtifacts();
+                    gfx::Vec2 artifactsSize{ size.x * 0.9f, size.y * 0.9f };
+                    if (autumnArtifactsTex) gfx::drawSprite(autumnArtifactsTex, pos, 0.0f, artifactsSize, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                 }
                 else if (tileType == 4)
                 {
@@ -531,7 +544,7 @@ int game::AutumnS1::update(float dt)
     {
         if (brktile.triggered && !brktile.destroyed)
         {
-            brktile.timer += dt;
+            brktile.timer += (dt * 2.0f);
             int nf = static_cast<int>(brktile.timer / sprite::crackFrameTime);
             if (nf >= sprite::crackFrameCount - 1)
             {
@@ -644,7 +657,7 @@ int game::AutumnS2::update(float dt)
 
     for (auto& brktile : breakableTiles) {
         if (brktile.triggered && !brktile.destroyed) {
-            brktile.timer += dt;
+            brktile.timer += (dt * 2.0f);
             int nf = static_cast<int>(brktile.timer / sprite::crackFrameTime);
             if (nf >= sprite::crackFrameCount - 1) { tileMap[brktile.row][brktile.col] = 0; brktile.destroyed = true; }
             else brktile.crackFrame = nf;
@@ -753,7 +766,7 @@ int game::AutumnS3::update(float dt)
 
     for (auto& brktile : breakableTiles) {
         if (brktile.triggered && !brktile.destroyed) {
-            brktile.timer += dt;
+            brktile.timer += (dt * 2.0f);
             int nf = static_cast<int>(brktile.timer / sprite::crackFrameTime);
             if (nf >= sprite::crackFrameCount - 1) { tileMap[brktile.row][brktile.col] = 0; brktile.destroyed = true; }
             else brktile.crackFrame = nf;
@@ -856,7 +869,7 @@ int game::AutumnS4::update(float dt)
 
     for (auto& brktile : breakableTiles) {
         if (brktile.triggered && !brktile.destroyed) {
-            brktile.timer += dt;
+            brktile.timer += (dt * 2.0f);
             int nf = static_cast<int>(brktile.timer / sprite::crackFrameTime);
             if (nf >= sprite::crackFrameCount - 1) { tileMap[brktile.row][brktile.col] = 0; brktile.destroyed = true; }
             else brktile.crackFrame = nf;

@@ -15,7 +15,7 @@ namespace game
 {
 
     // -------------------------------------------------------------------------
-    // Constructor â€” load texture and build a standard 1x1 unit quad.
+    // Constructor — load texture and build a standard 1x1 unit quad.
     // The actual size is applied in draw() via a scale transform.
     // -------------------------------------------------------------------------
     SplashScreen::SplashScreen()
@@ -23,7 +23,7 @@ namespace game
         , splashTex(nullptr)
         , splashMesh(nullptr)
     {
-        // Load your splash image â€” place it in Assets/ and update the path if needed
+        // Load your splash image — place it in Assets/ and update the path if needed
         splashTex = AEGfxTextureLoad("Assets/Splash/DigiPen_Singapore_WEB_RED.png");
 
         // Standard 1x1 unit quad centered at the origin.
@@ -44,7 +44,7 @@ namespace game
     }
 
     // -------------------------------------------------------------------------
-    // Destructor â€” free GPU resources
+    // Destructor — free GPU resources
     // -------------------------------------------------------------------------
     SplashScreen::~SplashScreen()
     {
@@ -53,7 +53,7 @@ namespace game
     }
 
     // -------------------------------------------------------------------------
-    // Update â€” returns 1 when it's time to move to Main Menu
+    // Update — returns 1 when it's time to move to Main Menu
     // -------------------------------------------------------------------------
     int SplashScreen::update()
     {
@@ -75,7 +75,7 @@ namespace game
     }
 
     // -------------------------------------------------------------------------
-    // Draw â€” renders the splash image centered at its actual pixel size
+    // Draw — renders the splash image centered at its actual pixel size
     // -------------------------------------------------------------------------
     void SplashScreen::draw() const
     {

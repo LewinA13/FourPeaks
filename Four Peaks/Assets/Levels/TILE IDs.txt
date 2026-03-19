@@ -41,3 +41,11 @@ TILE IDs
 24 - fire
 
 25 - wheel of death
+
+30 - Winter artifacts
+
+31 - Summer artifacts
+
+32 - Spring artifacts
+
+33 - Autumn artifacts

@@ -627,11 +627,13 @@ void PlayerUpdate(Player& p, float dt)
             if (p.horzSpeed > 0.0f)
             {
                 p.horzSpeed -= p.decel * dt;
+                //! prevent overshooting
                 if (p.horzSpeed < 0.0f) p.horzSpeed = 0.0f;
             }
             else if (p.horzSpeed < 0.0f)
             {
                 p.horzSpeed += p.decel * dt;
+                //! prevent overshooting
                 if (p.horzSpeed > 0.0f) p.horzSpeed = 0.0f;
             }
         }

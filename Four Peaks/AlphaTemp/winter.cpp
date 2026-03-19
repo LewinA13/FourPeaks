@@ -21,6 +21,7 @@ typedef uint32_t u32;
 
 extern s8 gFontId;
 
+
 namespace game {
 
     // -------------------------------------------------------------------
@@ -1135,7 +1136,6 @@ namespace game {
                 //! check the ice pos whether equal and never set state before
                 if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
                     ice.triggered = true;
-                    ice.triggered = true;
                 }
             }
         }
@@ -1903,6 +1903,13 @@ namespace game {
                 {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                }
+                // artifacts
+                else if (tileType == 34) {
+                    AEGfxTexture* winterArtifactsTex = sprite::winterArtifacts();
+                    gfx::Vec2 artifactsSize{ size.x * 0.9f, size.y * 0.9f };
+                    if (winterArtifactsTex) gfx::drawSprite(winterArtifactsTex, pos, 0.0f, artifactsSize, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                 }
                 // WinterC (ID 4) and WinterT (ID 6) standalone textures

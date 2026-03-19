@@ -8,8 +8,8 @@
 // *** Set SPLASH_WIDTH / SPLASH_HEIGHT to match your actual image size ***
 //
 // Return values from update():
-//   0  â€” still showing splash
-//   1  â€” done, switch to Main Menu
+//   0  — still showing splash
+//   1  — done, switch to Main Menu
 // ---------------------------------------------------------------------------
 
 #include <AEEngine.h> // AEGfxTexture

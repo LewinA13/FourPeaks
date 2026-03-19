@@ -542,17 +542,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             g_currentSignID = 13;
         }
 
-        else if (currentState == SceneState::AutumnS1) {
-            g_currentMap = autumnStage.getTileMap();
+        // Summer stages (so collision + pickups use the correct current map)
+        // ==================================================================
+        else if (currentState == SceneState::SummerS1) {
+            g_currentMap = summerStage.getTileMap();
+            g_currentSignID = 20;
         }
-        else if (currentState == SceneState::AutumnS2) {
-            g_currentMap = autumnStage2.getTileMap();
+        else if (currentState == SceneState::SummerS2) {
+            g_currentMap = summerStage2.getTileMap();
+            g_currentSignID = 21;
         }
-        else if (currentState == SceneState::AutumnS3) {
-            g_currentMap = autumnStage3.getTileMap();
+        else if (currentState == SceneState::SummerS3) {
+            g_currentMap = summerStage3.getTileMap();
+            g_currentSignID = 22;
         }
-        else if (currentState == SceneState::AutumnS4) {
-            g_currentMap = autumnStage4.getTileMap();
+        else if (currentState == SceneState::SummerS4) {
+            g_currentMap = summerStage4.getTileMap();
+            g_currentSignID = 23;
         }
 
         // Spring stages
@@ -573,23 +579,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             g_currentSignID = 33;
         }
 
-        // Summer stages (so collision + pickups use the correct current map)
-        // ==================================================================
-        else if (currentState == SceneState::SummerS1) {
-            g_currentMap = summerStage.getTileMap();
-            g_currentSignID = 20;
+        // Autumn stages
+        else if (currentState == SceneState::AutumnS1) {
+            g_currentMap = autumnStage.getTileMap();
+            g_currentSignID = 40;
         }
-        else if (currentState == SceneState::SummerS2) {
-            g_currentMap = summerStage2.getTileMap();
-            g_currentSignID = 21;
+        else if (currentState == SceneState::AutumnS2) {
+            g_currentMap = autumnStage2.getTileMap();
+            g_currentSignID = 41;
         }
-        else if (currentState == SceneState::SummerS3) {
-            g_currentMap = summerStage3.getTileMap();
-            g_currentSignID = 22;
+        else if (currentState == SceneState::AutumnS3) {
+            g_currentMap = autumnStage3.getTileMap();
+            g_currentSignID = 42;
         }
-        else if (currentState == SceneState::SummerS4) {
-            g_currentMap = summerStage4.getTileMap();
-            g_currentSignID = 23;
+        else if (currentState == SceneState::AutumnS4) {
+            g_currentMap = autumnStage4.getTileMap();
+            g_currentSignID = 43;
         }
 
         // Begin frame.
@@ -924,22 +929,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (action == 1)
             {
-                /*  if (!gGame.player.checkpointScene.empty())
-                  {
-                      currentState = StringToScene(gGame.player.checkpointScene);
-                      lastState = SceneState::Exit;
-
-                      float h = camera::screenHeight();
-                      if (currentState == SceneState::WinterS2 || currentState == SceneState::SummerS2) camera::setY(h);
-                      else if (currentState == SceneState::WinterS3 || currentState == SceneState::SummerS3) camera::setY(h * 2.0f);
-                      else if (currentState == SceneState::WinterS4 || currentState == SceneState::SummerS4) camera::setY(h * 3.0f);
-                      else camera::setY(0.0f);
-                  }
-                  else
-                  {
-                      currentState = SceneState::StageSelect;
-                      camera::setY(0.0f);
-                  }*/
+                stageSelect.reset();
                 currentState = SceneState::StageSelect;
             }
             else if (action == 2)

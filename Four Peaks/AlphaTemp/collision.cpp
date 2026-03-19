@@ -62,8 +62,11 @@ TileRange calTileRange(f32 x, f32 y, f32 width, f32 height)
     const float halfH = fullH * 0.5f;
     const float halfW = (float)AEGfxGetWindowWidth() * 0.5f;
 
+    // Convert center-origin to screen-space 
     float btmCoordPostX = x + halfW;
     float btmCoordPostY = y + halfH;
+
+    // get a Y value that maps correctly to the tile grid of that stage
     float screenY = btmCoordPostY - g_currentY;
 
     // Invalidate if player is completely outside the current layer
@@ -73,6 +76,7 @@ TileRange calTileRange(f32 x, f32 y, f32 width, f32 height)
         return box;
     }
 
+    // +- 1.0f is to shrink player collider box
     float left = btmCoordPostX - width * 0.5f + 1.0f;
     float right = btmCoordPostX + width * 0.5f - 1.0f;
     float top = screenY + height * 0.5f - 1.0f;
@@ -119,7 +123,6 @@ static bool isSolidTile(int tile)
 
 // ---------------------------------------------------------------------------
 // Map collision check
-// velY      : player vertical velocity, used for one-way platform logic (unused currently)
 // playerHeadY : screen-space head Y, used for breakable tile upper-half collision
 // ---------------------------------------------------------------------------
 bool checkMapCollision(TileRange box, int levelLayout[][mapColm],
@@ -129,17 +132,7 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm],
 
     for (int r = box.rowStart; r <= box.rowEnd; r++) {
         for (int c = box.colStart; c <= box.colEnd; c++) {
-            int tile = levelLayout[r][c];
-
-            //! Assume platform is 7 first, ****change in future
-            //if (tile == 7) {
-            //	// If (player is dropping or staying) and (player bottom is near with platform), collision detect
-            //	if (velY <= 0 && (box.rowStart == r || box.rowStart == r + 1)) {
-            //		return true;
-            //	}
-            //	//! Skip this tile, check remaining tiles for collision
-            //	continue;
-            //}
+            int tile = levelLayout[r][c];          
 
             if (tile == 15) {
                 // Breakable tile (special case): only the upper half is solid.
@@ -156,44 +149,7 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm],
     return false;
 }
 
-// ---------------------------------------------------------------------------
-// Damage tile helpers
-// ---------------------------------------------------------------------------
-static bool isDamageTile(int tile)
-{
-    switch (tile) {
-    case 2:  // spike up
-    case 9:  // spike down
-    case 24: // fire
-        return true;
-    default:
-        return false;
-    }
-}
-
-// Returns the fraction of the player's width that overlaps with damage tiles in a row.
-float calculateDamageOverlapRatio(const Player& player, int row, TileRange box, int levelLayout[][mapColm])
-{
-    float halfWinW = (float)AEGfxGetWindowWidth() * 0.5f;
-    float playerLeft = player.pos.x + halfWinW - player.colliderSize.x * 0.5f;
-    float playerRight = player.pos.x + halfWinW + player.colliderSize.x * 0.5f;
-    float totalDamageWidth = 0.0f;
-
-    for (int c = box.colStart; c <= box.colEnd; c++) {
-        if (!isDamageTile(levelLayout[row][c])) continue;
-
-        float tileLeft = (float)(c * tileW);
-        float tileRight = (float)((c + 1) * tileW);
-        float overlapLeft = fmaxf(playerLeft, tileLeft);
-        float overlapRight = fminf(playerRight, tileRight);
-
-        if (overlapRight > overlapLeft)
-            totalDamageWidth += overlapRight - overlapLeft;
-    }
-
-    return totalDamageWidth / player.colliderSize.x;
-}
-
+// helper function for damage tile
 static void checkDamageTile(Player& player, int r, TileRange box,
     int levelLayout[][mapColm], int tileCase)
 {
@@ -207,19 +163,14 @@ static void checkDamageTile(Player& player, int r, TileRange box,
     {
         float playerFeetY = getPlayerFeetY(player);
         bool  spikeNotAtFeet = (r != box.rowStart);
-        Player::GroundType damageType = (tileCase == 24)
-            ? Player::GroundType::Fire : Player::GroundType::Spikes;
+        Player::GroundType damageType = (tileCase == 24)? Player::GroundType::Fire : Player::GroundType::Spikes;
 
         if (spikeNotAtFeet) {
-            if (calculateDamageOverlapRatio(player, r, box, levelLayout) > 0.0f)
-                player.currGroundType = damageType;
+               player.currGroundType = damageType;
         }
         else {
-            bool edgeCase = (box.colStart != box.colEnd) &&
-                ((levelLayout[r][box.colStart] == 0) || (levelLayout[r][box.colEnd] == 0));
-            if (edgeCase || playerFeetY <= tileDeadZoneY)
-                if (calculateDamageOverlapRatio(player, r, box, levelLayout) >= 0.5f)
-                    player.currGroundType = damageType;
+            if (playerFeetY <= tileDeadZoneY)
+                player.currGroundType = damageType;
         }
         break;
     }
@@ -229,12 +180,12 @@ static void checkDamageTile(Player& player, int r, TileRange box,
         bool  spikeNotAtHead = (r != box.rowEnd);
 
         if (spikeNotAtHead) {
-            if (calculateDamageOverlapRatio(player, r, box, levelLayout) > 0.0f)
+            //if (calculateDamageOverlapRatio(player, r, box, levelLayout) > 0.0f)
                 player.currGroundType = Player::GroundType::Spikes;
         }
         else {
             if (playerHeadY >= tileDeadZoneY)
-                if (calculateDamageOverlapRatio(player, r, box, levelLayout) >= 0.5f)
+                //if (calculateDamageOverlapRatio(player, r, box, levelLayout) >= 0.5f)
                     player.currGroundType = Player::GroundType::Spikes;
         }
         break;
@@ -250,6 +201,11 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
 {
     for (int r = box.rowStart; r <= box.rowEnd; r++) {
         for (int c = box.colStart; c <= box.colEnd; c++) {
+
+            // immediately return if out of bound
+            if (box.colStart == -1) return;  
+
+            printf("Current levelLayout[%i][%i]: %i\n", r, c, levelLayout[r][c]);
             switch (levelLayout[r][c]) {
 
             case 10: // checkpoint
@@ -321,10 +277,12 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 float feetY = getPlayerFeetY(player);
                 float tileTopY = static_cast<float>(r + 1) * static_cast<float>(tileH);
 
-                if (feetY >= tileTopY - static_cast<float>(tileH) * 0.1f) {
+                // trigger when player feet are within the top 5% of the ice tile
+                if (feetY >= tileTopY - static_cast<float>(tileH) * 0.05f) {
                     g_triggeredIceTiles.push_back({ r, c });
                     player.currGroundType = Player::GroundType::Ice;
                 }
+
                 break;
             }
 
@@ -334,7 +292,7 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 float feetY = getPlayerFeetY(player);
                 float tileTopY = static_cast<float>(r + 1) * static_cast<float>(tileH);
 
-                if (feetY >= tileTopY - static_cast<float>(tileH) * 0.1f)
+                if (feetY >= tileTopY - static_cast<float>(tileH) * 0.05f)
                     g_triggeredbrkTiles.push_back({ r, c });
                 break;
             }
@@ -345,8 +303,24 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 break;
 
             case 19: // sign
-                UI::gDialog.showForLevel(g_currentSignID);
                 UI::gDialog.PLAYERNEARSIGN(true);
+                UI::gDialog.showForLevel(g_currentSignID);
+                break;
+
+            case 34:
+                levelLayout[r][c] = 0;
+                break;
+
+            case 31:
+                levelLayout[r][c] = 0;
+                break;
+
+            case 32:
+                levelLayout[r][c] = 0;
+                break;
+
+            case 33:
+                levelLayout[r][c] = 0;
                 break;
 
             default:
@@ -354,20 +328,6 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
             }
         }
     }
-}
-
-// ---------------------------------------------------------------------------
-// Public collision entry points
-// ---------------------------------------------------------------------------
-bool checkPlayerCollision(Player& player, int levelLayout[][mapColm])
-{
-    TileRange box = calTileRange(player.pos.x, player.pos.y,
-        player.colliderSize.x, player.colliderSize.y);
-    checkGroundType(player, box, levelLayout);
-
-    if (player.dead) return false;
-
-    return checkMapCollision(box, levelLayout, player.velY, getPlayerHeadY(player));
 }
 
 static bool checkAABBCollisionAt(float x, float y, float w, float h)
@@ -384,21 +344,27 @@ void CollisionResolveSpawn(Player& player)
     const float step = 0.5f;
 
     // Push up until clear
-    for (int i = 0; i < 200 && checkPlayerCollision(player, g_currentMap); ++i)
+    TileRange box{};  
+    for (int i = 0; i < 200; ++i) {
+        box = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+        if (!checkMapCollision(box, g_currentMap, player.velY, getPlayerHeadY(player))) break;
         player.pos.y += step;
+    }
 
     // Snap down a small amount so player lands on the surface
     const int maxSteps = (int)(10.0f / step);
     bool landed = false;
     for (int i = 0; i < maxSteps; ++i) {
         player.pos.y -= step;
-        if (checkPlayerCollision(player, g_currentMap)) {
+        box = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+        if (checkMapCollision(box, g_currentMap, player.velY, getPlayerHeadY(player))) {
             player.pos.y += step;
             landed = true;
             break;
         }
     }
 
+ 
     player.grounded = landed;
     player.velX = 0.0f;
     player.velY = 0.0f;
@@ -410,9 +376,7 @@ void CollisionResolveSpawn(Player& player)
 // ---------------------------------------------------------------------------
 void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
 {
-    // GROUND_Y: the minimum screen-space Y before the player is considered out of bounds.
-    // Derived from window height so it adapts if resolution changes.
-    const float GROUND_Y = -(float)AEGfxGetWindowHeight() * 0.5f;
+  
 
     float currentY = player.pos.y;
     float oldY = currentY - player.velY * dt;
@@ -420,11 +384,17 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
     // --- Horizontal collision ---
     // Temporarily revert to last frame Y so horizontal and vertical are resolved independently.
     player.pos.y = oldY;
-    if (player.velX != 0.0f && checkPlayerCollision(player, levelLayout)) {
-        const float step = 0.5f;
-        float push = (player.velX > 0.0f) ? -step : step;
-        for (int i = 0; checkPlayerCollision(player, levelLayout) && i < 200; ++i)
+    TileRange hBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+
+    if (player.velX != 0.0f && checkMapCollision(hBox, levelLayout, player.velY, getPlayerHeadY(player))) {
+        float push = (player.velX > 0.0f) ? -0.5f : 0.5f;
+        for (int i = 0; i < 200; ++i) {
             player.pos.x += push;
+            hBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+            if (!checkMapCollision(hBox, levelLayout, player.velY, getPlayerHeadY(player))) {
+                break;
+            }
+        }
         player.velX = 0.0f;
     }
 
@@ -450,12 +420,25 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
         return;
     }
 
-    float feetY = screenY - player.colliderSize.y * 0.5f;
+    float feetY = getPlayerFeetY(player);
+    // GROUND_Y: the minimum screen-space Y before the player is considered out of bounds.
+    // Derived from window height so it adapts if resolution changes.
+    const float GROUND_Y = -(float)AEGfxGetWindowHeight() * 0.5f;
 
-    if (feetY > GROUND_Y + 10.0f && checkPlayerCollision(player, levelLayout)) {
+    TileRange vBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+
+
+    if (feetY > GROUND_Y  && checkMapCollision(vBox, levelLayout, player.velY, getPlayerHeadY(player))) {
         float push = (player.velY > 0) ? -0.5f : 0.5f;
-        for (int i = 0; checkPlayerCollision(player, levelLayout) && i < 100; ++i)
+        for (int i = 0; i < 200; ++i) {
             player.pos.y += push;
+            vBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
+            if (!checkMapCollision(vBox, levelLayout, player.velY, getPlayerHeadY(player))) {
+                break;
+            }
+            
+        }
+
 
         player.grounded = (player.velY < 0) ? true : player.grounded;
         player.velY = 0;
@@ -463,7 +446,7 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
 }
 
 // ---------------------------------------------------------------------------
-// Ground physics ? applies per-surface movement modifiers
+// Ground physics 
 // ---------------------------------------------------------------------------
 void applyGroundPhysics(Player& player)
 {
@@ -496,7 +479,16 @@ void applyGroundPhysics(Player& player)
 
 void CollisionUpdate(Player& player, f32 dt)
 {
+
+    player.currGroundType = Player::GroundType::Normal;
     resolvePlayerCollision(player, g_currentMap, dt);
+
+    // Player has been pushed out of tiles by resolvePlayerCollision, 
+    // and calTileRange shrinks the box by 1.0f at the bottom,
+    // so probe 2.0f downward to ensure checkGroundType can detect the tile below player's feet
+    TileRange box = calTileRange(player.pos.x, player.pos.y - 2.0f, player.colliderSize.x, player.colliderSize.y);
+    checkGroundType(player, box, g_currentMap);
+
     applyGroundPhysics(player);
 
     if (!player.grounded) {
