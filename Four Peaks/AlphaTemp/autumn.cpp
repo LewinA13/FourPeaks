@@ -493,7 +493,6 @@ game::AutumnS1::~AutumnS1() = default;
 int game::AutumnS1::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (AEInputCheckTriggered(AEVK_UP))
     {
@@ -611,7 +610,6 @@ game::AutumnS2::~AutumnS2() = default;
 int game::AutumnS2::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (AEInputCheckTriggered(AEVK_UP))
     {
@@ -721,7 +719,6 @@ game::AutumnS3::~AutumnS3() = default;
 int game::AutumnS3::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (AEInputCheckTriggered(AEVK_UP))
     {
@@ -830,7 +827,6 @@ game::AutumnS4::~AutumnS4() = default;
 int game::AutumnS4::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
 

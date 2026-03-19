@@ -1,6 +1,7 @@
 #include "stageselection.hpp"
 #include "AEEngine.h"
 #include "sprite.hpp"
+#include "gamestate.hpp"
 
 extern s8 gFontId;      // Font handle created in main.cpp
 
@@ -9,6 +10,24 @@ static AEVec2 WorldToNorm(float worldX, float worldY)
     float screenW = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
     float screenH = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
     return { worldX / (screenW * 0.5f), worldY / (screenH * 0.5f) };
+}
+
+static int SeasonStageToUnlockIndex(int seasonIndex, int stageIndex)
+{
+    return seasonIndex * 4 + stageIndex;
+}
+
+static bool IsSeasonUnlockedLocal(int seasonIndex)
+{
+    int firstStage = seasonIndex * 4;
+    return gGame.unlockedStages[firstStage];
+}
+
+static bool IsStageUnlockedLocal(int seasonIndex, int stageIndex)
+{
+    int idx = SeasonStageToUnlockIndex(seasonIndex, stageIndex);
+    if (idx < 0 || idx >= 16) return false;
+    return gGame.unlockedStages[idx];
 }
 
 namespace game {
@@ -28,8 +47,12 @@ namespace game {
 
             if (AEInputCheckTriggered(AEVK_RETURN) || AEInputCheckTriggered(AEVK_SPACE))
             {
-                selectingStage = true;
-                stageIndex = 0;  
+                // only enter stage if this season has been unlocked
+                if (IsSeasonUnlockedLocal(seasonIndex))
+                {
+                    selectingStage = true;
+                    stageIndex = 0;
+                }
             }
 
             if (AEInputCheckTriggered(AEVK_ESCAPE))
@@ -44,9 +67,13 @@ namespace game {
 
             if (AEInputCheckTriggered(AEVK_RETURN) || AEInputCheckTriggered(AEVK_SPACE))
             {
-                // seasonIndex 0~3, stageIndex 0~3
-                // action code: Winter=10~13, Summer=20~23, Spring=30~33, Autumn=40~43
-                return (seasonIndex + 1) * 10 + stageIndex;
+                // Only return an action if the selected stage is unlocked
+                if (IsStageUnlockedLocal(seasonIndex, stageIndex))
+                {
+                    // seasonIndex 0~3, stageIndex 0~3
+                    // action code: Winter=10~13, Summer=20~23, Spring=30~33, Autumn=40~43
+                    return (seasonIndex + 1) * 10 + stageIndex;
+                }
             }
 
             if (AEInputCheckTriggered(AEVK_ESCAPE))
@@ -129,9 +156,14 @@ namespace game {
         // ----------------------------------------------------------------
         if (seasonBg[leftSeason])
         {
+            bool unlocked = IsSeasonUnlockedLocal(leftSeason);
+
             gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { mainCardW + 6, mainCardH + 6 }, 0xFF333333u);
             gfx::drawSprite(seasonBg[leftSeason], { leftBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
-            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0x77000000u);
+
+            // Locked seasons get a stronger dark overlay.
+            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { mainCardW, mainCardH },
+                unlocked ? 0x77000000u : 0xCC444444u);
         }
         // show grey if not being selected
         {
@@ -146,9 +178,14 @@ namespace game {
         // ----------------------------------------------------------------
         if (seasonBg[rightSeason])
         {
+            bool unlocked = IsSeasonUnlockedLocal(rightSeason);
+
             gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { mainCardW + 6, mainCardH + 6 }, 0xFF333333u);
             gfx::drawSprite(seasonBg[rightSeason], { rightBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
-            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0x77000000u);
+
+            // Locked seasons get a stronger dark overlay.
+            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { mainCardW, mainCardH },
+                unlocked ? 0x77000000u : 0xCC444444u);
         }
         {
             float wx = AEGfxGetWinMaxX() - sideCardW + 10.0f;
@@ -162,12 +199,15 @@ namespace game {
         // ----------------------------------------------------------------
         if (seasonBg[seasonIndex])
         {
+            bool unlocked = IsSeasonUnlockedLocal(seasonIndex);
+            u32 borderColor = unlocked ? seasonBorderColor[seasonIndex] : 0xFF555555u;
 
-            gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { mainCardW + 10, mainCardH + 10 }, seasonBorderColor[seasonIndex]);
-            //gfx::drawSprite(centerframetex, { -10.0f, cardY - 120.0f }, 0.0f, { mainCardW + 500, mainCardH + 590 }, 0, 0, 1, 1);
+            gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { mainCardW + 10, mainCardH + 10 }, borderColor);
             gfx::drawSprite(seasonBg[seasonIndex], { 0.0f, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
-          
-          
+
+            // Grey overlay when this season is still locked.
+            if (!unlocked)
+                gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { mainCardW, mainCardH }, 0xCC444444u);
         }
         {
             float wx = 0.0f - mainCardW * 0.5f + 20.0f;
@@ -201,11 +241,23 @@ namespace game {
             for (int i = 0; i < 4; ++i)
             {
                 float cx = stageStartX + i * stageSpacing;
-                bool  sel = selectingStage && (i == stageIndex);
 
-                // choose season color, otherwise choose grey
-                u32 borderCol = sel ? seasonBorderColor[seasonIndex] : 0xFF444444u;
-                u32 bgCol = sel ? 0xFF222222u : 0xFF111111u;
+                bool sel = selectingStage && (i == stageIndex);
+                bool unlocked = IsStageUnlockedLocal(seasonIndex, i);
+
+                u32 borderCol = 0xFF555555u;
+                u32 bgCol = 0xFF111111u;
+
+                if (!unlocked)
+                {
+                    borderCol = 0xFF444444u;
+                    bgCol = 0xFF333333u;
+                }
+                else if (sel)
+                {
+                    borderCol = seasonBorderColor[seasonIndex];
+                    bgCol = 0xFF222222u;
+                }
 
                 gfx::drawRectangle({ cx, stageRowY }, 0.0f,
                     { stageCardW + 6, stageCardH + 6 }, borderCol);
@@ -219,14 +271,32 @@ namespace game {
 
                 float tX = cx / (screenW * 0.5f) - 0.04f;
                 float tY = stageRowY / (screenH * 0.5f);
-                float tR = sel ? seasonR[seasonIndex] : 0.85f;
-                float tG = sel ? seasonG[seasonIndex] : 0.85f;
-                float tB = sel ? seasonB[seasonIndex] : 0.85f;
+                float tR = 0.85f;
+                float tG = 0.85f;
+                float tB = 0.85f;
+
+                if (!unlocked)
+                {
+                    tR = 0.55f;
+                    tG = 0.55f;
+                    tB = 0.55f;
+                }
+                else if (sel)
+                {
+                    tR = seasonR[seasonIndex];
+                    tG = seasonG[seasonIndex];
+                    tB = seasonB[seasonIndex];
+                }
 
 
 
                 AEGfxPrint(gFontId, code, tX, tY + 0.08f, 1.4f, tR, tG, tB, 1.0f);
                 AEGfxPrint(gFontId, stageLabels[i], tX - 0.02f, tY - 0.10f, 0.75f, tR, tG, tB, 0.9f);
+
+                if (!unlocked)
+                {
+                    AEGfxPrint(gFontId, "LOCKED", tX - 0.03f, tY - 0.22f, 0.60f, 0.65f, 0.65f, 0.65f, 0.9f);
+                }
             }
 
 

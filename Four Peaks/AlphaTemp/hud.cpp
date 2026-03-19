@@ -106,7 +106,7 @@ namespace hud
         sprintf_s(buffer, "Time: %02d:%02d:%02d", minutes, seconds, centiseconds);
 
         // draw near the top-right area of the screen.
-        printText(0.55f, 0.88f, 0xFFFFFFFFu, buffer, 1.0f);
+        printText(-0.95f, 0.70f, 0xFFFFFFFFu, buffer, 1.0f);
 
         // restore gameplay camera.
         AEGfxSetCamPosition(oldCamX, oldCamY);

@@ -25,6 +25,7 @@
 #include "hud.hpp"
 #include "stageselection.hpp"
 #include "credit.hpp"
+#include "pause.hpp"
 
 
 // Global font handle used by all states
@@ -163,6 +164,95 @@ static int StageIndex(SceneState s)
     }
 }
 
+// Convert a seasonal gameplay scene into unlock array index
+// Returns -1 for non season scenes like tutorials/menu
+static int UnlockIndex(SceneState s)
+{
+    switch (s)
+    {
+    case SceneState::WinterS1: return 0;
+    case SceneState::WinterS2: return 1;
+    case SceneState::WinterS3: return 2;
+    case SceneState::WinterS4: return 3;
+
+    case SceneState::SummerS1: return 4;
+    case SceneState::SummerS2: return 5;
+    case SceneState::SummerS3: return 6;
+    case SceneState::SummerS4: return 7;
+
+    case SceneState::SpringS1: return 8;
+    case SceneState::SpringS2: return 9;
+    case SceneState::SpringS3: return 10;
+    case SceneState::SpringS4: return 11;
+
+    case SceneState::AutumnS1: return 12;
+    case SceneState::AutumnS2: return 13;
+    case SceneState::AutumnS3: return 14;
+    case SceneState::AutumnS4: return 15;
+
+    default: return -1;
+    }
+}
+
+// returns true if stage has already been unlocked
+static bool IsStageUnlocked(SceneState s)
+{
+    int idx = UnlockIndex(s);
+    if (idx < 0) return false;
+    return gGame.unlockedStages[idx];
+}
+
+// marks one seasonal stage as unlocked
+static void UnlockStage(SceneState s)
+{
+    int idx = UnlockIndex(s);
+    if (idx >= 0)
+        gGame.unlockedStages[idx] = true;
+}
+
+//unlock the next stage in the fixed campaign order
+static void UnlockNextStage(SceneState clearedScene)
+{
+    switch (clearedScene)
+    {
+    case SceneState::Tutorial3: UnlockStage(SceneState::WinterS1); break;
+
+    case SceneState::WinterS1: UnlockStage(SceneState::WinterS2); break;
+    case SceneState::WinterS2: UnlockStage(SceneState::WinterS3); break;
+    case SceneState::WinterS3: UnlockStage(SceneState::WinterS4); break;
+    case SceneState::WinterS4: UnlockStage(SceneState::SummerS1); break;
+
+    case SceneState::SummerS1: UnlockStage(SceneState::SummerS2); break;
+    case SceneState::SummerS2: UnlockStage(SceneState::SummerS3); break;
+    case SceneState::SummerS3: UnlockStage(SceneState::SummerS4); break;
+    case SceneState::SummerS4: UnlockStage(SceneState::SpringS1); break;
+
+    case SceneState::SpringS1: UnlockStage(SceneState::SpringS2); break;
+    case SceneState::SpringS2: UnlockStage(SceneState::SpringS3); break;
+    case SceneState::SpringS3: UnlockStage(SceneState::SpringS4); break;
+    case SceneState::SpringS4: UnlockStage(SceneState::AutumnS1); break;
+
+    case SceneState::AutumnS1: UnlockStage(SceneState::AutumnS2); break;
+    case SceneState::AutumnS2: UnlockStage(SceneState::AutumnS3); break;
+    case SceneState::AutumnS3: UnlockStage(SceneState::AutumnS4); break;
+
+    default: break;
+    }
+}
+
+// season is unlocked when its first stage is unlocked
+static bool IsSeasonUnlocked(int seasonIndex)
+{
+    switch (seasonIndex)
+    {
+    case 0: return gGame.unlockedStages[0];   // WinterS1
+    case 1: return gGame.unlockedStages[4];   // SummerS1
+    case 2: return gGame.unlockedStages[8];   // SpringS1
+    case 3: return gGame.unlockedStages[12];  // AutumnS1
+    default: return false;
+    }
+}
+
 static gfx::Vec2 GridToWorld(int gridX, int gridY, float screenYOffset)
 {
     // Use constant screen half-dimensions instead of AEGfxGetWinMin/Max,
@@ -268,6 +358,14 @@ static bool IsSeasonScene(SceneState s)
     default:
         return false;
     }
+}
+
+static void ResetPauseState()
+{
+    gGame.pauseActive = false;
+    gGame.pauseShowSettings = false;
+    gGame.pauseSelectedIndex = 0;
+    gGame.pauseSettingsRow = 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -401,6 +499,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 
+
     while (gGameRunning)
     {
         g_currentScene = SceneToString(currentState);
@@ -499,8 +598,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         // only count time while the player is inside actual season stages.
         // excludes splash screen, main menu, tutorial, and any future pause/settings states.
-        if (IsSeasonScene(currentState))
+        if (IsSeasonScene(currentState) && !gGame.pauseActive)
         {
+            // timer only runs when not paused
             gGame.runTimeSeconds += dt;
         }
 
@@ -579,22 +679,54 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // Apply camera
         camera::apply();
 
+        // esc controls pause only during gameplay
+        if (IsGameplayScene(currentState) && !gTransition.isActive())
+        {
+            if (AEInputCheckTriggered(AEVK_ESCAPE))
+            {
+                if (!gGame.pauseActive)
+                {
+                    // open pause
+                    ResetPauseState();
+                    gGame.pauseActive = true;
+                }
+                else
+                {
+                    // if inside pause settings, esc goes back to pause menu
+                    if (gGame.pauseShowSettings)
+                    {
+                        gGame.pauseShowSettings = false;
+                        gGame.pauseSettingsRow = 0;
+                    }
+                    else
+                    {
+                        // otherwise close pause
+                        ResetPauseState();
+                    }
+                }
+            }
+        }
+
         // --------------------------------------------------------
         // CHEATS: F11 toggles ALL cheats
         // --------------------------------------------------------
-        if (AEInputCheckTriggered(AEVK_F11))
+        if (!gGame.pauseActive && AEInputCheckTriggered(AEVK_F11))
         {
             gGame.cheatsOn = !gGame.cheatsOn;
 
-            // Optional: clean up physics instantly when enabling cheats
+            // reset some player state when cheats turn on
             if (gGame.cheatsOn)
             {
                 gGame.player.grounded = false;
                 gGame.player.dashCount = gGame.player.maxDashCount;
             }
+            else
+            {
+                gGame.noClip = false;
+            }
         }
 
-        if (gGame.cheatsOn && AEInputCheckTriggered(AEVK_F10))
+        if (!gGame.pauseActive && gGame.cheatsOn && AEInputCheckTriggered(AEVK_F10))
         {
             gGame.noClip = !gGame.noClip;
         }
@@ -744,6 +876,26 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         UI::gDialog.PLAYERNEARSIGN(false);
 
+        if (gGame.pauseActive)
+        {
+            pause::Action pauseAction = pause::update();
+
+            if (pauseAction == pause::Resume)
+            {
+                ResetPauseState();
+            }
+            else if (pauseAction == pause::MainMenu)
+            {
+                ResetPauseState();
+                triggerTransition(SceneState::MainMenu);
+            }
+            else if (pauseAction == pause::ExitGame)
+            {
+                ResetPauseState();
+                gGameRunning = 0;
+            }
+        }
+
         // ?? Transition: fire scene switch at mid-point, draw overlay on top ??
         gTransition.update(dt);
         if (gTransition.isReadyToSwitch())
@@ -811,37 +963,57 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         case SceneState::Tutorial1:
         {
-            action = tutorial1.update(dt);
+            if (!gGame.pauseActive)
+                action = tutorial1.update(dt);
+
             tutorial1.draw();
 
-            if (action == 30) triggerTransition(SceneState::Tutorial2);
-            if (action == 31) triggerTransition(SceneState::Tutorial3);
-            if (action == 32) triggerTransition(SceneState::WinterS1);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 30) triggerTransition(SceneState::Tutorial2);
+                if (action == 31) triggerTransition(SceneState::Tutorial3);
+                if (action == 32) triggerTransition(SceneState::WinterS1);
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
         case SceneState::Tutorial2:
         {
-            action = tutorial2.update(dt);
+            if (!gGame.pauseActive)
+                action = tutorial2.update(dt);
+
             tutorial2.draw();
 
-            if (action == 30) triggerTransition(SceneState::Tutorial2);
-            if (action == 31) triggerTransition(SceneState::Tutorial3);
-            if (action == 32) triggerTransition(SceneState::WinterS1);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 30) triggerTransition(SceneState::Tutorial2);
+                if (action == 31) triggerTransition(SceneState::Tutorial3);
+                if (action == 32) triggerTransition(SceneState::WinterS1);
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
+
             break;
         }
 
         case SceneState::Tutorial3:
         {
-            action = tutorial3.update(dt);
+            if (!gGame.pauseActive)
+                action = tutorial3.update(dt);
+
             tutorial3.draw();
 
-            if (action == 30) triggerTransition(SceneState::Tutorial2);
-            if (action == 31) triggerTransition(SceneState::Tutorial3);
-            if (action == 32) triggerTransition(SceneState::WinterS1);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 30) triggerTransition(SceneState::Tutorial2);
+                if (action == 31) triggerTransition(SceneState::Tutorial3);
+                if (action == 32) {
+                    UnlockNextStage(SceneState::Tutorial3);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::WinterS1);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
@@ -896,42 +1068,75 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // --------------------------------------------------------
         case SceneState::SummerS1:
         {
-            action = summerStage.update(dt);
+            if (!gGame.pauseActive)
+                action = summerStage.update(dt);
+
             summerStage.draw();
 
-            if (action == 20) triggerTransition(SceneState::SummerS2);
-            if (action == 24) triggerTransition(SceneState::WinterS4);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 20) {
+                    UnlockNextStage(SceneState::SummerS1);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::SummerS2);
+                }
+
+                if (action == 24) triggerTransition(SceneState::WinterS4);
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
         case SceneState::SummerS2:
         {
-            action = summerStage2.update(dt);
+            if (!gGame.pauseActive)
+                action = summerStage2.update(dt);
+
             summerStage2.draw();
 
-            if (action == 21) triggerTransition(SceneState::SummerS3);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 21) triggerTransition(SceneState::SummerS3);
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
         case SceneState::SummerS3:
         {
-            action = summerStage3.update(dt);
+            if (!gGame.pauseActive)
+                action = summerStage3.update(dt);
+
             summerStage3.draw();
 
-            if (action == 22) triggerTransition(SceneState::SummerS4);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 22) {
+                    UnlockNextStage(SceneState::SummerS3);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::SummerS4);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
         case SceneState::SummerS4:
         {
-            action = summerStage4.update(dt);
+            if (!gGame.pauseActive)
+                action = summerStage4.update(dt);
+
             summerStage4.draw();
 
-            if (action == 25) triggerTransition(SceneState::SpringS1);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 25) {
+                    UnlockNextStage(SceneState::SummerS4);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::SpringS1);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
@@ -945,41 +1150,73 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // --------------------------------------------------------
         case SceneState::AutumnS1:
         {
-            action = autumnStage.update(dt);
+            if (!gGame.pauseActive)
+                action = autumnStage.update(dt);
+
             autumnStage.draw();
 
-            if (action == 60) triggerTransition(SceneState::AutumnS2);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 60) {
+                    UnlockNextStage(SceneState::AutumnS1);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::AutumnS2);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
         case SceneState::AutumnS2:
         {
-            action = autumnStage2.update(dt);
+            if (!gGame.pauseActive)
+                action = autumnStage2.update(dt);
+
             autumnStage2.draw();
 
-            if (action == 61) triggerTransition(SceneState::AutumnS3);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 61) {
+                    UnlockNextStage(SceneState::AutumnS2);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::AutumnS3);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
         case SceneState::AutumnS3:
         {
-            action = autumnStage3.update(dt);
+            if (!gGame.pauseActive)
+                action = autumnStage3.update(dt);
+
             autumnStage3.draw();
 
-            if (action == 62) triggerTransition(SceneState::AutumnS4);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 62) {
+                    UnlockNextStage(SceneState::AutumnS3);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::AutumnS4);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
         case SceneState::AutumnS4:
         {
-            action = autumnStage4.update(dt);
+            if (!gGame.pauseActive)
+                action = autumnStage4.update(dt);
+
             autumnStage4.draw();
 
-            if (action == 63) triggerTransition(SceneState::ThankYou);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 63) triggerTransition(SceneState::ThankYou);
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
@@ -1003,86 +1240,158 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // --------------------------------------------------------
         case SceneState::SpringS1:
         {
-            action = springStage.update(dt);
+            if (!gGame.pauseActive)
+                action = springStage.update(dt);
+
             springStage.draw();
 
-            if (action == 40) triggerTransition(SceneState::SpringS2);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 40) {
+                    UnlockNextStage(SceneState::SpringS1);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::SpringS2);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
         case SceneState::SpringS2:
         {
-            action = springStage2.update(dt);
+            if (!gGame.pauseActive)
+                action = springStage2.update(dt);
+
             springStage2.draw();
 
-            if (action == 41) triggerTransition(SceneState::SpringS3);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 41) {
+                    UnlockNextStage(SceneState::SpringS2);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::SpringS3);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
         case SceneState::SpringS3:
         {
-            action = springStage3.update(dt);
+            if (!gGame.pauseActive)
+                action = springStage3.update(dt);
+
             springStage3.draw();
 
-            if (action == 42) triggerTransition(SceneState::SpringS4);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 42) {
+                    UnlockNextStage(SceneState::SpringS3);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::SpringS4);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
         case SceneState::SpringS4:
         {
-            action = springStage4.update(dt);
+            if (!gGame.pauseActive)
+                action = springStage4.update(dt);
+
             springStage4.draw();
 
-            if (action == 43) triggerTransition(SceneState::AutumnS1);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
+            if (!gGame.pauseActive)
+            {
+                if (action == 43) {
+                    UnlockNextStage(SceneState::SpringS4);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::AutumnS1);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+            }
             break;
         }
 
         case SceneState::WinterS1:
         {
-            action = winterStage.update(dt);
+            if (!gGame.pauseActive)
+                action = winterStage.update(dt);
+
             winterStage.draw();
 
-            if (action == 20) triggerTransition(SceneState::WinterS2);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
-            else if (action == 3) gGameRunning = 0;
+            if (!gGame.pauseActive)
+            {
+                if (action == 20) {
+                    UnlockNextStage(SceneState::WinterS1);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::WinterS2);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+                else if (action == 3) gGameRunning = 0;
+            }
         }
         break;
 
         case SceneState::WinterS2:
         {
-            action = winterStage2.update(dt);
+            if (!gGame.pauseActive)
+                action = winterStage2.update(dt);
+
             winterStage2.draw();
 
-            if (action == 21) triggerTransition(SceneState::WinterS3);
-            if (action == 5)  triggerTransition(SceneState::WinterS1);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
-            else if (action == 3) gGameRunning = 0;
+            if (!gGame.pauseActive)
+            {
+                if (action == 21) {
+                    UnlockNextStage(SceneState::WinterS2);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::WinterS3);
+                }
+                if (action == 5)  triggerTransition(SceneState::WinterS1);
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+                else if (action == 3) gGameRunning = 0;
+            }
             break;
         }
 
         case SceneState::WinterS3:
         {
-            action = winterStage3.update(dt);
+            if (!gGame.pauseActive)
+                action = winterStage3.update(dt);
+
             winterStage3.draw();
 
-            if (action == 22) triggerTransition(SceneState::WinterS4);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
-            else if (action == 3) gGameRunning = 0;
+            if (!gGame.pauseActive)
+            {
+                if (action == 22) {
+                    UnlockNextStage(SceneState::WinterS3);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::WinterS4);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+                else if (action == 3) gGameRunning = 0;
+            }
             break;
         }
 
         case SceneState::WinterS4:
         {
-            action = winterStage4.update(dt);
+            if (!gGame.pauseActive)
+                action = winterStage4.update(dt);
+
             winterStage4.draw();
 
-            if (action == 23) triggerTransition(SceneState::SummerS1);
-            if (action == 2)  triggerTransition(SceneState::MainMenu);
-            else if (action == 3) gGameRunning = 0;
+            if (!gGame.pauseActive)
+            {
+                if (action == 23) {
+                    UnlockNextStage(SceneState::WinterS4);
+                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+                    triggerTransition(SceneState::SummerS1);
+                }
+                if (action == 2)  triggerTransition(SceneState::MainMenu);
+                else if (action == 3) gGameRunning = 0;
+            }
             break;
         }
 
@@ -1090,7 +1399,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }  // End of switch statement
 
 
-        UI::gDialog.update(dt);
+        if (!gGame.pauseActive)
+        {
+            // stop dialogue animation while paused
+            UI::gDialog.update(dt);
+        }
         UI::gDialog.render();
 
         // draw hud last. putting it here allows it to be present in all season
@@ -1106,41 +1419,47 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             hud::drawRunTimer(gGame.runTimeSeconds);
         }
 
+        if (gGame.pauseActive)
+        {
+            // draw pause overlay after gameplay and hud
+            pause::draw();
+        }
+
 
         // End frame.
         gTransition.draw();  // overlay drawn last, on top of everything
         AESysFrameEnd();
+        }
+
+        // Save latest checkpoint data before shutting down.
+        // This also saves the latest run timer.
+        if (!gGame.player.checkpointScene.empty())
+        {
+            PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+        }
+
+        // Clean up font.
+        if (gFontId >= 0)
+        {
+            AEGfxDestroyFont(gFontId);
+            gFontId = -1;
+        }
+
+        // Shut down sprite helper.
+        sprite::shutdown();
+
+        // Shut down graphics helper.
+        gfx::shutdown();
+
+
+        // -----------------------
+        // AUDIO CLEANUP
+        // -----------------------
+        audio::shutdown();
+
+
+        // Free all engine resources.
+        AESysExit();
+
+        return 0;
     }
-
-    // Save latest checkpoint data before shutting down.
-    // This also saves the latest run timer.
-    if (!gGame.player.checkpointScene.empty())
-    {
-        PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
-    }
-
-    // Clean up font.
-    if (gFontId >= 0)
-    {
-        AEGfxDestroyFont(gFontId);
-        gFontId = -1;
-    }
-
-    // Shut down sprite helper.
-    sprite::shutdown();
-
-    // Shut down graphics helper.
-    gfx::shutdown();
-
-
-    // -----------------------
-    // AUDIO CLEANUP
-    // -----------------------
-    audio::shutdown();
-
-
-    // Free all engine resources.
-    AESysExit();
-
-    return 0;
-}

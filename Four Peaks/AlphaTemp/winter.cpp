@@ -170,11 +170,6 @@ namespace game {
             gridVisible = !gridVisible;
         }
 
-        if (AEInputCheckTriggered(AEVK_ESCAPE))
-        {
-            return 2;
-        }
-
         // DEBUG: Press UP or W key anywhere to start transition
         if (AEInputCheckTriggered(AEVK_UP))
         {
@@ -649,10 +644,6 @@ namespace game {
             gridVisible = !gridVisible;
         }
 
-        if (AEInputCheckTriggered(AEVK_ESCAPE))
-        {
-            return 2;
-        }
 
         // Only update player when NOT transitioning
         if (!camera::isTransitioning())
@@ -1103,10 +1094,6 @@ namespace game {
             gridVisible = !gridVisible;
         }
 
-        if (AEInputCheckTriggered(AEVK_ESCAPE))
-        {
-            return 2;
-        }
 
         if (!camera::isTransitioning())
         {
@@ -1616,10 +1603,6 @@ namespace game {
             gridVisible = !gridVisible;
         }
 
-        if (AEInputCheckTriggered(AEVK_ESCAPE))
-        {
-            return 2;
-        }
 
         if (!camera::isTransitioning())
         {

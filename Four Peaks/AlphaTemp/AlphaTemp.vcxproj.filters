@@ -24,6 +24,7 @@
     <ClCompile Include="thankyou.cpp" />
     <ClCompile Include="transition.cpp" />
     <ClCompile Include="credit.cpp" />
+    <ClCompile Include="pause.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="audio.hpp" />
@@ -45,6 +46,7 @@
     <ClInclude Include="thankyou.hpp" />
     <ClInclude Include="transition.hpp" />
     <ClInclude Include="credit.hpp" />
+    <ClInclude Include="pause.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="hud.hpp" />

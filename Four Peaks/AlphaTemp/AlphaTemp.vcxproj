@@ -23,6 +23,7 @@
     <ClCompile Include="level_loader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainmenu.cpp" />
+    <ClCompile Include="pause.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="spring.cpp" />
     <ClCompile Include="splash.cpp" />
@@ -46,6 +47,7 @@
     <ClInclude Include="graphics.hpp" />
     <ClInclude Include="level_loader.hpp" />
     <ClInclude Include="mainmenu.hpp" />
+    <ClInclude Include="pause.hpp" />
     <ClInclude Include="player.hpp" />
     <ClInclude Include="spring.hpp" />
     <ClInclude Include="sprite.hpp" />

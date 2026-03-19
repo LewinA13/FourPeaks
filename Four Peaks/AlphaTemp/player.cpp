@@ -33,10 +33,6 @@ void PlayerSetRespawn(Player& p, gfx::Vec2 pos) // PlayerSetRespawn(gGame.p, gfx
     p.respawnPos = pos;
 }
 
-// File format:
-//   checkpoint_v1
-//   <respawnX> <respawnY>
-
 bool PlayerSaveCheckpoint(const Player& p, const char* filename)
 {
     if (filename == nullptr || filename[0] == '\0')
@@ -47,7 +43,7 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
     if (!out.is_open())
         return false;
 
-    out << "checkpoint_v6\n";
+    out << "checkpoint_v7\n";
     out << p.checkpointScene << "\n";
     out << std::fixed << std::setprecision(3);
 
@@ -57,6 +53,14 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
         << p.melonsCollected << " "
         << p.deathCount << " "
         << gGame.runTimeSeconds << "\n";
+
+    // Save all 16 seasonal unlock flags as 0/1 values.
+    for (int i = 0; i < 16; ++i)
+    {
+        out << (gGame.unlockedStages[i] ? 1 : 0);
+        if (i < 15) out << " ";
+    }
+    out << "\n";
 
     out << gGame.collectedMelons.size() << "\n";
 
@@ -92,14 +96,44 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     gGame.runTimeSeconds = 0.0f;
     gGame.collectedMelons.clear();
 
+    for (int i = 0; i < 16; ++i)
+        gGame.unlockedStages[i] = false;
+
     std::string scene;
     if (!(in >> scene))
         return false;
 
     p.checkpointScene = scene;
 
-    // Newest format: checkpoint_v5
-    if (header == "checkpoint_v6")
+    // Newest format: checkpoint_v7
+    if (header == "checkpoint_v7")
+    {
+        if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
+            return false;
+
+        for (int i = 0; i < 16; ++i)
+        {
+            int unlocked = 0;
+            if (!(in >> unlocked))
+                return false;
+
+            gGame.unlockedStages[i] = (unlocked != 0);
+        }
+
+        int collectedCount = 0;
+        if (!(in >> collectedCount))
+            return false;
+
+        for (int i = 0; i < collectedCount; ++i)
+        {
+            CollectedMelon melon;
+            if (!(in >> melon.scene >> melon.row >> melon.col))
+                return false;
+
+            gGame.collectedMelons.push_back(melon);
+        }
+    }
+    else if (header == "checkpoint_v6")
     {
         if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
             return false;
@@ -117,58 +151,11 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
             gGame.collectedMelons.push_back(melon);
         }
     }
-    else if (header == "checkpoint_v5")
-    {
-        if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
-            return false;
-    }else if (header == "checkpoint_v4")
-    {
-        if (!(in >> x >> y >> p.melonsCollected >> p.deathCount))
-            return false;
-
-        gGame.runTimeSeconds = 0.0f;
-    }
-    // Older format support: checkpoint_v3
-    else if (header == "checkpoint_v3")
-    {
-        if (!(in >> x >> y >> p.melonsCollected))
-            return false;
-
-        p.deathCount = 0;
-        gGame.runTimeSeconds = 0.0f;
-    }
     else
     {
         return false;
     }
-
-    p.respawnPos = { x, y };
-
-    if (teleportToRespawn)
-        PlayerSetFeetWorld(p, p.respawnPos);
-
-    return true;
 }
-
-/* revamp on melons 
-bool PlayerSaveMelons(const Player& p, const char* filename)
-{
-    std::ofstream out(filename, std::ios::out | std::ios::trunc);
-    if (!out.is_open()) return false;
-    out << p.melonsCollected << "\n";
-    return out.good();
-}
-
-bool PlayerLoadMelons(Player& p, const char* filename)
-{
-    std::ifstream in(filename);
-    if (!in.is_open()) return false;
-    int melons = 0;
-    if (!(in >> melons)) return false;
-    p.melonsCollected = melons;
-    return true;
-}
-*/
 
 bool IsMelonCollected(const char* sceneName, int row, int col)
 {
@@ -332,10 +319,10 @@ void PlayerInit(Player& p)
 
     p.jumpVel = 900.0f;
 
-    p.coyoteTime = 0.08f;  // tweak: 0.06 - 0.12 feels normal
+    p.coyoteTime = 0.08f;  // tweak
     p.coyoteTimer = 0.0f;
 
-    p.jumpCutMult = 2.5f; // tweak: 2.0 - 4.0
+    p.jumpCutMult = 2.5f; // tweak
 
     // player kill/respawn
     p.maxHp = 1;
@@ -352,7 +339,7 @@ void PlayerInit(Player& p)
     p.justRespawned = false;
 
 
-    p.deadDuration = 0.50f;    // tweak later (0.0f = instant respawn)
+    p.deadDuration = 0.50f;    // tweak (lower val = faster respawn)
     p.deadTimer = 0.0f;
 
     // death animation
@@ -362,7 +349,7 @@ void PlayerInit(Player& p)
     p.deathFrameCount = 23;
 
     p.deathAnimTimer = 0.0f;
-    p.deathFrameTime = 0.04f;     // tweak: 0.03–0.06 feels good
+    p.deathFrameTime = 0.04f;     // tweak
 
     p.deadDuration = p.deathFrameCount * p.deathFrameTime;
 
@@ -477,8 +464,6 @@ void PlayerInit(Player& p)
     p.maxHeat = 1.0f;
     p.heat = p.maxHeat;
 
-
-
 }
 
 
@@ -511,7 +496,7 @@ void PlayerUpdate(Player& p, float dt)
     // =========================================================
     if (p.dead)
     {
-        // advance death animation (clamp at last frame)
+        // advance death animation
         p.deathAnimTimer += dt;
         while (p.deathAnimTimer >= p.deathFrameTime)
         {
@@ -579,7 +564,7 @@ void PlayerUpdate(Player& p, float dt)
     // 2) TIMERS / BUFFERS / DASH
     // =========================================================
 
-    // Wall regrab lockout (prevents instant re-hang after wall jump)
+    // Wall regrab prevention
     if (p.wallRegrabTimer > 0.0f)
     {
         p.wallRegrabTimer -= dt;
@@ -611,7 +596,6 @@ void PlayerUpdate(Player& p, float dt)
         p.dashing = true;
         p.dashTimer = p.dashDuration;
         p.dashCount--;
-        camera::startShake(30.0f, 0.10f, 60.0f);
 
         // dash direction
         if (AEInputCheckCurr(AEVK_A))      p.dashDir = -1;
@@ -698,7 +682,7 @@ void PlayerUpdate(Player& p, float dt)
 
     // =========================================================
     // 6) GRAVITY (vertical physics)
-    //    Note: wall hanging/climb will override velY later.
+    //    Note: wall hanging/climb will override velY
     // =========================================================
     if (!p.dashing && !gGame.cheatsOn)
     {

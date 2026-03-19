@@ -17,21 +17,30 @@ struct GameState
 {
     Player player;
 
-    // Volume settings (0.0f to 1.0f)
+    // volume settings
     float musicVol = 0.6f;
     float sfxVol = 0.9f;
 
     bool cheatsOn = false;
     bool noClip = false;
 
-    // total game run time. only when playing. pause doesnt affect
+    // total game run time
     float runTimeSeconds = 0.0f;
 
-    //vector to store the collected melons
+    // stage unlock flags
+    bool unlockedStages[16] = {};
+
+    // collected melon data
     std::vector<CollectedMelon> collectedMelons;
+
+    // pause menu state
+    bool pauseActive = false;
+    bool pauseShowSettings = false;
+    int pauseSelectedIndex = 0;
+    int pauseSettingsRow = 0;
 };
 
-// One global world object (declared here)
+// one global world object
 extern GameState gGame;
 
 #endif // GAME_STATE_HPP

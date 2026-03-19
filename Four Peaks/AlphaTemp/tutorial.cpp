@@ -363,7 +363,6 @@ namespace game
     int Tutorial1::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-        if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
         if (int nav = tutorialNavButtons(1)) return nav;
 
@@ -420,7 +419,6 @@ namespace game
     int Tutorial2::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-        if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
         if (int nav = tutorialNavButtons(2)) return nav;
 
@@ -476,7 +474,6 @@ namespace game
     int Tutorial3::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-        if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
         if (int nav = tutorialNavButtons(3)) return nav;
 

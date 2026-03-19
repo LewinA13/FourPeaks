@@ -125,20 +125,27 @@ namespace game {
     }
     SummerS1::~SummerS1() = default;
 
-    void SummerS1::reset(){
+    void SummerS1::reset()
+    {
         const bool loaded =
             level::loadTileMap("Assets/Levels/summer_s1.txt",
                 gridRows, gridCols,
                 &tileMap[0][0]);
 
-        //basically a fail safe, if the above code fails, make the map empty
-        if (!loaded){
-            for (int r = 0; r < gridRows; ++r){
-                for (int c = 0; c < gridCols; ++c){
+        // Reload the original map; if loading fails, clear it safely
+        if (!loaded)
+        {
+            for (int r = 0; r < gridRows; ++r)
+            {
+                for (int c = 0; c < gridCols; ++c)
+                {
                     tileMap[r][c] = 0;
                 }
             }
         }
+
+        // Re-remove melons that were already collected and saved
+        ApplyCollectedMelonsToTileMap("SummerS1", gridRows, tileMap);
     }
 
     int SummerS1::update(float dt) {
@@ -148,7 +155,6 @@ namespace game {
             gGame.player.justRespawned = false;
         }
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
-        if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
         if (AEInputCheckTriggered(AEVK_UP)) {
             if (!camera::isTransitioning()) {
                 camera::startTransitionY(0.0f, camera::screenHeight(), 0.3f);
@@ -395,13 +401,20 @@ namespace game {
                 gridRows, gridCols,
                 &tileMap[0][0]);
 
-        if (!loaded){
-            for (int r = 0; r < gridRows; ++r){
-                for (int c = 0; c < gridCols; ++c){
+        // Reload the original map. if loading fails, clear it safely
+        if (!loaded)
+        {
+            for (int r = 0; r < gridRows; ++r)
+            {
+                for (int c = 0; c < gridCols; ++c)
+                {
                     tileMap[r][c] = 0;
                 }
             }
         }
+
+        // Re-remove melons that were already collected and saved.
+        ApplyCollectedMelonsToTileMap("SummerS2", gridRows, tileMap);
     }
 
     int SummerS2::update(float dt) {
@@ -410,7 +423,6 @@ namespace game {
             gGame.player.justRespawned = false;
         }
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
-        if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
         if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
         if (!camera::isTransitioning()) {
             float gx, gy, cw, ch;
@@ -621,19 +633,30 @@ namespace game {
                 gridRows, gridCols,
                 &tileMap[0][0]);
 
-        if (!loaded){
-            for (int r = 0; r < gridRows; ++r){
-                for (int c = 0; c < gridCols; ++c){
+        // Reload the original map; if loading fails, clear it safely.
+        if (!loaded)
+        {
+            for (int r = 0; r < gridRows; ++r)
+            {
+                for (int c = 0; c < gridCols; ++c)
+                {
                     tileMap[r][c] = 0;
                 }
             }
         }
 
+        // Re-remove melons that were already collected and saved.
+        ApplyCollectedMelonsToTileMap("SummerS3", gridRows, tileMap);
+
         iceTiles.clear();
 
-        for (int r = 0; r < gridRows; ++r){
-            for (int c = 0; c < gridCols; ++c){
-                if (tileMap[r][c] == 1){
+        // Rebuild breakable ice data from the updated tile map.
+        for (int r = 0; r < gridRows; ++r)
+        {
+            for (int c = 0; c < gridCols; ++c)
+            {
+                if (tileMap[r][c] == 1)
+                {
                     IceTileState ice;
                     ice.row = r;
                     ice.col = c;
@@ -649,7 +672,6 @@ namespace game {
             gGame.player.justRespawned = false;
         }
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
-        if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
         if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
         if (!camera::isTransitioning()) {
             float gx, gy, cw, ch;
@@ -873,19 +895,30 @@ namespace game {
                 gridRows, gridCols,
                 &tileMap[0][0]);
 
-        if (!loaded){
-            for (int r = 0; r < gridRows; ++r){
-                for (int c = 0; c < gridCols; ++c){
+        // Reload the original map; if loading fails, clear it safely
+        if (!loaded)
+        {
+            for (int r = 0; r < gridRows; ++r)
+            {
+                for (int c = 0; c < gridCols; ++c)
+                {
                     tileMap[r][c] = 0;
                 }
             }
         }
 
+        // Re-remove melons that were already collected and saved
+        ApplyCollectedMelonsToTileMap("SummerS4", gridRows, tileMap);
+
         iceTiles.clear();
 
-        for (int r = 0; r < gridRows; ++r){
-            for (int c = 0; c < gridCols; ++c){
-                if (tileMap[r][c] == 1){
+        // Rebuild breakable ice data from the updated tile map
+        for (int r = 0; r < gridRows; ++r)
+        {
+            for (int c = 0; c < gridCols; ++c)
+            {
+                if (tileMap[r][c] == 1)
+                {
                     IceTileState ice;
                     ice.row = r;
                     ice.col = c;
@@ -903,7 +936,6 @@ namespace game {
             gGame.player.justRespawned = false;
         }
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
-        if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
         if (!camera::isTransitioning()) {
             PlayerUpdate(gGame.player, dt);
             HeatUpdate(dt);

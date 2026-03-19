@@ -483,7 +483,6 @@ game::SpringS1::~SpringS1() = default;
 int game::SpringS1::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (AEInputCheckTriggered(AEVK_UP))
     {
@@ -562,7 +561,6 @@ game::SpringS2::~SpringS2() = default;
 int game::SpringS2::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (AEInputCheckTriggered(AEVK_UP))
     {
@@ -640,7 +638,6 @@ game::SpringS3::~SpringS3() = default;
 int game::SpringS3::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (AEInputCheckTriggered(AEVK_UP))
     {
@@ -718,7 +715,6 @@ game::SpringS4::~SpringS4() = default;
 int game::SpringS4::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     float windForce = g_windSystem.update(dt);
     if (!camera::isTransitioning())
