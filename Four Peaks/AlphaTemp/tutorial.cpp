@@ -86,7 +86,7 @@ namespace
         auto isSolid = [&](int r, int c) -> bool {
             if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
             int t = tileMap[r][c];
-            return (t == 1 || t == 3 || t == 5 || t == 6 || t == 7 || t == 23);
+            return (t == 1 || t == 3 || t == 4 || t == 5 || t == 6 || t == 7 || t == 23);
             };
 
         for (int row = 0; row < gridRows; ++row)
@@ -173,7 +173,7 @@ namespace
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.05f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
@@ -519,4 +519,4 @@ namespace game
         PlayerDraw(gGame.player);
     }
 
-} // namespace game
+} // namespace game 

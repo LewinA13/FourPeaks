@@ -110,6 +110,7 @@ static bool isSolidTile(int tile)
     case 11:  // winter ice tile
     case 16:  // summer tile top
     case 17:  // summer tile bottom
+    case 30:  // Spring tile
         return true;
     default:
         return false;
@@ -274,7 +275,7 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 player.currGroundType = Player::GroundType::Grass;
                 break;
 
-            case 4: case 5: case 6: case 7: // normal solid tiles
+            case 4: case 5: case 6: case 7: case 30: // normal solid tiles
                 player.currGroundType = Player::GroundType::Normal;
                 break;
 
@@ -312,7 +313,8 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 }
                 break;
 
-            case 1: // ice tile
+            //Issue Lies Here with Tile ID.
+            case 1: // ice tile 
             {
                 // Only trigger when player feet are near the tile top.
                 // Prevents triggering when player brushes the tile from the side.
