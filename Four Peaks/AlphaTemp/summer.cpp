@@ -125,8 +125,7 @@ namespace game {
     }
     SummerS1::~SummerS1() = default;
 
-    void SummerS1::reset()
-    {
+    void SummerS1::reset() {
         const bool loaded =
             level::loadTileMap("Assets/Levels/summer_s1.txt",
                 gridRows, gridCols,
@@ -149,7 +148,7 @@ namespace game {
     }
 
     int SummerS1::update(float dt) {
-        if (gGame.player.justRespawned){
+        if (gGame.player.justRespawned) {
             // basically reset the bottles
             reset();
             gGame.player.justRespawned = false;
@@ -418,7 +417,7 @@ namespace game {
     }
 
     int SummerS2::update(float dt) {
-        if (gGame.player.justRespawned){
+        if (gGame.player.justRespawned) {
             reset();
             gGame.player.justRespawned = false;
         }
@@ -495,25 +494,39 @@ namespace game {
 
                 if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
 
-                if (tileType == 2) {
+                // Vertical spikes. Type 2 points up; type 9 points down. Use a
+                // slight offset to sink the sprite into the tile by ~12% of
+                // its height. Without this offset the spike base would float
+                // slightly above the tile, leaving a visible gap. Mirroring
+                // the V coordinates flips the sprite for downward spikes.
+                if (tileType == 2 || tileType == 9) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
-                        gfx::Vec2 ss{ size.x, size.y * 1.5f };
-                        gfx::Vec2 sp = pos; sp.y += (ss.y - size.y) * 0.5f;
-                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, 0.0f, 0.0f, 1.0f, 1.0f);
+                        float heightScale = 1.5f;
+                        gfx::Vec2 ss{ size.x, size.y * heightScale };
+                        gfx::Vec2 sp = pos;
+                        if (tileType == 2) {
+                            // Up-facing: anchor base to cell bottom then sink
+                            sp.y += (ss.y - size.y) * 0.5f;
+                            sp.y -= size.y * 0.12f;
+                        }
+                        else {
+                            // Down-facing: anchor base to cell top then sink
+                            sp.y -= (ss.y - size.y) * 0.5f;
+                            sp.y += size.y * 0.12f;
+                        }
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 9) {
+                            v0 = 1.0f; v1 = 0.0f;
+                        }
+                        // Round to avoid sub-pixel gaps
+                        sp.x = std::round(sp.x);
+                        sp.y = std::round(sp.y);
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
-                    else gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
-                    continue;
-                }
-
-                if (tileType == 9) {
-                    AEGfxTexture* spikeTex = sprite::spikes();
-                    if (spikeTex) {
-                        gfx::Vec2 ss{ size.x, size.y * 1.5f };
-                        gfx::Vec2 sp = pos; sp.y -= (ss.y - size.y) * 0.5f;
-                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, 0.0f, 1.0f, 1.0f, 0.0f);
+                    else {
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                     }
-                    else gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                     continue;
                 }
 
@@ -667,7 +680,7 @@ namespace game {
     }
 
     int SummerS3::update(float dt) {
-        if (gGame.player.justRespawned){
+        if (gGame.player.justRespawned) {
             reset(); // reset the bottle
             gGame.player.justRespawned = false;
         }
@@ -755,14 +768,31 @@ namespace game {
                 float border = (cellW < cellH ? cellW : cellH) * 0.05f;
                 u32 borderColor = 0xFF000000;
 
+                // Vertical spikes. Type 2 points up; type 9 points down. Sink
+                // them slightly into the tile so there is no visible gap.
                 if (tileType == 2 || tileType == 9) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
-                        gfx::Vec2 ss{ size.x, size.y * 1.5f };
+                        float heightScale = 1.5f;
+                        gfx::Vec2 ss{ size.x, size.y * heightScale };
                         gfx::Vec2 sp = pos;
-                        sp.y += (tileType == 2) ? (ss.y - size.y) * 0.5f : -(ss.y - size.y) * 0.5f;
-                        float u0 = 0, v0 = 0, u1 = 1, v1 = 1;
-                        if (tileType == 9) { v0 = 1.0f; v1 = 0.0f; }
+                        if (tileType == 2) {
+                            // Up-facing: anchor base then sink by ~12%
+                            sp.y += (ss.y - size.y) * 0.5f;
+                            sp.y -= size.y * 0.12f;
+                        }
+                        else {
+                            // Down-facing: anchor base then sink by ~12%
+                            sp.y -= (ss.y - size.y) * 0.5f;
+                            sp.y += size.y * 0.12f;
+                        }
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 9) {
+                            v0 = 1.0f; v1 = 0.0f;
+                        }
+                        // Round to integral pixels to avoid sub-pixel gaps
+                        sp.x = std::round(sp.x);
+                        sp.y = std::round(sp.y);
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                     continue;

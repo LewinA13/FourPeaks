@@ -868,15 +868,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         // Helper: start a PokemonWipe transition to a target scene.
         // Call this instead of setting currentState directly for level switches.
+        // Always reset and start a new transition. This avoids situations where
+        // back-to-back teleports happen before the previous transition has
+        // finished (for example, quickly chaining Winter S2->S3->S4). In such
+        // cases, ignoring the second trigger would cause the scene switch to
+        // occur without the wipe effect. By resetting and starting a new
+        // transition whenever a teleport is requested we ensure the wipe
+        // animation always plays.
         auto triggerTransition = [&](SceneState target)
             {
-                if (!gTransition.isActive())
+                // If a transition is already running, reset it so that a new
+                // wipe can begin immediately. The reset call clears any
+                // pending switch flags and sets the phase back to idle.
+                if (gTransition.isActive())
                 {
-                    gTransition.style = TransitionStyle::PokemonWipe;
                     gTransition.reset();
-                    gTransition.start();
-                    transitionTarget = target;
                 }
+                gTransition.style = TransitionStyle::PokemonWipe;
+                gTransition.start();
+                transitionTarget = target;
             };
 
         UI::gDialog.PLAYERNEARSIGN(false);
