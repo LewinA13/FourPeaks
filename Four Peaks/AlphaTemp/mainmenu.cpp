@@ -35,7 +35,7 @@ namespace game
     int   backgroundFrame = 0;
     float backgroundTimer = 0.0f;
     constexpr int   backgroundFrameCount = 6;
-    constexpr float backgroundFrameTime = 0.09f;   // seconds per frame (~11 fps)
+    constexpr float backgroundFrameTime = 0.09f;   //Adjust according to desired speed
 
 
     // -------------------------------------------------------------------------
@@ -59,7 +59,9 @@ namespace game
     static f32 textHalfWidth(const char* text, f32 scale = 1.0f)
     {
         f32 w = 0.f, h = 0.f;
+        //Gets the width and height of th text string if it were to be printed at scale 1
         AEGfxGetPrintSize(gFontId, text, scale, &w, &h);
+        //Obtains the half-width aka middle point of the text string.
         return w * 0.5f;
     }
 
@@ -67,6 +69,7 @@ namespace game
     static void printCentered(f32 y, u32 color,
         const char* text, f32 scale = 1.0f)
     {
+        //Allows the printing of text to be at the center of screen and adding the negative value shifts the text to the left. Allowing centering fit
         f32 x = -textHalfWidth(text, scale);
         printText(x, y, color, text, scale);
     }

@@ -104,7 +104,9 @@ namespace game {
         for (const auto& p : particles)
         {
             if (!p.active) continue;
+			//This is to convert the particle's alpha (0.0 to 1.0) into an 8-bit integer (0 to 255) for the ARGB color format.
             u32 alpha8 = static_cast<u32>(p.alpha * 255.0f) & 0xFF;
+			//This make the snow white with the variable alpha for transparency, by placing the alpha in the highest byte and setting RGB to 255.
             u32 snowColor = (alpha8 << 24) | 0x00FFFFFF; // white with variable alpha
             gfx::Vec2 pos{ p.x, p.y };
             gfx::Vec2 size{ p.size, p.size };
@@ -369,7 +371,7 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.05f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
@@ -827,7 +829,7 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.05f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
@@ -1309,7 +1311,7 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.05f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
@@ -1794,7 +1796,7 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.05f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
