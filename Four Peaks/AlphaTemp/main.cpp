@@ -622,6 +622,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             const float h = camera::screenHeight();
             const int idx = StageIndex(currentState);
 
+            // clear artifacts when changing dialog
+            UI::gDialog.reset();
 
             // 1) Snap camera to the correct vertical band
             camera::setY(h * idx);
@@ -889,7 +891,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 transitionTarget = target;
             };
 
-        UI::gDialog.PLAYERNEARSIGN(false);
+        UI::gDialog.playerNearSignBoard(false);
 
         if (gGame.pauseActive)
         {

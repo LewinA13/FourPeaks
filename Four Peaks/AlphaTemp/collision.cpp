@@ -302,24 +302,38 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 levelLayout[r][c] = 0;
                 break;
 
-            case 19: // sign
-                UI::gDialog.PLAYERNEARSIGN(true);
+            case 19:
+            {
+                float halfW = (float)AEGfxGetWindowWidth() * 0.5f;
+                float halfH = (float)AEGfxGetWindowHeight() * 0.5f;
+
+                float signWorldX = (c + 0.5f) * tileW - halfW;
+                float signWorldY = g_currentY - halfH + (r + 0.5f) * tileH;
+
+                UI::gDialog.setSignPos(signWorldX, signWorldY);
+                UI::gDialog.playerNearSignBoard(true);
                 UI::gDialog.showForLevel(g_currentSignID);
                 break;
+            }
+         
 
-            case 34:
+            case 34: // winter artifacts
+                UI::gDialog.triggerFromArtifact(13);
                 levelLayout[r][c] = 0;
                 break;
 
-            case 31:
+            case 31: // summer artifacts
+                UI::gDialog.triggerFromArtifact(23);
                 levelLayout[r][c] = 0;
                 break;
 
-            case 32:
+            case 32: // spring artifacts
+                UI::gDialog.triggerFromArtifact(33);
                 levelLayout[r][c] = 0;
                 break;
 
-            case 33:
+            case 33: // autumn artifacts
+                UI::gDialog.triggerFromArtifact(44);
                 levelLayout[r][c] = 0;
                 break;
 
