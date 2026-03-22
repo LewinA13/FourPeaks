@@ -166,9 +166,11 @@ namespace
                 }
                 else if (tileType == 32) {
                     AEGfxTexture* springArtifactsTex = sprite::springArtifacts();
+                    float bobOffset = sinf((float)AEGetTime(nullptr) * 2.0f) * (cellH * 0.08f);
+                    gfx::Vec2 artifactsPos{ pos.x, pos.y + bobOffset };
                     gfx::Vec2 artifactsSize{ size.x * 0.9f, size.y * 0.9f };
-                    if (springArtifactsTex) gfx::drawSprite(springArtifactsTex, pos, 0.0f, artifactsSize, 0, 0, 1, 1);
-                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                    if (springArtifactsTex) gfx::drawSprite(springArtifactsTex, artifactsPos, 0.0f, artifactsSize, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(artifactsPos, 0.0f, size, 0xFF00AA00u);
                 }
                 else if (tileType == 30)
                 {

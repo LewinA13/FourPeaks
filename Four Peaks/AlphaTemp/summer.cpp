@@ -1106,9 +1106,11 @@ namespace game {
                 else if (drawSpecialTile(tileType, pos, size)) { /* drawn */ }
                 else if (tileType == 31) {
                     AEGfxTexture* summerArtifactsTex = sprite::summerArtifacts();
+                    float bobOffset = sinf((float)AEGetTime(nullptr) * 2.0f) * (size.y * 0.08f);
+                    gfx::Vec2 artifactsPos{ pos.x, pos.y + bobOffset };
                     gfx::Vec2 artifactsSize{ size.x * 0.9f, size.y * 0.9f };
-                    if (summerArtifactsTex) gfx::drawSprite(summerArtifactsTex, pos, 0.0f, artifactsSize, 0, 0, 1, 1);
-                    else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
+                    if (summerArtifactsTex) gfx::drawSprite(summerArtifactsTex, artifactsPos, 0.0f, artifactsSize, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(artifactsPos, 0.0f, size, 0xFF00AA00u);
                 }
                 else if (tileType == 3) {
                     AEGfxTexture* t = sprite::spring2();
