@@ -605,8 +605,7 @@ int game::SpringS2::update(float dt)
         float zoneRight = gx + cw;
         float zoneBot   = gy;
         float zoneTop   = gy + ch * 3.0f;
-        if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-            gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+        if (playerOverlapsRect(gGame.player, zoneLeft, zoneRight, zoneBot, zoneTop))
             return 41;
     }
 
@@ -678,8 +677,7 @@ int game::SpringS3::update(float dt)
         float zoneRight = gx + cw;
         float zoneBot   = gy;
         float zoneTop   = gy + ch * 3.0f;
-        if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-            gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+        if (playerOverlapsRect(gGame.player, zoneLeft, zoneRight, zoneBot, zoneTop))
             return 42;
     }
 
@@ -742,6 +740,8 @@ int game::SpringS4::update(float dt)
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
 
+    // Teleporter to AutumnS1
+    if (!camera::isTransitioning())
     // Teleport zone: matches visual indicator (col 31, rows 18-19)
     {
         float gx, gy, cw, ch;

@@ -647,8 +647,7 @@ int game::AutumnS2::update(float dt)
         float zoneRight = gx + cw;
         float zoneBot   = gy;
         float zoneTop   = gy + ch * 3.0f;
-        if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-            gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+        if (playerOverlapsRect(gGame.player, zoneLeft, zoneRight, zoneBot, zoneTop))
             return 61;
     }
 
@@ -752,8 +751,7 @@ int game::AutumnS3::update(float dt)
         float zoneRight = gx + cw;
         float zoneBot   = gy;
         float zoneTop   = gy + ch * 3.0f;
-        if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-            gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+        if (playerOverlapsRect(gGame.player, zoneLeft, zoneRight, zoneBot, zoneTop))
             return 62;
     }
 

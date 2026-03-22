@@ -22,8 +22,8 @@
 typedef std::uint32_t u32;
 
 // Phase durations in seconds (before applying speed multiplier)
-static constexpr float FADE_IN_DURATION = 0.75f;
-static constexpr float HOLD_DURATION = 0.25f;
+static constexpr float FADE_IN_DURATION  = 0.75f;
+static constexpr float HOLD_DURATION     = 0.25f;
 static constexpr float FADE_OUT_DURATION = 0.75f;
 
 // ---------------------------------------------------------------------------
@@ -41,7 +41,7 @@ void Transition::drawBlackOverlay(float alpha)
     float minY = AEGfxGetWinMinY();
     float maxY = AEGfxGetWinMaxY();
 
-    u32 a8 = static_cast<u32>(alpha * 255.0f);
+    u32 a8  = static_cast<u32>(alpha * 255.0f);
     u32 col = (a8 << 24); // ARGB: alpha, R=0, G=0, B=0
 
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
@@ -53,11 +53,11 @@ void Transition::drawBlackOverlay(float alpha)
     // Two triangles covering the full screen - one draw call total
     AEGfxMeshStart();
     AEGfxTriAdd(minX, maxY, col, 0.0f, 0.0f,
-        maxX, maxY, col, 0.0f, 0.0f,
-        minX, minY, col, 0.0f, 0.0f);
+                maxX, maxY, col, 0.0f, 0.0f,
+                minX, minY, col, 0.0f, 0.0f);
     AEGfxTriAdd(maxX, maxY, col, 0.0f, 0.0f,
-        maxX, minY, col, 0.0f, 0.0f,
-        minX, minY, col, 0.0f, 0.0f);
+                maxX, minY, col, 0.0f, 0.0f,
+                minX, minY, col, 0.0f, 0.0f);
     AEGfxVertexList* mesh = AEGfxMeshEnd();
     if (mesh)
     {
@@ -75,10 +75,10 @@ void Transition::drawBlackOverlay(float alpha)
 // ---------------------------------------------------------------------------
 void Transition::start()
 {
-    phase = Phase::FadeIn;
-    t = 0.0f;
+    phase         = Phase::FadeIn;
+    t             = 0.0f;
     switchPending = false;
-    switchDone = false;
+    switchDone    = false;
 }
 
 // ---------------------------------------------------------------------------
@@ -92,8 +92,8 @@ void Transition::update(float dt)
     float duration = 0.0f;
     switch (phase)
     {
-    case Phase::FadeIn:  duration = FADE_IN_DURATION / speed; break;
-    case Phase::Hold:    duration = HOLD_DURATION / speed; break;
+    case Phase::FadeIn:  duration = FADE_IN_DURATION  / speed; break;
+    case Phase::Hold:    duration = HOLD_DURATION     / speed; break;
     case Phase::FadeOut: duration = FADE_OUT_DURATION / speed; break;
     default: break;
     }
@@ -106,14 +106,14 @@ void Transition::update(float dt)
         switch (phase)
         {
         case Phase::FadeIn:
-            phase = Phase::Hold;
+            phase         = Phase::Hold;
             switchPending = true;   // caller should switch scene NOW
             break;
         case Phase::Hold:
             phase = Phase::FadeOut;
             break;
         case Phase::FadeOut:
-            phase = Phase::Idle;
+            phase      = Phase::Idle;
             switchDone = true;
             break;
         default: break;
@@ -147,14 +147,5 @@ void Transition::draw() const
         return;
     }
 
-    // Draw transition in screen space so it stays visible on every vertical
-    // stage band. This matches how the HUD and pause overlay are rendered.
-    f32 oldCamX = 0.0f;
-    f32 oldCamY = 0.0f;
-    AEGfxGetCamPosition(&oldCamX, &oldCamY);
-    AEGfxSetCamPosition(0.0f, 0.0f);
-
     drawBlackOverlay(alpha);
-
-    AEGfxSetCamPosition(oldCamX, oldCamY);
 }
