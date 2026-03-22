@@ -5,13 +5,13 @@ namespace game {
     class StageSelect {
     public:
         StageSelect();
-        int  update(float dt);  
+        int  update(float dt);
         void draw() const;
         void reset();
     private:
-        int seasonIndex;   
-        int stageIndex;   
-        bool selectingStage; 
+        int seasonIndex;
+        int stageIndex;
+        bool selectingStage;
     };
 }
 

@@ -110,6 +110,12 @@ namespace sprite
     AEGfxTexture* springArtifacts();
     AEGfxTexture* autumnArtifacts();
 
+    // Standalone Stage Images
+    AEGfxTexture* winterStage(int stageIndex);
+    AEGfxTexture* summerStage(int stageIndex);
+    AEGfxTexture* springStage(int stageIndex);
+    AEGfxTexture* autumnStage(int stageIndex);
+
 
     bool getFireUv(int frame, float& u0, float& v0, float& u1, float& v1);
     bool getSawUv(int frame, float& u0, float& v0, float& u1, float& v1);

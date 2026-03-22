@@ -5,7 +5,6 @@
 
 
 
-
 namespace sprite
 {
 
@@ -50,6 +49,15 @@ namespace sprite
         AEGfxTexture* springArtifactsTex{};
         AEGfxTexture* autumnArtifactsTex{};
 
+        // ----------------------------------------------------------------
+        // Stage preview textures [4 seasons][4 stages]
+        // Loaded once on first use via a static array inside each helper.
+        // ----------------------------------------------------------------
+        AEGfxTexture* winterStageTex[4]{};
+        AEGfxTexture* summerStageTex[4]{};
+        AEGfxTexture* springStageTex[4]{};
+        AEGfxTexture* autumnStageTex[4]{};
+
         // Fire animation (fire.png = 160x24, 8 frames 20x24)
         int fireFrame = 0;
         float fireTimer = 0.0f;
@@ -75,7 +83,6 @@ namespace sprite
         AEGfxTexture* spring2Tex{};
         AEGfxTexture* autumn1Tex{};
         AEGfxTexture* autumn2Tex{};
-
 
         constexpr float texW = 224.0f;
         constexpr float texH = 320.0f;
@@ -187,7 +194,6 @@ namespace sprite
             if (!signTex) signTex = AEGfxTextureLoad("sign.jpg");
         }
         if (!tile12Tex) {
-            // Support both your project asset paths and direct project-root drops.
             tile12Tex = AEGfxTextureLoad("Assets/center.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Assets/center.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Tile_12.png");
@@ -223,12 +229,12 @@ namespace sprite
 
         if (!stgselectbgTex) {
             stgselectbgTex = AEGfxTextureLoad("Assets/stgselectbg.png");
-            if (!breakabletileTex) stgselectbgTex = AEGfxTextureLoad("stgselectbg.jpg");
+            if (!stgselectbgTex) stgselectbgTex = AEGfxTextureLoad("stgselectbg.jpg");
         }
 
-        if (!centerframeTex){
+        if (!centerframeTex) {
             centerframeTex = AEGfxTextureLoad("Assets/Centerframe.png");
-            if (!breakabletileTex) centerframeTex = AEGfxTextureLoad("Centerframe.jpg");
+            if (!centerframeTex) centerframeTex = AEGfxTextureLoad("Centerframe.jpg");
         }
 
         // Winter tile overrides (standalone images)
@@ -252,6 +258,30 @@ namespace sprite
         if (!springArtifactsTex)  springArtifactsTex = AEGfxTextureLoad("Assets/springArtifacts.png");
         if (!autumnArtifactsTex)  autumnArtifactsTex = AEGfxTextureLoad("Assets/autumnArtifacts.png");
 
+        // ----------------------------------------------------------------
+        // Stage preview textures — loaded here so they are ready before the
+        // stage selection screen is first drawn.
+        // Update the file paths below to match your actual asset filenames.
+        // ----------------------------------------------------------------
+        if (!winterStageTex[0]) winterStageTex[0] = AEGfxTextureLoad("Assets/winter_stage1.png");
+        if (!winterStageTex[1]) winterStageTex[1] = AEGfxTextureLoad("Assets/winter_stage2.png");
+        if (!winterStageTex[2]) winterStageTex[2] = AEGfxTextureLoad("Assets/winter_stage3.png");
+        if (!winterStageTex[3]) winterStageTex[3] = AEGfxTextureLoad("Assets/winter_stage4.png");
+
+        if (!summerStageTex[0]) summerStageTex[0] = AEGfxTextureLoad("Assets/summer_stage1.png");
+        if (!summerStageTex[1]) summerStageTex[1] = AEGfxTextureLoad("Assets/summer_stage2.png");
+        if (!summerStageTex[2]) summerStageTex[2] = AEGfxTextureLoad("Assets/summer_stage3.png");
+        if (!summerStageTex[3]) summerStageTex[3] = AEGfxTextureLoad("Assets/summer_stage4.png");
+
+        if (!springStageTex[0]) springStageTex[0] = AEGfxTextureLoad("Assets/spring_stage1.png");
+        if (!springStageTex[1]) springStageTex[1] = AEGfxTextureLoad("Assets/spring_stage2.png");
+        if (!springStageTex[2]) springStageTex[2] = AEGfxTextureLoad("Assets/spring_stage3.png");
+        if (!springStageTex[3]) springStageTex[3] = AEGfxTextureLoad("Assets/spring_stage4.png");
+
+        if (!autumnStageTex[0]) autumnStageTex[0] = AEGfxTextureLoad("Assets/autumn_stage1.png");
+        if (!autumnStageTex[1]) autumnStageTex[1] = AEGfxTextureLoad("Assets/autumn_stage2.png");
+        if (!autumnStageTex[2]) autumnStageTex[2] = AEGfxTextureLoad("Assets/autumn_stage3.png");
+        if (!autumnStageTex[3]) autumnStageTex[3] = AEGfxTextureLoad("Assets/autumn_stage4.png");
     }
 
 
@@ -332,7 +362,7 @@ namespace sprite
         {
             AEGfxTextureUnload(signTex);
             signTex = nullptr;
-        } // make it look nc later - A
+        }
         if (tile12Tex) { AEGfxTextureUnload(tile12Tex); tile12Tex = nullptr; }
         if (tile02Tex) { AEGfxTextureUnload(tile02Tex); tile02Tex = nullptr; }
         if (bottleTex) { AEGfxTextureUnload(bottleTex); bottleTex = nullptr; }
@@ -360,6 +390,15 @@ namespace sprite
         if (summerArtifactsTex) { AEGfxTextureUnload(summerArtifactsTex); summerArtifactsTex = nullptr; }
         if (springArtifactsTex) { AEGfxTextureUnload(springArtifactsTex); springArtifactsTex = nullptr; }
         if (autumnArtifactsTex) { AEGfxTextureUnload(autumnArtifactsTex); autumnArtifactsTex = nullptr; }
+
+        // Unload stage preview textures
+        for (int i = 0; i < 4; ++i)
+        {
+            if (winterStageTex[i]) { AEGfxTextureUnload(winterStageTex[i]); winterStageTex[i] = nullptr; }
+            if (summerStageTex[i]) { AEGfxTextureUnload(summerStageTex[i]); summerStageTex[i] = nullptr; }
+            if (springStageTex[i]) { AEGfxTextureUnload(springStageTex[i]); springStageTex[i] = nullptr; }
+            if (autumnStageTex[i]) { AEGfxTextureUnload(autumnStageTex[i]); autumnStageTex[i] = nullptr; }
+        }
     }
 
     AEGfxTexture* tileset()
@@ -422,7 +461,6 @@ namespace sprite
         return crackTex;
     }
 
-    // make it look nice later - Arun
     AEGfxTexture* sign() { return signTex; }
     AEGfxTexture* tile12() { return tile12Tex; }
     AEGfxTexture* tile02() { return tile02Tex; }
@@ -441,8 +479,8 @@ namespace sprite
     AEGfxTexture* autumn1() { return autumn1Tex; }
     AEGfxTexture* autumn2() { return autumn2Tex; }
 
-    AEGfxTexture* winterC() { return winterCTex; }   // tile ID 4 -> WinterC.png
-    AEGfxTexture* winterT() { return winterTTex; }   // tile ID 6 -> WinterT.png
+    AEGfxTexture* winterC() { return winterCTex; }
+    AEGfxTexture* winterT() { return winterTTex; }
 
     AEGfxTexture* grass() { return grassTex; }
     AEGfxTexture* fireTex() { return fireTex_; }
@@ -452,6 +490,34 @@ namespace sprite
     AEGfxTexture* summerArtifacts() { return summerArtifactsTex; }
     AEGfxTexture* springArtifacts() { return springArtifactsTex; }
     AEGfxTexture* autumnArtifacts() { return autumnArtifactsTex; }
+
+    // ----------------------------------------------------------------
+    // Public stage preview accessors (declared in sprite.hpp)
+    // Returns nullptr if index is out of range or texture failed to load.
+    // ----------------------------------------------------------------
+    AEGfxTexture* winterStage(int stageIndex)
+    {
+        if (stageIndex < 0 || stageIndex > 3) return nullptr;
+        return winterStageTex[stageIndex];
+    }
+
+    AEGfxTexture* summerStage(int stageIndex)
+    {
+        if (stageIndex < 0 || stageIndex > 3) return nullptr;
+        return summerStageTex[stageIndex];
+    }
+
+    AEGfxTexture* springStage(int stageIndex)
+    {
+        if (stageIndex < 0 || stageIndex > 3) return nullptr;
+        return springStageTex[stageIndex];
+    }
+
+    AEGfxTexture* autumnStage(int stageIndex)
+    {
+        if (stageIndex < 0 || stageIndex > 3) return nullptr;
+        return autumnStageTex[stageIndex];
+    }
 
     bool getFireUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
@@ -494,7 +560,6 @@ namespace sprite
         if (frame < 0) frame = 0;
         frame %= frameCount;
 
-        // small inset to reduce bleeding between frames
         constexpr float insetPx = 0.5f;
 
         float px = frame * frameW;
@@ -514,7 +579,6 @@ namespace sprite
     }
 
 
-    // UVs for checkpoint animation frames
     bool getCheckpointUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
         // Checkpoint.png = 320x32 (10 frames, each 32x32 laid horizontally)
@@ -527,7 +591,6 @@ namespace sprite
         if (frame < 0) frame = 0;
         frame %= frameCount;
 
-        // Small inset to reduce texture bleeding
         constexpr float insetPx = 0.5f;
 
         float px = frame * frameW;
@@ -546,10 +609,8 @@ namespace sprite
         return true;
     }
 
-    // UVs for crack animation frames
     bool getCrackUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
-        // cf985dfb-...jpg = 224x32 (7 frames, each 32x32 laid horizontally)
         constexpr int frameCount = 7;
         constexpr float sheetW = 160.0f;
         constexpr float sheetH = 32.0f;
@@ -559,7 +620,6 @@ namespace sprite
         if (frame < 0) frame = 0;
         frame %= frameCount;
 
-        // Small inset to reduce bleeding
         constexpr float insetPx = 0.5f;
 
         float px = frame * frameW;
@@ -619,9 +679,6 @@ namespace sprite
 
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size)
     {
-        // Tile IDs in your project:
-        // 8  = coin
-        // 10 = checkpoint
         if (tileType == 8)
         {
             if (!coinTex) return true;
@@ -629,7 +686,6 @@ namespace sprite
             float u0{}, v0{}, u1{}, v1{};
             getCoinUv(coinFrame, u0, v0, u1, v1);
 
-            // melon size
             gfx::Vec2 coinSize{ size.x * 0.9f, size.y * 0.9f };
             gfx::drawSprite(coinTex, pos, 0.0f, coinSize, u0, v0, u1, v1);
             return true;
@@ -642,27 +698,23 @@ namespace sprite
             float u0{}, v0{}, u1{}, v1{};
             getCheckpointUv(checkpointFrame, u0, v0, u1, v1);
 
-            // Draw same height as signboard (1.5x cell height), slightly wider
             gfx::Vec2 cpSize{ size.x * 1.2f, size.y * 1.5f };
-            pos.y += (cpSize.y - size.y) * 0.5f;  // shift up so bottom aligns with tile bottom
+            pos.y += (cpSize.y - size.y) * 0.5f;
             gfx::drawSprite(checkpointTex, pos, 0.0f, cpSize, u0, v0, u1, v1);
             return true;
         }
 
-        // Tile 24 = fire (animated, bigger to look denser)
         if (tileType == 24)
         {
             if (!fireTex_) return true;
             float u0{}, v0{}, u1{}, v1{};
             getFireUv(fireFrame, u0, v0, u1, v1);
-            // Make fire 1.5x wider and 2x taller, anchored at bottom of cell
             gfx::Vec2 fireSize{ size.x * 1.5f, size.y * 2.0f };
             gfx::Vec2 firePos{ pos.x, pos.y + (fireSize.y - size.y) * 0.5f };
             gfx::drawSprite(fireTex_, firePos, 0.0f, fireSize, u0, v0, u1, v1);
             return true;
         }
 
-        // Tile 25 = saw (animated, fits exactly in cell)
         if (tileType == 25)
         {
             if (!sawTex_) return true;
@@ -672,7 +724,6 @@ namespace sprite
             return true;
         }
 
-        // Tile 18 = bottle (floating animation on Y axis)
         if (tileType == 18)
         {
             if (!bottleTex) return true;
@@ -687,23 +738,14 @@ namespace sprite
     }
 
 
-    // UVs from tileset
     bool getTileUv(int tileType, float& u0, float& v0, float& u1, float& v1)
     {
         switch (tileType)
         {
-            // keep your old tile 1 if you still use it:
-            // bottom-left 32x32 in this sheet is x=0,y=288
         case 1: uvFromPixels(0, 288, 32, 32, u0, v0, u1, v1); return true;
-
-            // New tiles (leave 2 for spikes)
-        // New tiles (32x32 versions from the spritesheet)
-        case 3: uvFromPixels(144, 48, 32, 32, u0, v0, u1, v1); return true; // brown (32x32 version of big)
-            // case 4 and 6 are now standalone textures (WinterC.png / WinterT.png)
-        case 5: uvFromPixels(144, 288, 32, 32, u0, v0, u1, v1); return true; // ice   (32x32 version of big)
-
-        case 7: uvFromPixels(48, 128, 32, 32, u0, v0, u1, v1); return true; // grey+ice (your red 5)
-
+        case 3: uvFromPixels(144, 48, 32, 32, u0, v0, u1, v1); return true;
+        case 5: uvFromPixels(144, 288, 32, 32, u0, v0, u1, v1); return true;
+        case 7: uvFromPixels(48, 128, 32, 32, u0, v0, u1, v1); return true;
         }
 
         return false;
@@ -713,8 +755,8 @@ namespace sprite
 
     bool getHeatBarUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
-        if (frame < 0 || frame > 5) return false;   // was 11
-        constexpr float frameW = 48.0f / 384.0f;    // was 32.0f / 384.0f
+        if (frame < 0 || frame > 5) return false;
+        constexpr float frameW = 48.0f / 384.0f;
         u0 = frame * frameW;
         u1 = u0 + frameW;
         v0 = 0.5f;
