@@ -206,6 +206,25 @@ namespace
                     }
                     continue;
                 }
+<<<<<<< Updated upstream
+=======
+                else if (tileType == 19) {
+                    AEGfxTexture* tex = sprite::sign();
+                    // Draw sign 2 tiles tall, anchored to bottom of tile
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
+                }
+                else if (tileType == 33) {
+                    AEGfxTexture* autumnArtifactsTex = sprite::autumnArtifacts();
+                    float bobOffset = sinf((float)AEGetTime(nullptr) * 2.0f) * (cellH * 0.08f);
+                    gfx::Vec2 artifactsPos{ pos.x, pos.y + bobOffset };
+                    gfx::Vec2 artifactsSize{ size.x * 0.9f, size.y * 0.9f };
+                    if (autumnArtifactsTex) gfx::drawSprite(autumnArtifactsTex, artifactsPos, 0.0f, artifactsSize, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(artifactsPos, 0.0f, size, 0xFF00AA00u);
+                }
+>>>>>>> Stashed changes
                 else if (tileType == 4)
                 {
                     AEGfxTexture* t = sprite::winterC();
@@ -542,7 +561,7 @@ int game::AutumnS1::update(float dt)
             else brktile.crackFrame = nf;
         }
     }
-    
+
     if (gGame.player.respawning) {
         for (auto& brktile : breakableTiles) {
             tileMap[brktile.row][brktile.col] = 15;

@@ -104,7 +104,13 @@ namespace game {
         for (const auto& p : particles)
         {
             if (!p.active) continue;
+<<<<<<< Updated upstream
             u32 alpha8 = static_cast<u32>(p.alpha * 255.0f) & 0xFF;
+=======
+            //This is to convert the particle's alpha (0.0 to 1.0) into an 8-bit integer (0 to 255) for the ARGB color format.
+            u32 alpha8 = static_cast<u32>(p.alpha * 255.0f) & 0xFF;
+            //This make the snow white with the variable alpha for transparency, by placing the alpha in the highest byte and setting RGB to 255.
+>>>>>>> Stashed changes
             u32 snowColor = (alpha8 << 24) | 0x00FFFFFF; // white with variable alpha
             gfx::Vec2 pos{ p.x, p.y };
             gfx::Vec2 size{ p.size, p.size };
@@ -1982,6 +1988,18 @@ namespace game {
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                 }
+<<<<<<< Updated upstream
+=======
+                // artifacts
+                else if (tileType == 34) {
+                    AEGfxTexture* winterArtifactsTex = sprite::winterArtifacts();
+                    float bobOffset = sinf((float)AEGetTime(nullptr) * 2.0f) * (cellH * 0.08f);
+                    gfx::Vec2 artifactsPos{ pos.x, pos.y + bobOffset };
+                    gfx::Vec2 artifactsSize{ size.x * 0.9f, size.y * 0.9f };
+                    if (winterArtifactsTex) gfx::drawSprite(winterArtifactsTex, artifactsPos, 0.0f, artifactsSize, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(artifactsPos, 0.0f, size, 0xFF00AA00u);
+                }
+>>>>>>> Stashed changes
                 // WinterC (ID 4) and WinterT (ID 6) standalone textures
                 else if (tileType == 4)
                 {

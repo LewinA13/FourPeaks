@@ -156,7 +156,27 @@ namespace
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                     // falls through to border pass
                 }
+<<<<<<< Updated upstream
                 else if (tileType == 1)
+=======
+                else if (tileType == 19) {
+                    AEGfxTexture* tex = sprite::sign();
+                    // Draw sign 2 tiles tall, anchored to bottom of tile
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
+                    if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
+                    else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
+                }
+                else if (tileType == 32) {
+                    AEGfxTexture* springArtifactsTex = sprite::springArtifacts();
+                    float bobOffset = sinf((float)AEGetTime(nullptr) * 2.0f) * (cellH * 0.08f);
+                    gfx::Vec2 artifactsPos{ pos.x, pos.y + bobOffset };
+                    gfx::Vec2 artifactsSize{ size.x * 0.9f, size.y * 0.9f };
+                    if (springArtifactsTex) gfx::drawSprite(springArtifactsTex, artifactsPos, 0.0f, artifactsSize, 0, 0, 1, 1);
+                    else   gfx::drawRectangle(artifactsPos, 0.0f, size, 0xFF00AA00u);
+                }
+                else if (tileType == 30)
+>>>>>>> Stashed changes
                 {
                     AEGfxTexture* t = sprite::spring1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
