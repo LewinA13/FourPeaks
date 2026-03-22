@@ -132,7 +132,7 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm],
 
     for (int r = box.rowStart; r <= box.rowEnd; r++) {
         for (int c = box.colStart; c <= box.colEnd; c++) {
-            int tile = levelLayout[r][c];          
+            int tile = levelLayout[r][c];
 
             if (tile == 15) {
                 // Breakable tile (special case): only the upper half is solid.

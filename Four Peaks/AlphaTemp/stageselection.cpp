@@ -165,17 +165,16 @@ namespace game {
         {
             bool unlocked = IsSeasonUnlockedLocal(leftSeason);
 
-            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { mainCardW + 6, mainCardH + 6 }, 0xFF333333u);
-            gfx::drawSprite(seasonBg[leftSeason], { leftBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
-
-            // Locked seasons get a stronger dark overlay.
-            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { mainCardW, mainCardH },
-                unlocked ? 0x77000000u : 0xCC444444u);
-
-            // hong yang code below
             gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { CardW + 6, CardH + 6 }, 0xFF333333u);
             gfx::drawSprite(seasonBg[leftSeason], { leftBgCX, cardY }, 0.0f, { CardW, CardH }, 0, 0, 1, 1);
-            gfx::drawRectangle({ leftBgCX, cardY }, 0.0f, { CardW, CardH }, 0x77000000u);
+
+            // draw overlay last so it is not covered by another sprite draw
+            gfx::drawRectangle(
+                { leftBgCX, cardY },
+                0.0f,
+                { CardW, CardH },
+                unlocked ? 0x77000000u : 0xCC444444u
+            );
         }
         // show grey if not being selected
         {
@@ -192,17 +191,16 @@ namespace game {
         {
             bool unlocked = IsSeasonUnlockedLocal(rightSeason);
 
-            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { mainCardW + 6, mainCardH + 6 }, 0xFF333333u);
-            gfx::drawSprite(seasonBg[rightSeason], { rightBgCX, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
-
-            // Locked seasons get a stronger dark overlay.
-            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { mainCardW, mainCardH },
-                unlocked ? 0x77000000u : 0xCC444444u);
-
-            //hy code below
             gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { CardW + 6, CardH + 6 }, 0xFF333333u);
             gfx::drawSprite(seasonBg[rightSeason], { rightBgCX, cardY }, 0.0f, { CardW, CardH }, 0, 0, 1, 1);
-            gfx::drawRectangle({ rightBgCX, cardY }, 0.0f, { CardW, CardH }, 0x77000000u);
+
+            // draw overlay last so it stays visible
+            gfx::drawRectangle(
+                { rightBgCX, cardY },
+                0.0f,
+                { CardW, CardH },
+                unlocked ? 0x77000000u : 0xCC444444u
+            );
         }
         {
             float wx = AEGfxGetWinMaxX() - sideCardW + 10.0f;
@@ -219,18 +217,14 @@ namespace game {
             bool unlocked = IsSeasonUnlockedLocal(seasonIndex);
             u32 borderColor = unlocked ? seasonBorderColor[seasonIndex] : 0xFF555555u;
 
-            gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { mainCardW + 10, mainCardH + 10 }, borderColor);
-            gfx::drawSprite(seasonBg[seasonIndex], { 0.0f, cardY }, 0.0f, { mainCardW, mainCardH }, 0, 0, 1, 1);
-
-            // Grey overlay when this season is still locked.
-            if (!unlocked)
-                gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { mainCardW, mainCardH }, 0xCC444444u);
-
-            // hy code below
-            gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { CardW + 10, CardH + 10 }, seasonBorderColor[seasonIndex]);
-            //gfx::drawSprite(centerframetex, { -10.0f, cardY - 120.0f }, 0.0f, { mainCardW + 500, mainCardH + 590 }, 0, 0, 1, 1);
+            gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { CardW + 10, CardH + 10 }, borderColor);
             gfx::drawSprite(seasonBg[seasonIndex], { 0.0f, cardY }, 0.0f, { CardW, CardH }, 0, 0, 1, 1);
-          
+
+            // draw locked overlay after the final sprite draw
+            if (!unlocked)
+            {
+                gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { CardW, CardH }, 0xCC444444u);
+            }
           
         }
         {
