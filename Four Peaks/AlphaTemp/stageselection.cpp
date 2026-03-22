@@ -30,9 +30,28 @@ static bool IsStageUnlockedLocal(int seasonIndex, int stageIndex)
     return gGame.unlockedStages[idx];
 }
 
+// Returns half the rendered width of a string — identical to mainmenu.cpp's helper.
+static f32 textHalfWidth(const char* text, f32 scale = 1.0f)
+{
+    f32 w = 0.f, h = 0.f;
+    AEGfxGetPrintSize(gFontId, text, scale, &w, &h);
+    return w * 0.5f;
+}
+
+// Prints text horizontally centered on screen — identical to mainmenu.cpp's helper.
+static void printCentered(f32 y, u32 argbColor, const char* text, f32 scale = 1.0f)
+{
+    f32 a = ((argbColor >> 24) & 0xFF) / 255.0f;
+    f32 r = ((argbColor >> 16) & 0xFF) / 255.0f;
+    f32 g = ((argbColor >> 8) & 0xFF) / 255.0f;
+    f32 b = ((argbColor >> 0) & 0xFF) / 255.0f;
+    f32 x = -textHalfWidth(text, scale);
+    AEGfxPrint(gFontId, text, x, y, scale, r, g, b, a);
+}
+
 namespace game {
 
-    StageSelect::StageSelect():seasonIndex(0), stageIndex(0), selectingStage(false) {}
+    StageSelect::StageSelect() :seasonIndex(0), stageIndex(0), selectingStage(false) {}
 
 
     int StageSelect::update(float dt)
@@ -56,7 +75,7 @@ namespace game {
             }
 
             if (AEInputCheckTriggered(AEVK_ESCAPE))
-                return 2;  
+                return 2;
         }
         else
         {
@@ -78,7 +97,7 @@ namespace game {
 
             if (AEInputCheckTriggered(AEVK_ESCAPE))
             {
-                selectingStage = false;  
+                selectingStage = false;
             }
         }
 
@@ -86,7 +105,7 @@ namespace game {
     }
 
 
-   
+
     void StageSelect::draw() const
     {
 
@@ -97,9 +116,9 @@ namespace game {
         float minY = -screenH * 0.5f;
         float maxY = screenH * 0.5f;
 
-// ----------------------------------------------------------------
-// set up beackground
-// ----------------------------------------------------------------
+        // ----------------------------------------------------------------
+        // set up beackground
+        // ----------------------------------------------------------------
 
         AEGfxTexture* bg = sprite::stgselectBackground();
 
@@ -109,12 +128,12 @@ namespace game {
         }
 
 
-// ----------------------------------------------------------------
-// season bg + name + color
-// ----------------------------------------------------------------
-        // 0 - Winter,  1 - Summer,  2 - Spring,  3 - Autumn
+        // ----------------------------------------------------------------
+        // season bg + name + color
+        // ----------------------------------------------------------------
+                // 0 - Winter,  1 - Summer,  2 - Spring,  3 - Autumn
         AEGfxTexture* seasonBg[4] = {
-            sprite::background(),      
+            sprite::background(),
             sprite::summerBackground(),
             sprite::springBackground(),
             sprite::autumnBackground()
@@ -134,9 +153,9 @@ namespace game {
         static const float seasonG[] = { 0.80f, 0.80f, 1.0f,  0.53f };
         static const float seasonB[] = { 1.0f,  0.0f,  0.53f, 0.27f };
 
-// ----------------------------------------------------------------
-// Season card 
-// ----------------------------------------------------------------
+        // ----------------------------------------------------------------
+        // Season card 
+        // ----------------------------------------------------------------
 
         AEGfxTexture* centerframetex = sprite::centerframe();
 
@@ -208,7 +227,7 @@ namespace game {
             AEVec2 pos = WorldToNorm(wx, wy);
             AEGfxPrint(gFontId, seasonNames[rightSeason], pos.x, pos.y, 1.0f, 0.6f, 0.6f, 0.6f, 1.0f);
         }
-      
+
         // ----------------------------------------------------------------
         // center 
         // ----------------------------------------------------------------
@@ -231,17 +250,18 @@ namespace game {
             float wx = 0.0f - CardW * 0.5f + 20.0f;
             float wy = cardY + CardH * 0.5f - 40.0f;
             AEVec2 pos = WorldToNorm(wx, wy);
-            AEGfxPrint(gFontId, seasonNames[seasonIndex], pos.x, pos.y, 2.0f, seasonR[seasonIndex], seasonG[seasonIndex], seasonB[seasonIndex], 1.0f);}
+            AEGfxPrint(gFontId, seasonNames[seasonIndex], pos.x, pos.y, 2.0f, seasonR[seasonIndex], seasonG[seasonIndex], seasonB[seasonIndex], 1.0f);
+        }
 
 
 
 
-        AEGfxPrint(gFontId, "STAGE SELECTION",
-            -0.28f, 0.88f, 1.8f, 1.0f, 1.0f, 0.8f, 1.0f);
+        printCentered(0.88f, 0xFFFFFFCCu, "STAGE SELECTION", 1.8f);
 
-// ----------------------------------------------------------------
-//  Stage card
-// ----------------------------------------------------------------
+
+        // ----------------------------------------------------------------
+        //  Stage card
+        // ----------------------------------------------------------------
         static const char* stageLabels[] = { "Stage 1", "Stage 2", "Stage 3", "Stage 4" };
 
         float stageCardW = screenW * 0.18f;
@@ -250,8 +270,16 @@ namespace game {
         float stageSpacing = screenW * 0.21f;
         float stageStartX = 0.0f - stageSpacing * 1.5f;
 
-      
-    
+
+        AEGfxTexture* stageTex[4][4] = {
+        { sprite::winterStage(0), sprite::winterStage(1), sprite::winterStage(2), sprite::winterStage(3) },
+        { sprite::summerStage(0), sprite::summerStage(1), sprite::summerStage(2), sprite::summerStage(3) },
+        { sprite::springStage(0), sprite::springStage(1), sprite::springStage(2), sprite::springStage(3) },
+        { sprite::autumnStage(0), sprite::autumnStage(1), sprite::autumnStage(2), sprite::autumnStage(3) },
+        };
+
+
+
         if (selectingStage)
         {
             for (int i = 0; i < 4; ++i)
@@ -280,6 +308,19 @@ namespace game {
                 gfx::drawRectangle({ cx, stageRowY }, 0.0f,
                     { stageCardW, stageCardH }, bgCol);
 
+                AEGfxTexture* preview = stageTex[seasonIndex][i];
+                if (preview)
+                {
+                    // Dim non-selected cards; full brightness on selected
+                    float alpha = sel ? 1.0f : 0.5f;
+                    gfx::drawSprite(preview, { cx, stageRowY }, 0.0f,
+                        { stageCardW, stageCardH }, 0, 0, 1, 1);
+                    // Darken overlay for non-selected cards
+                    if (!sel)
+                        gfx::drawRectangle({ cx, stageRowY }, 0.0f,
+                            { stageCardW, stageCardH }, 0x88000000u);
+                }
+
                 char code[4];
                 // get each season first alphabet
                 code[0] = seasonNames[seasonIndex][0];
@@ -307,8 +348,8 @@ namespace game {
 
 
 
-                AEGfxPrint(gFontId, code, tX, tY + 0.08f, 1.4f, tR, tG, tB, 1.0f);
-                AEGfxPrint(gFontId, stageLabels[i], tX - 0.02f, tY - 0.10f, 0.75f, tR, tG, tB, 0.9f);
+                //AEGfxPrint(gFontId, code, tX, tY + 0.08f, 1.4f, tR, tG, tB, 1.0f);
+                //AEGfxPrint(gFontId, stageLabels[i], tX - 0.02f, tY - 0.10f, 0.75f, tR, tG, tB, 0.9f);
 
                 if (!unlocked)
                 {
@@ -317,18 +358,13 @@ namespace game {
             }
 
 
-            char selText[64];
-            sprintf_s(selText, "SELECT STAGE: %c%d",
-                seasonNames[seasonIndex][0], stageIndex + 1);
-            AEGfxPrint(gFontId, selText,
-                -0.20f, -0.78f, 1.0f, 1.0f, 1.0f, 0.6f, 1.0f);
-            AEGfxPrint(gFontId, "UP / DOWN to choose    ENTER to start    ESC to go back",
-                -0.45f, -0.90f, 0.75f, 0.6f, 0.6f, 0.6f, 1.0f);
+            
+
+            printCentered(-0.8f, 0xFFFFFFCCu, "LEFT / RIGHT to change season    ENTER to select    ESC to go back", 1.0f);
         }
         else
         {
-            AEGfxPrint(gFontId, "LEFT / RIGHT to change season    ENTER to select    ESC to go back",
-                -0.50f, -0.90f, 0.75f, 0.6f, 0.6f, 0.6f, 1.0f);
+            printCentered(-0.8f, 0xFFFFFFCCu, "LEFT / RIGHT to change season    ENTER to select    ESC to go back", 1.0f);
         }
     }
 
