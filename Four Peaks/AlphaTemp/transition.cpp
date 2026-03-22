@@ -26,17 +26,17 @@
 #include <cmath>
 #include <cstdint>
 #include <array>
-#include <cstdlib>   // rand / srand
+#include <cstdlib>   // rand / srand -- remove?
 #include <cstring>   // memset
 
 typedef std::uint32_t u32;
 
-// ??? Timing constants ????????????????????????????????????????????????????????
+// Timing constants 
 static constexpr float WIPE_IN_DURATION = 0.75f;
 static constexpr float HOLD_DURATION = 0.25f;
 static constexpr float WIPE_OUT_DURATION = 0.75f;
 
-// ??? Dissolve block grid ?????????????????????????????????????????????????????
+// Dissolve block grid 
 static constexpr int DISSOLVE_COLS = 24;
 static constexpr int DISSOLVE_ROWS = 16;
 static constexpr int DISSOLVE_TOTAL = DISSOLVE_COLS * DISSOLVE_ROWS;
@@ -51,13 +51,13 @@ static void buildDissolveOrder()
     // Fisher-Yates shuffle
     for (int i = DISSOLVE_TOTAL - 1; i > 0; --i)
     {
-        int j = rand() % (i + 1);
-        std::swap(gDissolveOrder[i], gDissolveOrder[j]);
+        int j = rand() % (i + 1); // debug remove 
+        std::swap(gDissolveOrder[i], gDissolveOrder[j]); 
     }
     gDissolveReady = true;
 }
 
-// ??? Solid rectangle helper (colour draw) ????????????????????????????????????
+// Solid rectangle helper (colour draw)
 void Transition::drawSolidRect(float x, float y, float w, float h, u32 argb)
 {
     // Convert ARGB to floats
@@ -73,7 +73,7 @@ void Transition::drawSolidRect(float x, float y, float w, float h, u32 argb)
     AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
 
     AEGfxMeshStart();
-    AEGfxTriAdd(
+    AEGfxTriAdd( //simplify 
         x, y + h, (static_cast<u32>(a * 255) << 24) | (static_cast<u32>(r * 255) << 16) | (static_cast<u32>(g * 255) << 8) | static_cast<u32>(b * 255), 0, 0,
         x + w, y + h, (static_cast<u32>(a * 255) << 24) | (static_cast<u32>(r * 255) << 16) | (static_cast<u32>(g * 255) << 8) | static_cast<u32>(b * 255), 0, 0,
         x, y, (static_cast<u32>(a * 255) << 24) | (static_cast<u32>(r * 255) << 16) | (static_cast<u32>(g * 255) << 8) | static_cast<u32>(b * 255), 0, 0);
@@ -92,7 +92,7 @@ void Transition::drawSolidRect(float x, float y, float w, float h, u32 argb)
     }
 }
 
-// ??? Control API ?????????????????????????????????????????????????????????????
+// Control API 
 void Transition::start()
 {
     if (phase != Phase::Idle) return;   // already running

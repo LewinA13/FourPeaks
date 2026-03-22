@@ -40,7 +40,7 @@ namespace game {
         // Tile map: 0=empty, 1=ground, 2=spikes, etc.
         int tileMap[gridRows][gridCols];
 
-		//For Snow Particles
+        //For Snow Particles
         mutable std::array<SnowParticle, MAX_SNOW> snowParticles{};
         bool snowInitialized = false;
         float snowSpawnTimer = 0.0f;
@@ -83,7 +83,7 @@ namespace game {
         void gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const;
     };
 
-    struct IceTileState{
+    struct IceTileState {
         int row{}, col{};
         bool triggered = false;
         float timer = 0.0f;
@@ -124,6 +124,10 @@ namespace game {
 
         std::vector<IceTileState> iceTiles;
 
+        // Prevents the teleport from firing every frame while the player
+        // is standing in the portal zone, which would reset the PokemonWipe
+        // transition before it completes.
+        bool teleportFired = false;
     };
 
     // -------------------------------------------------------------------

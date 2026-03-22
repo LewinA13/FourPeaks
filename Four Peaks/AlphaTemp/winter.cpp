@@ -1123,7 +1123,9 @@ namespace game {
         // Scan every cell in the top row (row 19) that is marked as a portal tile (type 3),
         // then also fall back to the hardcoded col 1-2 zone so the portal works even if
         // the level file uses a different tile type for the exit.
-        if (!camera::isTransitioning())
+        // teleportFired is latched true on the first trigger so the PokemonWipe transition
+        // is not reset every frame while the player stands inside the portal zone.
+        if (!camera::isTransitioning() && !teleportFired)
         {
             int teleportRow = 19;
 
@@ -1163,7 +1165,10 @@ namespace game {
             }
 
             if (triggered)
+            {
+                teleportFired = true; // latch: prevent re-triggering while the wipe plays
                 return 22; // Signal teleport to Stage 4
+            }
         }
 
 
