@@ -21,6 +21,7 @@ typedef uint32_t u32;
 
 extern s8 gFontId;
 
+
 namespace game {
 
     // -------------------------------------------------------------------
@@ -104,13 +105,9 @@ namespace game {
         for (const auto& p : particles)
         {
             if (!p.active) continue;
-<<<<<<< Updated upstream
+			//This is to convert the particle's alpha (0.0 to 1.0) into an 8-bit integer (0 to 255) for the ARGB color format.
             u32 alpha8 = static_cast<u32>(p.alpha * 255.0f) & 0xFF;
-=======
-            //This is to convert the particle's alpha (0.0 to 1.0) into an 8-bit integer (0 to 255) for the ARGB color format.
-            u32 alpha8 = static_cast<u32>(p.alpha * 255.0f) & 0xFF;
-            //This make the snow white with the variable alpha for transparency, by placing the alpha in the highest byte and setting RGB to 255.
->>>>>>> Stashed changes
+			//This make the snow white with the variable alpha for transparency, by placing the alpha in the highest byte and setting RGB to 255.
             u32 snowColor = (alpha8 << 24) | 0x00FFFFFF; // white with variable alpha
             gfx::Vec2 pos{ p.x, p.y };
             gfx::Vec2 size{ p.size, p.size };
@@ -174,11 +171,6 @@ namespace game {
         if (AEInputCheckTriggered(AEVK_G))
         {
             gridVisible = !gridVisible;
-        }
-
-        if (AEInputCheckTriggered(AEVK_ESCAPE))
-        {
-            return 2;
         }
 
         // DEBUG: Press UP or W key anywhere to start transition
@@ -380,7 +372,7 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.05f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
@@ -658,10 +650,6 @@ namespace game {
             gridVisible = !gridVisible;
         }
 
-        if (AEInputCheckTriggered(AEVK_ESCAPE))
-        {
-            return 2;
-        }
 
         // Only update player when NOT transitioning
         if (!camera::isTransitioning())
@@ -845,7 +833,7 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.05f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
@@ -1115,10 +1103,6 @@ namespace game {
             gridVisible = !gridVisible;
         }
 
-        if (AEInputCheckTriggered(AEVK_ESCAPE))
-        {
-            return 2;
-        }
 
         if (!camera::isTransitioning())
         {
@@ -1129,9 +1113,7 @@ namespace game {
         // Scan every cell in the top row (row 19) that is marked as a portal tile (type 3),
         // then also fall back to the hardcoded col 1-2 zone so the portal works even if
         // the level file uses a different tile type for the exit.
-        // teleportFired is latched true on the first trigger so the PokemonWipe transition
-        // is not reset every frame while the player stands inside the portal zone.
-        if (!camera::isTransitioning() && !teleportFired)
+        if (!camera::isTransitioning())
         {
             int teleportRow = 19;
 
@@ -1171,10 +1153,7 @@ namespace game {
             }
 
             if (triggered)
-            {
-                teleportFired = true; // latch: prevent re-triggering while the wipe plays
                 return 22; // Signal teleport to Stage 4
-            }
         }
 
 
@@ -1182,7 +1161,6 @@ namespace game {
             for (auto& ice : iceTiles) {
                 //! check the ice pos whether equal and never set state before
                 if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
-                    ice.triggered = true;
                     ice.triggered = true;
                 }
             }
@@ -1384,7 +1362,7 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.05f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
@@ -1681,10 +1659,6 @@ namespace game {
             gridVisible = !gridVisible;
         }
 
-        if (AEInputCheckTriggered(AEVK_ESCAPE))
-        {
-            return 2;
-        }
 
         if (!camera::isTransitioning())
         {
@@ -1876,7 +1850,7 @@ namespace game {
                 if (tileType == 19)
                 {
                     AEGfxTexture* tex = sprite::sign();
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.05f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
@@ -1988,8 +1962,6 @@ namespace game {
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                 }
-<<<<<<< Updated upstream
-=======
                 // artifacts
                 else if (tileType == 34) {
                     AEGfxTexture* winterArtifactsTex = sprite::winterArtifacts();
@@ -1999,7 +1971,6 @@ namespace game {
                     if (winterArtifactsTex) gfx::drawSprite(winterArtifactsTex, artifactsPos, 0.0f, artifactsSize, 0, 0, 1, 1);
                     else   gfx::drawRectangle(artifactsPos, 0.0f, size, 0xFF00AA00u);
                 }
->>>>>>> Stashed changes
                 // WinterC (ID 4) and WinterT (ID 6) standalone textures
                 else if (tileType == 4)
                 {

@@ -98,7 +98,7 @@ namespace
         auto isSolid = [&](int r, int c) -> bool {
             if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
             int t = tileMap[r][c];
-            return (t == 1 || t == 3 || t == 4 || t == 5 || t == 6 || t == 7 || t == 23);
+            return (t == 30 || t == 3 || t == 4 || t == 5 || t == 6 || t == 7 || t == 23);
             };
 
         for (int r = 0; r < gridRows; ++r)
@@ -156,9 +156,6 @@ namespace
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                     // falls through to border pass
                 }
-<<<<<<< Updated upstream
-                else if (tileType == 1)
-=======
                 else if (tileType == 19) {
                     AEGfxTexture* tex = sprite::sign();
                     // Draw sign 2 tiles tall, anchored to bottom of tile
@@ -176,7 +173,6 @@ namespace
                     else   gfx::drawRectangle(artifactsPos, 0.0f, size, 0xFF00AA00u);
                 }
                 else if (tileType == 30)
->>>>>>> Stashed changes
                 {
                     AEGfxTexture* t = sprite::spring1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
@@ -503,7 +499,6 @@ game::SpringS1::~SpringS1() = default;
 int game::SpringS1::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (AEInputCheckTriggered(AEVK_UP))
     {
@@ -516,7 +511,7 @@ int game::SpringS1::update(float dt)
 
     // Apply wind force to player before movement update
     float windForce = g_windSystem.update(dt);
-    if (!camera::isTransitioning())
+    if (!camera::isTransitioning() && !gGame.player.respawning)
     {
         gGame.player.pos.x += windForce * dt;
     }
@@ -582,7 +577,6 @@ game::SpringS2::~SpringS2() = default;
 int game::SpringS2::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (AEInputCheckTriggered(AEVK_UP))
     {
@@ -594,7 +588,7 @@ int game::SpringS2::update(float dt)
     }
 
     float windForce = g_windSystem.update(dt);
-    if (!camera::isTransitioning())
+    if (!camera::isTransitioning() && !gGame.player.respawning)
     {
         gGame.player.pos.x += windForce * dt;
     }
@@ -660,7 +654,6 @@ game::SpringS3::~SpringS3() = default;
 int game::SpringS3::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     if (AEInputCheckTriggered(AEVK_UP))
     {
@@ -672,7 +665,7 @@ int game::SpringS3::update(float dt)
     }
 
     float windForce = g_windSystem.update(dt);
-    if (!camera::isTransitioning())
+    if (!camera::isTransitioning() && !gGame.player.respawning)
     {
         gGame.player.pos.x += windForce * dt;
     }
@@ -738,10 +731,9 @@ game::SpringS4::~SpringS4() = default;
 int game::SpringS4::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) return 2;
 
     float windForce = g_windSystem.update(dt);
-    if (!camera::isTransitioning())
+    if (!camera::isTransitioning() && !gGame.player.respawning)
     {
         gGame.player.pos.x += windForce * dt;
     }
