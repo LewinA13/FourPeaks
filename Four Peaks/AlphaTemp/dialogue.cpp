@@ -6,20 +6,21 @@ extern s8 gFontId;      // Font handle created in main.cpp
 
 namespace UI {
 
-    Dialog::Dialog() {
-        currentIndex = 0;
-        isShowing = false;
-
-        // *****************************        TYPEWRITER                   **************************************************************************
-        displayedChars = 0;
-        typeWriterTimer = 0.0f;
-        timePerChar = 1.0f / 20.0f;
-        wordSize = 1.6f;
-
-
-     
-
-    }
+    Dialog::Dialog() 
+    : currentIndex(0)
+    , isShowing(false)
+    , displayedChars(0)
+    , typeWriterTimer(0.0f)
+    , timePerChar(1.0f / 20.0f)
+    , wordSize(1.6f)
+    , isArtifactDialog(false)
+    , artifactAutoCloseTimer(0.0f)
+    , artifactAutoCloseDelay(1.0f)
+    , waitingForInput(false)
+    , signWorldPos{0.0f, 0.0f}   
+    , currentLevelID(-1)
+    , playerNearSign(false)
+    {}
 
     void Dialog::initialize() {
 
@@ -46,6 +47,7 @@ namespace UI {
             "Press [W]/ [A]/ [S]/ [D] for moving",
             "[SHIFT] for dashing",
             "[SPACE] for jumping"
+            "[L] for climbing"
         };
 
         levelDialogs[1] = {  // Tutorial 2
@@ -69,9 +71,6 @@ namespace UI {
         };
 
         levelDialogs[11] = {  // WinterS2
-            "Remembering Dad's Note:",
-            "The ice will betray your footing. Don't trust the ground.",
-            "...but first, watch your step. Those spikes are unforgiving."
         };
 
         levelDialogs[12] = {  // WinterS3
@@ -167,36 +166,99 @@ namespace UI {
 
     //! check current level and show dialog for that level
     void Dialog::showForLevel(int levelID) {
-        //! skip if no dialog exists at that level
         if (levelDialogs.find(levelID) == levelDialogs.end()) return;
 
-        //! If same level dialog is already loaded, just show it without resetting progress
-        if (currentLevelID == levelID) {
-            isShowing = true;
+        if (currentLevelID == levelID && isShowing) {
             return;
         }
 
-        currentLevelID = levelID;
-        texts = levelDialogs[levelID];
-        currentIndex = 0;
-        displayedChars = 0;
-        typeWriterTimer = 0.0f;
-        isShowing = true;
+        if (!waitingForInput && !isShowing) {
+            waitingForInput = true;
+            currentLevelID = levelID;
+            return;
+        }
     }
 
-    void Dialog::update(float dt) {
-        if (!isShowing) return;
 
+    void Dialog::update(float dt) {
+
+        // artifact dialog
+        if (isArtifactDialog) {
+            if (!isShowing) return;
+
+            size_t currentTextLength = texts[currentIndex].length();
+            bool isLastLine = (currentIndex + 1 >= (int)texts.size());
+            bool isFullyTyped = (displayedChars >= currentTextLength);
+
+            if (!isFullyTyped) {
+                typeWriterTimer += dt;
+                if (typeWriterTimer >= timePerChar) {
+                    displayedChars++;
+                    typeWriterTimer = 0.0f;
+                }
+            }
+
+            if (isLastLine && isFullyTyped) {
+                artifactAutoCloseTimer += dt;
+                if (artifactAutoCloseTimer >= artifactAutoCloseDelay) {
+                    reset();
+                    return;
+                }
+            }
+
+            if (AEInputCheckTriggered(AEVK_DOWN)) {
+                if (!isFullyTyped) {
+                    displayedChars = currentTextLength;
+                }
+                else if (!isLastLine) {
+                    currentIndex++;
+                    displayedChars = 0;
+                    typeWriterTimer = 0.0f;
+                    artifactAutoCloseTimer = 0.0f;
+                }
+                else {
+                    reset();
+                }
+            }
+
+            return; 
+        }
+
+        // ---- signboard dialog ----
         if (!playerNearSign) {
             isShowing = false;
+            waitingForInput = false;
             return;
         }
 
+        if (waitingForInput || isShowing) {
+            if (AEInputCheckTriggered(AEVK_E)) {
+                if (isShowing) {
+                    isShowing = false;
+                    waitingForInput = true;
+                    currentIndex = 0;
+                    displayedChars = 0;
+                    typeWriterTimer = 0.0f;
+                }
+                else {
+                    waitingForInput = false;
+                    texts = levelDialogs[currentLevelID];
+                    currentIndex = 0;
+                    displayedChars = 0;
+                    typeWriterTimer = 0.0f;
+                    isShowing = true;
+                }
+                return;
+            }
+        }
+
+        if (!isShowing) return;
 
         size_t currentTextLength = texts[currentIndex].length();
+        bool isLastLine = (currentIndex + 1 >= (int)texts.size());
+        bool isFullyTyped = (displayedChars >= currentTextLength);
 
-        // typewriter logic
-        if (displayedChars < currentTextLength) {
+        if (!isFullyTyped) {
             typeWriterTimer += dt;
             if (typeWriterTimer >= timePerChar) {
                 displayedChars++;
@@ -204,8 +266,7 @@ namespace UI {
             }
         }
 
-        // go to previos dialog line
-        if (playerNearSign && AEInputCheckTriggered(AEVK_UP)) {
+        if (AEInputCheckTriggered(AEVK_UP)) {
             if (currentIndex > 0) {
                 currentIndex--;
                 displayedChars = 0;
@@ -213,18 +274,14 @@ namespace UI {
             }
         }
 
-        // go to next dialog line 
-        if (playerNearSign && AEInputCheckTriggered(AEVK_DOWN)) {
-            // skip typewriter effect and show full sentence
-            if (displayedChars < currentTextLength) {
+        if (AEInputCheckTriggered(AEVK_DOWN)) {
+            if (!isFullyTyped) {
                 displayedChars = currentTextLength;
             }
-            else {
-                if (currentIndex+1 < (int)texts.size()) {
-                    currentIndex++;
-                    displayedChars = 0;
-                    typeWriterTimer = 0.0f;
-                }
+            else if (!isLastLine) {
+                currentIndex++;
+                displayedChars = 0;
+                typeWriterTimer = 0.0f;
             }
         }
     }
@@ -232,10 +289,38 @@ namespace UI {
     void Dialog::render()
     {
 
+        if ((waitingForInput || isShowing) && playerNearSign && !isArtifactDialog) {
+            float oldX, oldY;
+            AEGfxGetCamPosition(&oldX, &oldY);
+            AEGfxSetCamPosition(0.0f, 0.0f);
+
+            const char* hint = isShowing ? "Press [E] to close" : "Press [E] to read";
+            float scale = 1.2f;
+
+            f32 tw, th;
+            AEGfxGetPrintSize(gFontId, hint, scale, &tw, &th);
+
+            float halfW = (float)AEGfxGetWindowWidth() * 0.5f;
+            float halfH = (float)AEGfxGetWindowHeight() * 0.5f;
+
+            float screenX = signWorldPos.x - oldX;
+            float screenY = signWorldPos.y - oldY + 40.0f; 
+
+            float normX = screenX / halfW;
+            float normY = screenY / halfH;
+
+            float drawX = normX - tw * 0.5f;
+            float drawY = normY - th * 0.5f;
+
+            AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+            AEGfxPrint(gFontId, hint, drawX, drawY, scale, 1.0f, 1.0f, 1.0f, 1.0f); 
+
+            AEGfxSetCamPosition(oldX, oldY);
+        }
+
+
         if (!isShowing)
             return;
-
-       
 
         //! record current camera coord
         float oldX, oldY;
@@ -272,7 +357,7 @@ namespace UI {
         }
      
 
-        if (currentIndex < texts.size()){
+        if (currentIndex < texts.size() && (playerNearSign || isArtifactDialog)){
             std::string fullText = texts[currentIndex];
 
             // typewriter effect
@@ -304,9 +389,35 @@ namespace UI {
         AEGfxSetCamPosition(oldX, oldY);
     }
 
-    void Dialog::PLAYERNEARSIGN(bool detect) {
+    void Dialog::playerNearSignBoard(bool detect) {
         playerNearSign = detect;
     }
+
+    void Dialog::triggerFromArtifact(int levelID) {
+        if (levelDialogs.find(levelID) == levelDialogs.end()) return;
+
+        currentLevelID = levelID;
+        texts = levelDialogs[levelID];
+        currentIndex = 0;
+        displayedChars = 0;
+        typeWriterTimer = 0.0f;
+        isArtifactDialog = true;
+        artifactAutoCloseTimer = 0.0f;
+        isShowing = true;
+    }
+
+    void Dialog::reset() {
+        isShowing = false;
+        isArtifactDialog = false;
+        artifactAutoCloseTimer = 0.0f;
+        currentIndex = 0;
+        displayedChars = 0;
+        waitingForInput = false;  
+    }
    
+    void Dialog::setSignPos(float x, float y) {
+        signWorldPos.x = x;
+        signWorldPos.y = y;
+    }
 }
 	

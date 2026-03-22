@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <map>
-
+#include <AEEngine.h>
 
 
 
@@ -24,7 +24,15 @@ namespace UI{
         void showForLevel(int levelID);
 
         //! collision
-        void PLAYERNEARSIGN(bool detect);
+        void playerNearSignBoard(bool detect);
+
+        //! shown up after picking up artifacts
+        void triggerFromArtifact(int levelID);
+
+        void setSignPos(float x, float y);
+
+        void reset();
+
 
     private:
 
@@ -49,6 +57,13 @@ namespace UI{
         float timePerChar;
 
         float wordSize;
+
+        bool  isArtifactDialog;
+        float artifactAutoCloseTimer;
+        float artifactAutoCloseDelay;
+
+        bool waitingForInput;   
+        AEVec2 signWorldPos;
 
 
     };
