@@ -161,10 +161,10 @@ namespace game {
 
         // scale bigger if choosing season
         float CardW = selectingStage ? screenW * 0.42f : screenW * 0.52f;
-        float CardH = selectingStage ? screenH * 0.30f : screenH * 0.48f;
+        float CardH = selectingStage ? screenH * 0.40f : screenH * 0.58f;
 
         float mainCardW = selectingStage ? screenW * 0.42f : screenW * 0.52f;
-        float mainCardH = selectingStage ? screenH * 0.30f : screenH * 0.48f;
+        float mainCardH = selectingStage ? screenH * 0.4f : screenH * 0.58f;
 
         // offset to determine how width side card show
         float sideCardW = screenW * 0.16f;
@@ -360,7 +360,7 @@ namespace game {
 
             
 
-            printCentered(-0.8f, 0xFFFFFFCCu, "LEFT / RIGHT to change season    ENTER to select    ESC to go back", 1.0f);
+            printCentered(-0.9f, 0xFFFFFFCCu, "LEFT / RIGHT to change season    ENTER to select    ESC to go back", 1.0f);
         }
         else
         {
