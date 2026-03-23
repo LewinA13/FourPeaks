@@ -173,7 +173,7 @@ namespace
                 else if (tileType == 19) {
                     AEGfxTexture* tex = sprite::sign();
                     // Draw sign 2 tiles tall, anchored to bottom of tile
-                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.05f };
+                    gfx::Vec2 signSize{ size.x * 0.9f, size.y * 1.5f };
                     gfx::Vec2 signPos{ pos.x, pos.y + (signSize.y - size.y) * 0.5f };
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
@@ -605,8 +605,7 @@ int game::SpringS2::update(float dt)
         float zoneRight = gx + cw;
         float zoneBot   = gy;
         float zoneTop   = gy + ch * 3.0f;
-        if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-            gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+        if (playerOverlapsRect(gGame.player, zoneLeft, zoneRight, zoneBot, zoneTop))
             return 41;
     }
 
@@ -678,8 +677,7 @@ int game::SpringS3::update(float dt)
         float zoneRight = gx + cw;
         float zoneBot   = gy;
         float zoneTop   = gy + ch * 3.0f;
-        if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-            gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+        if (playerOverlapsRect(gGame.player, zoneLeft, zoneRight, zoneBot, zoneTop))
             return 42;
     }
 
@@ -742,6 +740,8 @@ int game::SpringS4::update(float dt)
 
     if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
 
+    // Teleporter to AutumnS1
+    if (!camera::isTransitioning())
     // Teleport zone: matches visual indicator (col 31, rows 18-19)
     {
         float gx, gy, cw, ch;

@@ -1,40 +1,28 @@
 #pragma once
 // ---------------------------------------------------------------------------
-// transition.hpp  —  Pokemon-style screen-wipe transition effect
+// transition.hpp  -  Simple fade-to-black screen transition
 // ---------------------------------------------------------------------------
-// HOW TO USE (optional drop-in — game runs fine without it):
-//
-//   1. In main.cpp add:
+// HOW TO USE:
+//   1. In main.cpp:
 //        #include "transition.hpp"
 //        static Transition gTransition;
 //
 //   2. When you want to change scenes, call:
-//        gTransition.start(SceneState::WinterS1);   // or whatever target
-//      instead of setting currentState directly.
+//        gTransition.start();
+//        transitionTarget = SceneState::WinterS2;
 //
-//   3. In your main game loop update/draw section, call:
+//   3. In the main game loop, call each frame:
 //        gTransition.update(dt);
-//        gTransition.draw();      // call AFTER all game drawing
-//
-//   4. In the update section check:
 //        if (gTransition.isReadyToSwitch()) {
-//            currentState = gTransition.getTarget();
+//            currentState = transitionTarget;
 //            gTransition.notifySwitch();
 //        }
-//
-// The transition fires even if you don't integrate it—it is purely visual.
+//        // ...all game drawing...
+//        gTransition.draw();   // LAST, on top of everything
 // ---------------------------------------------------------------------------
 
-#include <AEEngine.h>
+#include "AEEngine.h"
 #include <cstdint>
-
-// ??? Transition styles ?????????????????????????????????????????????????????
-enum class TransitionStyle
-{
-    PokemonWipe,    // expanding diamond/circle wipe (classic Pokemon battle)
-    SweepLeft,      // hard black panel sweeps from right to left
-    Dissolve,       // random pixel-block dissolve
-};
 
 class Transition
 {
@@ -42,46 +30,46 @@ public:
     Transition() = default;
     ~Transition() = default;
 
-    // ?? Configuration ???????????????????????????????????????????????????????
-    TransitionStyle style = TransitionStyle::PokemonWipe;
-    float           speed = 2.5f;   // multiplier: higher = faster wipe
+    // Speed multiplier: higher = faster fade
+    float speed = 2.5f;
 
-    // ?? Control API ?????????????????????????????????????????????????????????
-
-    // Call this to kick off a transition
+    // Start a new fade-to-black. Safe to call even mid-transition (restarts).
     void start();
 
-    // Per-frame calls
+    // Call once per frame
     void update(float dt);
+
+    // Call AFTER all game drawing
     void draw() const;
 
-    // Phase queries
-    bool isActive()         const { return phase != Phase::Idle; }
-    bool isReadyToSwitch()  const { return switchPending; }
-    bool isComplete()       const { return phase == Phase::Idle && switchDone; }
+    // True for ONE frame at the fully-black mid-point - switch scene now
+    bool isReadyToSwitch() const { return switchPending; }
 
-    // Call once after you've actually changed the scene
-    void notifySwitch() { switchPending = false; switchDone = true; }
+    // Call after switching scene in response to isReadyToSwitch()
+    void notifySwitch() { switchPending = false; }
 
-    // Reset so the transition can be used again next time
-    void reset() {
-        phase = Phase::Idle; t = 0.0f;
-        switchPending = false; switchDone = false;
+    // True while fade-in or fade-out is playing
+    bool isActive() const { return phase != Phase::Idle; }
+
+    // True after the full transition cycle has completed
+    bool isComplete() const { return phase == Phase::Idle && switchDone; }
+
+    // Reset for reuse
+    void reset()
+    {
+        phase         = Phase::Idle;
+        t             = 0.0f;
+        switchPending = false;
+        switchDone    = false;
     }
 
 private:
-    enum class Phase { Idle, WipeIn, Hold, WipeOut };
-    Phase phase = Phase::Idle;
-    float t = 0.0f;   // 0..1 within current phase
+    enum class Phase { Idle, FadeIn, Hold, FadeOut };
+
+    Phase phase         = Phase::Idle;
+    float t             = 0.0f;
     bool  switchPending = false;
-    bool  switchDone = false;
+    bool  switchDone    = false;
 
-    //Per-style draw helpers 
-    void drawPokemonWipe(float progress, bool coverScreen) const;
-    void drawSweepLeft(float progress, bool coverScreen) const;
-    void drawDissolve(float progress) const;
-
-    //Shared quad draw 
-    static void drawSolidRect(float x, float y, float w, float h, std::uint32_t argb);
-    static void drawCircleMask(float cx, float cy, float radius, bool invert);
+    static void drawBlackOverlay(float alpha);
 };

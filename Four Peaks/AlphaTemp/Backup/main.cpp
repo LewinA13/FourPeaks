@@ -622,8 +622,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             const float h = camera::screenHeight();
             const int idx = StageIndex(currentState);
 
-            // clear artifacts when changing dialog
-            UI::gDialog.reset();
 
             // 1) Snap camera to the correct vertical band
             camera::setY(h * idx);
@@ -878,15 +876,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // animation always plays.
         auto triggerTransition = [&](SceneState target)
             {
-                // Ignore re-trigger if transition already running.
-                // Prevents the fade restarting every frame when the player
-                // stands still inside the teleport zone.
-                if (gTransition.isActive()) return;
+                // If a transition is already running, reset it so that a new
+                // wipe can begin immediately. The reset call clears any
+                // pending switch flags and sets the phase back to idle.
+                if (gTransition.isActive())
+                {
+                    gTransition.reset();
+                }
                 gTransition.start();
                 transitionTarget = target;
             };
 
-        UI::gDialog.playerNearSignBoard(false);
+        UI::gDialog.PLAYERNEARSIGN(false);
 
         if (gGame.pauseActive)
         {
@@ -1093,11 +1094,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (!gGame.pauseActive)
             {
-                if (action == 21 && !gTransition.isActive()) {
-                    UnlockNextStage(SceneState::SummerS2);
-                    PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
-                    triggerTransition(SceneState::SummerS3);
-                }
+                if (action == 21) triggerTransition(SceneState::SummerS3);
                 if (action == 2 && !gTransition.isActive())  triggerTransition(SceneState::MainMenu);
             }
             break;
