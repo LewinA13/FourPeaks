@@ -13,6 +13,7 @@ void CollisionResolveSpawn(Player& player);
 
 void CheckPathForCheckpoint(Player& player, gfx::Vec2 startPos, gfx::Vec2 endPos);
 
+bool OnGroundExactly(Player& player);
 
 struct breakableTileTrigger{
     int row, col;
