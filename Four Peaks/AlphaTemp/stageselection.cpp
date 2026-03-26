@@ -30,6 +30,18 @@ static bool IsStageUnlockedLocal(int seasonIndex, int stageIndex)
     return gGame.unlockedStages[idx];
 }
 
+static const char* GetSeasonLockMessage(int seasonIndex)
+{
+    switch (seasonIndex)
+    {
+    case 0: return "Please complete tutorial first";
+    case 1: return "Please complete winter first";
+    case 2: return "Please complete summer first";
+    case 3: return "Please complete spring first";
+    default: return "";
+    }
+}
+
 // Returns half the rendered width of a string — identical to mainmenu.cpp's helper.
 static f32 textHalfWidth(const char* text, f32 scale = 1.0f)
 {
@@ -194,6 +206,16 @@ namespace game {
                 { CardW, CardH },
                 unlocked ? 0x77000000u : 0xCC444444u
             );
+
+            if (!unlocked)
+            {
+                float textX = leftBgCX / (screenW * 0.5f) - 0.12f;
+                float textY = cardY / (screenH * 0.5f) - 0.02f;
+
+                AEGfxPrint(gFontId, GetSeasonLockMessage(leftSeason),
+                    textX, textY, 0.7f,
+                    1.0f, 1.0f, 1.0f, 1.0f);
+            }
         }
         // show grey if not being selected
         {
@@ -220,6 +242,16 @@ namespace game {
                 { CardW, CardH },
                 unlocked ? 0x77000000u : 0xCC444444u
             );
+
+            if (!unlocked)
+            {
+                float textX = rightBgCX / (screenW * 0.5f) - 0.12f;
+                float textY = cardY / (screenH * 0.5f) - 0.02f;
+
+                AEGfxPrint(gFontId, GetSeasonLockMessage(rightSeason),
+                    textX, textY, 0.7f,
+                    1.0f, 1.0f, 1.0f, 1.0f);
+            }
         }
         {
             float wx = AEGfxGetWinMaxX() - sideCardW + 10.0f;
@@ -243,6 +275,13 @@ namespace game {
             if (!unlocked)
             {
                 gfx::drawRectangle({ 0.0f, cardY }, 0.0f, { CardW, CardH }, 0xCC444444u);
+
+                float textX = -0.18f;
+                float textY = cardY / (screenH * 0.5f) - 0.02f;
+
+                AEGfxPrint(gFontId, GetSeasonLockMessage(seasonIndex),
+                    textX, textY, 0.9f,
+                    1.0f, 1.0f, 1.0f, 1.0f);
             }
           
         }

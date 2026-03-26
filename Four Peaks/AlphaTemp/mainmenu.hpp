@@ -32,6 +32,8 @@ namespace game
         bool showHowTo;     // true when help screen is shown
         bool showSettings;
 		int  settingsRow;    //For Background and SFX Selection
+        bool confirmDeleteSave;
+        bool deleteSaveResult;
 
         void drawHowToPlay() const;
         void drawSettings() const;

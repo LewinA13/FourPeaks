@@ -638,29 +638,29 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 /* ---------- TUTORIAL ---------- */
             case SceneState::Tutorial1: spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::Tutorial2: spawn = GridToWorld(2, 2, h * idx); break;
-            case SceneState::Tutorial3: spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::Tutorial3: spawn = GridToWorld(1, 3, h * idx); break;
 
                 /* ---------- WINTER ---------- */
             case SceneState::WinterS1:  spawn = GridToWorld(3, 3, h * idx); break;
-            case SceneState::WinterS2:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::WinterS2:  spawn = GridToWorld(2, 1, h * idx); break;
             case SceneState::WinterS3:  spawn = GridToWorld(1, 6, h * idx); break;
-            case SceneState::WinterS4:  spawn = GridToWorld(3, 3, h * idx); break;
+            case SceneState::WinterS4:  spawn = GridToWorld(2, 2, h * idx); break;
 
                 /* ---------- SUMMER ---------- */
             case SceneState::SummerS1:  spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::SummerS2:  spawn = GridToWorld(2, 17, h * idx); break;
             case SceneState::SummerS3:  spawn = GridToWorld(1, 16, h * idx); break;
-            case SceneState::SummerS4:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::SummerS4:  spawn = GridToWorld(2, 3, h * idx); break;
 
                 /* ---------- SPRING ---------- */
             case SceneState::SpringS1:  spawn = GridToWorld(2, 2, h * idx); break;
-            case SceneState::SpringS2:  spawn = GridToWorld(2, 2, h * idx); break;
-            case SceneState::SpringS3:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::SpringS2:  spawn = GridToWorld(2, 4, h * idx); break;
+            case SceneState::SpringS3:  spawn = GridToWorld(29, 3, h * idx); break;
             case SceneState::SpringS4:  spawn = GridToWorld(2, 2, h * idx); break;
 
                 /* ---------- AUTUMN ---------- */
             case SceneState::AutumnS1:  spawn = GridToWorld(2, 2, h * idx); break;
-            case SceneState::AutumnS2:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::AutumnS2:  spawn = GridToWorld(2, 16, h * idx); break;
             case SceneState::AutumnS3:  spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::AutumnS4:  spawn = GridToWorld(2, 2, h * idx); break;
 
@@ -941,19 +941,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
             else if (action == 2)
             {
-                // Exit selected.
                 gGameRunning = 0;
-
             }
-            // action == 3 is reserved for "How To Play".
-
-            if (action == 4) {
+            else if (action == 4)
+            {
                 currentState = SceneState::Tutorial1;
+                lastState = SceneState::Exit;
                 camera::setY(0.0f);
             }
-
-            if (action == 5) {
+            else if (action == 5)
+            {
                 currentState = SceneState::Credit;
+            }
+            else if (action == 6)
+            {
+                // fresh restart after deleting checkpoint
+                currentState = SceneState::Tutorial1;
+                lastState = SceneState::Exit;
+                camera::setY(0.0f);
             }
         }
         break;

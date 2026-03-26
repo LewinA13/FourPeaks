@@ -157,6 +157,43 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     }
 }
 
+bool PlayerDeleteCheckpoint(const char* filename)
+{
+    if (filename == nullptr || filename[0] == '\0')
+        return false;
+
+    // remove the checkpoint file
+    return std::remove(filename) == 0;
+}
+
+void PlayerResetProgress(Player& p)
+{
+    // reset player 
+    p.melonsCollected = 0;
+    p.deathCount = 0;
+    p.checkpointScene.clear();
+    p.respawnPos = { 0.0f, 0.0f };
+
+    // reset global
+    gGame.runTimeSeconds = 0.0f;
+    gGame.collectedMelons.clear();
+
+    for (int i = 0; i < 16; ++i)
+    {
+        gGame.unlockedStages[i] = false;
+    }
+
+    // also clear some immediate gameplay state
+    p.velX = 0.0f;
+    p.velY = 0.0f;
+    p.grounded = false;
+    p.dead = false;
+    p.alive = true;
+    p.dashing = false;
+    p.wallHanging = false;
+    p.dashCount = p.maxDashCount;
+}
+
 bool IsMelonCollected(const char* sceneName, int row, int col)
 {
     if (!sceneName) return false;

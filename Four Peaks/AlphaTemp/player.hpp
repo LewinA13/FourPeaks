@@ -4,6 +4,7 @@
 #include "graphics.hpp"
 #include "AEEngine.h"
 #include <string>
+#include <cstdio>
 
 // Player data
 struct Player
@@ -223,6 +224,9 @@ void      PlayerSetFeetWorld(Player& p, gfx::Vec2 feetWorld);
 // checkpoint helper functions
 bool PlayerSaveCheckpoint(const Player& p, const char* filename);
 bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespawn);
+
+bool PlayerDeleteCheckpoint(const char* filename);
+void PlayerResetProgress(Player& p);
 
 //melon 
 bool PlayerSaveMelons(const Player& p, const char* filename);

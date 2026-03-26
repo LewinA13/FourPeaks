@@ -16,6 +16,7 @@
 #include <cstring>
 #include <fstream>
 #include "graphics.hpp"
+#include "player.hpp"
 
 extern s8 gFontId;
 static bool gIsFullscreen = false;
@@ -133,6 +134,8 @@ namespace game
         , showHowTo(false)
         , showSettings(false)
         , settingsRow(0)
+        , confirmDeleteSave(false)
+        , deleteSaveResult(false)
     {
         // Load all 6 background frames
         bgFrames[0] = AEGfxTextureLoad("Assets/background_/mmf1.png");
@@ -209,49 +212,90 @@ namespace game
         // ---- Settings sub-screen ----
         if (showSettings)
         {
-            // settingsRow: 0 = Music volume, 1 = SFX volume
-            // UP / DOWN — switch between rows
+            // settingsRow:
+            // 0 = music volume
+            // 1 = sfx volume
+            // 2 = delete save file
+
             if (AEInputCheckTriggered(AEVK_UP))
-                settingsRow = (settingsRow + 1) % 2;
+                settingsRow = (settingsRow + 3 - 1) % 3;
+
             if (AEInputCheckTriggered(AEVK_DOWN))
-                settingsRow = (settingsRow + 1) % 2;
+                settingsRow = (settingsRow + 1) % 3;
 
-            // Convenience reference to whichever volume is active
-            float& activeVol = (settingsRow == 0) ? gGame.musicVol : gGame.sfxVol;
-
-            // LEFT / RIGHT — adjust volume of selected row
-            if (AEInputCheckTriggered(AEVK_RIGHT))
-                activeVol = min(activeVol + 0.1f, 1.0f);
-            if (AEInputCheckTriggered(AEVK_LEFT))
-                activeVol = max(activeVol - 0.1f, 0.0f);
-
-            // M — mute / unmute selected row
-            if (AEInputCheckTriggered(AEVK_M))
-            {
-                static float sMusicMuteSave = 1.0f;
-                static float sSfxMuteSave = 1.0f;
-                float& muteSave = (settingsRow == 0) ? sMusicMuteSave : sSfxMuteSave;
-
-                if (activeVol > 0.0f) {
-                    muteSave = activeVol;
-                    activeVol = 0.0f;
-                }
-                else {
-                    activeVol = muteSave;
-                }
-            }
-
-            // Fullscreen toggle — I key
+            // fullscreen toggle stays available from settings
             if (AEInputCheckTriggered(AEVK_I))
                 ToggleFullscreen();
 
-            // Back — Escape or Space
-            if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_SPACE))
+            // volume rows only
+            if (settingsRow == 0 || settingsRow == 1)
             {
-                saveVolumeSettings();   // persist before leaving
-                showSettings = false;
-                settingsRow = 0;   // reset cursor for next visit
+                float& activeVol = (settingsRow == 0) ? gGame.musicVol : gGame.sfxVol;
+
+                if (AEInputCheckTriggered(AEVK_RIGHT))
+                    activeVol = min(activeVol + 0.1f, 1.0f);
+
+                if (AEInputCheckTriggered(AEVK_LEFT))
+                    activeVol = max(activeVol - 0.1f, 0.0f);
+
+                if (AEInputCheckTriggered(AEVK_M))
+                {
+                    static float sMusicMuteSave = 1.0f;
+                    static float sSfxMuteSave = 1.0f;
+                    float& muteSave = (settingsRow == 0) ? sMusicMuteSave : sSfxMuteSave;
+
+                    if (activeVol > 0.0f)
+                    {
+                        muteSave = activeVol;
+                        activeVol = 0.0f;
+                    }
+                    else
+                    {
+                        activeVol = muteSave;
+                    }
+                }
             }
+
+            // delete save row
+            if (settingsRow == 2)
+            {
+                if (AEInputCheckTriggered(AEVK_RETURN) || AEInputCheckTriggered(AEVK_SPACE))
+                {
+                    if (!confirmDeleteSave)
+                    {
+                        // first press arms the delete
+                        confirmDeleteSave = true;
+                        deleteSaveResult = false;
+                    }
+                    else
+                    {
+                        // second press confirms it
+                        PlayerDeleteCheckpoint("checkpoint.txt");
+                        PlayerResetProgress(gGame.player);
+
+                        saveVolumeSettings();
+
+                        confirmDeleteSave = false;
+                        deleteSaveResult = true;
+
+                        // stay inside settings after deleting
+                        showSettings = true;
+                        settingsRow = 2;
+
+                        return 0;
+                    }
+                }
+            }
+
+            // back out of settings
+            if (AEInputCheckTriggered(AEVK_ESCAPE))
+            {
+                saveVolumeSettings();
+                showSettings = false;
+                settingsRow = 0;
+                confirmDeleteSave = false;
+            }
+
             return 0;
         }
 
@@ -468,11 +512,32 @@ namespace game
         }
 
         // ------------------------------------------------------------------
+        // Delete save row
+        // ------------------------------------------------------------------
+        {
+            bool selected = (settingsRow == 2);
+            u32 labelCol = selected ? 0xFFFF4444u : 0xFFFFFF00u;
+
+            printCentered(-0.68f, labelCol,
+                selected ? "> Delete Save File <" : "  Delete Save File  ");
+
+            if (confirmDeleteSave && selected)
+            {
+                printCentered(-0.80f, 0xFFFF6666u, "Press Enter again to confirm");
+                printCentered(-0.90f, 0xFFAAAAAAu, "This will restart all progress");
+            }
+            else
+            {
+                printCentered(-0.80f, 0xFFAAAAAAu, "Enter to delete all checkpoint progress");
+            }
+        }
+
+        // ------------------------------------------------------------------
         // Hint text
         // ------------------------------------------------------------------
-        printCentered(-0.68f, 0xFFAAAAAA,
+        printCentered(-1.02f, 0xFFAAAAAA,
             "UP/DOWN to switch   LEFT/RIGHT to adjust   M to mute");
-        printCentered(-0.80f, 0xFFFFFF00u, "Press ESC or Space to go back");
+        printCentered(-1.12f, 0xFFFFFF00u, "Press ESC to go back");
     }
 
 } // namespace game
