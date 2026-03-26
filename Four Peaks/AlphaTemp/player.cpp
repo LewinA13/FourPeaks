@@ -521,6 +521,7 @@ void PlayerUpdate(Player& p, float dt)
     const bool pressDown = AEInputCheckCurr(AEVK_S);
 
     bool didWallJumpThisFrame = false;
+    bool didGroundJumpThisFrame = false;
 
     static constexpr float SNOW_STEP_INTERVAL = 0.10f; // tweak: 0.22-0.35 feels normal
     static constexpr float WALK_SPEED_EPS = 5.0f; // tweak based on your velocity scale
@@ -600,13 +601,9 @@ void PlayerUpdate(Player& p, float dt)
     // =========================================================
     // 2) TIMERS / BUFFERS / DASH
     // =========================================================
-
-    // Wall regrab prevention
-    if (p.wallRegrabTimer > 0.0f)
-    {
-        p.wallRegrabTimer -= dt;
-        if (p.wallRegrabTimer < 0.0f) p.wallRegrabTimer = 0.0f;
-    }
+    
+    // wall regrab timer not used anymore
+    p.wallRegrabTimer = 0.0f;
 
     // Coyote time + dash 
     if (wasGrounded) // checks if you are on the ground LAST FRAME
@@ -711,6 +708,7 @@ void PlayerUpdate(Player& p, float dt)
             p.velY = p.jumpVel;
             p.grounded = false;
             p.coyoteTimer = 0.0f;
+            didGroundJumpThisFrame = true;
 
             // reset jump anim
             p.jumpFrame = 0;
@@ -854,7 +852,7 @@ void PlayerUpdate(Player& p, float dt)
     // =========================================================
     if (!p.dashing)
     {
-        const bool canStick = (!p.grounded && touchingWall && p.wallRegrabTimer <= 0.0f);
+        const bool canStick = (!p.grounded && touchingWall);
 
         if (!p.wallHanging && canStick && (grabHeld || p.wallHangBufferTimer > 0.0f))
         {
@@ -904,7 +902,7 @@ void PlayerUpdate(Player& p, float dt)
     // =========================================================
     if (!p.dashing && jumpPressed)
     {
-        const bool canWallJump = (!p.grounded && touchingWall && p.wallRegrabTimer <= 0.0f);
+        const bool canWallJump = (!wasGrounded && !didGroundJumpThisFrame && !p.grounded && touchingWall);
 
         if (canWallJump)
         {
@@ -916,12 +914,11 @@ void PlayerUpdate(Player& p, float dt)
             p.velY = p.jumpVel;
             didWallJumpThisFrame = true;
 
-            // Horizontal push (your existing tuning)
+            // horizontal push
             p.horzSpeed = jumpDir * 2.0f;
             p.facing = (jumpDir > 0.0f) ? 1 : -1;
             p.velX = p.horzSpeed * p.speed;
 
-            p.wallRegrabTimer = p.wallRegrabTime;
             p.wallHanging = false;
 
             p.grounded = false;
