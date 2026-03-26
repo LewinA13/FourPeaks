@@ -392,7 +392,7 @@ namespace game
         }
 
         // Title — large and prominent
-        printTitleCentered(0.60f, 0xFFFFFF00u, "FOUR SEASONS PLATFORMER", 1.0f);
+        printTitleCentered(0.60f, 0xFFFFFF00u, "FOUR PEAKS", 1.0f);
 
         // Subtitle — well below title
         printCentered(0.35f, 0xFF88CCFFu, "- A Journey Through the Seasons -", 1.25f);
@@ -470,13 +470,13 @@ namespace game
     // -------------------------------------------------------------------------
     void MainMenu::drawSettings() const
     {
-        printCentered(0.75f, 0xFF00FFFFu, "Settings", 1.3f);
+        printCentered(0.55f, 0xFF00FFFFu, "Settings", 1.3f);
 
         // ------------------------------------------------------------------
         // Fullscreen row
         // ------------------------------------------------------------------
-        printCentered(0.50f, 0xFFFFFF00u, "Fullscreen");
-        printCentered(0.35f, 0xFFFFFFFFu,
+        printCentered(0.40f, 0xFFFFFF00u, "Fullscreen");
+        printCentered(0.33f, 0xFFFFFFFFu,
             gIsFullscreen ? "[ ON ]  Press I to toggle"
             : "[ OFF ] Press I to toggle");
 
@@ -501,12 +501,12 @@ namespace game
             bool   muted = (gGame.musicVol <= 0.0f);
             u32    barCol = muted ? 0xFF888888u : (selected ? 0xFF00FF44u : 0xFFFFFFFFu);
 
-            printCentered(0.12f, labelCol, selected ? "> Music Volume <" : "  Music Volume  ");
+            printCentered(0.15f, labelCol, selected ? "> Music Volume <" : "  Music Volume  ");
 
             char bar[16];
             buildBar(gGame.musicVol, bar);
-            printCentered(-0.03f, barCol, bar);
-            if (muted) printCentered(-0.15f, 0xFFFF4444u, "MUTED");
+            printCentered(0.07f, barCol, bar);
+            if (muted) printCentered(0.04f, 0xFFFF4444u, "MUTED");
         }
 
         // ------------------------------------------------------------------
@@ -518,12 +518,12 @@ namespace game
             bool   muted = (gGame.sfxVol <= 0.0f);
             u32    barCol = muted ? 0xFF888888u : (selected ? 0xFF00FF44u : 0xFFFFFFFFu);
 
-            printCentered(-0.30f, labelCol, selected ? "> SFX Volume <" : "  SFX Volume  ");
+            printCentered(-0.1f, labelCol, selected ? "> SFX Volume <" : "  SFX Volume  ");
 
             char bar[16];
             buildBar(gGame.sfxVol, bar);
-            printCentered(-0.45f, barCol, bar);
-            if (muted) printCentered(-0.57f, 0xFFFF4444u, "MUTED");
+            printCentered(-0.15f, barCol, bar);
+            if (muted) printCentered(-0.18f, 0xFFFF4444u, "MUTED");
         }
 
         // ------------------------------------------------------------------
@@ -533,26 +533,26 @@ namespace game
             bool selected = (settingsRow == 2);
             u32 labelCol = selected ? 0xFFFF4444u : 0xFFFFFF00u;
 
-            printCentered(-0.68f, labelCol,
+            printCentered(-0.3f, labelCol,
                 selected ? "> Delete Save File <" : "  Delete Save File  ");
 
             if (confirmDeleteSave && selected)
             {
-                printCentered(-0.80f, 0xFFFF6666u, "Press Enter again to confirm");
-                printCentered(-0.90f, 0xFFAAAAAAu, "This will restart all progress");
+                printCentered(-0.40f, 0xFFFF6666u, "Press Enter again to confirm");
+                printCentered(-0.50f, 0xFFAAAAAAu, "This will restart all progress");
             }
             else
             {
-                printCentered(-0.80f, 0xFFAAAAAAu, "Enter to delete all checkpoint progress");
+                printCentered(-0.40f, 0xFFAAAAAAu, "Enter to delete all checkpoint progress");
             }
         }
 
         // ------------------------------------------------------------------
         // Hint text
         // ------------------------------------------------------------------
-        printCentered(-1.02f, 0xFFAAAAAA,
+        printCentered(-0.7f, 0xFFAAAAAA,
             "UP/DOWN to switch   LEFT/RIGHT to adjust   M to mute");
-        printCentered(-1.12f, 0xFFFFFF00u, "Press ESC to go back");
+        printCentered(-0.75f, 0xFFFFFF00u, "Press ESC to go back");
     }
 
 } // namespace game
