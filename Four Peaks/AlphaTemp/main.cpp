@@ -30,6 +30,7 @@
 
 // Global font handle used by all states
 s8 gFontId = -1;
+s8 gFontTitle = -1;
 
 UI::Dialog UI::gDialog;
 
@@ -407,6 +408,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Load font once and share it.
     // Make sure this path points to a valid .ttf in your Assets folder.
     gFontId = AEGfxCreateFont("Assets/Font/L.ttf", 24);
+	gFontTitle = AEGfxCreateFont("Assets/Font/L.ttf" , 80);
 
     // Audio system + loading (done in audio.cpp)
     audio::init();
