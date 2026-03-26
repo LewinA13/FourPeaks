@@ -18,6 +18,7 @@
 #include "graphics.hpp"
 
 extern s8 gFontId;
+extern s8 gFontTitle;
 static bool gIsFullscreen = false;
 
 
@@ -72,6 +73,20 @@ namespace game
         //Allows the printing of text to be at the center of screen and adding the negative value shifts the text to the left. Allowing centering fit
         f32 x = -textHalfWidth(text, scale);
         printText(x, y, color, text, scale);
+    }
+
+    static void printTitleCentered(f32 y, u32 color, const char* text, f32 scale = 1.0f)
+    {
+        f32 w = 0.f, h = 0.f;
+        AEGfxGetPrintSize(gFontTitle, text, scale, &w, &h);
+        f32 x = -(w * 0.5f);
+
+        f32 a = ((color >> 24) & 0xFF) / 255.0f;
+        f32 r = ((color >> 16) & 0xFF) / 255.0f;
+        f32 g = ((color >> 8) & 0xFF) / 255.0f;
+        f32 b = ((color >> 0) & 0xFF) / 255.0f;
+
+        AEGfxPrint(gFontTitle, text, x, y, scale, r, g, b, a); // unpack color same as printText
     }
 
     // -------------------------------------------------------------------------
@@ -333,7 +348,7 @@ namespace game
         }
 
         // Title — large and prominent
-        printCentered(0.60f, 0xFFFFFF00u, "FOUR SEASONS PLATFORMER", 3.5f);
+        printTitleCentered(0.60f, 0xFFFFFF00u, "FOUR SEASONS PLATFORMER", 1.0f);
 
         // Subtitle — well below title
         printCentered(0.35f, 0xFF88CCFFu, "- A Journey Through the Seasons -", 1.25f);
