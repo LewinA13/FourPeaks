@@ -294,4 +294,43 @@ namespace gfx
         AEGfxSetTransform(m.m);
         AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
     }
+
+    void drawSpriteTinted(AEGfxTexture* tex, Vec2 position, f32 rotationRad, Vec2 size,
+        f32 u0, f32 v0, f32 u1, f32 v1, u32 multiplyColor)
+    {
+        if (!tex) return;
+
+        uint64_t key = makeUVKey(u0, v0, u1, v1);
+        auto it = spriteMeshCache.find(key);
+        AEGfxVertexList* mesh;
+
+        if (it != spriteMeshCache.end())
+            mesh = it->second;
+        else
+        {
+            mesh = buildSpriteMesh(u0, v0, u1, v1);
+            spriteMeshCache[key] = mesh;
+        }
+
+        const float a = ((multiplyColor >> 24) & 0xFF) / 255.0f;
+        const float r = ((multiplyColor >> 16) & 0xFF) / 255.0f;
+        const float g = ((multiplyColor >> 8) & 0xFF) / 255.0f;
+        const float b = ((multiplyColor >> 0) & 0xFF) / 255.0f;
+
+        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+        AEGfxSetTransparency(a);
+
+        AEGfxSetColorToMultiply(r, g, b, 1.0f);
+        AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+
+        AEGfxTextureSet(tex, 0, 0);
+
+        AEMtx33 m = makeTransform(position, rotationRad, size);
+        AEGfxSetTransform(m.m);
+        AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
+
+        AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+        AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+    }
 }

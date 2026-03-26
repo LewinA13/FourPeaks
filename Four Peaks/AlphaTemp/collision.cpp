@@ -318,21 +318,29 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
          
 
             case 34: // winter artifacts
+                if (MarkArtifactCollected(0))
+                    PlayerSaveCheckpoint(player, "checkpoint.txt");
                 UI::gDialog.triggerFromArtifact(13);
                 levelLayout[r][c] = 0;
                 break;
 
             case 31: // summer artifacts
+                if (MarkArtifactCollected(1))
+                    PlayerSaveCheckpoint(player, "checkpoint.txt");
                 UI::gDialog.triggerFromArtifact(23);
                 levelLayout[r][c] = 0;
                 break;
 
             case 32: // spring artifacts
+                if (MarkArtifactCollected(2))
+                    PlayerSaveCheckpoint(player, "checkpoint.txt");
                 UI::gDialog.triggerFromArtifact(33);
                 levelLayout[r][c] = 0;
                 break;
 
             case 33: // autumn artifacts
+                if (MarkArtifactCollected(3))
+                    PlayerSaveCheckpoint(player, "checkpoint.txt");
                 UI::gDialog.triggerFromArtifact(44);
                 levelLayout[r][c] = 0;
                 break;

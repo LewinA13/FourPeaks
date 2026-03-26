@@ -10,4 +10,7 @@ namespace hud
 
     // draw formatted run timer on screen
     void drawRunTimer(float totalSeconds);
+
+    // draw artifact icons on the hud
+    void drawArtifactsHud(const bool collected[4]);
 }

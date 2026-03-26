@@ -38,23 +38,20 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
     if (filename == nullptr || filename[0] == '\0')
         return false;
 
-    // trunc is used to remove old checkpoint and add in new one
     std::ofstream out(filename, std::ios::out | std::ios::trunc);
     if (!out.is_open())
         return false;
 
-    out << "checkpoint_v7\n";
+    out << "checkpoint_v8\n";
     out << p.checkpointScene << "\n";
     out << std::fixed << std::setprecision(3);
 
-    // Save respawn position, melon count, death count, and run timer.
     out << p.respawnPos.x << " "
         << p.respawnPos.y << " "
         << p.melonsCollected << " "
         << p.deathCount << " "
         << gGame.runTimeSeconds << "\n";
 
-    // Save all 16 seasonal unlock flags as 0/1 values.
     for (int i = 0; i < 16; ++i)
     {
         out << (gGame.unlockedStages[i] ? 1 : 0);
@@ -71,7 +68,13 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
             << melon.col << "\n";
     }
 
-    std::cout << "Saved checkpoint to file";
+    for (int i = 0; i < 4; ++i)
+    {
+        out << (gGame.collectedArtifacts[i] ? 1 : 0);
+        if (i < 3) out << " ";
+    }
+    out << "\n";
+
     return out.good();
 }
 
@@ -90,7 +93,6 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     float x = 0.0f;
     float y = 0.0f;
 
-    // Safe defaults if file is old or missing values
     p.melonsCollected = 0;
     p.deathCount = 0;
     gGame.runTimeSeconds = 0.0f;
@@ -99,14 +101,52 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     for (int i = 0; i < 16; ++i)
         gGame.unlockedStages[i] = false;
 
+    for (int i = 0; i < 4; ++i)
+        gGame.collectedArtifacts[i] = false;
+
     std::string scene;
     if (!(in >> scene))
         return false;
 
     p.checkpointScene = scene;
 
-    // Newest format: checkpoint_v7
-    if (header == "checkpoint_v7")
+    if (header == "checkpoint_v8")
+    {
+        if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
+            return false;
+
+        for (int i = 0; i < 16; ++i)
+        {
+            int unlocked = 0;
+            if (!(in >> unlocked))
+                return false;
+
+            gGame.unlockedStages[i] = (unlocked != 0);
+        }
+
+        int collectedCount = 0;
+        if (!(in >> collectedCount))
+            return false;
+
+        for (int i = 0; i < collectedCount; ++i)
+        {
+            CollectedMelon melon;
+            if (!(in >> melon.scene >> melon.row >> melon.col))
+                return false;
+
+            gGame.collectedMelons.push_back(melon);
+        }
+
+        for (int i = 0; i < 4; ++i)
+        {
+            int collected = 0;
+            if (!(in >> collected))
+                return false;
+
+            gGame.collectedArtifacts[i] = (collected != 0);
+        }
+    }
+    else if (header == "checkpoint_v7")
     {
         if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
             return false;
@@ -155,6 +195,13 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     {
         return false;
     }
+
+    p.respawnPos = { x, y };
+
+    if (teleportToRespawn)
+        PlayerSetFeetWorld(p, p.respawnPos);
+
+    return true;
 }
 
 bool PlayerDeleteCheckpoint(const char* filename)
@@ -181,6 +228,11 @@ void PlayerResetProgress(Player& p)
     for (int i = 0; i < 16; ++i)
     {
         gGame.unlockedStages[i] = false;
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+        gGame.collectedArtifacts[i] = false;
     }
 
     // also clear some immediate gameplay state
@@ -240,6 +292,48 @@ void ApplyCollectedMelonsToTileMap(const char* sceneName, int rows, int tileMap[
 
         if (tileMap[melon.row][melon.col] == 8)
             tileMap[melon.row][melon.col] = 0;
+    }
+}
+
+bool IsArtifactCollected(int artifactIndex)
+{
+    if (artifactIndex < 0 || artifactIndex >= 4)
+        return false;
+
+    return gGame.collectedArtifacts[artifactIndex];
+}
+
+bool MarkArtifactCollected(int artifactIndex)
+{
+    if (artifactIndex < 0 || artifactIndex >= 4)
+        return false;
+
+    if (gGame.collectedArtifacts[artifactIndex])
+        return false;
+
+    gGame.collectedArtifacts[artifactIndex] = true;
+    return true;
+}
+
+void ApplyCollectedArtifactsToTileMap(int rows, int tileMap[][32])
+{
+    if (!tileMap) return;
+
+    for (int r = 0; r < rows; ++r)
+    {
+        for (int c = 0; c < 32; ++c)
+        {
+            const int tile = tileMap[r][c];
+
+            if (tile == 34 && gGame.collectedArtifacts[0])
+                tileMap[r][c] = 0;
+            else if (tile == 31 && gGame.collectedArtifacts[1])
+                tileMap[r][c] = 0;
+            else if (tile == 32 && gGame.collectedArtifacts[2])
+                tileMap[r][c] = 0;
+            else if (tile == 33 && gGame.collectedArtifacts[3])
+                tileMap[r][c] = 0;
+        }
     }
 }
 
@@ -515,7 +609,7 @@ void PlayerUpdate(Player& p, float dt)
     const bool jumpHeld = AEInputCheckCurr(AEVK_SPACE);
 
     const bool grabHeld = AEInputCheckCurr(AEVK_L);
-    const bool dashPressed = AEInputCheckTriggered(AEVK_LSHIFT);
+    const bool dashPressed = AEInputCheckTriggered(AEVK_LSHIFT) || AEInputCheckTriggered(AEVK_K);
 
     const bool pressUp = AEInputCheckCurr(AEVK_W);
     const bool pressDown = AEInputCheckCurr(AEVK_S);
@@ -830,7 +924,7 @@ void PlayerUpdate(Player& p, float dt)
 
         PlayerSetRespawn(p, feet);
     }
-    if (AEInputCheckTriggered(AEVK_K))
+    if (AEInputCheckTriggered(AEVK_K) && AEInputCheckTriggered(AEVK_LCTRL))
     {
         PlayerKill(p);
     }

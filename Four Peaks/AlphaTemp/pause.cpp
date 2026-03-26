@@ -4,6 +4,7 @@
 #include "gamestate.hpp"
 #include "camera.hpp"
 #include <cstdio>
+#include "mainmenu.hpp"
 
 extern s8 gFontId;
 
@@ -100,9 +101,11 @@ namespace pause
             }
 
             // esc or space or enter goes back to main pause page
-            if (AEInputCheckTriggered(AEVK_SPACE) ||
+            if (AEInputCheckTriggered(AEVK_ESCAPE) ||
+                AEInputCheckTriggered(AEVK_SPACE) ||
                 AEInputCheckTriggered(AEVK_RETURN))
             {
+                game::SaveVolumeSettings();
                 gGame.pauseShowSettings = false;
                 gGame.pauseSettingsRow = 0;
             }

@@ -112,9 +112,10 @@ namespace game
     // -------------------------------------------------------------------------
     // Volume persistence — saves / loads musicVol and sfxVol to a text file
     // -------------------------------------------------------------------------
+
     static constexpr const char* kSettingsFile = "Assets/settings.txt";
 
-    static void saveVolumeSettings()
+    void SaveVolumeSettings()
     {
         std::ofstream out(kSettingsFile);
         if (out.is_open())
@@ -124,10 +125,10 @@ namespace game
         }
     }
 
-    static void loadVolumeSettings()
+    void LoadVolumeSettings()
     {
         std::ifstream in(kSettingsFile);
-        if (!in.is_open()) return;   // first run — keep defaults
+        if (!in.is_open()) return;
 
         char key[32];
         float val;
@@ -185,7 +186,7 @@ namespace game
         }
 
         // Restore volume settings from last session
-        loadVolumeSettings();
+        LoadVolumeSettings();
     }
 
     // -------------------------------------------------------------------------
@@ -288,7 +289,7 @@ namespace game
                         PlayerDeleteCheckpoint("checkpoint.txt");
                         PlayerResetProgress(gGame.player);
 
-                        saveVolumeSettings();
+                        SaveVolumeSettings();
 
                         confirmDeleteSave = false;
                         deleteSaveResult = true;
@@ -305,7 +306,7 @@ namespace game
             // back out of settings
             if (AEInputCheckTriggered(AEVK_ESCAPE))
             {
-                saveVolumeSettings();
+                SaveVolumeSettings();
                 showSettings = false;
                 settingsRow = 0;
                 confirmDeleteSave = false;

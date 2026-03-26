@@ -111,4 +111,60 @@ namespace hud
         // restore gameplay camera.
         AEGfxSetCamPosition(oldCamX, oldCamY);
     }
+
+    void drawArtifactsHud(const bool collected[4])
+    {
+        float camX = 0.0f;
+        float camY = 0.0f;
+        AEGfxGetCamPosition(&camX, &camY);
+
+        // small compact box below the timer panel
+        const gfx::Vec2 panelSize{ 150.0f, 42.0f };
+        const gfx::Vec2 panelPos{ camX - 700.0f, camY + 280.0f };
+
+        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+        gfx::drawRectangle(panelPos, 0.0f, panelSize, 0xAA000000u);
+
+        AEGfxTexture* textures[4] =
+        {
+            sprite::winterArtifacts(),
+            sprite::summerArtifacts(),
+            sprite::springArtifacts(),
+            sprite::autumnArtifacts()
+        };
+
+        const gfx::Vec2 iconSize{ 22.0f, 22.0f };
+        const float startX = panelPos.x - 48.0f;
+        const float spacing = 32.0f;
+        const float iconY = panelPos.y;
+
+        for (int i = 0; i < 4; ++i)
+        {
+            const gfx::Vec2 slotPos{ startX + spacing * i, iconY };
+            const gfx::Vec2 slotBoxSize{ 26.0f, 26.0f };
+
+            // small slot background
+            AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+            AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+            gfx::drawRectangle(slotPos, 0.0f, slotBoxSize, 0x44000000u);
+
+            if (!textures[i])
+                continue;
+
+            if (collected[i])
+            {
+                gfx::drawSprite(textures[i], slotPos, 0.0f, iconSize,
+                    0.0f, 0.0f, 1.0f, 1.0f);
+            }
+            else
+            {
+                gfx::drawSpriteTinted(textures[i], slotPos, 0.0f, iconSize,
+                    0.0f, 0.0f, 1.0f, 1.0f, 0xFF000000u);
+            }
+        }
+
+        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+        AEGfxSetBlendMode(AE_GFX_BM_NONE);
+    }
 }

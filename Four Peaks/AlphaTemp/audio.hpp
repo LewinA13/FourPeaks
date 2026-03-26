@@ -7,7 +7,9 @@ enum class BgmType
     Winter,
     Summer,
     Spring,
-    Autumn
+    Autumn,
+    MainMenu,
+    Tutorial
 };
 
 enum class SfxType

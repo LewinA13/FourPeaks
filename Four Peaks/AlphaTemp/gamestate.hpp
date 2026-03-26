@@ -33,6 +33,13 @@ struct GameState
     // collected melon data
     std::vector<CollectedMelon> collectedMelons;
 
+    // collected artifact flags
+    // 0 = winter
+    // 1 = summer
+    // 2 = spring
+    // 3 = autumn
+    bool collectedArtifacts[4] = {};
+
     // pause menu state
     bool pauseActive = false;
     bool pauseShowSettings = false;

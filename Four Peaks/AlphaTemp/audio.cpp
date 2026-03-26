@@ -12,6 +12,8 @@ static AEAudio s_winterMusic{};
 static AEAudio s_summerMusic{};
 static AEAudio s_springMusic{};
 static AEAudio s_autumnMusic{};
+static AEAudio s_mainMenuMusic{};
+static AEAudio s_tutorialMusic{};
 
 // SFX
 static AEAudio s_jumpSfx{};
@@ -37,6 +39,8 @@ void audio::init()
     s_summerMusic = AEAudioLoadMusic("Assets/Music/summer.mp3");
     s_springMusic = AEAudioLoadMusic("Assets/Music/spring.mp3");
     s_autumnMusic = AEAudioLoadMusic("Assets/Music/autumn.mp3");
+    s_mainMenuMusic = AEAudioLoadMusic("Assets/Music/main_menu.mp3");
+    s_tutorialMusic = AEAudioLoadMusic("Assets/Music/tutorial.mp3");
 
     s_jumpSfx = AEAudioLoadSound("Assets/SFX/jump.mp3");
     s_dashSfx = AEAudioLoadSound("Assets/SFX/dash.mp3");
@@ -80,6 +84,14 @@ static void PlayBgm_Internal(BgmType type)
         AEAudioPlay(s_autumnMusic, s_musicGroup, 1.0f, 1.0f, -1);
         break;
 
+    case BgmType::MainMenu:
+        AEAudioPlay(s_mainMenuMusic, s_musicGroup, 1.0f, 1.0f, -1);
+        break;
+
+    case BgmType::Tutorial:
+        AEAudioPlay(s_tutorialMusic, s_musicGroup, 1.0f, 1.0f, -1);
+        break;
+
     case BgmType::None:
     default:
         // silence
@@ -93,7 +105,7 @@ void audio::update(BgmType desiredBgm)
 
     // Both groups now follow the same slider
     AEAudioSetGroupVolume(s_musicGroup, gGame.musicVol);
-    AEAudioSetGroupVolume(s_sfxGroup, gGame.musicVol);
+    AEAudioSetGroupVolume(s_sfxGroup, gGame.sfxVol);
 
     if (desiredBgm != s_currentBgm)
     {
@@ -137,7 +149,13 @@ void audio::shutdown()
     AEAudioStopGroup(s_musicGroup);
 
     // Unload audio handles
+    AEAudioUnloadAudio(s_mainMenuMusic);
+    AEAudioUnloadAudio(s_tutorialMusic);
     AEAudioUnloadAudio(s_winterMusic);
+    AEAudioUnloadAudio(s_summerMusic);
+    AEAudioUnloadAudio(s_springMusic);
+    AEAudioUnloadAudio(s_autumnMusic);
+
     AEAudioUnloadAudio(s_jumpSfx);
     AEAudioUnloadAudio(s_dashSfx);
     AEAudioUnloadAudio(s_deathSfx);

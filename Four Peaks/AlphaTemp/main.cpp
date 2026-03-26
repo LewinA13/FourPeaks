@@ -276,27 +276,39 @@ static gfx::Vec2 GridToWorld(int gridX, int gridY, float screenYOffset)
 
 static BgmType Audio_GetDesiredBgmType(SceneState state)
 {
-    if (state == SceneState::WinterS1 || state == SceneState::WinterS2 || state == SceneState::WinterS3 || state == SceneState::WinterS4)
+    // main menu related screens
+    if (state == SceneState::Splash ||
+        state == SceneState::MainMenu ||
+        state == SceneState::StageSelect ||
+        state == SceneState::Credit ||
+        state == SceneState::ThankYou)
     {
+        return BgmType::MainMenu;
+    }
+
+    // tutorial stages
+    if (state == SceneState::Tutorial1 ||state == SceneState::Tutorial2 ||state == SceneState::Tutorial3){
+        return BgmType::Tutorial;
+    }
+
+    // winter
+    if (state == SceneState::WinterS1 ||state == SceneState::WinterS2 ||state == SceneState::WinterS3 ||state == SceneState::WinterS4){
         return BgmType::Winter;
     }
 
-    // Summer
-    if (state == SceneState::SummerS1 || state == SceneState::SummerS2 || state == SceneState::SummerS3 || state == SceneState::SummerS4)
-    {
+    // summer
+    if (state == SceneState::SummerS1 ||state == SceneState::SummerS2 ||state == SceneState::SummerS3 ||state == SceneState::SummerS4){
         return BgmType::Summer;
     }
 
-    // Spring
-    if (state == SceneState::SpringS1 || state == SceneState::SpringS2 || state == SceneState::SpringS3 || state == SceneState::SpringS4)
-    {
-        return BgmType::Spring; // currently silent unless you load a summer track in audio.cpp
+    // spring
+    if (state == SceneState::SpringS1 ||state == SceneState::SpringS2 ||state == SceneState::SpringS3 ||state == SceneState::SpringS4){
+        return BgmType::Spring;
     }
 
-    // Autumn
-    if (state == SceneState::AutumnS1 || state == SceneState::AutumnS2 || state == SceneState::AutumnS3 || state == SceneState::AutumnS4)
-    {
-        return BgmType::Autumn; // currently silent unless you load a summer track in audio.cpp
+    // autumn
+    if (state == SceneState::AutumnS1 || state == SceneState::AutumnS2 || state == SceneState::AutumnS3 ||state == SceneState::AutumnS4){
+        return BgmType::Autumn;
     }
 
     return BgmType::None;
@@ -495,6 +507,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     ApplyCollectedMelonsToTileMap("AutumnS2", game::AutumnS2::gridRows, autumnStage2.getTileMap());
     ApplyCollectedMelonsToTileMap("AutumnS3", game::AutumnS3::gridRows, autumnStage3.getTileMap());
     ApplyCollectedMelonsToTileMap("AutumnS4", game::AutumnS4::gridRows, autumnStage4.getTileMap());
+
+    // Apply picked up removals to all stage maps after checkpoint is loaded.
+    ApplyCollectedArtifactsToTileMap(game::WinterS4::gridRows, winterStage4.getTileMap());
+    ApplyCollectedArtifactsToTileMap(game::SummerS4::gridRows, summerStage4.getTileMap());
+    ApplyCollectedArtifactsToTileMap(game::SpringS4::gridRows, springStage4.getTileMap());
+    ApplyCollectedArtifactsToTileMap(game::AutumnS4::gridRows, autumnStage4.getTileMap());
 
     // gDialog
     UI::gDialog.initialize();
@@ -704,6 +722,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                     // if inside pause settings, esc goes back to pause menu
                     if (gGame.pauseShowSettings)
                     {
+                        game::SaveVolumeSettings();
                         gGame.pauseShowSettings = false;
                         gGame.pauseSettingsRow = 0;
                     }
@@ -1425,6 +1444,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (IsSeasonScene(currentState))
         {
             hud::drawRunTimer(gGame.runTimeSeconds);
+            hud::drawArtifactsHud(gGame.collectedArtifacts);
         }
 
         if (gGame.pauseActive)

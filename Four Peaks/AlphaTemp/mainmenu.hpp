@@ -19,6 +19,10 @@
 
 namespace game
 {
+
+    void SaveVolumeSettings();
+    void LoadVolumeSettings();
+
     class MainMenu
     {
     public:
