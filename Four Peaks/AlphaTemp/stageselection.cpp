@@ -42,6 +42,51 @@ static const char* GetSeasonLockMessage(int seasonIndex)
     }
 }
 
+static const char* GetStageLockMessage(int seasonIndex, int stageIndex)
+{
+    switch (seasonIndex)
+    {
+    case 0: // winter
+        switch (stageIndex)
+        {
+        case 1: return "Please complete Winter1 first";
+        case 2: return "Please complete Winter2 first";
+        case 3: return "Please complete Winter3 first";
+        default: return "";
+        }
+
+    case 1: // summer
+        switch (stageIndex)
+        {
+        case 1: return "Please complete Summer1 first";
+        case 2: return "Please complete Summer2 first";
+        case 3: return "Please complete Summer3 first";
+        default: return "";
+        }
+
+    case 2: // spring
+        switch (stageIndex)
+        {
+        case 1: return "Please complete Spring1 first";
+        case 2: return "Please complete Spring2 first";
+        case 3: return "Please complete Spring3 first";
+        default: return "";
+        }
+
+    case 3: // autumn
+        switch (stageIndex)
+        {
+        case 1: return "Please complete Autumn1 first";
+        case 2: return "Please complete Autumn2 first";
+        case 3: return "Please complete Autumn3 first";
+        default: return "";
+        }
+
+    default:
+        return "";
+    }
+}
+
 // Returns half the rendered width of a string — identical to mainmenu.cpp's helper.
 static f32 textHalfWidth(const char* text, f32 scale = 1.0f)
 {
@@ -392,7 +437,12 @@ namespace game {
 
                 if (!unlocked)
                 {
-                    AEGfxPrint(gFontId, "LOCKED", tX - 0.03f, tY - 0.22f, 0.60f, 0.65f, 0.65f, 0.65f, 0.9f);
+                    gfx::drawRectangle({ cx, stageRowY }, 0.0f,
+                        { stageCardW, stageCardH }, 0xAA444444u);
+
+                    AEGfxPrint(gFontId, GetStageLockMessage(seasonIndex, i),
+                        tX - 0.04f, tY ,
+                        0.52f, 1.0f, 1.0f, 1.0f, 1.0f);
                 }
             }
 
