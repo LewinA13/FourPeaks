@@ -160,12 +160,6 @@ namespace UI {
             "The mountain is conquered."
         };
 
-        levelDialogs[45] = {  // All artifacts achievement
-            "Achievement unlocked:",
-            "Congrats! You have collected all 4 artifacts.",
-            "Frost, Flame, Wind, and Harvest are all yours."
-        };
-
 
     }
 

@@ -1,11 +1,10 @@
-﻿#include "winter.hpp"
+#include "winter.hpp"
 #include "player.hpp"
 #include <iostream>
 #include "collision.hpp"
 #include "audio.hpp"
 #include "dialogue.hpp"
 #include "graphics.hpp"
-#include "gamestate.hpp"
 
 // ---------------------------------------------------------------------------
 // Globals
@@ -192,14 +191,6 @@ static void checkDamageTile(Player& player, int r, TileRange box,
         break;
     }
     }
-}
-
-static bool HasAllArtifactsCollected()
-{
-    return gGame.collectedArtifacts[0]
-        && gGame.collectedArtifacts[1]
-        && gGame.collectedArtifacts[2]
-        && gGame.collectedArtifacts[3];
 }
 
 // ---------------------------------------------------------------------------

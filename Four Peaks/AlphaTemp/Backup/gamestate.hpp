@@ -33,10 +33,6 @@ struct GameState
     // collected melon data
     std::vector<CollectedMelon> collectedMelons;
 
-    // seasonal artifact progress
-    bool collectedArtifacts[4] = {};
-    bool allArtifactsAchievementShown = false;
-
     // pause menu state
     bool pauseActive = false;
     bool pauseShowSettings = false;

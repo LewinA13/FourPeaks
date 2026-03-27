@@ -155,12 +155,6 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     {
         return false;
     }
-
-    PlayerSetRespawn(p, { x, y });
-    if (teleportToRespawn)
-        PlayerSetFeetWorld(p, { x, y });
-
-    return true;
 }
 
 bool IsMelonCollected(const char* sceneName, int row, int col)
