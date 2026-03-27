@@ -27,11 +27,16 @@ namespace UI{
         void playerNearSignBoard(bool detect);
 
         //! shown up after picking up artifacts
-        void triggerFromArtifact(int levelID);
+        void triggerAutoDialog(int levelID);
 
         void setSignPos(float x, float y);
 
+        bool dialogBoxShowing() const;
+
+
         void reset();
+
+
 
 
     private:
@@ -58,14 +63,14 @@ namespace UI{
 
         float wordSize;
 
-        bool  isArtifactDialog;
-        float artifactAutoCloseTimer;
-        float artifactAutoCloseDelay;
+
+
+        bool  isAutoDialog;
+        float autoDialogCloseTimer;
+        float autoDialogCloseDelay;
 
         bool waitingForInput;   
         AEVec2 signWorldPos;
-
-
     };
 
     extern Dialog gDialog;  

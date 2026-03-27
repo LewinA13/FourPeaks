@@ -7,6 +7,7 @@
 #include "camera.hpp"
 #include "gamestate.hpp"
 #include "audio.hpp"
+#include "dialogue.hpp"
 
 #include <iostream>
 
@@ -677,6 +678,21 @@ void PlayerUpdate(Player& p, float dt)
         return;
     }
 
+    // lock player if player exactly on ground and reading dialog box
+    if (OnGroundExactly(p) && p.grounded && UI::gDialog.dialogBoxShowing()) {
+        p.velX = 0.0f;
+        p.horzSpeed = 0.0f;
+        p.dashing = false;
+        p.wallHanging = false;
+
+        CollisionUpdate(p, dt);
+        CollisionUpdateWallFlags(p);
+        
+        return;
+    }
+
+   
+
     // =========================================================
     // 1) INPUT (read once)
     // =========================================================
@@ -691,6 +707,7 @@ void PlayerUpdate(Player& p, float dt)
     }
 
     
+
 
     // =========================================================
     // 2) TIMERS / BUFFERS / DASH
@@ -1227,7 +1244,7 @@ void PlayerDraw(Player& p)
         return;
     }
 
-    bool isMoving = (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_D));
+    bool isMoving = ((AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_D))) && !UI::gDialog.dialogBoxShowing();
 
     AEGfxTexture* tex = nullptr;
     int frame = 0;

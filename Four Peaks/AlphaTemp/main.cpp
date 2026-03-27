@@ -699,6 +699,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             gGame.player.velY = 0.0f;
             gGame.player.grounded = false;
 
+            if (currentState == SceneState::Tutorial1)
+            {
+                UI::gDialog.triggerAutoDialog(50);
+            }
+
             lastState = currentState;
         }
 

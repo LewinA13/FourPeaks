@@ -320,28 +320,29 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
             case 34: // winter artifacts
                 if (MarkArtifactCollected(0))
                     PlayerSaveCheckpoint(player, "checkpoint.txt");
-                UI::gDialog.triggerFromArtifact(13);
+                UI::gDialog.triggerAutoDialog(13);
                 levelLayout[r][c] = 0;
                 break;
 
             case 31: // summer artifacts
                 if (MarkArtifactCollected(1))
                     PlayerSaveCheckpoint(player, "checkpoint.txt");
-                UI::gDialog.triggerFromArtifact(23);
+                UI::gDialog.triggerAutoDialog(23);
                 levelLayout[r][c] = 0;
                 break;
 
             case 32: // spring artifacts
                 if (MarkArtifactCollected(2))
                     PlayerSaveCheckpoint(player, "checkpoint.txt");
-                UI::gDialog.triggerFromArtifact(33);
+                UI::gDialog.triggerAutoDialog(33);
                 levelLayout[r][c] = 0;
                 break;
 
             case 33: // autumn artifacts
                 if (MarkArtifactCollected(3))
                     PlayerSaveCheckpoint(player, "checkpoint.txt");
-                UI::gDialog.triggerFromArtifact(44);
+                //UI::gDialog.triggerFromArtifact(44);
+                UI::gDialog.triggerAutoDialog(44);
                 levelLayout[r][c] = 0;
                 break;
 
@@ -548,4 +549,22 @@ void CheckPathForCheckpoint(Player& player, gfx::Vec2 startPos, gfx::Vec2 endPos
         TileRange box = calTileRange(sx, sy, fakeW, fakeH);
         checkGroundType(player, box, g_currentMap);
     }
+}
+
+bool OnGroundExactly(Player& player)
+{
+    const float PROBE_Y = 2.0f;
+    const float OFFSET_X = player.colliderSize.x * 0.4f; 
+
+    float testW = 2.0f; 
+    float testH = 2.0f;
+
+    float leftX = player.pos.x - OFFSET_X;
+    float rightX = player.pos.x + OFFSET_X;
+    float y = player.pos.y - player.colliderSize.y * 0.5f - PROBE_Y;
+
+    bool leftGround = checkAABBCollisionAt(leftX, y, testW, testH);
+    bool rightGround = checkAABBCollisionAt(rightX, y, testW, testH);
+
+    return leftGround && rightGround;
 }
