@@ -210,7 +210,7 @@ namespace game {
                     float gx, gy, cw, ch;
                     gridToWorld(col, 19, gx, gy, cw, ch);
                     gfx::Vec2 pp{ std::round(gx + cw * 0.5f), std::round(gy + ch * 0.5f) };
-                    gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAA00FFFFu);
+                    gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAAFFFFFFu);
                 }
             }
             // Draw back-teleport to WinterS4 indicator (col 1-2, row 2)
@@ -218,7 +218,7 @@ namespace game {
                 float gx, gy, cw, ch;
                 gridToWorld(30 + c, 19, gx, gy, cw, ch);
                 gfx::Vec2 pp{ std::round(gx + cw * 0.5f), std::round(gy + ch * 0.5f) };
-                gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAA4488FFu); // Blue = leads to Winter
+                gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAAFFFFFFu); 
             }
         }
         HeatDraw();
@@ -468,7 +468,7 @@ namespace game {
                     float gx, gy, cw, ch;
                     gridToWorld(col, 0, gx, gy, cw, ch);
                     gfx::Vec2 pp{ std::round(gx + cw * 0.5f), std::round(gy + ch * 0.5f) };
-                    gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAA00FFFFu);
+                    gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAAFFFFFFu);
                 }
             }
         }
@@ -748,7 +748,7 @@ namespace game {
                     float gx, gy, cw, ch;
                     gridToWorld(col, 19, gx, gy, cw, ch);
                     gfx::Vec2 pp{ std::round(gx + cw * 0.5f),std::round(gy + ch * 0.5f) };
-                    gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAA00FFFFu);
+                    gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAAFFFFFFu);
                 }
             }
         }
@@ -1038,11 +1038,11 @@ namespace game {
             float ch = (maxY - minY) / static_cast<float>(gridRows);
             {
                 gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
-                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
             }
             {
                 gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
-                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
             }
         }
         PlayerDraw(gGame.player);

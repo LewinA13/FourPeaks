@@ -595,7 +595,7 @@ void game::AutumnS1::draw() const
         for (int row : { 7, 8, 9 })
         {
             gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
         }
     }
 
@@ -700,7 +700,7 @@ void game::AutumnS2::draw() const
         for (int row : { 17, 18, 19 })
         {
             gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
         }
     }
 
@@ -804,7 +804,7 @@ void game::AutumnS3::draw() const
         for (int row : { 1, 2, 3 })
         {
             gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
         }
     }
 
@@ -910,7 +910,7 @@ void game::AutumnS4::draw() const
         for (int row : { 18, 19 })
         {
             gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
         }
     }
 

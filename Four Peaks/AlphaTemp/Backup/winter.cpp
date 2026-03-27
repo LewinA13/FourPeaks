@@ -658,7 +658,8 @@ namespace game {
             float zoneRight = gx + cw;
             float zoneBot   = gy;
             float zoneTop   = gy + ch * 2.0f;
-            if (playerOverlapsRect(gGame.player, zoneLeft, zoneRight, zoneBot, zoneTop))
+            if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
+                gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
             {
                 return 21; // Signal teleport to Stage 3
             }
@@ -1099,7 +1100,8 @@ namespace game {
                 {
                     float gx, gy, cw, ch;
                     gridToWorld(c, teleportRow, gx, gy, cw, ch);
-                    if (playerOverlapsRect(gGame.player, gx, gx + cw, gy, gy + ch))
+                    if (gGame.player.pos.x >= gx && gGame.player.pos.x <= gx + cw &&
+                        gGame.player.pos.y >= gy && gGame.player.pos.y <= gy + ch)
                         triggered = true;
                 }
             }
@@ -1108,7 +1110,8 @@ namespace game {
             {
                 float gx, gy, cw, ch;
                 gridToWorld(1, teleportRow, gx, gy, cw, ch);
-                if (playerOverlapsRect(gGame.player, gx, gx + cw * 2.0f, gy, gy + ch))
+                if (gGame.player.pos.x >= gx && gGame.player.pos.x <= gx + cw * 2.0f &&
+                    gGame.player.pos.y >= gy && gGame.player.pos.y <= gy + ch)
                     triggered = true;
             }
             if (triggered)

@@ -437,7 +437,8 @@ namespace game {
             float zoneRight = gx + cw * 2.0f;
             float zoneBot   = gy;
             float zoneTop   = gy + ch;
-            if (playerOverlapsRect(gGame.player, zoneLeft, zoneRight, zoneBot, zoneTop))
+            if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
+                gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
                 return 21;
         }
         sprite::updateAnimatedTiles(dt);
@@ -704,7 +705,8 @@ namespace game {
             float zoneRight = gx + cw * 2.0f;
             float zoneBot   = gy;
             float zoneTop   = gy + ch;
-            if (playerOverlapsRect(gGame.player, zoneLeft, zoneRight, zoneBot, zoneTop))
+            if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
+                gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
                 return 22;
         }
         for (auto& trigger : g_triggeredIceTiles)

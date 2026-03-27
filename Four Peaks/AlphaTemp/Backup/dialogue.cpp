@@ -1,7 +1,6 @@
 #include "dialogue.hpp"
 #include "graphics.hpp"
 #include "sprite.hpp"
-#include "gamestate.hpp"
 extern s8 gFontId;      // Font handle created in main.cpp
 
 
@@ -14,9 +13,9 @@ namespace UI {
     , typeWriterTimer(0.0f)
     , timePerChar(1.0f / 20.0f)
     , wordSize(1.6f)
-    , isAutoDialog(false)
-    , autoDialogCloseTimer(0.0f)
-    , autoDialogCloseDelay(1.0f)
+    , isArtifactDialog(false)
+    , artifactAutoCloseTimer(0.0f)
+    , artifactAutoCloseDelay(1.0f)
     , waitingForInput(false)
     , signWorldPos{0.0f, 0.0f}   
     , currentLevelID(-1)
@@ -30,8 +29,7 @@ namespace UI {
         // Prologue
         // =========================================================
         levelDialogs[50] = {
-            "For generations, my family sought the relics.",
-            "Four seasonal artifacts, hidden atop this mountain.",
+            "For generations, my family sought the four seasonal relics hidden atop this mountain.",
             "No archaeologist has ever returned with all four.",
             "My father... and his father before him... never came back.",
             "All they left behind was this map - and their notes.",
@@ -162,12 +160,6 @@ namespace UI {
             "The mountain is conquered."
         };
 
-        levelDialogs[45] = {  // All artifacts achievement
-            "Achievement unlocked:",
-            "Congrats! You have collected all 4 artifacts.",
-            "Frost, Flame, Wind, and Harvest are all yours."
-        };
-
 
     }
 
@@ -189,8 +181,9 @@ namespace UI {
 
 
     void Dialog::update(float dt) {
+
         // artifact dialog
-        if (isAutoDialog) {
+        if (isArtifactDialog) {
             if (!isShowing) return;
 
             size_t currentTextLength = texts[currentIndex].length();
@@ -206,8 +199,8 @@ namespace UI {
             }
 
             if (isLastLine && isFullyTyped) {
-                autoDialogCloseTimer += dt;
-                if (autoDialogCloseTimer >= autoDialogCloseDelay) {
+                artifactAutoCloseTimer += dt;
+                if (artifactAutoCloseTimer >= artifactAutoCloseDelay) {
                     reset();
                     return;
                 }
@@ -221,7 +214,7 @@ namespace UI {
                     currentIndex++;
                     displayedChars = 0;
                     typeWriterTimer = 0.0f;
-                    autoDialogCloseTimer = 0.0f;
+                    artifactAutoCloseTimer = 0.0f;
                 }
                 else {
                     reset();
@@ -296,7 +289,7 @@ namespace UI {
     void Dialog::render()
     {
 
-        if ((waitingForInput || isShowing) && playerNearSign && !isAutoDialog) {
+        if ((waitingForInput || isShowing) && playerNearSign && !isArtifactDialog) {
             float oldX, oldY;
             AEGfxGetCamPosition(&oldX, &oldY);
             AEGfxSetCamPosition(0.0f, 0.0f);
@@ -364,7 +357,7 @@ namespace UI {
         }
      
 
-        if (currentIndex < texts.size() && (playerNearSign || isAutoDialog)){
+        if (currentIndex < texts.size() && (playerNearSign || isArtifactDialog)){
             std::string fullText = texts[currentIndex];
 
             // typewriter effect
@@ -400,7 +393,7 @@ namespace UI {
         playerNearSign = detect;
     }
 
-    void Dialog::triggerAutoDialog(int levelID) {
+    void Dialog::triggerFromArtifact(int levelID) {
         if (levelDialogs.find(levelID) == levelDialogs.end()) return;
 
         currentLevelID = levelID;
@@ -408,28 +401,23 @@ namespace UI {
         currentIndex = 0;
         displayedChars = 0;
         typeWriterTimer = 0.0f;
-        isAutoDialog = true;
-        autoDialogCloseTimer = 0.0f;
+        isArtifactDialog = true;
+        artifactAutoCloseTimer = 0.0f;
         isShowing = true;
     }
 
     void Dialog::reset() {
         isShowing = false;
-        isAutoDialog = false;
-        autoDialogCloseTimer = 0.0f;
+        isArtifactDialog = false;
+        artifactAutoCloseTimer = 0.0f;
         currentIndex = 0;
         displayedChars = 0;
         waitingForInput = false;  
     }
    
-    // helper funct for render 
     void Dialog::setSignPos(float x, float y) {
         signWorldPos.x = x;
         signWorldPos.y = y;
-    }
-
-    bool Dialog::dialogBoxShowing() const {
-        return isShowing;
     }
 }
 	

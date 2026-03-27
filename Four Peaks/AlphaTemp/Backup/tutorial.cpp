@@ -329,6 +329,9 @@ namespace
 
         (void)currentTutorial;
 
+        if (AEInputCheckTriggered(AEVK_F2)) return 30;
+        if (AEInputCheckTriggered(AEVK_F3)) return 31;
+        if (AEInputCheckTriggered(AEVK_1))  return 32;
 
         if (!AEInputCheckTriggered(AEVK_LBUTTON))
             return 0;
@@ -394,7 +397,7 @@ namespace game
             for (int c : { 1, 2 })
             {
                 gfx::Vec2 p{ std::round(minX + c * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
-                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
             }
         }
 
@@ -450,7 +453,7 @@ namespace game
             for (int r : { 3, 4 })
             {
                 gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + r * ch + ch * 0.5f) };
-                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
             }
         }
 
@@ -505,7 +508,7 @@ namespace game
             for (int r : { 16, 17, 18 })
             {
                 gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + r * ch + ch * 0.5f) };
-                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
             }
         }
 
