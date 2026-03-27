@@ -90,9 +90,8 @@ namespace UI {
         // =========================================================
         levelDialogs[20] = {  // SummerS1
             "Dad's Note:",
-            "Heat kills faster than hunger. Find water - or faint.",
-            "I can already feel the scorching heat.",
-            "I need to find water bottles to stay cool."
+            "Watch the heat bar on the top-left, ",
+            "find water bottles to stay cool!",
         };
 
         levelDialogs[21] = {  // SummerS2

@@ -602,6 +602,7 @@ void PlayerInit(Player& p)
 
 void PlayerUpdate(Player& p, float dt)
 {
+    printf("player velY: %f\n", p.velY);
     // =========================================================
     // 0) SETUP
     // =========================================================
