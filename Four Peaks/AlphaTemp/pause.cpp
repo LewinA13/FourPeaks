@@ -45,11 +45,22 @@ namespace
         "resume",
         "settings",
         "cheats",
+        "fullscreen",
         "main menu",
         "exit"
     };
 
-    static const int kPauseItemCount = 5;
+    static const int kPauseItemCount = 6;
+
+    // Tracks current fullscreen state; toggled alongside the actual window call
+    static bool sIsFullscreen = false;
+
+    static void toggleFullscreen()
+    {
+        sIsFullscreen = !sIsFullscreen;
+
+        AESysSetFullScreen(sIsFullscreen);
+    }
 
     static void drawOutlineBox(const gfx::Vec2& pos, const gfx::Vec2& size)
     {
@@ -141,9 +152,13 @@ namespace pause
                 return Action::None;
 
             case 3:
-                return Action::MainMenu;
+                toggleFullscreen();
+                return Action::None;
 
             case 4:
+                return Action::MainMenu;
+
+            case 5:
                 return Action::ExitGame;
 
             default:
@@ -171,8 +186,8 @@ namespace pause
             0xB0000000
         );
 
-        // draw the pause box in the middle of the current view
-        drawOutlineBox({ camX, camY }, { 520.0f, 420.0f });
+        // draw the pause box in the center of the screen
+        drawOutlineBox({ 0.0f, 0.0f }, { 520.0f, 570.0f });
 
         if (gGame.pauseShowSettings)
         {
@@ -202,11 +217,20 @@ namespace pause
                 gGame.cheatsOn ? "On" : "Off"
             );
 
+            char fullscreenText[64];
+            std::snprintf(
+                fullscreenText,
+                sizeof(fullscreenText),
+                "Fullscreen : [%s]",
+                sIsFullscreen ? "X" : " "
+            );
+
             const char* displayText[kPauseItemCount] =
             {
                 "Resume",
                 "Settings",
                 cheatText,
+                fullscreenText,
                 "Main menu",
                 "Exit"
             };
@@ -218,8 +242,8 @@ namespace pause
                 printCentered(startY - i * 0.14f, color, displayText[i], 0.95f);
             }
 
-            printCentered(-0.52f, 0xFFBBBBBB, "Up and down to move", 0.75f);
-            printCentered(-0.64f, 0xFFBBBBBB, "Enter or space to confirm", 0.75f);
+            printCentered(-0.72f, 0xFFBBBBBB, "Up and down to move", 0.75f);
+            printCentered(-0.84f, 0xFFBBBBBB, "Enter or space to confirm", 0.75f);
         }
 
     }
