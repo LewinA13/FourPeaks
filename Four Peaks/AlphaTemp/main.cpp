@@ -1262,7 +1262,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (!gGame.pauseActive)
             {
-                if (action == 21 && !gTransition.isActive()) {
+
+                if (action == 21  && !gTransition.isActive()) {
                     UnlockNextStage(SceneState::WinterS2);
                     PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
                     triggerTransition(SceneState::WinterS3);

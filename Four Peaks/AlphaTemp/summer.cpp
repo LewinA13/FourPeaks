@@ -95,6 +95,10 @@ namespace game {
 
     void HeatDraw()
     {
+        float oldCamX, oldCamY;
+        AEGfxGetCamPosition(&oldCamX, &oldCamY);
+        AEGfxSetCamPosition(0.0f, 0.0f);
+
         AEGfxTexture* hbTex = sprite::heatbar();
         if (!hbTex) return;
 
@@ -105,16 +109,19 @@ namespace game {
         float u0, v0, u1, v1;
         sprite::getHeatBarUv(frame, u0, v0, u1, v1);
 
-        float maxX = AEGfxGetWinMaxX();
-        float maxY = AEGfxGetWinMaxY();
-        gfx::Vec2 hbPos{ maxX - 55.0f, maxY - 55.0f };
-        gfx::Vec2 hbSize{ 90.0f, 90.0f };
-
+        const float hudCenterX = -700.0f;
+        const float hudBottom = 280.0f - 42.0f / 2.0f;  
+        const float gap = 6.0f;
+        gfx::Vec2 hbSize{ 110.0f, 110.0f };
+        gfx::Vec2 hbPos{hudCenterX, hudBottom - gap - hbSize.y / 2.0f};
+     
         AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
         AEGfxSetBlendMode(AE_GFX_BM_BLEND);
         gfx::drawSprite(hbTex, hbPos, 0.0f, hbSize, u0, v0, u1, v1);
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
+
+        AEGfxSetCamPosition(oldCamX, oldCamY);
     }
 
 

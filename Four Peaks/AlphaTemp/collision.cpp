@@ -409,7 +409,7 @@ void CollisionResolveSpawn(Player& player)
 void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
 {
   
-
+   
     float currentY = player.pos.y;
     float oldY = currentY - player.velY * dt;
 
@@ -442,9 +442,23 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
     // --- Vertical collision ---
     player.pos.y = currentY;
 
+    const float halfWinH = (float)AEGfxGetWindowHeight() * 0.5f;     
     float fullH = (float)AEGfxGetWindowHeight();
     float btmCoordPostY = player.pos.y + fullH * 0.5f;
     float screenY = btmCoordPostY - g_currentY;
+
+  
+    float headY = getPlayerHeadY(player);
+
+    if (headY > fullH)
+    {
+        float clampedHeadY = fullH;
+
+        player.pos.y = (clampedHeadY - player.colliderSize.y * 0.5f) + g_currentY - halfWinH;
+
+        player.velY = -100.0f;
+    }
+
 
     // Kill player if they fall below the layer
     if (screenY < -50.0f) {
