@@ -212,7 +212,7 @@ namespace UI {
                 }
             }
 
-            if (AEInputCheckTriggered(AEVK_DOWN)) {
+            if (AEInputCheckTriggered(AEVK_RETURN)) {
                 if (!isFullyTyped) {
                     displayedChars = currentTextLength;
                 }
@@ -272,15 +272,7 @@ namespace UI {
             }
         }
 
-        if (AEInputCheckTriggered(AEVK_UP)) {
-            if (currentIndex > 0) {
-                currentIndex--;
-                displayedChars = 0;
-                typeWriterTimer = 0.0f;
-            }
-        }
-
-        if (AEInputCheckTriggered(AEVK_DOWN)) {
+        if (AEInputCheckTriggered(AEVK_RETURN)) {
             if (!isFullyTyped) {
                 displayedChars = currentTextLength;
             }
@@ -300,28 +292,31 @@ namespace UI {
             AEGfxGetCamPosition(&oldX, &oldY);
             AEGfxSetCamPosition(0.0f, 0.0f);
 
-            const char* hint = isShowing ? "Press [E] to close" : "Press [E] to read";
-            float scale = 1.2f;
+            if (!isShowing) {
+                const char* hint = "Press [E] to read";
+                float scale = 1.2f;
 
-            f32 tw, th;
-            AEGfxGetPrintSize(gFontId, hint, scale, &tw, &th);
+                f32 tw, th;
+                AEGfxGetPrintSize(gFontId, hint, scale, &tw, &th);
 
-            float halfW = (float)AEGfxGetWindowWidth() * 0.5f;
-            float halfH = (float)AEGfxGetWindowHeight() * 0.5f;
+                float halfW = (float)AEGfxGetWindowWidth() * 0.5f;
+                float halfH = (float)AEGfxGetWindowHeight() * 0.5f;
 
-            float screenX = signWorldPos.x - oldX;
-            float screenY = signWorldPos.y - oldY + 40.0f; 
+                float screenX = signWorldPos.x - oldX;
+                float screenY = signWorldPos.y - oldY + 40.0f;
 
-            float normX = screenX / halfW;
-            float normY = screenY / halfH;
+                float normX = screenX / halfW;
+                float normY = screenY / halfH;
 
-            float drawX = normX - tw * 0.5f;
-            float drawY = normY - th * 0.5f;
+                float drawX = normX - tw * 0.5f;
+                float drawY = normY - th * 0.5f;
 
-            AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-            AEGfxPrint(gFontId, hint, drawX, drawY, scale, 1.0f, 1.0f, 1.0f, 1.0f); 
+                AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                AEGfxPrint(gFontId, hint, drawX, drawY, scale, 1.0f, 1.0f, 1.0f, 1.0f);
 
-            AEGfxSetCamPosition(oldX, oldY);
+                AEGfxSetCamPosition(oldX, oldY);
+            }
+           
         }
 
 
@@ -354,13 +349,7 @@ namespace UI {
         }
 
 
-
-        if (currentIndex > 0) {
-            gfx::drawSprite(textboxUpTexture, { 400, 310 }, 0.0f, { 30.0f, 30.0f }, 0.0f, 0.0f, 1.0f, 1.0f);
-        }
-        if (currentIndex + 1 < (int)texts.size() || displayedChars < texts[currentIndex].length()) {
-            gfx::drawSprite(textboxDownTexture, { 400, 270 }, 0.0f, { 30.0f, 30.0f }, 0.0f, 0.0f, 1.0f, 1.0f);
-        }
+   
      
 
         if (currentIndex < texts.size() && (playerNearSign || isAutoDialog)){
@@ -389,6 +378,29 @@ namespace UI {
             float drawY = normY - textHeight / 2.0f;
 
             AEGfxPrint(gFontId, pText, drawX, drawY, wordSize, 1.0f, 1.0f, 1.0f, 1.0f);
+
+            // hint 
+            float hintScale = 1.0f;
+            float boxBottom = (boxY - boxHeight * 0.5f) / (AEGfxGetWindowHeight() * 0.5f);
+
+            const char* hintText = nullptr;
+
+            if (isAutoDialog) {
+                hintText = (currentIndex + 1 < (int)texts.size() || displayedChars < texts[currentIndex].length()) ? "[Press \" Enter \" to continue]" : "[Press \" Enter \" to skip]";
+            }
+            else{
+                hintText = (currentIndex + 1 < (int)texts.size() || displayedChars < texts[currentIndex].length()) ? "[Press \" Enter \" to continue]" : "[Press \" E \" to close]";
+            }
+
+            f32 hintWidth{}, hintHeight{};
+            AEGfxGetPrintSize(gFontId, hintText, hintScale, &hintWidth, &hintHeight);
+
+            float hintX = normX - hintWidth / 2.0f;
+            float hintY = boxBottom + 0.03f;
+
+            AEGfxPrint(gFontId, hintText, hintX, hintY, hintScale, 1.0f, 1.0f, 0.8f, 1.0f);
+
+
         }
 
   
