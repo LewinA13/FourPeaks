@@ -117,7 +117,7 @@ namespace
         { "Four Peaks Alpha",          1.4f, 0xFFFFFFFFu },
         { "",                          1.0f, 0x00000000u },
         { "Developed by",              0.9f, 0xFFAAAAAAu },
-        { "Your Team Name Here",       1.1f, 0xFF88EEFFu },
+        { "Team Game++",       1.1f, 0xFF88EEFFu },
         { "",                          1.0f, 0x00000000u },
         { "Press ENTER or SPACE",      0.8f, 0xFFCCCCCCu },
         { "to return to the menu",     0.8f, 0xFFCCCCCCu },
