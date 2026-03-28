@@ -159,23 +159,20 @@ namespace pause
         if (!gGame.pauseActive)
             return;
 
-        float oldCamX = 0.0f;
-        float oldCamY = 0.0f;
-        AEGfxGetCamPosition(&oldCamX, &oldCamY);
+        float camX = 0.0f;
+        float camY = 0.0f;
+        AEGfxGetCamPosition(&camX, &camY);
 
-        // switch everything in pause to ui space
-        AEGfxSetCamPosition(0.0f, 0.0f);
-
-        // draw grey overlay across the whole screen
+        // draw the grey overlay centered on the current camera
         gfx::drawRectangle(
-            { 0.0f, 0.0f },
+            { camX, camY },
             0.0f,
             { camera::screenWidth(), camera::screenHeight() },
             0xB0000000
         );
 
-        // draw the pause box in the center of the screen
-        drawOutlineBox({ 0.0f, 0.0f }, { 520.0f, 420.0f });
+        // draw the pause box in the middle of the current view
+        drawOutlineBox({ camX, camY }, { 520.0f, 420.0f });
 
         if (gGame.pauseShowSettings)
         {
@@ -225,7 +222,5 @@ namespace pause
             printCentered(-0.64f, 0xFFBBBBBB, "Enter or space to confirm", 0.75f);
         }
 
-        // restore gameplay camera after pause draw
-        AEGfxSetCamPosition(oldCamX, oldCamY);
     }
 }
