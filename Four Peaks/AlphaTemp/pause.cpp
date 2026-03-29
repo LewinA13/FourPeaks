@@ -187,7 +187,7 @@ namespace pause
         );
 
         // draw the pause box in the center of the screen
-        drawOutlineBox({ 0.0f, 0.0f }, { 520.0f, 570.0f });
+        drawOutlineBox({ camX, camY }, { 520.0f, 570.0f });
 
         if (gGame.pauseShowSettings)
         {

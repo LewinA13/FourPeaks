@@ -14,6 +14,7 @@
 
 #define NOMINMAX
 #include "transition.hpp"
+#include "camera.hpp"
 #include "graphics.hpp"
 #include "AEEngine.h"
 #include <cstdint>
@@ -133,28 +134,30 @@ void Transition::draw() const
     switch (phase)
     {
     case Phase::FadeIn:
-        // Smooth step: slow start, fast middle, slow end
         alpha = t * t * (3.0f - 2.0f * t);
         break;
     case Phase::Hold:
         alpha = 1.0f;
         break;
     case Phase::FadeOut:
-        // Reverse smooth step
         alpha = 1.0f - (t * t * (3.0f - 2.0f * t));
         break;
     default:
         return;
     }
 
-    // Draw transition in screen space so it stays visible on every vertical
-    // stage band. This matches how the HUD and pause overlay are rendered.
-    f32 oldCamX = 0.0f;
-    f32 oldCamY = 0.0f;
-    AEGfxGetCamPosition(&oldCamX, &oldCamY);
-    AEGfxSetCamPosition(0.0f, 0.0f);
+    float camX = 0.0f;
+    float camY = 0.0f;
+    AEGfxGetCamPosition(&camX, &camY);
 
-    drawBlackOverlay(alpha);
+    const u32 a8 = static_cast<u32>(alpha * 255.0f);
+    const u32 color = (a8 << 24);
 
-    AEGfxSetCamPosition(oldCamX, oldCamY);
+    // draw transition using the real gameplay camera
+    gfx::drawRectangle(
+        { camX, camY },
+        0.0f,
+        { camera::screenWidth(), camera::screenHeight() },
+        color
+    );
 }
