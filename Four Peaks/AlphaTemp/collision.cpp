@@ -193,6 +193,13 @@ static void checkDamageTile(Player& player, int r, TileRange box, int tileCase)
         float playerFeetY = getPlayerFeetY(player);
         bool  spikeNotAtFeet = (r != box.rowStart);
 
+        float tileDeadZoneX = (r + 0.95f) * tileH;
+        //float playerLeft = ;
+        bool  spikeNotAtFeet = (r != box.rowStart);
+
+
+
+
         if (spikeNotAtFeet) { //  means player center touch the sprikes alr
             player.currGroundType = Player::GroundType::Saw;
         }
