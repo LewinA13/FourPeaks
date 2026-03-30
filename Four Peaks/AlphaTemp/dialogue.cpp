@@ -339,10 +339,7 @@ namespace UI {
         float boxWidth = 950.0f;
         float boxHeight = 200.0f;
         AEGfxTexture* textboxTexture = sprite::textbox();
-        AEGfxTexture* textboxUpTexture = sprite::textboxUp();
-        AEGfxTexture* textboxDownTexture = sprite::textboxDown();
-
-
+   
         // If not add this line code, sprite dont show up
         gfx::drawRectangle({ -99999.0f, -99999.0f }, 0.0f, { 1.0f, 1.0f }, 0x00000000u);
 
