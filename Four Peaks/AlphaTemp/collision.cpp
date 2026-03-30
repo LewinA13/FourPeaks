@@ -126,8 +126,7 @@ static bool isSolidTile(int tile)
 // Map collision check
 // playerHeadY : screen-space head Y, used for breakable tile upper-half collision
 // ---------------------------------------------------------------------------
-bool checkMapCollision(TileRange box, int levelLayout[][mapColm],
-    float velY = 0.0f, float playerHeadY = 0.0f)
+bool checkMapCollision(TileRange box, int levelLayout[][mapColm], float playerHeadY = 0.0f)
 {
     if (box.colStart == -1) return false;
 
@@ -151,22 +150,19 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm],
 }
 
 // helper function for damage tile
-static void checkDamageTile(Player& player, int r, TileRange box,
-    int levelLayout[][mapColm], int tileCase)
+static void checkDamageTile(Player& player, int r, TileRange box, int tileCase)
 {
-    float screenY = getPlayerScreenY(player);
-    float tileDeadZoneY = (r + 0.6f) * tileH;
-
     switch (tileCase)
     {
     case 2:
     case 24:
     {
+        float tileDeadZoneY = (r + 0.6f) * tileH;
         float playerFeetY = getPlayerFeetY(player);
         bool  spikeNotAtFeet = (r != box.rowStart);
         Player::GroundType damageType = (tileCase == 24)? Player::GroundType::Fire : Player::GroundType::Spikes;
 
-        if (spikeNotAtFeet) {
+        if (spikeNotAtFeet) { //  means player center touch the sprikes alr
                player.currGroundType = damageType;
         }
         else {
@@ -175,22 +171,38 @@ static void checkDamageTile(Player& player, int r, TileRange box,
         }
         break;
     }
+
     case 9:
     {
+        float tileDeadZoneY = (r + 0.6f) * tileH;
         float playerHeadY = getPlayerHeadY(player);
         bool  spikeNotAtHead = (r != box.rowEnd);
 
-        if (spikeNotAtHead) {
-            //if (calculateDamageOverlapRatio(player, r, box, levelLayout) > 0.0f)
+        if (spikeNotAtHead) { //  means player center touch the sprikes alr
                 player.currGroundType = Player::GroundType::Spikes;
         }
         else {
             if (playerHeadY >= tileDeadZoneY)
-                //if (calculateDamageOverlapRatio(player, r, box, levelLayout) >= 0.5f)
                     player.currGroundType = Player::GroundType::Spikes;
         }
         break;
     }
+
+    case 25:
+        float tileDeadZoneY = (r + 0.9f) * tileH;
+        float playerFeetY = getPlayerFeetY(player);
+        bool  spikeNotAtFeet = (r != box.rowStart);
+
+        if (spikeNotAtFeet) { //  means player center touch the sprikes alr
+            player.currGroundType = Player::GroundType::Saw;
+        }
+        else {
+            if (playerFeetY <= tileDeadZoneY)
+                player.currGroundType = Player::GroundType::Saw;
+        }
+        break;
+
+
     }
 }
 
@@ -244,12 +256,9 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 player.currGroundType = Player::GroundType::Normal;
                 break;
 
-            case 2: case 9: case 24: // spikes / fire
-                checkDamageTile(player, r, box, levelLayout, levelLayout[r][c]);
-                break;
-
-            case 25: // saw
-                player.currGroundType = Player::GroundType::Saw;
+            // Using "checkDamageTile" to resolve all damaga tile 
+            case 2: case 9: case 24: case 25: // upspikes / downspikes / fire / saw
+                checkDamageTile(player, r, box, levelLayout[r][c]);
                 break;
 
             case 8:	// melon 
@@ -379,7 +388,7 @@ void CollisionResolveSpawn(Player& player)
     TileRange box{};  
     for (int i = 0; i < 200; ++i) {
         box = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
-        if (!checkMapCollision(box, g_currentMap, player.velY, getPlayerHeadY(player))) break;
+        if (!checkMapCollision(box, g_currentMap, getPlayerHeadY(player))) break;
         player.pos.y += step;
     }
 
@@ -389,7 +398,7 @@ void CollisionResolveSpawn(Player& player)
     for (int i = 0; i < maxSteps; ++i) {
         player.pos.y -= step;
         box = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
-        if (checkMapCollision(box, g_currentMap, player.velY, getPlayerHeadY(player))) {
+        if (checkMapCollision(box, g_currentMap,getPlayerHeadY(player))) {
             player.pos.y += step;
             landed = true;
             break;
@@ -418,12 +427,12 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
     player.pos.y = oldY;
     TileRange hBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
 
-    if (player.velX != 0.0f && checkMapCollision(hBox, levelLayout, player.velY, getPlayerHeadY(player))) {
+    if (player.velX != 0.0f && checkMapCollision(hBox, levelLayout, getPlayerHeadY(player))) {
         float push = (player.velX > 0.0f) ? -0.5f : 0.5f;
         for (int i = 0; i < 200; ++i) {
             player.pos.x += push;
             hBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
-            if (!checkMapCollision(hBox, levelLayout, player.velY, getPlayerHeadY(player))) {
+            if (!checkMapCollision(hBox, levelLayout, getPlayerHeadY(player))) {
                 break;
             }
         }
@@ -474,12 +483,12 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
     TileRange vBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
 
 
-    if (feetY > GROUND_Y  && checkMapCollision(vBox, levelLayout, player.velY, getPlayerHeadY(player))) {
+    if (feetY > GROUND_Y  && checkMapCollision(vBox, levelLayout, getPlayerHeadY(player))) {
         float push = (player.velY > 0) ? -0.5f : 0.5f;
         for (int i = 0; i < 200; ++i) {
             player.pos.y += push;
             vBox = calTileRange(player.pos.x, player.pos.y, player.colliderSize.x, player.colliderSize.y);
-            if (!checkMapCollision(vBox, levelLayout, player.velY, getPlayerHeadY(player))) {
+            if (!checkMapCollision(vBox, levelLayout, getPlayerHeadY(player))) {
                 break;
             }
             
