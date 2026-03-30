@@ -150,7 +150,7 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm], float playerHe
 }
 
 // helper function for damage tile
-static void checkDamageTile(Player& player, int r, TileRange box, int tileCase)
+static void checkDamageTile(Player& player, int r, int c, TileRange box, int tileCase)
 {
     switch (tileCase)
     {
@@ -188,44 +188,34 @@ static void checkDamageTile(Player& player, int r, TileRange box, int tileCase)
         break;
     }
 
+   
     case 25:
-        float tileDeadZoneY = (r + 0.95f) * tileH;
-        float playerFeetY = getPlayerFeetY(player);
-        bool  spikeNotAtFeet = (r != box.rowStart);
+    {
+        float halfWinW = (float)AEGfxGetWindowWidth() / 2.0f;
+        float btmCoordPostX = player.pos.x + halfWinW;
+        float playerLeft = btmCoordPostX - player.colliderSize.x / 2.0f;
+        float playerRight = btmCoordPostX + player.colliderSize.x / 2.0f;
+        float tileLeft = (float)(c * tileW);
+        float tileRight = (float)((c + 1) * tileW);
 
-        float tileDeadZoneX = (r + 0.95f) * tileH;
-        //float playerLeft = ;
-        bool  spikeNotAtFeet = (r != box.rowStart);
+        float overlapLeft = fmaxf(playerLeft, tileLeft);
+        float overlapRight = fminf(playerRight, tileRight);
+        float overlapRatio = (overlapRight - overlapLeft) / player.colliderSize.x;
 
-
-
-
-        if (spikeNotAtFeet) { //  means player center touch the sprikes alr
+        if (overlapRatio > 0.6f)
             player.currGroundType = Player::GroundType::Saw;
-        }
-        else {
-            if (playerFeetY <= tileDeadZoneY)
-                player.currGroundType = Player::GroundType::Saw;
-        }
+
         break;
-
-
+    }
     }
 }
 
-/******************    Remove it if dont need     ********************/
-//static bool HasAllArtifactsCollected()
-//{
-//    return gGame.collectedArtifacts[0]
-//        && gGame.collectedArtifacts[1]
-//        && gGame.collectedArtifacts[2]
-//        && gGame.collectedArtifacts[3];
-//}
 
 // ---------------------------------------------------------------------------
 // Ground type detection
 // Iterates over the player's tile box and applies gameplay effects per tile.
 // ---------------------------------------------------------------------------
+
 void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
 {
     for (int r = box.rowStart; r <= box.rowEnd; r++) {
@@ -266,7 +256,7 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
 
             // Using "checkDamageTile" to resolve all damaga tile 
             case 2: case 9: case 24: case 25: // upspikes / downspikes / fire / saw
-                checkDamageTile(player, r, box, levelLayout[r][c]);
+                checkDamageTile(player, r, c, box, levelLayout[r][c]);
                 break;
 
             case 8:	// melon 
