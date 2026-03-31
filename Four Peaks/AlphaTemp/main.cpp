@@ -560,11 +560,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         AESysFrameStart();
         f32 dt = (f32)AEFrameRateControllerGetFrameTime();
 
-        // only count time while the player is inside actual season stages.
-        // excludes splash screen, main menu, tutorial, and any future pause/settings states.
-        if (IsSeasonScene(currentState) && !gGame.pauseActive)
+        // count time while the player is in any playable stage, including tutorial.
+        // this makes the thank-you screen show the full run from tutorial to Autumn 4,
+        // while still working correctly if the player starts from a later unlocked stage.
+        if (IsGameplayScene(currentState) && !gGame.pauseActive)
         {
-            // timer only runs when not paused
             gGame.runTimeSeconds += dt;
         }
 
