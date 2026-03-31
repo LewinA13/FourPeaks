@@ -680,6 +680,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // Handle state changes (both transition-based and direct)
         if (currentState != lastState)
         {
+
+            switch (currentState)
+            {
+            case SceneState::WinterS3: winterStage3.resetBreakableIce(); break;
+            case SceneState::WinterS4: winterStage4.resetBreakableIce(); break;
+            case SceneState::AutumnS1: autumnStage.resetBreakableTile();  break;
+            case SceneState::AutumnS2: autumnStage2.resetBreakableTile(); break;
+            case SceneState::AutumnS3: autumnStage3.resetBreakableTile(); break;
+            case SceneState::AutumnS4: autumnStage4.resetBreakableTile(); break;
+            default: break;
+            }
+
+
             const float h = camera::screenHeight();
             const int idx = StageIndex(currentState);
 

@@ -382,7 +382,7 @@ namespace game
 
         if (showHowTo)
         {
-            drawHowToPlay();
+            drawHowToPlay();   
             return;
         }
 
@@ -443,9 +443,9 @@ namespace game
 
         // Big obvious debug box first
         gfx::drawRectangle(
-            { 0.0f, -25.0f },
+            { 0.0f, -55.0f },
             0.0f,
-            { 600.0f, 500.0f },
+            { 600.0f, 600.0f },
             0x88000000
         );
 
@@ -458,20 +458,21 @@ namespace game
         );
 
 
-
-   /*   printCentered(0.7f, 0xFF00FFFFu, "How To Play", 1.5);
-        printCentered(0.2f, 0xFFFFFFFFu, "> Use WASD Keys to move the player! <", 1.5);
-        printCentered(0.0f, 0xFFFFFFFFu, "> Use the Shift Key to dash! <", 1.5);
-        printCentered(-0.2f, 0xFFFFFFFFu, "> Use the L Key to wall climb <", 1.5);
-        printCentered(-0.4f, 0xFFFFFF00u, "Press Enter, Space or ESC to return.", 1.5);
-    */
-
         printCentered(0.7f, 0xFF00FFFFu, "How To Play", 1.5);
-        printCentered(0.3f, 0xFFFFFFFFu, "> Use WASD Keys to move the player! <", 1.5);
-        printCentered(0.1f, 0xFFFFFFFFu, "> Use the Shift Key to dash! <", 1.5);
-        printCentered(-0.1f, 0xFFFFFFFFu, "> Use the L Key to wall climb <", 1.5);
-        printCentered(-0.3f, 0xFFFFFFFFu, "> Use the Space Key in game to wall jump! <", 1.5);
-        printCentered(-0.5f, 0xFFFFFF00u, "Press Enter, Space or ESC to return.", 1.5);
+    
+        // Movement
+        printCentered(0.35f, 0xFFFFFF00u, "-- Movement --", 1.1f);
+        printCentered(0.23f, 0xFFFFFFFFu, "W / A / S / D   -   Move", 1.1f);
+        printCentered(0.11f, 0xFFFFFFFFu, "SPACE   -   Jump  (hold longer = jump higher)", 1.1f);
+        printCentered(-0.01f, 0xFFFFFFFFu, "SHIFT or K   -   Dash", 1.1f);
+
+        // Advanced
+        printCentered(-0.17f, 0xFFFFFF00u, "-- Advanced --", 1.1f);
+        printCentered(-0.29f, 0xFFFFFFFFu, "L   -   Wall Hang", 1.1f);
+        printCentered(-0.41f, 0xFFFFFFFFu, "L + W   -   Wall Climb Up", 1.1f);
+        printCentered(-0.53f, 0xFFFFFFFFu, "L + S   -   Slide Down", 1.1f);
+        printCentered(-0.65f, 0xFFFFFFFFu, "SPACE   -   Wall Jump", 1.1f);
+
     }
 
     // -------------------------------------------------------------------------

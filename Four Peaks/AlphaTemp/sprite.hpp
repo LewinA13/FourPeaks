@@ -61,10 +61,6 @@ namespace sprite
     // textbox texture (textbox.png)
     AEGfxTexture* textbox();
 
-    // textbox arrow texture
-    AEGfxTexture* textboxUp();    // (textboxUp.png)
-    AEGfxTexture* textboxDown();    // (textboxDown.png)
-
     // breakable tile spritesheet (breakabletile.png)
     AEGfxTexture* breakabletile();
 

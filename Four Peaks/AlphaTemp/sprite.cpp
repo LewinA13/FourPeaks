@@ -30,8 +30,6 @@ namespace sprite
         AEGfxTexture* tile02Tex{};
         AEGfxTexture* bottleTex{};
         AEGfxTexture* textboxTex{};
-        AEGfxTexture* textboxUpTex{};
-        AEGfxTexture* textboxDownTex{};
         AEGfxTexture* winterCTex{};   // tile ID 4 -> WinterC.png
         AEGfxTexture* winterTTex{};   // tile ID 6 -> WinterT.png
         AEGfxTexture* breakabletileTex{};
@@ -213,15 +211,7 @@ namespace sprite
             textboxTex = AEGfxTextureLoad("Assets/textbox.png");
             if (!textboxTex) textboxTex = AEGfxTextureLoad("textbox.jpg");
         }
-        if (!textboxUpTex) {
-            textboxUpTex = AEGfxTextureLoad("Assets/textboxUp.png");
-            if (!textboxUpTex) textboxUpTex = AEGfxTextureLoad("textboxUp.jpg");
-        }
-        if (!textboxDownTex) {
-            textboxDownTex = AEGfxTextureLoad("Assets/textboxDown.png");
-            if (!textboxDownTex) textboxDownTex = AEGfxTextureLoad("textboxDown.jpg");
-        }
-
+     
         if (!breakabletileTex) {
             breakabletileTex = AEGfxTextureLoad("Assets/breakabletile.png");
             if (!breakabletileTex) breakabletileTex = AEGfxTextureLoad("breakabletile.jpg");
@@ -367,8 +357,6 @@ namespace sprite
         if (tile02Tex) { AEGfxTextureUnload(tile02Tex); tile02Tex = nullptr; }
         if (bottleTex) { AEGfxTextureUnload(bottleTex); bottleTex = nullptr; }
         if (textboxTex) { AEGfxTextureUnload(textboxTex); textboxTex = nullptr; }
-        if (textboxUpTex) { AEGfxTextureUnload(textboxUpTex); textboxUpTex = nullptr; }
-        if (textboxDownTex) { AEGfxTextureUnload(textboxDownTex); textboxDownTex = nullptr; }
 
         if (winterCTex) { AEGfxTextureUnload(winterCTex); winterCTex = nullptr; }
         if (winterTTex) { AEGfxTextureUnload(winterTTex); winterTTex = nullptr; }
@@ -466,8 +454,6 @@ namespace sprite
     AEGfxTexture* tile02() { return tile02Tex; }
     AEGfxTexture* bottle() { return bottleTex; }
     AEGfxTexture* textbox() { return textboxTex; }
-    AEGfxTexture* textboxUp() { return textboxUpTex; }
-    AEGfxTexture* textboxDown() { return textboxDownTex; }
 
     AEGfxTexture* breakabletile() { return breakabletileTex; }
     AEGfxTexture* stgselectBackground() { return stgselectbgTex; }

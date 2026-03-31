@@ -101,6 +101,8 @@ namespace game {
         WinterS3(const WinterS3&) = delete;
         int update(float dt);
         void draw() const;
+        void resetBreakableIce(); // Use for stage changing
+
 
         // Grid dimensions - 32 columns width x 20 rows height.
         static const int gridCols = 32;
@@ -136,6 +138,8 @@ namespace game {
         WinterS4(const WinterS4&) = delete;
         int update(float dt);
         void draw() const;
+        void resetBreakableIce(); // Use for stage changing
+
 
         // Grid dimensions - 32 columns width x 20 rows height.
         static const int gridCols = 32;

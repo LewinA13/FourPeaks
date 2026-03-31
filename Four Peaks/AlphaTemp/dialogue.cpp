@@ -47,14 +47,16 @@ namespace UI {
             "I've trained my whole life for this climb.",
             "Move with care. Every step matters.",
             "Press [W]/ [A]/ [S]/ [D] for moving",
-            "[SHIFT] for dashing",
-            "[SPACE] for jumping"
+            "[SHIFT] or [K] for dashing",
+            "[SPACE] for jumping",
             "[L] for climbing"
         };
 
         levelDialogs[1] = {  // Tutorial 2
-            "The flag play a crucial part!!!",
-            "Touch it to save your progress."
+             "The flag marks my progress. I should touch it.",
+             "Holding [SPACE] longer gets me higher.",
+             "These walls... I can climb them.",
+             "Press [L] to grip. Jump off to wall jump."
         };
 
         levelDialogs[2] = {  // Tutorial 3
@@ -160,7 +162,7 @@ namespace UI {
             "Four relics.",
             "The mountain is conquered."
         };
-
+        
         levelDialogs[45] = {  // All artifacts achievement
             "Achievement unlocked:",
             "Congrats! You have collected all 4 artifacts.",
@@ -343,10 +345,7 @@ namespace UI {
         float boxWidth = 950.0f;
         float boxHeight = 200.0f;
         AEGfxTexture* textboxTexture = sprite::textbox();
-        AEGfxTexture* textboxUpTexture = sprite::textboxUp();
-        AEGfxTexture* textboxDownTexture = sprite::textboxDown();
-
-
+   
         // If not add this line code, sprite dont show up
         gfx::drawRectangle({ -99999.0f, -99999.0f }, 0.0f, { 1.0f, 1.0f }, 0x00000000u);
 

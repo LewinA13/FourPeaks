@@ -517,6 +517,18 @@ game::AutumnS1::AutumnS1()
             }
         }
 }
+
+void game::AutumnS1::resetBreakableTile()
+{
+    for (auto& brktile : breakableTiles) {
+        tileMap[brktile.row][brktile.col] = 15;
+        brktile.triggered = false;
+        brktile.timer = 0.0f;
+        brktile.crackFrame = 0;
+        brktile.destroyed = false;
+    }
+}
+
 game::AutumnS1::~AutumnS1() = default;
 
 int game::AutumnS1::update(float dt)
@@ -630,6 +642,18 @@ game::AutumnS2::AutumnS2()
             }
         }
 }
+
+void game::AutumnS2::resetBreakableTile()
+{
+    for (auto& brktile : breakableTiles) {
+        tileMap[brktile.row][brktile.col] = 15;
+        brktile.triggered = false;
+        brktile.timer = 0.0f;
+        brktile.crackFrame = 0;
+        brktile.destroyed = false;
+    }
+}
+
 game::AutumnS2::~AutumnS2() = default;
 
 int game::AutumnS2::update(float dt)
@@ -735,6 +759,18 @@ game::AutumnS3::AutumnS3()
             }
         }
 }
+
+void game::AutumnS3::resetBreakableTile()
+{
+    for (auto& brktile : breakableTiles) {
+        tileMap[brktile.row][brktile.col] = 15;
+        brktile.triggered = false;
+        brktile.timer = 0.0f;
+        brktile.crackFrame = 0;
+        brktile.destroyed = false;
+    }
+}
+
 game::AutumnS3::~AutumnS3() = default;
 
 int game::AutumnS3::update(float dt)
@@ -839,6 +875,19 @@ game::AutumnS4::AutumnS4()
             }
         }
 }
+
+
+void game::AutumnS4::resetBreakableTile()
+{
+    for (auto& brktile : breakableTiles) {
+        tileMap[brktile.row][brktile.col] = 15;
+        brktile.triggered = false;
+        brktile.timer = 0.0f;
+        brktile.crackFrame = 0;
+        brktile.destroyed = false;
+    }
+}
+
 game::AutumnS4::~AutumnS4() = default;
 
 int game::AutumnS4::update(float dt)
