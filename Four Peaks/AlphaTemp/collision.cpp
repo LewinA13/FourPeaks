@@ -122,6 +122,8 @@ static bool isSolidTile(int tile)
     }
 }
 
+
+
 // ---------------------------------------------------------------------------
 // Map collision check
 // playerHeadY : screen-space head Y, used for breakable tile upper-half collision
@@ -149,8 +151,9 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm], float playerHe
     return false;
 }
 
+
 // helper function for damage tile
-static void checkDamageTile(Player& player, int r, int c, TileRange box, int tileCase)
+static void resolveDamageTile(Player& player, int r, int c, TileRange box, int tileCase)
 {
     switch (tileCase)
     {
@@ -166,7 +169,7 @@ static void checkDamageTile(Player& player, int r, int c, TileRange box, int til
                player.currGroundType = damageType;
         }
         else {
-            if (playerFeetY <= tileDeadZoneY)
+            if (playerFeetY <= tileDeadZoneY) // up
                 player.currGroundType = damageType;
         }
         break;
@@ -174,7 +177,7 @@ static void checkDamageTile(Player& player, int r, int c, TileRange box, int til
 
     case 9:
     {
-        float tileDeadZoneY = (r + 0.6f) * tileH;
+        float tileDeadZoneY = (r + 0.4f) * tileH;
         float playerHeadY = getPlayerHeadY(player);
         bool  spikeNotAtHead = (r != box.rowEnd);
 
@@ -188,7 +191,6 @@ static void checkDamageTile(Player& player, int r, int c, TileRange box, int til
         break;
     }
 
-   
     case 25:
     {
         float halfWinW = (float)AEGfxGetWindowWidth() / 2.0f;
@@ -202,11 +204,19 @@ static void checkDamageTile(Player& player, int r, int c, TileRange box, int til
         float overlapRight = fminf(playerRight, tileRight);
         float overlapRatio = (overlapRight - overlapLeft) / player.colliderSize.x;
 
+        printf("[SAW] tile[%d][%d] playerLeft=%.1f playerRight=%.1f tileLeft=%.1f tileRight=%.1f overlap=%.1f ratio=%.2f\n",
+            r, c, playerLeft, playerRight, tileLeft, tileRight, overlapRight - overlapLeft, overlapRatio);
+
         if (overlapRatio > 0.6f)
             player.currGroundType = Player::GroundType::Saw;
 
         break;
     }
+
+   
+
+
+
     }
 }
 
@@ -246,18 +256,26 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 break;
             }
 
+            // Using "resolveDamageTile" to resolve all damaga tile 
+            case 2: case 9: case 24: case 25: // upspikes / downspikes / fire / saw
+                resolveDamageTile(player, r, c, box, levelLayout[r][c]);
+                break;
+
             case 23: // grass
-                player.currGroundType = Player::GroundType::Grass;
+                if (player.currGroundType != Player::GroundType::Saw) // specific check, dont allow grass overlap saw
+                {
+                    player.currGroundType = Player::GroundType::Grass;
+                }
                 break;
 
             case 4: case 5: case 6: case 7: case 30: // normal solid tiles
-                player.currGroundType = Player::GroundType::Normal;
+                if (player.currGroundType != Player::GroundType::Saw) // specific check, dont allow normal tiles overlap saw
+                {
+                    player.currGroundType = Player::GroundType::Normal;
+                }
                 break;
 
-            // Using "checkDamageTile" to resolve all damaga tile 
-            case 2: case 9: case 24: case 25: // upspikes / downspikes / fire / saw
-                checkDamageTile(player, r, c, box, levelLayout[r][c]);
-                break;
+      
 
             case 8:	// melon 
                 // only collect once
@@ -415,8 +433,6 @@ void CollisionResolveSpawn(Player& player)
 // ---------------------------------------------------------------------------
 void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
 {
-  
-   
     float currentY = player.pos.y;
     float oldY = currentY - player.velY * dt;
 

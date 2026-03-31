@@ -1065,6 +1065,18 @@ namespace game {
             }
     }
 
+    // reset function for breakable ice
+    void WinterS3::resetBreakableIce()
+    {
+        for (auto& ice : iceTiles) {
+            tileMap[ice.row][ice.col] = 1;
+            ice.triggered = false;
+            ice.timer = 0.0f;
+            ice.crackFrame = 0;
+            ice.destroyed = false;
+        }
+    }
+
     WinterS3::~WinterS3() = default;
 
     // -------------------------------------------------------------------
@@ -1600,6 +1612,18 @@ namespace game {
                 }
             }
 
+    }
+
+    // reset function for breakable ice
+    void WinterS4::resetBreakableIce()
+    {
+        for (auto& ice : iceTiles) {
+            tileMap[ice.row][ice.col] = 1;
+            ice.triggered = false;
+            ice.timer = 0.0f;
+            ice.crackFrame = 0;
+            ice.destroyed = false;
+        }
     }
 
     WinterS4::~WinterS4() = default;

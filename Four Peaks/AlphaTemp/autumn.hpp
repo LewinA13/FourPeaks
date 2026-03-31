@@ -30,6 +30,7 @@ namespace game
         AutumnS1(const AutumnS1&) = delete;
         int update(float dt);
         void draw() const;
+        void resetBreakableTile(); // Use for stage changing
 
         static const int gridCols = 32;
         static const int gridRows = 20;
@@ -54,6 +55,8 @@ namespace game
         AutumnS2(const AutumnS2&) = delete;
         int update(float dt);
         void draw() const;
+        void resetBreakableTile(); // Use for stage changing
+
 
         static const int gridCols = 32;
         static const int gridRows = 20;
@@ -78,6 +81,8 @@ namespace game
         AutumnS3(const AutumnS3&) = delete;
         int update(float dt);
         void draw() const;
+        void resetBreakableTile(); // Use for stage changing
+
 
         static const int gridCols = 32;
         static const int gridRows = 20;
@@ -102,6 +107,8 @@ namespace game
         AutumnS4(const AutumnS4&) = delete;
         int update(float dt);
         void draw() const;
+        void resetBreakableTile(); // Use for stage changing
+
 
         static const int gridCols = 32;
         static const int gridRows = 20;
