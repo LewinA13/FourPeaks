@@ -61,20 +61,6 @@ namespace gfx
         return result;
     }
 
-    static u8 getA(u32 c) { return static_cast<u8>((c >> 24) & 0xFF); }
-    static u8 getR(u32 c) { return static_cast<u8>((c >> 16) & 0xFF); }
-    static u8 getG(u32 c) { return static_cast<u8>((c >> 8) & 0xFF); }
-    static u8 getB(u32 c) { return static_cast<u8>((c >> 0) & 0xFF); }
-
-    static u32 toAERGBA(u32 argb)
-    {
-        return (static_cast<u32>(getR(argb)) << 24) |
-            (static_cast<u32>(getG(argb)) << 16) |
-            (static_cast<u32>(getB(argb)) << 8) |
-            (static_cast<u32>(getA(argb)) << 0);
-    }
-
-
     static AEGfxVertexList* buildSpriteMesh(f32 u0, f32 v0, f32 u1, f32 v1)
     {
         AEGfxMeshStart();

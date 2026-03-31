@@ -27,30 +27,6 @@ namespace game {
     // -------------------------------------------------------------------
     // Helper function - shared by both stages
     // -------------------------------------------------------------------
-    static void printText(f32 x, f32 y, u32 argbColor,
-        const char* text, f32 scale = 1.0f)
-    {
-        f32 a = ((argbColor >> 24) & 0xFF) / 255.0f;
-        f32 r = ((argbColor >> 16) & 0xFF) / 255.0f;
-        f32 g = ((argbColor >> 8) & 0xFF) / 255.0f;
-        f32 b = ((argbColor >> 0) & 0xFF) / 255.0f;
-        AEGfxPrint(gFontId, text, x, y, scale, r, g, b, a);
-    }
-
-    static bool playerOverlapsRect(const Player& player, float left, float right, float bottom, float top)
-    {
-        const float halfW = player.colliderSize.x * 0.5f;
-        const float halfH = player.colliderSize.y * 0.5f;
-
-        const float playerLeft = player.pos.x - halfW;
-        const float playerRight = player.pos.x + halfW;
-        const float playerBottom = player.pos.y - halfH;
-        const float playerTop = player.pos.y + halfH;
-
-        return playerRight >= left && playerLeft <= right &&
-               playerTop >= bottom && playerBottom <= top;
-    }
-
     // -------------------------------------------------------------------
     // Snow particle helpers - shared by all winter stages
     // -------------------------------------------------------------------

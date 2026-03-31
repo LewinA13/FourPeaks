@@ -35,8 +35,8 @@ namespace game
         static constexpr float SPLASH1_HEIGHT = 356.0f;
 
         // Splash 2 - Game Logo
-        static constexpr float SPLASH2_WIDTH = 800.0f;
-        static constexpr float SPLASH2_HEIGHT = 800.0f;
+        static constexpr float SPLASH2_WIDTH = 500.0f;
+        static constexpr float SPLASH2_HEIGHT = 500.0f;
 
         float timer;
         int   currentSplash; // 0 = first, 1 = second

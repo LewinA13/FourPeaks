@@ -1431,10 +1431,10 @@ void PlayerDraw(Player& p, bool showCollider)
     {
         if (p.trail[i].alpha <= 0.0f) continue;
 
-        float u0 = (float)p.dashFrame / (float)p.dashFrameCount;
-        float u1 = u0 + 1.0f / (float)p.dashFrameCount;
-        float flipU0 = (p.facing == -1) ? u1 : u0;
-        float flipU1 = (p.facing == -1) ? u0 : u1;
+        float dashU0 = (float)p.dashFrame / (float)p.dashFrameCount;
+        float dashU1 = dashU0 + 1.0f / (float)p.dashFrameCount;
+        float flipU0 = (p.facing == -1) ? dashU1 : dashU0;
+        float flipU1 = (p.facing == -1) ? dashU0 : dashU1;
 
         gfx::drawSprite(p.dashTex, p.trail[i].pos, 0.0f, p.spriteSize,
             flipU0, 0.0f, flipU1, 1.0f, p.trail[i].alpha);

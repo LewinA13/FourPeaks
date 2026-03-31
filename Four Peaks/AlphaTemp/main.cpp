@@ -82,16 +82,6 @@ enum StateID {
     WINTER_S4 = 4
 };
 
-int static getStateID(SceneState scene) {
-    switch (scene) {
-    case SceneState::WinterS1: return WINTER_S1;
-    case SceneState::WinterS2: return WINTER_S2;
-    case SceneState::WinterS3: return WINTER_S3;
-    case SceneState::WinterS4: return WINTER_S4;
-    default: return MENU;
-    }
-}
-
 
 //checkpoint saving
 static std::string SceneToString(SceneState s)
@@ -121,36 +111,6 @@ static std::string SceneToString(SceneState s)
 
     default:                    return "";
     }
-}
-
-static SceneState StringToScene(const std::string& s)
-{
-    if (s == "Tutorial1") return SceneState::Tutorial1;
-    if (s == "Tutorial2") return SceneState::Tutorial2;
-    if (s == "Tutorial3") return SceneState::Tutorial3;
-
-    if (s == "WinterS1")  return SceneState::WinterS1;
-    if (s == "WinterS2")  return SceneState::WinterS2;
-    if (s == "WinterS3")  return SceneState::WinterS3;
-    if (s == "WinterS4")  return SceneState::WinterS4;
-
-    if (s == "SummerS1")  return SceneState::SummerS1;
-    if (s == "SummerS2")  return SceneState::SummerS2;
-    if (s == "SummerS3")  return SceneState::SummerS3;
-    if (s == "SummerS4")  return SceneState::SummerS4;
-
-    if (s == "SpringS1")  return SceneState::SpringS1;
-    if (s == "SpringS2")  return SceneState::SpringS2;
-    if (s == "SpringS3")  return SceneState::SpringS3;
-    if (s == "SpringS4")  return SceneState::SpringS4;
-
-    if (s == "AutumnS1")  return SceneState::AutumnS1;
-    if (s == "AutumnS2")  return SceneState::AutumnS2;
-    if (s == "AutumnS3")  return SceneState::AutumnS3;
-    if (s == "AutumnS4")  return SceneState::AutumnS4;
-    if (s == "ThankYou")   return SceneState::ThankYou;
-
-    return SceneState::Tutorial1; // fallback
 }
 
 // save what stage number we are in, regardless of season
@@ -194,14 +154,6 @@ static int UnlockIndex(SceneState s)
 
     default: return -1;
     }
-}
-
-// returns true if stage has already been unlocked
-static bool IsStageUnlocked(SceneState s)
-{
-    int idx = UnlockIndex(s);
-    if (idx < 0) return false;
-    return gGame.unlockedStages[idx];
 }
 
 // marks one seasonal stage as unlocked
@@ -248,19 +200,6 @@ static void UnlockNextStage(SceneState clearedScene)
     case SceneState::AutumnS3: UnlockStage(SceneState::AutumnS4); break;
 
     default: break;
-    }
-}
-
-// season is unlocked when its first stage is unlocked
-static bool IsSeasonUnlocked(int seasonIndex)
-{
-    switch (seasonIndex)
-    {
-    case 0: return gGame.unlockedStages[0];   // WinterS1
-    case 1: return gGame.unlockedStages[4];   // SummerS1
-    case 2: return gGame.unlockedStages[8];   // SpringS1
-    case 3: return gGame.unlockedStages[12];  // AutumnS1
-    default: return false;
     }
 }
 
@@ -662,11 +601,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         AESysFrameStart();
         f32 dt = (f32)AEFrameRateControllerGetFrameTime();
 
-        // only count time while the player is inside actual season stages.
-        // excludes splash screen, main menu, tutorial, and any future pause/settings states.
-        if (IsSeasonScene(currentState) && !gGame.pauseActive)
+        // count time while the player is in any playable stage, including tutorial.
+        // this makes the thank-you screen show the full run from tutorial to Autumn 4,
+        // while still working correctly if the player starts from a later unlocked stage.
+        if (IsGameplayScene(currentState) && !gGame.pauseActive)
         {
-            // timer only runs when not paused
             gGame.runTimeSeconds += dt;
         }
 
