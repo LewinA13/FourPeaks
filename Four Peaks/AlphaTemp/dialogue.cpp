@@ -337,8 +337,6 @@ namespace UI {
         float boxWidth = 950.0f;
         float boxHeight = 200.0f;
         AEGfxTexture* textboxTexture = sprite::textbox();
-        AEGfxTexture* textboxUpTexture = sprite::textboxUp();
-        AEGfxTexture* textboxDownTexture = sprite::textboxDown();
 
 
         // If not add this line code, sprite dont show up

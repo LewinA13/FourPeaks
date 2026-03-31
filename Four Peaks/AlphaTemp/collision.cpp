@@ -129,6 +129,7 @@ static bool isSolidTile(int tile)
 bool checkMapCollision(TileRange box, int levelLayout[][mapColm],
     float velY = 0.0f, float playerHeadY = 0.0f)
 {
+    (void)velY;
     if (box.colStart == -1) return false;
 
     for (int r = box.rowStart; r <= box.rowEnd; r++) {
@@ -154,7 +155,7 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm],
 static void checkDamageTile(Player& player, int r, TileRange box,
     int levelLayout[][mapColm], int tileCase)
 {
-    float screenY = getPlayerScreenY(player);
+    (void)levelLayout;
     float tileDeadZoneY = (r + 0.6f) * tileH;
 
     switch (tileCase)
@@ -194,13 +195,6 @@ static void checkDamageTile(Player& player, int r, TileRange box,
     }
 }
 
-static bool HasAllArtifactsCollected()
-{
-    return gGame.collectedArtifacts[0]
-        && gGame.collectedArtifacts[1]
-        && gGame.collectedArtifacts[2]
-        && gGame.collectedArtifacts[3];
-}
 
 // ---------------------------------------------------------------------------
 // Ground type detection

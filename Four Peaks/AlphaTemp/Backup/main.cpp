@@ -30,6 +30,7 @@
 
 // Global font handle used by all states
 s8 gFontId = -1;
+s8 gFontTitle = -1;
 
 UI::Dialog UI::gDialog;
 
@@ -275,27 +276,39 @@ static gfx::Vec2 GridToWorld(int gridX, int gridY, float screenYOffset)
 
 static BgmType Audio_GetDesiredBgmType(SceneState state)
 {
-    if (state == SceneState::WinterS1 || state == SceneState::WinterS2 || state == SceneState::WinterS3 || state == SceneState::WinterS4)
+    // main menu related screens
+    if (state == SceneState::Splash ||
+        state == SceneState::MainMenu ||
+        state == SceneState::StageSelect ||
+        state == SceneState::Credit ||
+        state == SceneState::ThankYou)
     {
+        return BgmType::MainMenu;
+    }
+
+    // tutorial stages
+    if (state == SceneState::Tutorial1 ||state == SceneState::Tutorial2 ||state == SceneState::Tutorial3){
+        return BgmType::Tutorial;
+    }
+
+    // winter
+    if (state == SceneState::WinterS1 ||state == SceneState::WinterS2 ||state == SceneState::WinterS3 ||state == SceneState::WinterS4){
         return BgmType::Winter;
     }
 
-    // Summer
-    if (state == SceneState::SummerS1 || state == SceneState::SummerS2 || state == SceneState::SummerS3 || state == SceneState::SummerS4)
-    {
+    // summer
+    if (state == SceneState::SummerS1 ||state == SceneState::SummerS2 ||state == SceneState::SummerS3 ||state == SceneState::SummerS4){
         return BgmType::Summer;
     }
 
-    // Spring
-    if (state == SceneState::SpringS1 || state == SceneState::SpringS2 || state == SceneState::SpringS3 || state == SceneState::SpringS4)
-    {
-        return BgmType::Spring; // currently silent unless you load a summer track in audio.cpp
+    // spring
+    if (state == SceneState::SpringS1 ||state == SceneState::SpringS2 ||state == SceneState::SpringS3 ||state == SceneState::SpringS4){
+        return BgmType::Spring;
     }
 
-    // Autumn
-    if (state == SceneState::AutumnS1 || state == SceneState::AutumnS2 || state == SceneState::AutumnS3 || state == SceneState::AutumnS4)
-    {
-        return BgmType::Autumn; // currently silent unless you load a summer track in audio.cpp
+    // autumn
+    if (state == SceneState::AutumnS1 || state == SceneState::AutumnS2 || state == SceneState::AutumnS3 ||state == SceneState::AutumnS4){
+        return BgmType::Autumn;
     }
 
     return BgmType::None;
@@ -407,6 +420,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Load font once and share it.
     // Make sure this path points to a valid .ttf in your Assets folder.
     gFontId = AEGfxCreateFont("Assets/Font/L.ttf", 24);
+	gFontTitle = AEGfxCreateFont("Assets/Font/L.ttf" , 80);
 
     // Audio system + loading (done in audio.cpp)
     audio::init();
@@ -493,6 +507,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     ApplyCollectedMelonsToTileMap("AutumnS2", game::AutumnS2::gridRows, autumnStage2.getTileMap());
     ApplyCollectedMelonsToTileMap("AutumnS3", game::AutumnS3::gridRows, autumnStage3.getTileMap());
     ApplyCollectedMelonsToTileMap("AutumnS4", game::AutumnS4::gridRows, autumnStage4.getTileMap());
+
+    // Apply picked up removals to all stage maps after checkpoint is loaded.
+    ApplyCollectedArtifactsToTileMap(game::WinterS4::gridRows, winterStage4.getTileMap());
+    ApplyCollectedArtifactsToTileMap(game::SummerS4::gridRows, summerStage4.getTileMap());
+    ApplyCollectedArtifactsToTileMap(game::SpringS4::gridRows, springStage4.getTileMap());
+    ApplyCollectedArtifactsToTileMap(game::AutumnS4::gridRows, autumnStage4.getTileMap());
 
     // gDialog
     UI::gDialog.initialize();
@@ -638,29 +658,29 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 /* ---------- TUTORIAL ---------- */
             case SceneState::Tutorial1: spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::Tutorial2: spawn = GridToWorld(2, 2, h * idx); break;
-            case SceneState::Tutorial3: spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::Tutorial3: spawn = GridToWorld(1, 3, h * idx); break;
 
                 /* ---------- WINTER ---------- */
             case SceneState::WinterS1:  spawn = GridToWorld(3, 3, h * idx); break;
-            case SceneState::WinterS2:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::WinterS2:  spawn = GridToWorld(2, 1, h * idx); break;
             case SceneState::WinterS3:  spawn = GridToWorld(1, 6, h * idx); break;
-            case SceneState::WinterS4:  spawn = GridToWorld(3, 3, h * idx); break;
+            case SceneState::WinterS4:  spawn = GridToWorld(2, 2, h * idx); break;
 
                 /* ---------- SUMMER ---------- */
             case SceneState::SummerS1:  spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::SummerS2:  spawn = GridToWorld(2, 17, h * idx); break;
             case SceneState::SummerS3:  spawn = GridToWorld(1, 16, h * idx); break;
-            case SceneState::SummerS4:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::SummerS4:  spawn = GridToWorld(2, 3, h * idx); break;
 
                 /* ---------- SPRING ---------- */
             case SceneState::SpringS1:  spawn = GridToWorld(2, 2, h * idx); break;
-            case SceneState::SpringS2:  spawn = GridToWorld(2, 2, h * idx); break;
-            case SceneState::SpringS3:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::SpringS2:  spawn = GridToWorld(2, 4, h * idx); break;
+            case SceneState::SpringS3:  spawn = GridToWorld(29, 3, h * idx); break;
             case SceneState::SpringS4:  spawn = GridToWorld(2, 2, h * idx); break;
 
                 /* ---------- AUTUMN ---------- */
             case SceneState::AutumnS1:  spawn = GridToWorld(2, 2, h * idx); break;
-            case SceneState::AutumnS2:  spawn = GridToWorld(2, 2, h * idx); break;
+            case SceneState::AutumnS2:  spawn = GridToWorld(2, 16, h * idx); break;
             case SceneState::AutumnS3:  spawn = GridToWorld(2, 2, h * idx); break;
             case SceneState::AutumnS4:  spawn = GridToWorld(2, 2, h * idx); break;
 
@@ -678,6 +698,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             // 3) Reset player physics
             gGame.player.velY = 0.0f;
             gGame.player.grounded = false;
+
+            if (currentState == SceneState::Tutorial1)
+            {
+                UI::gDialog.triggerAutoDialog(50);
+            }
 
             lastState = currentState;
         }
@@ -702,6 +727,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                     // if inside pause settings, esc goes back to pause menu
                     if (gGame.pauseShowSettings)
                     {
+                        game::SaveVolumeSettings();
                         gGame.pauseShowSettings = false;
                         gGame.pauseSettingsRow = 0;
                     }
@@ -738,119 +764,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             gGame.noClip = !gGame.noClip;
         }
 
-        // --------------------------------------------------------
-        // DEBUG: STAGE SWITCH (no animation)
-        // Tutorial: F1/F2/F3
-        // Winter:   1/2/3/4
-        // --------------------------------------------------------
-
-        if (AEInputCheckTriggered(AEVK_F1))
-        {
-            currentState = SceneState::Tutorial1;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_F2))
-        {
-            currentState = SceneState::Tutorial2;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_F3))
-        {
-            currentState = SceneState::Tutorial3;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_F4))
-        {
-            currentState = SceneState::AutumnS1;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_F5))
-        {
-            currentState = SceneState::AutumnS2;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_F6))
-        {
-            currentState = SceneState::AutumnS3;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_F7))
-        {
-            currentState = SceneState::AutumnS4;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_1))
-        {
-            currentState = SceneState::WinterS1;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_2))
-        {
-            currentState = SceneState::WinterS2;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_3))
-        {
-            currentState = SceneState::WinterS3;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_4))
-        {
-            currentState = SceneState::WinterS4;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_5))
-        {
-            currentState = SceneState::SummerS1;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_6))
-        {
-            currentState = SceneState::SummerS2;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_7))
-        {
-            currentState = SceneState::SummerS3;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_8))
-        {
-            currentState = SceneState::SummerS4;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_9))
-        {
-            currentState = SceneState::SpringS1;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_0))
-        {
-            currentState = SceneState::AutumnS1;
-            lastState = SceneState::Exit;
-        }
-
-        // Spring levels: V=S1, B=S2, N=S3, M=S4
-        if (AEInputCheckTriggered(AEVK_V))
-        {
-            currentState = SceneState::SpringS1;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_B))
-        {
-            currentState = SceneState::SpringS2;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_N))
-        {
-            currentState = SceneState::SpringS3;
-            lastState = SceneState::Exit;
-        }
-        if (AEInputCheckTriggered(AEVK_M))
-        {
-            currentState = SceneState::SpringS4;
-            lastState = SceneState::Exit;
-        }
         // T key: test the transition effect (PokemonWipe then goes to MainMenu)
         if (AEInputCheckTriggered(AEVK_T))
         {
@@ -941,19 +854,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
             else if (action == 2)
             {
-                // Exit selected.
                 gGameRunning = 0;
-
             }
-            // action == 3 is reserved for "How To Play".
-
-            if (action == 4) {
+            else if (action == 4)
+            {
                 currentState = SceneState::Tutorial1;
+                lastState = SceneState::Exit;
                 camera::setY(0.0f);
             }
-
-            if (action == 5) {
+            else if (action == 5)
+            {
                 currentState = SceneState::Credit;
+            }
+            else if (action == 6)
+            {
+                // fresh restart after deleting checkpoint
+                currentState = SceneState::Tutorial1;
+                lastState = SceneState::Exit;
+                camera::setY(0.0f);
             }
         }
         break;
@@ -1344,7 +1262,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             if (!gGame.pauseActive)
             {
-                if (action == 21 && !gTransition.isActive()) {
+
+                if (action == 21  && !gTransition.isActive()) {
                     UnlockNextStage(SceneState::WinterS2);
                     PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
                     triggerTransition(SceneState::WinterS3);
@@ -1418,6 +1337,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (IsSeasonScene(currentState))
         {
             hud::drawRunTimer(gGame.runTimeSeconds);
+            hud::drawArtifactsHud(gGame.collectedArtifacts);
         }
 
         if (gGame.pauseActive)

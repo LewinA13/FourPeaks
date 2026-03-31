@@ -16,7 +16,7 @@
 #include "graphics.hpp"
 #include <cmath>
 #include <cstdint>
-#include <cstdlib>   // rand
+#include <cstdlib>   
 #include <array>
 
 typedef std::uint32_t u32;
@@ -114,7 +114,7 @@ namespace
     {
         { "THANK YOU FOR PLAYING",     2.0f, 0xFFFFD700u },  // gold
         { "",                          1.0f, 0x00000000u },
-        { "Four Peaks Alpha",          1.4f, 0xFFFFFFFFu },
+        { "Four Peaks",          1.4f, 0xFFFFFFFFu },
         { "",                          1.0f, 0x00000000u },
         { "Developed by",              0.9f, 0xFFAAAAAAu },
         { "Team Game++",       1.1f, 0xFF88EEFFu },
@@ -138,7 +138,7 @@ namespace game
         // Optional background image
         bgTex = AEGfxTextureLoad("Assets/thankyou.png");
 
-        // Build a simple full-screen quad for the background tint
+        // simple full-screen quad 
         AEGfxMeshStart();
         AEGfxTriAdd(-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f,
             0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
@@ -153,7 +153,7 @@ namespace game
     {
         if (bgMesh) { AEGfxMeshFree(bgMesh);      bgMesh = nullptr; }
         if (bgTex) { AEGfxTextureUnload(bgTex);  bgTex = nullptr; }
-        gStarsInitialized = false; // reset so next visit re-initialises
+        gStarsInitialized = false; // reset so next visit re-initialise
     }
 
     // -------------------------------------------------------------------------

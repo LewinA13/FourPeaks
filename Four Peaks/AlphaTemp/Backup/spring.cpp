@@ -84,7 +84,7 @@ namespace
         const float playerTop = player.pos.y + halfH;
 
         return playerRight >= left && playerLeft <= right &&
-               playerTop >= bottom && playerBottom <= top;
+            playerTop >= bottom && playerBottom <= top;
     }
 
     // ===================================================================
@@ -338,8 +338,9 @@ namespace
             float dirSign = (dir == WindDir::Right) ? 1.0f : -1.0f;
 
             WindParticle p{};
-            // Spawn from the upwind edge of the screen
-            p.x = (dirSign > 0.0f) ? minX - 10.0f : maxX + 10.0f;
+            // Spawn across the full screen width so particles fill the entire screen,
+            // with a slight overflow on both sides to avoid visible pop-in at edges
+            p.x = randF(minX - 60.0f, maxX + 60.0f);
             p.y = randF(minY, maxY);
 
             p.velX = dirSign * speed;
@@ -517,7 +518,7 @@ int game::SpringS1::update(float dt)
 
     // Apply wind force to player before movement update
     float windForce = g_windSystem.update(dt);
-    if (!camera::isTransitioning() && !gGame.player.respawning)
+    if (!camera::isTransitioning() && !gGame.player.respawning && !gGame.player.wallHanging)
     {
         gGame.player.pos.x += windForce * dt;
     }
@@ -528,12 +529,12 @@ int game::SpringS1::update(float dt)
     {
         float gx, gy, cw, ch;
         gridToWorld(0, 16, gx, gy, cw, ch);
-        float zoneLeft  = gx;
+        float zoneLeft = gx;
         float zoneRight = gx + cw;
-        float zoneBot   = gy;
-        float zoneTop   = gy + ch * 3.0f;
-        if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-            gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+        float zoneBot = gy;
+        float zoneTop = gy + ch * 3.0f;
+        if (gGame.player.pos.x >= zoneLeft && gGame.player.pos.x <= zoneRight &&
+            gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
             return 40;
     }
 
@@ -557,7 +558,7 @@ void game::SpringS1::draw() const
         for (int row : { 16, 17, 18 })
         {
             gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
         }
     }
 
@@ -590,7 +591,7 @@ int game::SpringS2::update(float dt)
 
 
     float windForce = g_windSystem.update(dt);
-    if (!camera::isTransitioning() && !gGame.player.respawning)
+    if (!camera::isTransitioning() && !gGame.player.respawning && !gGame.player.wallHanging)
     {
         gGame.player.pos.x += windForce * dt;
     }
@@ -601,12 +602,12 @@ int game::SpringS2::update(float dt)
     {
         float gx, gy, cw, ch;
         gridToWorld(31, 17, gx, gy, cw, ch);
-        float zoneLeft  = gx;
+        float zoneLeft = gx;
         float zoneRight = gx + cw;
-        float zoneBot   = gy;
-        float zoneTop   = gy + ch * 3.0f;
-        if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-            gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+        float zoneBot = gy;
+        float zoneTop = gy + ch * 3.0f;
+        if (gGame.player.pos.x >= zoneLeft && gGame.player.pos.x <= zoneRight &&
+            gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
             return 41;
     }
 
@@ -630,7 +631,7 @@ void game::SpringS2::draw() const
         for (int row : { 17, 18, 19 })
         {
             gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
         }
     }
 
@@ -663,7 +664,7 @@ int game::SpringS3::update(float dt)
 
 
     float windForce = g_windSystem.update(dt);
-    if (!camera::isTransitioning() && !gGame.player.respawning)
+    if (!camera::isTransitioning() && !gGame.player.respawning && !gGame.player.wallHanging)
     {
         gGame.player.pos.x += windForce * dt;
     }
@@ -674,12 +675,12 @@ int game::SpringS3::update(float dt)
     {
         float gx, gy, cw, ch;
         gridToWorld(0, 17, gx, gy, cw, ch);
-        float zoneLeft  = gx;
+        float zoneLeft = gx;
         float zoneRight = gx + cw;
-        float zoneBot   = gy;
-        float zoneTop   = gy + ch * 3.0f;
-        if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-            gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+        float zoneBot = gy;
+        float zoneTop = gy + ch * 3.0f;
+        if (gGame.player.pos.x >= zoneLeft && gGame.player.pos.x <= zoneRight &&
+            gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
             return 42;
     }
 
@@ -703,7 +704,7 @@ void game::SpringS3::draw() const
         for (int row : { 17, 18, 19 })
         {
             gfx::Vec2 p{ std::round(minX + 0 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
         }
     }
 
@@ -735,7 +736,7 @@ int game::SpringS4::update(float dt)
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
 
     float windForce = g_windSystem.update(dt);
-    if (!camera::isTransitioning() && !gGame.player.respawning)
+    if (!camera::isTransitioning() && !gGame.player.respawning && !gGame.player.wallHanging)
     {
         gGame.player.pos.x += windForce * dt;
     }
@@ -746,12 +747,12 @@ int game::SpringS4::update(float dt)
     {
         float gx, gy, cw, ch;
         gridToWorld(31, 18, gx, gy, cw, ch);
-        float zoneLeft  = gx;
+        float zoneLeft = gx;
         float zoneRight = gx + cw;
-        float zoneBot   = gy;
-        float zoneTop   = gy + ch * 2.0f;
-        if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-            gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+        float zoneBot = gy;
+        float zoneTop = gy + ch * 2.0f;
+        if (gGame.player.pos.x >= zoneLeft && gGame.player.pos.x <= zoneRight &&
+            gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
         {
             g_windSystem.reset();
             return 43;
@@ -779,7 +780,7 @@ void game::SpringS4::draw() const
         for (int row : { 18, 19 })
         {
             gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
-            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAA00FFFFu);
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
         }
     }
 

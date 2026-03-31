@@ -1,10 +1,11 @@
-#include "winter.hpp"
+﻿#include "winter.hpp"
 #include "player.hpp"
 #include <iostream>
 #include "collision.hpp"
 #include "audio.hpp"
 #include "dialogue.hpp"
 #include "graphics.hpp"
+#include "gamestate.hpp"
 
 // ---------------------------------------------------------------------------
 // Globals
@@ -193,6 +194,14 @@ static void checkDamageTile(Player& player, int r, TileRange box,
     }
 }
 
+static bool HasAllArtifactsCollected()
+{
+    return gGame.collectedArtifacts[0]
+        && gGame.collectedArtifacts[1]
+        && gGame.collectedArtifacts[2]
+        && gGame.collectedArtifacts[3];
+}
+
 // ---------------------------------------------------------------------------
 // Ground type detection
 // Iterates over the player's tile box and applies gameplay effects per tile.
@@ -318,22 +327,31 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
          
 
             case 34: // winter artifacts
-                UI::gDialog.triggerFromArtifact(13);
+                if (MarkArtifactCollected(0))
+                    PlayerSaveCheckpoint(player, "checkpoint.txt");
+                UI::gDialog.triggerAutoDialog(13);
                 levelLayout[r][c] = 0;
                 break;
 
             case 31: // summer artifacts
-                UI::gDialog.triggerFromArtifact(23);
+                if (MarkArtifactCollected(1))
+                    PlayerSaveCheckpoint(player, "checkpoint.txt");
+                UI::gDialog.triggerAutoDialog(23);
                 levelLayout[r][c] = 0;
                 break;
 
             case 32: // spring artifacts
-                UI::gDialog.triggerFromArtifact(33);
+                if (MarkArtifactCollected(2))
+                    PlayerSaveCheckpoint(player, "checkpoint.txt");
+                UI::gDialog.triggerAutoDialog(33);
                 levelLayout[r][c] = 0;
                 break;
 
             case 33: // autumn artifacts
-                UI::gDialog.triggerFromArtifact(44);
+                if (MarkArtifactCollected(3))
+                    PlayerSaveCheckpoint(player, "checkpoint.txt");
+                //UI::gDialog.triggerFromArtifact(44);
+                UI::gDialog.triggerAutoDialog(44);
                 levelLayout[r][c] = 0;
                 break;
 
@@ -391,7 +409,7 @@ void CollisionResolveSpawn(Player& player)
 void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
 {
   
-
+   
     float currentY = player.pos.y;
     float oldY = currentY - player.velY * dt;
 
@@ -424,9 +442,23 @@ void resolvePlayerCollision(Player& player, int levelLayout[][mapColm], f32 dt)
     // --- Vertical collision ---
     player.pos.y = currentY;
 
+    const float halfWinH = (float)AEGfxGetWindowHeight() * 0.5f;     
     float fullH = (float)AEGfxGetWindowHeight();
     float btmCoordPostY = player.pos.y + fullH * 0.5f;
     float screenY = btmCoordPostY - g_currentY;
+
+  
+    float headY = getPlayerHeadY(player);
+
+    if (headY > fullH)
+    {
+        float clampedHeadY = fullH;
+
+        player.pos.y = (clampedHeadY - player.colliderSize.y * 0.5f) + g_currentY - halfWinH;
+
+        player.velY = -100.0f;
+    }
+
 
     // Kill player if they fall below the layer
     if (screenY < -50.0f) {
@@ -540,4 +572,22 @@ void CheckPathForCheckpoint(Player& player, gfx::Vec2 startPos, gfx::Vec2 endPos
         TileRange box = calTileRange(sx, sy, fakeW, fakeH);
         checkGroundType(player, box, g_currentMap);
     }
+}
+
+bool OnGroundExactly(Player& player)
+{
+    const float PROBE_Y = 2.0f;
+    const float OFFSET_X = player.colliderSize.x * 0.4f; 
+
+    float testW = 2.0f; 
+    float testH = 2.0f;
+
+    float leftX = player.pos.x - OFFSET_X;
+    float rightX = player.pos.x + OFFSET_X;
+    float y = player.pos.y - player.colliderSize.y * 0.5f - PROBE_Y;
+
+    bool leftGround = checkAABBCollisionAt(leftX, y, testW, testH);
+    bool rightGround = checkAABBCollisionAt(rightX, y, testW, testH);
+
+    return leftGround && rightGround;
 }

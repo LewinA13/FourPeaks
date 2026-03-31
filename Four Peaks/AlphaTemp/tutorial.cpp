@@ -1,4 +1,4 @@
-#include "tutorial.hpp"
+﻿#include "tutorial.hpp"
 #include "AEEngine.h"
 #include "graphics.hpp"
 #include "player.hpp"
@@ -253,23 +253,6 @@ namespace
         }
     }
 
-    static bool reachedGoalTopRight(const Player& p)
-    {
-        constexpr int goalCol = 31;
-        constexpr int goalRow = 19;
-        constexpr int gridRows = 20;
-        constexpr int gridCols = 32;
-
-        float xWorld{}, yWorld{}, cellW{}, cellH{};
-        gridToWorld(goalCol, goalRow, gridCols, gridRows, xWorld, yWorld, cellW, cellH);
-
-        float cx = xWorld + cellW * 0.5f;
-        float cy = yWorld + cellH * 0.5f;
-        float dx = p.pos.x - cx;
-        float dy = p.pos.y - cy;
-        return (std::sqrt(dx * dx + dy * dy) < cellW * 1.0f);
-    }
-
     // ---------------------------------------------------------------
     // Tutorial background
     // ---------------------------------------------------------------
@@ -368,9 +351,8 @@ namespace game
 
         if (!camera::isTransitioning())
         {
-            constexpr int gridRows = 20, gridCols = 32;
             float gx{}, gy{}, cw{}, ch{};
-            gridToWorld(1, 19, gridCols, gridRows, gx, gy, cw, ch);
+            gridToWorld(1, 19, this->gridCols, this->gridRows, gx, gy, cw, ch);
             float dx = gGame.player.pos.x - (gx + cw * 0.5f);
             float dy = gGame.player.pos.y - (gy + ch * 0.5f);
             if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 30;
@@ -424,9 +406,8 @@ namespace game
 
         if (!camera::isTransitioning())
         {
-            constexpr int gridRows = 20, gridCols = 32;
             float gx{}, gy{}, cw{}, ch{};
-            gridToWorld(31, 3, gridCols, gridRows, gx, gy, cw, ch);
+            gridToWorld(31, 3, this->gridCols, this->gridRows, gx, gy, cw, ch);
             float dx = gGame.player.pos.x - (gx + cw * 0.5f);
             float dy = gGame.player.pos.y - (gy + ch * 0.5f);
             if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 31;
@@ -479,9 +460,8 @@ namespace game
 
         if (!camera::isTransitioning())
         {
-            constexpr int gridRows = 20, gridCols = 32;
             float gx{}, gy{}, cw{}, ch{};
-            gridToWorld(31, 16, gridCols, gridRows, gx, gy, cw, ch);
+            gridToWorld(31, 16, this->gridCols, this->gridRows, gx, gy, cw, ch);
             float dx = gGame.player.pos.x - (gx + cw * 0.5f);
             float dy = gGame.player.pos.y - (gy + ch * 0.5f);
             if (std::sqrt(dx * dx + dy * dy) < cw * 1.5f) return 32;

@@ -271,7 +271,7 @@ namespace game {
                     portalPos.y = std::round(portalPos.y);
 
                     gfx::Vec2 portalSize{ cellW, cellH };
-                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAA00FFFF); // Cyan
+                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu); // Cyan
                 }
             }
         }
@@ -720,7 +720,7 @@ namespace game {
                     portalPos.x = std::round(portalPos.x);
                     portalPos.y = std::round(portalPos.y);
                     gfx::Vec2 portalSize{ cellW, cellH };
-                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAA00FFFF); // Green portal
+                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu); // Green portal
                 }
             }
         }
@@ -1215,7 +1215,7 @@ namespace game {
                     portalPos.x = std::round(portalPos.x);
                     portalPos.y = std::round(portalPos.y);
                     gfx::Vec2 portalSize{ cellW, cellH };
-                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAA00FFFFu);
+                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu);
                     drewAny = true;
                 }
             }
@@ -1234,7 +1234,7 @@ namespace game {
                         portalPos.x = std::round(portalPos.x);
                         portalPos.y = std::round(portalPos.y);
                         gfx::Vec2 portalSize{ cellW, cellH };
-                        gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAA00FFFFu);
+                        gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu);
                     }
                 }
             }
@@ -1721,7 +1721,7 @@ namespace game {
                 portalPos.x = std::round(portalPos.x);
                 portalPos.y = std::round(portalPos.y);
                 gfx::Vec2 portalSize{ cellW, cellH };
-                gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFF8800u); // Orange = leads to Summer
+                gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu); // Orange = leads to Summer
             }
         }
 

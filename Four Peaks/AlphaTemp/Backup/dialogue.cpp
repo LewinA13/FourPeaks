@@ -1,6 +1,7 @@
 #include "dialogue.hpp"
 #include "graphics.hpp"
 #include "sprite.hpp"
+#include "gamestate.hpp"
 extern s8 gFontId;      // Font handle created in main.cpp
 
 
@@ -13,9 +14,9 @@ namespace UI {
     , typeWriterTimer(0.0f)
     , timePerChar(1.0f / 20.0f)
     , wordSize(1.6f)
-    , isArtifactDialog(false)
-    , artifactAutoCloseTimer(0.0f)
-    , artifactAutoCloseDelay(1.0f)
+    , isAutoDialog(false)
+    , autoDialogCloseTimer(0.0f)
+    , autoDialogCloseDelay(1.0f)
     , waitingForInput(false)
     , signWorldPos{0.0f, 0.0f}   
     , currentLevelID(-1)
@@ -29,7 +30,8 @@ namespace UI {
         // Prologue
         // =========================================================
         levelDialogs[50] = {
-            "For generations, my family sought the four seasonal relics hidden atop this mountain.",
+            "For generations, my family sought the relics.",
+            "Four seasonal artifacts, hidden atop this mountain.",
             "No archaeologist has ever returned with all four.",
             "My father... and his father before him... never came back.",
             "All they left behind was this map - and their notes.",
@@ -88,9 +90,8 @@ namespace UI {
         // =========================================================
         levelDialogs[20] = {  // SummerS1
             "Dad's Note:",
-            "Heat kills faster than hunger. Find water - or faint.",
-            "I can already feel the scorching heat.",
-            "I need to find water bottles to stay cool."
+            "Watch the heat bar on the top-left, ",
+            "find water bottles to stay cool!",
         };
 
         levelDialogs[21] = {  // SummerS2
@@ -160,6 +161,12 @@ namespace UI {
             "The mountain is conquered."
         };
 
+        levelDialogs[45] = {  // All artifacts achievement
+            "Achievement unlocked:",
+            "Congrats! You have collected all 4 artifacts.",
+            "Frost, Flame, Wind, and Harvest are all yours."
+        };
+
 
     }
 
@@ -181,9 +188,8 @@ namespace UI {
 
 
     void Dialog::update(float dt) {
-
         // artifact dialog
-        if (isArtifactDialog) {
+        if (isAutoDialog) {
             if (!isShowing) return;
 
             size_t currentTextLength = texts[currentIndex].length();
@@ -199,14 +205,14 @@ namespace UI {
             }
 
             if (isLastLine && isFullyTyped) {
-                artifactAutoCloseTimer += dt;
-                if (artifactAutoCloseTimer >= artifactAutoCloseDelay) {
+                autoDialogCloseTimer += dt;
+                if (autoDialogCloseTimer >= autoDialogCloseDelay) {
                     reset();
                     return;
                 }
             }
 
-            if (AEInputCheckTriggered(AEVK_DOWN)) {
+            if (AEInputCheckTriggered(AEVK_RETURN)) {
                 if (!isFullyTyped) {
                     displayedChars = currentTextLength;
                 }
@@ -214,7 +220,7 @@ namespace UI {
                     currentIndex++;
                     displayedChars = 0;
                     typeWriterTimer = 0.0f;
-                    artifactAutoCloseTimer = 0.0f;
+                    autoDialogCloseTimer = 0.0f;
                 }
                 else {
                     reset();
@@ -266,15 +272,7 @@ namespace UI {
             }
         }
 
-        if (AEInputCheckTriggered(AEVK_UP)) {
-            if (currentIndex > 0) {
-                currentIndex--;
-                displayedChars = 0;
-                typeWriterTimer = 0.0f;
-            }
-        }
-
-        if (AEInputCheckTriggered(AEVK_DOWN)) {
+        if (AEInputCheckTriggered(AEVK_RETURN)) {
             if (!isFullyTyped) {
                 displayedChars = currentTextLength;
             }
@@ -289,33 +287,36 @@ namespace UI {
     void Dialog::render()
     {
 
-        if ((waitingForInput || isShowing) && playerNearSign && !isArtifactDialog) {
+        if ((waitingForInput || isShowing) && playerNearSign && !isAutoDialog) {
             float oldX, oldY;
             AEGfxGetCamPosition(&oldX, &oldY);
             AEGfxSetCamPosition(0.0f, 0.0f);
 
-            const char* hint = isShowing ? "Press [E] to close" : "Press [E] to read";
-            float scale = 1.2f;
+            if (!isShowing) {
+                const char* hint = "Press [E] to read";
+                float scale = 1.2f;
 
-            f32 tw, th;
-            AEGfxGetPrintSize(gFontId, hint, scale, &tw, &th);
+                f32 tw, th;
+                AEGfxGetPrintSize(gFontId, hint, scale, &tw, &th);
 
-            float halfW = (float)AEGfxGetWindowWidth() * 0.5f;
-            float halfH = (float)AEGfxGetWindowHeight() * 0.5f;
+                float halfW = (float)AEGfxGetWindowWidth() * 0.5f;
+                float halfH = (float)AEGfxGetWindowHeight() * 0.5f;
 
-            float screenX = signWorldPos.x - oldX;
-            float screenY = signWorldPos.y - oldY + 40.0f; 
+                float screenX = signWorldPos.x - oldX;
+                float screenY = signWorldPos.y - oldY + 40.0f;
 
-            float normX = screenX / halfW;
-            float normY = screenY / halfH;
+                float normX = screenX / halfW;
+                float normY = screenY / halfH;
 
-            float drawX = normX - tw * 0.5f;
-            float drawY = normY - th * 0.5f;
+                float drawX = normX - tw * 0.5f;
+                float drawY = normY - th * 0.5f;
 
-            AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-            AEGfxPrint(gFontId, hint, drawX, drawY, scale, 1.0f, 1.0f, 1.0f, 1.0f); 
+                AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+                AEGfxPrint(gFontId, hint, drawX, drawY, scale, 1.0f, 1.0f, 1.0f, 1.0f);
 
-            AEGfxSetCamPosition(oldX, oldY);
+                AEGfxSetCamPosition(oldX, oldY);
+            }
+           
         }
 
 
@@ -348,16 +349,10 @@ namespace UI {
         }
 
 
-
-        if (currentIndex > 0) {
-            gfx::drawSprite(textboxUpTexture, { 400, 310 }, 0.0f, { 30.0f, 30.0f }, 0.0f, 0.0f, 1.0f, 1.0f);
-        }
-        if (currentIndex + 1 < (int)texts.size() || displayedChars < texts[currentIndex].length()) {
-            gfx::drawSprite(textboxDownTexture, { 400, 270 }, 0.0f, { 30.0f, 30.0f }, 0.0f, 0.0f, 1.0f, 1.0f);
-        }
+   
      
 
-        if (currentIndex < texts.size() && (playerNearSign || isArtifactDialog)){
+        if (currentIndex < texts.size() && (playerNearSign || isAutoDialog)){
             std::string fullText = texts[currentIndex];
 
             // typewriter effect
@@ -383,6 +378,29 @@ namespace UI {
             float drawY = normY - textHeight / 2.0f;
 
             AEGfxPrint(gFontId, pText, drawX, drawY, wordSize, 1.0f, 1.0f, 1.0f, 1.0f);
+
+            // hint 
+            float hintScale = 1.0f;
+            float boxBottom = (boxY - boxHeight * 0.5f) / (AEGfxGetWindowHeight() * 0.5f);
+
+            const char* hintText = nullptr;
+
+            if (isAutoDialog) {
+                hintText = (currentIndex + 1 < (int)texts.size() || displayedChars < texts[currentIndex].length()) ? "[Press \" Enter \" to continue]" : "[Press \" Enter \" to skip]";
+            }
+            else{
+                hintText = (currentIndex + 1 < (int)texts.size() || displayedChars < texts[currentIndex].length()) ? "[Press \" Enter \" to continue]" : "[Press \" E \" to close]";
+            }
+
+            f32 hintWidth{}, hintHeight{};
+            AEGfxGetPrintSize(gFontId, hintText, hintScale, &hintWidth, &hintHeight);
+
+            float hintX = normX - hintWidth / 2.0f;
+            float hintY = boxBottom + 0.03f;
+
+            AEGfxPrint(gFontId, hintText, hintX, hintY, hintScale, 1.0f, 1.0f, 0.8f, 1.0f);
+
+
         }
 
   
@@ -393,7 +411,7 @@ namespace UI {
         playerNearSign = detect;
     }
 
-    void Dialog::triggerFromArtifact(int levelID) {
+    void Dialog::triggerAutoDialog(int levelID) {
         if (levelDialogs.find(levelID) == levelDialogs.end()) return;
 
         currentLevelID = levelID;
@@ -401,23 +419,28 @@ namespace UI {
         currentIndex = 0;
         displayedChars = 0;
         typeWriterTimer = 0.0f;
-        isArtifactDialog = true;
-        artifactAutoCloseTimer = 0.0f;
+        isAutoDialog = true;
+        autoDialogCloseTimer = 0.0f;
         isShowing = true;
     }
 
     void Dialog::reset() {
         isShowing = false;
-        isArtifactDialog = false;
-        artifactAutoCloseTimer = 0.0f;
+        isAutoDialog = false;
+        autoDialogCloseTimer = 0.0f;
         currentIndex = 0;
         displayedChars = 0;
         waitingForInput = false;  
     }
    
+    // helper funct for render 
     void Dialog::setSignPos(float x, float y) {
         signWorldPos.x = x;
         signWorldPos.y = y;
+    }
+
+    bool Dialog::dialogBoxShowing() const {
+        return isShowing;
     }
 }
 	

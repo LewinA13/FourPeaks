@@ -20,30 +20,6 @@ extern s8 gFontId;
 
 namespace game {
 
-    static void printText(f32 x, f32 y, u32 argbColor,
-        const char* text, f32 scale = 1.0f)
-    {
-        f32 a = ((argbColor >> 24) & 0xFF) / 255.0f;
-        f32 r = ((argbColor >> 16) & 0xFF) / 255.0f;
-        f32 g = ((argbColor >> 8) & 0xFF) / 255.0f;
-        f32 b = ((argbColor >> 0) & 0xFF) / 255.0f;
-        AEGfxPrint(gFontId, text, x, y, scale, r, g, b, a);
-    }
-
-    static bool playerOverlapsRect(const Player& player, float left, float right, float bottom, float top)
-    {
-        const float halfW = player.colliderSize.x * 0.5f;
-        const float halfH = player.colliderSize.y * 0.5f;
-
-        const float playerLeft = player.pos.x - halfW;
-        const float playerRight = player.pos.x + halfW;
-        const float playerBottom = player.pos.y - halfH;
-        const float playerTop = player.pos.y + halfH;
-
-        return playerRight >= left && playerLeft <= right &&
-               playerTop >= bottom && playerBottom <= top;
-    }
-
     // ===================================================================
     // HELPER: Draw tiles 16-19 (shared logic, inlined per stage)
     // ===================================================================
@@ -290,24 +266,35 @@ namespace game {
                         gfx::Vec2 ss{ size.x * 1.5f, size.y };
                         gfx::Vec2 sp = pos;
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                        if (tileType == 26) { sp.x += (ss.x - size.x) * 0.5f; }
-
-                        // Cell-fit left spike (21) and right spike (22)
-                        else if (tileType == 21 || tileType == 22)
-                        {
-                            AEGfxTexture* spikeTex = sprite::spikes();
-                            if (spikeTex)
-                            {
-                                // Draw sideways: swap width/height so portrait spike lies on side
-                                gfx::Vec2 ss{ size.y, size.x };
-                                gfx::Vec2 sp = pos;
-                                float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                                if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
-                                else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
-                                gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
-                            }
+                        if (tileType == 26) {
+                            sp.x += (ss.x - size.x) * 0.5f;
+                        } else {
+                            sp.x -= (ss.x - size.x) * 0.5f;
+                            u0 = 1.0f;
+                            u1 = 0.0f;
                         }
-                        else { sp.x -= (ss.x - size.x) * 0.5f; u0 = 1.0f; u1 = 0.0f; }
+                        gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
+                    }
+                    continue;
+                }
+
+                // Cell-fit left spike (21) and right spike (22)
+                if (tileType == 21 || tileType == 22)
+                {
+                    AEGfxTexture* spikeTex = sprite::spikes();
+                    if (spikeTex)
+                    {
+                        // Draw sideways: swap width/height so portrait spike lies on side
+                        gfx::Vec2 ss{ size.y, size.x };
+                        gfx::Vec2 sp = pos;
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 21) {
+                            v0 = 0.0f;
+                            v1 = 1.0f;
+                        } else {
+                            u0 = 1.0f;
+                            u1 = 0.0f;
+                        }
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                     continue;

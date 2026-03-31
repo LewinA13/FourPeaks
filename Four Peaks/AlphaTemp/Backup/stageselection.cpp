@@ -1,4 +1,4 @@
-﻿#include "stageselection.hpp"
+#include "stageselection.hpp"
 #include "AEEngine.h"
 #include "sprite.hpp"
 #include "gamestate.hpp"
@@ -113,7 +113,6 @@ namespace game {
 
     int StageSelect::update(float dt)
     {
-        (void)dt;
         // ---- Choose season ----
         if (!selectingStage)
         {
@@ -215,9 +214,14 @@ namespace game {
         // Season card 
         // ----------------------------------------------------------------
 
+        AEGfxTexture* centerframetex = sprite::centerframe();
+
         // scale bigger if choosing season
         float CardW = selectingStage ? screenW * 0.42f : screenW * 0.52f;
         float CardH = selectingStage ? screenH * 0.40f : screenH * 0.58f;
+
+        float mainCardW = selectingStage ? screenW * 0.42f : screenW * 0.52f;
+        float mainCardH = selectingStage ? screenH * 0.4f : screenH * 0.58f;
 
         // offset to determine how width side card show
         float sideCardW = screenW * 0.16f;
@@ -392,6 +396,7 @@ namespace game {
                 if (preview)
                 {
                     // Dim non-selected cards; full brightness on selected
+                    float alpha = sel ? 1.0f : 0.5f;
                     gfx::drawSprite(preview, { cx, stageRowY }, 0.0f,
                         { stageCardW, stageCardH }, 0, 0, 1, 1);
                     // Darken overlay for non-selected cards
@@ -402,8 +407,8 @@ namespace game {
 
                 char code[4];
                 // get each season first alphabet
-                code[0] = static_cast<char>(seasonNames[seasonIndex][0]);
-                code[1] = static_cast<char>('1' + i);
+                code[0] = seasonNames[seasonIndex][0];
+                code[1] = '1' + i;
                 code[2] = '\0';
 
                 float tX = cx / (screenW * 0.5f) - 0.04f;

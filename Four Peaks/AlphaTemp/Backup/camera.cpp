@@ -137,7 +137,6 @@ namespace camera {
     }
 
     void followPlayer(float playerX, float playerY, float dt) {
-        (void)dt;
         if (!followMode) return;
         if (transitioning) return; // Don't follow during transitions
 

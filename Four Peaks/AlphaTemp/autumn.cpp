@@ -75,20 +75,6 @@ namespace
         }
     }
 
-    static bool playerOverlapsRect(const Player& player, float left, float right, float bottom, float top)
-    {
-        const float halfW = player.colliderSize.x * 0.5f;
-        const float halfH = player.colliderSize.y * 0.5f;
-
-        const float playerLeft = player.pos.x - halfW;
-        const float playerRight = player.pos.x + halfW;
-        const float playerBottom = player.pos.y - halfH;
-        const float playerTop = player.pos.y + halfH;
-
-        return playerRight >= left && playerLeft <= right &&
-               playerTop >= bottom && playerBottom <= top;
-    }
-
     // ===================================================================
     // TILE COLOR FALLBACKS
     // ===================================================================

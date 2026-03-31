@@ -7,6 +7,7 @@
 #include "camera.hpp"
 #include "gamestate.hpp"
 #include "audio.hpp"
+#include "dialogue.hpp"
 
 #include <iostream>
 
@@ -38,23 +39,20 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
     if (filename == nullptr || filename[0] == '\0')
         return false;
 
-    // trunc is used to remove old checkpoint and add in new one
     std::ofstream out(filename, std::ios::out | std::ios::trunc);
     if (!out.is_open())
         return false;
 
-    out << "checkpoint_v7\n";
+    out << "checkpoint_v8\n";
     out << p.checkpointScene << "\n";
     out << std::fixed << std::setprecision(3);
 
-    // Save respawn position, melon count, death count, and run timer.
     out << p.respawnPos.x << " "
         << p.respawnPos.y << " "
         << p.melonsCollected << " "
         << p.deathCount << " "
         << gGame.runTimeSeconds << "\n";
 
-    // Save all 16 seasonal unlock flags as 0/1 values.
     for (int i = 0; i < 16; ++i)
     {
         out << (gGame.unlockedStages[i] ? 1 : 0);
@@ -71,7 +69,13 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
             << melon.col << "\n";
     }
 
-    std::cout << "Saved checkpoint to file";
+    for (int i = 0; i < 4; ++i)
+    {
+        out << (gGame.collectedArtifacts[i] ? 1 : 0);
+        if (i < 3) out << " ";
+    }
+    out << "\n";
+
     return out.good();
 }
 
@@ -90,7 +94,6 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     float x = 0.0f;
     float y = 0.0f;
 
-    // Safe defaults if file is old or missing values
     p.melonsCollected = 0;
     p.deathCount = 0;
     gGame.runTimeSeconds = 0.0f;
@@ -99,14 +102,52 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     for (int i = 0; i < 16; ++i)
         gGame.unlockedStages[i] = false;
 
+    for (int i = 0; i < 4; ++i)
+        gGame.collectedArtifacts[i] = false;
+
     std::string scene;
     if (!(in >> scene))
         return false;
 
     p.checkpointScene = scene;
 
-    // Newest format: checkpoint_v7
-    if (header == "checkpoint_v7")
+    if (header == "checkpoint_v8")
+    {
+        if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
+            return false;
+
+        for (int i = 0; i < 16; ++i)
+        {
+            int unlocked = 0;
+            if (!(in >> unlocked))
+                return false;
+
+            gGame.unlockedStages[i] = (unlocked != 0);
+        }
+
+        int collectedCount = 0;
+        if (!(in >> collectedCount))
+            return false;
+
+        for (int i = 0; i < collectedCount; ++i)
+        {
+            CollectedMelon melon;
+            if (!(in >> melon.scene >> melon.row >> melon.col))
+                return false;
+
+            gGame.collectedMelons.push_back(melon);
+        }
+
+        for (int i = 0; i < 4; ++i)
+        {
+            int collected = 0;
+            if (!(in >> collected))
+                return false;
+
+            gGame.collectedArtifacts[i] = (collected != 0);
+        }
+    }
+    else if (header == "checkpoint_v7")
     {
         if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
             return false;
@@ -155,6 +196,55 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     {
         return false;
     }
+
+    p.respawnPos = { x, y };
+
+    if (teleportToRespawn)
+        PlayerSetFeetWorld(p, p.respawnPos);
+
+    return true;
+}
+
+bool PlayerDeleteCheckpoint(const char* filename)
+{
+    if (filename == nullptr || filename[0] == '\0')
+        return false;
+
+    // remove the checkpoint file
+    return std::remove(filename) == 0;
+}
+
+void PlayerResetProgress(Player& p)
+{
+    // reset player 
+    p.melonsCollected = 0;
+    p.deathCount = 0;
+    p.checkpointScene.clear();
+    p.respawnPos = { 0.0f, 0.0f };
+
+    // reset global
+    gGame.runTimeSeconds = 0.0f;
+    gGame.collectedMelons.clear();
+
+    for (int i = 0; i < 16; ++i)
+    {
+        gGame.unlockedStages[i] = false;
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+        gGame.collectedArtifacts[i] = false;
+    }
+
+    // also clear some immediate gameplay state
+    p.velX = 0.0f;
+    p.velY = 0.0f;
+    p.grounded = false;
+    p.dead = false;
+    p.alive = true;
+    p.dashing = false;
+    p.wallHanging = false;
+    p.dashCount = p.maxDashCount;
 }
 
 bool IsMelonCollected(const char* sceneName, int row, int col)
@@ -203,6 +293,48 @@ void ApplyCollectedMelonsToTileMap(const char* sceneName, int rows, int tileMap[
 
         if (tileMap[melon.row][melon.col] == 8)
             tileMap[melon.row][melon.col] = 0;
+    }
+}
+
+bool IsArtifactCollected(int artifactIndex)
+{
+    if (artifactIndex < 0 || artifactIndex >= 4)
+        return false;
+
+    return gGame.collectedArtifacts[artifactIndex];
+}
+
+bool MarkArtifactCollected(int artifactIndex)
+{
+    if (artifactIndex < 0 || artifactIndex >= 4)
+        return false;
+
+    if (gGame.collectedArtifacts[artifactIndex])
+        return false;
+
+    gGame.collectedArtifacts[artifactIndex] = true;
+    return true;
+}
+
+void ApplyCollectedArtifactsToTileMap(int rows, int tileMap[][32])
+{
+    if (!tileMap) return;
+
+    for (int r = 0; r < rows; ++r)
+    {
+        for (int c = 0; c < 32; ++c)
+        {
+            const int tile = tileMap[r][c];
+
+            if (tile == 34 && gGame.collectedArtifacts[0])
+                tileMap[r][c] = 0;
+            else if (tile == 31 && gGame.collectedArtifacts[1])
+                tileMap[r][c] = 0;
+            else if (tile == 32 && gGame.collectedArtifacts[2])
+                tileMap[r][c] = 0;
+            else if (tile == 33 && gGame.collectedArtifacts[3])
+                tileMap[r][c] = 0;
+        }
     }
 }
 
@@ -470,6 +602,7 @@ void PlayerInit(Player& p)
 
 void PlayerUpdate(Player& p, float dt)
 {
+    printf("player velY: %f\n", p.velY);
     // =========================================================
     // 0) SETUP
     // =========================================================
@@ -478,12 +611,13 @@ void PlayerUpdate(Player& p, float dt)
     const bool jumpHeld = AEInputCheckCurr(AEVK_SPACE);
 
     const bool grabHeld = AEInputCheckCurr(AEVK_L);
-    const bool dashPressed = AEInputCheckTriggered(AEVK_LSHIFT);
+    const bool dashPressed = AEInputCheckTriggered(AEVK_LSHIFT) || AEInputCheckTriggered(AEVK_K);
 
     const bool pressUp = AEInputCheckCurr(AEVK_W);
     const bool pressDown = AEInputCheckCurr(AEVK_S);
 
     bool didWallJumpThisFrame = false;
+    bool didGroundJumpThisFrame = false;
 
     static constexpr float SNOW_STEP_INTERVAL = 0.10f; // tweak: 0.22-0.35 feels normal
     static constexpr float WALK_SPEED_EPS = 5.0f; // tweak based on your velocity scale
@@ -545,6 +679,21 @@ void PlayerUpdate(Player& p, float dt)
         return;
     }
 
+    // lock player if player exactly on ground and reading dialog box
+    if (OnGroundExactly(p) && p.grounded && UI::gDialog.dialogBoxShowing()) {
+        p.velX = 0.0f;
+        p.horzSpeed = 0.0f;
+        p.dashing = false;
+        p.wallHanging = false;
+
+        CollisionUpdate(p, dt);
+        CollisionUpdateWallFlags(p);
+        
+        return;
+    }
+
+   
+
     // =========================================================
     // 1) INPUT (read once)
     // =========================================================
@@ -560,16 +709,13 @@ void PlayerUpdate(Player& p, float dt)
 
     
 
+
     // =========================================================
     // 2) TIMERS / BUFFERS / DASH
     // =========================================================
-
-    // Wall regrab prevention
-    if (p.wallRegrabTimer > 0.0f)
-    {
-        p.wallRegrabTimer -= dt;
-        if (p.wallRegrabTimer < 0.0f) p.wallRegrabTimer = 0.0f;
-    }
+    
+    // wall regrab timer not used anymore
+    p.wallRegrabTimer = 0.0f;
 
     // Coyote time + dash 
     if (wasGrounded) // checks if you are on the ground LAST FRAME
@@ -674,6 +820,7 @@ void PlayerUpdate(Player& p, float dt)
             p.velY = p.jumpVel;
             p.grounded = false;
             p.coyoteTimer = 0.0f;
+            didGroundJumpThisFrame = true;
 
             // reset jump anim
             p.jumpFrame = 0;
@@ -795,7 +942,7 @@ void PlayerUpdate(Player& p, float dt)
 
         PlayerSetRespawn(p, feet);
     }
-    if (AEInputCheckTriggered(AEVK_K))
+    if (AEInputCheckTriggered(AEVK_K) && AEInputCheckTriggered(AEVK_LCTRL))
     {
         PlayerKill(p);
     }
@@ -817,7 +964,7 @@ void PlayerUpdate(Player& p, float dt)
     // =========================================================
     if (!p.dashing)
     {
-        const bool canStick = (!p.grounded && touchingWall && p.wallRegrabTimer <= 0.0f);
+        const bool canStick = (!p.grounded && touchingWall);
 
         if (!p.wallHanging && canStick && (grabHeld || p.wallHangBufferTimer > 0.0f))
         {
@@ -867,7 +1014,7 @@ void PlayerUpdate(Player& p, float dt)
     // =========================================================
     if (!p.dashing && jumpPressed)
     {
-        const bool canWallJump = (!p.grounded && touchingWall && p.wallRegrabTimer <= 0.0f);
+        const bool canWallJump = (!wasGrounded && !didGroundJumpThisFrame && !p.grounded && touchingWall);
 
         if (canWallJump)
         {
@@ -879,12 +1026,11 @@ void PlayerUpdate(Player& p, float dt)
             p.velY = p.jumpVel;
             didWallJumpThisFrame = true;
 
-            // Horizontal push (your existing tuning)
+            // horizontal push
             p.horzSpeed = jumpDir * 2.0f;
             p.facing = (jumpDir > 0.0f) ? 1 : -1;
             p.velX = p.horzSpeed * p.speed;
 
-            p.wallRegrabTimer = p.wallRegrabTime;
             p.wallHanging = false;
 
             p.grounded = false;
@@ -1099,7 +1245,7 @@ void PlayerDraw(Player& p)
         return;
     }
 
-    bool isMoving = (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_D));
+    bool isMoving = ((AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_D))) && !UI::gDialog.dialogBoxShowing();
 
     AEGfxTexture* tex = nullptr;
     int frame = 0;
