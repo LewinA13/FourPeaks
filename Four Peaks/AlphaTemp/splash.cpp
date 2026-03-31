@@ -20,26 +20,21 @@ namespace game
     // -------------------------------------------------------------------------
     SplashScreen::SplashScreen()
         : timer(0.0f)
-        , splashTex(nullptr)
+        , currentSplash(0)
+        , splashTex1(nullptr)
+        , splashTex2(nullptr)
         , splashMesh(nullptr)
     {
-        // Load your splash image — place it in Assets/ and update the path if needed
-        splashTex = AEGfxTextureLoad("Assets/Splash/DigiPen_Singapore_WEB_RED.png");
+        splashTex1 = AEGfxTextureLoad("Assets/Splash/DigiPen_Singapore_WEB_RED.png");
+        splashTex2 = AEGfxTextureLoad("Assets/FourPeaksLogo.png"); // your game logo
 
-        // Standard 1x1 unit quad centered at the origin.
-        // The transform in draw() will scale it to SPLASH_WIDTH x SPLASH_HEIGHT pixels.
         AEGfxMeshStart();
-
-        AEGfxTriAdd(
-            -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f,   // top-left
-            0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,   // top-right
-            -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f);  // bottom-left
-
-        AEGfxTriAdd(
-            0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,   // top-right
-            0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,   // bottom-right
-            -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f);  // bottom-left
-
+        AEGfxTriAdd(-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f,
+            0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
+            -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f);
+        AEGfxTriAdd(0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
+            0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
+            -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f);
         splashMesh = AEGfxMeshEnd();
     }
 
@@ -48,8 +43,9 @@ namespace game
     // -------------------------------------------------------------------------
     SplashScreen::~SplashScreen()
     {
-        if (splashMesh) { AEGfxMeshFree(splashMesh);       splashMesh = nullptr; }
-        if (splashTex) { AEGfxTextureUnload(splashTex);   splashTex = nullptr; }
+        if (splashMesh) { AEGfxMeshFree(splashMesh);        splashMesh = nullptr; }
+        if (splashTex1) { AEGfxTextureUnload(splashTex1);   splashTex1 = nullptr; }
+        if (splashTex2) { AEGfxTextureUnload(splashTex2);   splashTex2 = nullptr; }
     }
 
     // -------------------------------------------------------------------------
@@ -60,16 +56,20 @@ namespace game
         float dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
         timer += dt;
 
-        // Allow the player to skip the splash early
-        if (AEInputCheckTriggered(AEVK_RETURN) ||
+        bool skip = AEInputCheckTriggered(AEVK_RETURN) ||
             AEInputCheckTriggered(AEVK_SPACE) ||
-            AEInputCheckTriggered(AEVK_ESCAPE))
-        {
-            return 1;
-        }
+            AEInputCheckTriggered(AEVK_ESCAPE);
 
-        if (timer >= SPLASH_DURATION)
-            return 1;
+        if (timer >= SPLASH_DURATION || skip)
+        {
+            if (currentSplash == 0)
+            {
+                currentSplash = 1;  // advance to game logo
+                timer = 0.0f;       // reset timer for second splash
+                return 0;
+            }
+            return 1; // both splashes done, go to menu
+        }
 
         return 0;
     }
@@ -80,33 +80,31 @@ namespace game
     void SplashScreen::draw() const
     {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
+        if (!splashMesh) return;
 
-        if (!splashMesh || !splashTex)
-            return;
+        // Pick active texture and dimensions
+        AEGfxTexture* activeTex = (currentSplash == 0) ? splashTex1 : splashTex2;
+        float         activeWidth = (currentSplash == 0) ? SPLASH1_WIDTH : SPLASH2_WIDTH;
+        float         activeHeight = (currentSplash == 0) ? SPLASH1_HEIGHT : SPLASH2_HEIGHT;
 
-        // --- Compute fade alpha ----------------------------------------------
+        if (!activeTex) return;
+
         float alpha = 1.0f;
         if (timer < FADE_TIME)
             alpha = timer / FADE_TIME;
         else if (timer > SPLASH_DURATION - FADE_TIME)
             alpha = (SPLASH_DURATION - timer) / FADE_TIME;
-        if (alpha < 0.0f) alpha = 0.0f;
-        if (alpha > 1.0f) alpha = 1.0f;
+        alpha = (alpha < 0.0f) ? 0.0f : (alpha > 1.0f) ? 1.0f : alpha;
 
-        // --- Build a scale transform so the unit mesh becomes the right size -
-        // Alpha Engine world space == pixels, so scaling by pixel dimensions
-        // gives us the image at its true size, centered at the origin (0, 0).
         AEMtx33 transform;
-        AEMtx33Scale(&transform, SPLASH_WIDTH, SPLASH_HEIGHT);
+        AEMtx33Scale(&transform, activeWidth, activeHeight);
 
-        // --- Draw ------------------------------------------------------------
         AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
         AEGfxSetBlendMode(AE_GFX_BM_BLEND);
         AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
         AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
         AEGfxSetTransparency(alpha);
-
-        AEGfxTextureSet(splashTex, 0.0f, 0.0f);
+        AEGfxTextureSet(activeTex, 0.0f, 0.0f);
         AEGfxSetTransform(transform.m);
         AEGfxMeshDraw(splashMesh, AE_GFX_MDM_TRIANGLES);
     }

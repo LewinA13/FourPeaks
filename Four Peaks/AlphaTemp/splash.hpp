@@ -12,7 +12,8 @@
 //   1  — done, switch to Main Menu
 // ---------------------------------------------------------------------------
 
-#include <AEEngine.h> // AEGfxTexture
+#pragma once
+#include <AEEngine.h>
 
 namespace game
 {
@@ -22,21 +23,26 @@ namespace game
         SplashScreen();
         ~SplashScreen();
 
-        int  update();   // returns 1 when the 5 s timer expires
+        int  update();
         void draw() const;
 
     private:
-        static constexpr float SPLASH_DURATION = 5.0f;   // seconds
-        static constexpr float FADE_TIME = 0.6f;   // seconds for fade in/out
+        static constexpr float SPLASH_DURATION = 5.0f;
+        static constexpr float FADE_TIME = 0.6f;
 
-        // *** Change these to match your splash image's actual pixel dimensions ***
-        // DigiPen_Singapore_WEB_RED.png is 1525x445 px, scaled to 80% to give breathing room
-        static constexpr float SPLASH_WIDTH = 1220.0f;  // 1525 * 0.8
-        static constexpr float SPLASH_HEIGHT = 356.0f;  //  445 * 0.8
+        // Splash 1 — DigiPen logo
+        static constexpr float SPLASH1_WIDTH = 1220.0f;
+        static constexpr float SPLASH1_HEIGHT = 356.0f;
+
+        // Splash 2 - Game Logo
+        static constexpr float SPLASH2_WIDTH = 800.0f;
+        static constexpr float SPLASH2_HEIGHT = 800.0f;
 
         float timer;
+        int   currentSplash; // 0 = first, 1 = second
 
-        AEGfxTexture* splashTex;
+        AEGfxTexture* splashTex1;
+        AEGfxTexture* splashTex2;
         AEGfxVertexList* splashMesh;
     };
 
