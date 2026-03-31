@@ -562,7 +562,7 @@ void game::SpringS1::draw() const
         }
     }
 
-    PlayerDraw(gGame.player);
+    PlayerDraw(gGame.player, gridVisible);
     g_windSystem.draw();
 }
 
@@ -635,7 +635,7 @@ void game::SpringS2::draw() const
         }
     }
 
-    PlayerDraw(gGame.player);
+    PlayerDraw(gGame.player, gridVisible);
     g_windSystem.draw();
 }
 
@@ -708,7 +708,7 @@ void game::SpringS3::draw() const
         }
     }
 
-    PlayerDraw(gGame.player);
+    PlayerDraw(gGame.player, gridVisible);
     g_windSystem.draw();
 }
 
@@ -784,7 +784,7 @@ void game::SpringS4::draw() const
         }
     }
 
-    PlayerDraw(gGame.player);
+    PlayerDraw(gGame.player, gridVisible);
     g_windSystem.draw();
 }
 

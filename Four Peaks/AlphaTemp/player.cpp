@@ -43,7 +43,7 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
     if (!out.is_open())
         return false;
 
-    out << "checkpoint_v8\n";
+    out << "checkpoint_v9\n";
     out << p.checkpointScene << "\n";
     out << std::fixed << std::setprecision(3);
 
@@ -75,6 +75,8 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
         if (i < 3) out << " ";
     }
     out << "\n";
+
+    out << (gGame.allMelonsAchievementShown ? 1 : 0) << "\n";
 
     return out.good();
 }
@@ -111,7 +113,87 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
 
     p.checkpointScene = scene;
 
-    if (header == "checkpoint_v8")
+    if (header == "checkpoint_v9")
+    {
+        if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
+            return false;
+
+        for (int i = 0; i < 16; ++i)
+        {
+            int unlocked = 0;
+            if (!(in >> unlocked))
+                return false;
+
+            gGame.unlockedStages[i] = (unlocked != 0);
+        }
+
+        int collectedCount = 0;
+        if (!(in >> collectedCount))
+            return false;
+
+        for (int i = 0; i < collectedCount; ++i)
+        {
+            CollectedMelon melon;
+            if (!(in >> melon.scene >> melon.row >> melon.col))
+                return false;
+
+            gGame.collectedMelons.push_back(melon);
+        }
+
+        for (int i = 0; i < 4; ++i)
+        {
+            int collected = 0;
+            if (!(in >> collected))
+                return false;
+
+            gGame.collectedArtifacts[i] = (collected != 0);
+        }
+
+        int melonAchievementShown = 0;
+        if (!(in >> melonAchievementShown))
+            return false;
+
+        gGame.allMelonsAchievementShown = (melonAchievementShown != 0);
+    }
+    else if (header == "checkpoint_v8")
+    {
+        if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
+            return false;
+
+        for (int i = 0; i < 16; ++i)
+        {
+            int unlocked = 0;
+            if (!(in >> unlocked))
+                return false;
+
+            gGame.unlockedStages[i] = (unlocked != 0);
+        }
+
+        int collectedCount = 0;
+        if (!(in >> collectedCount))
+            return false;
+
+        for (int i = 0; i < collectedCount; ++i)
+        {
+            CollectedMelon melon;
+            if (!(in >> melon.scene >> melon.row >> melon.col))
+                return false;
+
+            gGame.collectedMelons.push_back(melon);
+        }
+
+        for (int i = 0; i < 4; ++i)
+        {
+            int collected = 0;
+            if (!(in >> collected))
+                return false;
+
+            gGame.collectedArtifacts[i] = (collected != 0);
+        }
+
+        gGame.allMelonsAchievementShown = false;
+    }
+    else if (header == "checkpoint_v8")
     {
         if (!(in >> x >> y >> p.melonsCollected >> p.deathCount >> gGame.runTimeSeconds))
             return false;
@@ -235,6 +317,10 @@ void PlayerResetProgress(Player& p)
     {
         gGame.collectedArtifacts[i] = false;
     }
+
+    gGame.allMelonsAchievementShown = false;
+    gGame.reloadAllStageMaps = true;
+
 
     // also clear some immediate gameplay state
     p.velX = 0.0f;
@@ -466,6 +552,7 @@ void PlayerInit(Player& p)
     p.melonsCollected = 0;
     p.deathCount = 0;
     gGame.runTimeSeconds = 0.0f;
+    gGame.allMelonsAchievementShown = false;
 
     PlayerLoadCheckpoint(p, "checkpoint.txt", true);
     p.justRespawned = false;
@@ -1183,7 +1270,7 @@ void PlayerUpdate(Player& p, float dt)
 
 
 
-void PlayerDraw(Player& p)
+void PlayerDraw(Player& p, bool showCollider)
 {
 
     if (p.dead)
@@ -1214,6 +1301,11 @@ void PlayerDraw(Player& p)
 
         // No wall hang offset during death (prevents weird shifts)
         gfx::drawSprite(tex, drawPos, 0.0f, p.spriteSize, u0, 0.0f, u1, 1.0f);
+
+        if (showCollider)
+        {
+            gfx::drawRectangle(p.pos, 0.0f, p.colliderSize, 0xAAFF0000u);
+        }
         return;
     }
 
@@ -1242,6 +1334,11 @@ void PlayerDraw(Player& p)
         drawPos.x = feetWorld.x + p.spriteOffsetX;
 
         gfx::drawSprite(tex, drawPos, 0.0f, p.spriteSize, u0, 0.0f, u1, 1.0f);
+
+        if (showCollider)
+        {
+            gfx::drawRectangle(p.pos, 0.0f, p.colliderSize, 0xAAFF0000u);
+        }
         return;
     }
 
@@ -1345,6 +1442,11 @@ void PlayerDraw(Player& p)
 
 
     gfx::drawSprite(tex, drawPos, 0.0f, p.spriteSize, u0, 0.0f, u1, 1.0f);
+
+    if (showCollider)
+    {
+        gfx::drawRectangle(p.pos, 0.0f, p.colliderSize, 0xAAFF0000u);
+    }
 }
 
 void PlayerShutdown(Player& p)

@@ -599,7 +599,7 @@ void game::AutumnS1::draw() const
         }
     }
 
-    PlayerDraw(gGame.player);
+    PlayerDraw(gGame.player, gridVisible);
     g_leafSystem.draw();
 }
 
@@ -704,7 +704,7 @@ void game::AutumnS2::draw() const
         }
     }
 
-    PlayerDraw(gGame.player);
+    PlayerDraw(gGame.player, gridVisible);
     g_leafSystem.draw();
 }
 
@@ -808,7 +808,7 @@ void game::AutumnS3::draw() const
         }
     }
 
-    PlayerDraw(gGame.player);
+    PlayerDraw(gGame.player, gridVisible);
     g_leafSystem.draw();
 }
 
@@ -914,7 +914,7 @@ void game::AutumnS4::draw() const
         }
     }
 
-    PlayerDraw(gGame.player);
+    PlayerDraw(gGame.player, gridVisible);
     g_leafSystem.draw();
 }
 

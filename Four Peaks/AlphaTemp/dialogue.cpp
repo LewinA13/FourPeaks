@@ -167,6 +167,12 @@ namespace UI {
             "Frost, Flame, Wind, and Harvest are all yours."
         };
 
+        levelDialogs[46] = {  // All melons achievement
+        "Achievement unlocked:",
+        "You have collected all 53 melons.",
+        "You are now considered one of the greatest archaeologists ever."
+        };
+
 
     }
 

@@ -269,6 +269,12 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                         PlayerSetRespawn(player, PlayerGetFeetWorld(player));
                     }
 
+                    if (player.melonsCollected >= 53 && !gGame.allMelonsAchievementShown)
+                    {
+                        gGame.allMelonsAchievementShown = true;
+                        UI::gDialog.triggerAutoDialog(46);
+                    }
+
                     PlayerSaveCheckpoint(player, "checkpoint.txt");
                 }
                 else

@@ -229,7 +229,7 @@ namespace game {
             }
         }
         HeatDraw();
-        PlayerDraw(gGame.player);
+        PlayerDraw(gGame.player, gridVisible);
     }
 
     void SummerS1::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {
@@ -480,7 +480,7 @@ namespace game {
             }
         }
         HeatDraw();
-        PlayerDraw(gGame.player);
+        PlayerDraw(gGame.player, gridVisible);
     }
 
     void SummerS2::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {
@@ -760,7 +760,7 @@ namespace game {
             }
         }
         HeatDraw();
-        PlayerDraw(gGame.player);
+        PlayerDraw(gGame.player, gridVisible);
     }
 
     void SummerS3::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {
@@ -1052,7 +1052,7 @@ namespace game {
                 gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
             }
         }
-        PlayerDraw(gGame.player);
+        PlayerDraw(gGame.player, gridVisible);
     }
 
     void SummerS4::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {

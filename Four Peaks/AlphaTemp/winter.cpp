@@ -276,7 +276,7 @@ namespace game {
             }
         }
 
-        PlayerDraw(gGame.player);
+        PlayerDraw(gGame.player, gridVisible);
 
         // ---- DRAW SNOW (on top of everything) ----
         drawSnow(snowParticles);
@@ -725,7 +725,7 @@ namespace game {
             }
         }
 
-        PlayerDraw(gGame.player);
+        PlayerDraw(gGame.player, gridVisible);
 
         // ---- DRAW SNOW (on top of everything) ----
         drawSnow(snowParticles);
@@ -1240,7 +1240,7 @@ namespace game {
             }
         }
 
-        PlayerDraw(gGame.player);
+        PlayerDraw(gGame.player, gridVisible);
 
         // ---- DRAW SNOW (on top of everything) ----
         drawSnow(snowParticles);
@@ -1725,7 +1725,7 @@ namespace game {
             }
         }
 
-        PlayerDraw(gGame.player);
+        PlayerDraw(gGame.player, gridVisible);
 
         // ---- DRAW SNOW (on top of everything) ----
         drawSnow(snowParticles);

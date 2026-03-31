@@ -208,7 +208,7 @@ struct Player
 // function declarations (NO function bodies here)
 void PlayerInit(Player& p);
 void PlayerUpdate(Player& p, float dt);
-void PlayerDraw(Player& p);
+void PlayerDraw(Player& p, bool showCollider);
 void PlayerShutdown(Player& p);
 
 // player kill and respawn

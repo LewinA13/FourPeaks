@@ -36,6 +36,10 @@ struct GameState
     // seasonal artifact progress
     bool collectedArtifacts[4] = {};
     bool allArtifactsAchievementShown = false;
+    bool allMelonsAchievementShown = false;
+
+    // request a full in-memory stage reload after deleting save
+    bool reloadAllStageMaps = false;
 
     // pause menu state
     bool pauseActive = false;
