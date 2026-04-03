@@ -19,6 +19,10 @@ extern s8 gFontId;
 
 namespace
 {
+    // ===================================================================
+    // printText
+    // Draws text at (x, y) with given color and scale
+    // ===================================================================
     static void printText(float x, float y, u32 argb, const char* text, float scale = 1.0f)
     {
         const float a = ((argb >> 24) & 0xFF) / 255.0f;
@@ -28,6 +32,10 @@ namespace
         AEGfxPrint(gFontId, text, x, y, scale, r, g, b, a);
     }
 
+    // ===================================================================
+    // printCentered
+    // Draws text centered horizontally at given y with color and scale
+    // ===================================================================
     static void printCentered(float y, u32 argb, const char* text, float scale = 1.0f)
     {
         float width = 0.0f;
@@ -36,6 +44,10 @@ namespace
         printText(-width * 0.5f, y, argb, text, scale);
     }
 
+    // ===================================================================
+    // withAlpha
+    // Returns color with applied alpha multiplier
+    // ===================================================================
     static u32 withAlpha(u32 color, float alpha)
     {
         u32 baseA = (color >> 24) & 0xFF;
@@ -43,6 +55,10 @@ namespace
         return (fadedA << 24) | (color & 0x00FFFFFFu);
     }
 
+    // ===================================================================
+    // formatRunTime
+    // Converts a float time in seconds to a formatted string MM:SS:CS
+    // ===================================================================
     static void formatRunTime(float totalSeconds, char* buffer, size_t bufferSize)
     {
         if (totalSeconds < 0.0f)
@@ -70,6 +86,10 @@ namespace
     std::array<Star, STAR_COUNT> gStars{};
     bool gStarsInitialized = false;
 
+    // ===================================================================
+    // initStars
+    // Initialize positions, speeds, sizes, and twinkle properties of stars
+    // ===================================================================
     static void initStars()
     {
         for (std::array<Star, STAR_COUNT>::reference s : gStars)
@@ -85,6 +105,10 @@ namespace
         gStarsInitialized = true;
     }
 
+    // ===================================================================
+    // updateStars
+    // Updates star positions and twinkle phases per frame
+    // ===================================================================
     static void updateStars(float dt)
     {
         for (std::array<Star, STAR_COUNT>::reference s : gStars)
@@ -99,6 +123,10 @@ namespace
         }
     }
 
+    // ===================================================================
+    // drawStars
+    // Draws all stars with twinkle effect and global alpha
+    // ===================================================================
     static void drawStars(float globalAlpha)
     {
         const float minX = AEGfxGetWinMinX();
@@ -127,6 +155,10 @@ namespace
 
 namespace game
 {
+    // ===================================================================
+    // ThankYouScreen::Constructor
+    // Initializes stars, loads background texture, and creates mesh
+    // ===================================================================
     ThankYouScreen::ThankYouScreen()
     {
         timer = 0.0f;
@@ -138,28 +170,36 @@ namespace game
 
         AEGfxMeshStart();
         AEGfxTriAdd(-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f,
-                    0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
-                   -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f);
-        AEGfxTriAdd( 0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
-                     0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
-                    -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f);
+            0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
+            -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f);
+        AEGfxTriAdd(0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
+            0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
+            -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f);
         bgMesh = AEGfxMeshEnd();
     }
 
+    // ===================================================================
+    // ThankYouScreen::Destructor
+    // Frees background mesh and texture; resets star initialization
+    // ===================================================================
     ThankYouScreen::~ThankYouScreen()
     {
         if (bgMesh) { AEGfxMeshFree(bgMesh); bgMesh = nullptr; }
-        if (bgTex)  { AEGfxTextureUnload(bgTex); bgTex = nullptr; }
+        if (bgTex) { AEGfxTextureUnload(bgTex); bgTex = nullptr; }
         gStarsInitialized = false;
     }
 
+    // ===================================================================
+    // ThankYouScreen::update
+    // Updates timer and stars; returns 1 if user presses key or time exceeded
+    // ===================================================================
     int ThankYouScreen::update(float dt)
     {
         timer += dt;
         updateStars(dt);
 
         if (AEInputCheckTriggered(AEVK_RETURN) ||
-            AEInputCheckTriggered(AEVK_SPACE)  ||
+            AEInputCheckTriggered(AEVK_SPACE) ||
             AEInputCheckTriggered(AEVK_ESCAPE))
         {
             return 1;
@@ -171,6 +211,10 @@ namespace game
         return 0;
     }
 
+    // ===================================================================
+    // ThankYouScreen::draw
+    // Draws background, overlay, stars, and all text elements
+    // ===================================================================
     void ThankYouScreen::draw() const
     {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
@@ -227,8 +271,8 @@ namespace game
         char timeBuffer[64] = {};
         formatRunTime(gGame.runTimeSeconds, timeBuffer, sizeof(timeBuffer));
 
-        printCentered( 0.42f, withAlpha(0xFFFFD700u, alpha), "THANK YOU FOR PLAYING", 2.0f);
-        printCentered( 0.20f, withAlpha(0xFFFFFFFFu, alpha), "Four Peaks", 1.4f);
+        printCentered(0.42f, withAlpha(0xFFFFD700u, alpha), "THANK YOU FOR PLAYING", 2.0f);
+        printCentered(0.20f, withAlpha(0xFFFFFFFFu, alpha), "Four Peaks", 1.4f);
         printCentered(-0.02f, withAlpha(0xFFAAAAAAu, alpha), "Developed by", 0.9f);
         printCentered(-0.12f, withAlpha(0xFF88EEFFu, alpha), "Team Game++", 1.1f);
         printCentered(-0.27f, withAlpha(0xFFFFFFFFu, alpha), timeBuffer, 0.95f);

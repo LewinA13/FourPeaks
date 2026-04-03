@@ -112,7 +112,7 @@ namespace sprite
     AEGfxTexture* springStage(int stageIndex);
     AEGfxTexture* autumnStage(int stageIndex);
 
-
+    // UVs for Fire and Saw animation frames
     bool getFireUv(int frame, float& u0, float& v0, float& u1, float& v1);
     bool getSawUv(int frame, float& u0, float& v0, float& u1, float& v1);
 

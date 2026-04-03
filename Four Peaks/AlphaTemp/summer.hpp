@@ -14,6 +14,7 @@ namespace game {
     // Heat Bar for winter
     // -------------------------------------------------------------------
     void HeatUpdate(float dt);
+
     void HeatDraw();
 
 

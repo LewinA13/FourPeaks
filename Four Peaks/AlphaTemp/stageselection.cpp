@@ -5,6 +5,9 @@
 
 extern s8 gFontId;      // Font handle created in main.cpp
 
+// ---------------------------------------------------------------------------
+// Convert world-space coordinates to normalized screen coordinates (-1 ~ 1)
+// ---------------------------------------------------------------------------
 static AEVec2 WorldToNorm(float worldX, float worldY)
 {
     float screenW = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
@@ -12,17 +15,26 @@ static AEVec2 WorldToNorm(float worldX, float worldY)
     return { worldX / (screenW * 0.5f), worldY / (screenH * 0.5f) };
 }
 
+// ---------------------------------------------------------------------------
+// Convert (season, stage) pair into a global unlock index
+// ---------------------------------------------------------------------------
 static int SeasonStageToUnlockIndex(int seasonIndex, int stageIndex)
 {
     return seasonIndex * 4 + stageIndex;
 }
 
+// ---------------------------------------------------------------------------
+// Check if a season is unlocked (based on its first stage)
+// ---------------------------------------------------------------------------
 static bool IsSeasonUnlockedLocal(int seasonIndex)
 {
     int firstStage = seasonIndex * 4;
     return gGame.unlockedStages[firstStage];
 }
 
+// ---------------------------------------------------------------------------
+// Check if a specific stage is unlocked
+// ---------------------------------------------------------------------------
 static bool IsStageUnlockedLocal(int seasonIndex, int stageIndex)
 {
     int idx = SeasonStageToUnlockIndex(seasonIndex, stageIndex);
@@ -30,6 +42,9 @@ static bool IsStageUnlockedLocal(int seasonIndex, int stageIndex)
     return gGame.unlockedStages[idx];
 }
 
+// ---------------------------------------------------------------------------
+// Get lock message for a season
+// ---------------------------------------------------------------------------
 static const char* GetSeasonLockMessage(int seasonIndex)
 {
     switch (seasonIndex)
@@ -42,6 +57,9 @@ static const char* GetSeasonLockMessage(int seasonIndex)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Get lock message for a stage
+// ---------------------------------------------------------------------------
 static const char* GetStageLockMessage(int seasonIndex, int stageIndex)
 {
     switch (seasonIndex)
@@ -87,7 +105,9 @@ static const char* GetStageLockMessage(int seasonIndex, int stageIndex)
     }
 }
 
-// Returns half the rendered width of a string — identical to mainmenu.cpp's helper.
+// ---------------------------------------------------------------------------
+// Calculate half width of rendered text (for centering)
+// ---------------------------------------------------------------------------
 static f32 textHalfWidth(const char* text, f32 scale = 1.0f)
 {
     f32 w = 0.f, h = 0.f;
@@ -95,7 +115,9 @@ static f32 textHalfWidth(const char* text, f32 scale = 1.0f)
     return w * 0.5f;
 }
 
-// Prints text horizontally centered on screen — identical to mainmenu.cpp's helper.
+// ---------------------------------------------------------------------------
+// Print text centered horizontally on screen
+// ---------------------------------------------------------------------------
 static void printCentered(f32 y, u32 argbColor, const char* text, f32 scale = 1.0f)
 {
     f32 a = ((argbColor >> 24) & 0xFF) / 255.0f;
@@ -108,9 +130,15 @@ static void printCentered(f32 y, u32 argbColor, const char* text, f32 scale = 1.
 
 namespace game {
 
+    // ---------------------------------------------------------------------------
+    // Constructor: initialize selection state
+    // ---------------------------------------------------------------------------
     StageSelect::StageSelect() :seasonIndex(0), stageIndex(0), selectingStage(false) {}
 
-
+    // ---------------------------------------------------------------------------
+    // Handle input and update selection state
+    // Returns action code when a stage is selected
+    // ---------------------------------------------------------------------------
     int StageSelect::update(float dt)
     {
         (void)dt;
@@ -163,7 +191,9 @@ namespace game {
     }
 
 
-
+    // ---------------------------------------------------------------------------
+    // Render stage selection UI (season cards + stage cards)
+    // ---------------------------------------------------------------------------
     void StageSelect::draw() const
     {
 
@@ -452,6 +482,9 @@ namespace game {
         }
     }
 
+    // ---------------------------------------------------------------------------
+    // Reset selection state to default
+    // ---------------------------------------------------------------------------
     void StageSelect::reset()
     {
         seasonIndex = 0;

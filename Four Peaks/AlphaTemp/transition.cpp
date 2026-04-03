@@ -27,11 +27,11 @@ static constexpr float FADE_IN_DURATION = 0.75f;
 static constexpr float HOLD_DURATION = 0.25f;
 static constexpr float FADE_OUT_DURATION = 0.75f;
 
-// ---------------------------------------------------------------------------
-// drawBlackOverlay
+// ===================================================================
+// Transition::drawBlackOverlay
 // Draws a single full-screen black quad at the given alpha (0=clear, 1=black).
 // Uses one MeshStart/MeshEnd/MeshDraw call - fastest possible approach.
-// ---------------------------------------------------------------------------
+// ===================================================================
 void Transition::drawBlackOverlay(float alpha)
 {
     if (alpha <= 0.0f) return;
@@ -70,10 +70,10 @@ void Transition::drawBlackOverlay(float alpha)
     }
 }
 
-// ---------------------------------------------------------------------------
-// start
+// ===================================================================
+// Transition::start
 // Kick off a new transition. Resets state so it is safe to call mid-flight.
-// ---------------------------------------------------------------------------
+// ===================================================================
 void Transition::start()
 {
     phase = Phase::FadeIn;
@@ -82,10 +82,10 @@ void Transition::start()
     switchDone = false;
 }
 
-// ---------------------------------------------------------------------------
-// update
+// ===================================================================
+// Transition::update
 // Advance the transition timer. Call once per frame with the frame delta.
-// ---------------------------------------------------------------------------
+// ===================================================================
 void Transition::update(float dt)
 {
     if (phase == Phase::Idle) return;
@@ -122,10 +122,10 @@ void Transition::update(float dt)
     }
 }
 
-// ---------------------------------------------------------------------------
-// draw
+// ===================================================================
+// Transition::draw
 // Draw the black overlay on top of everything. Call LAST in your render loop.
-// ---------------------------------------------------------------------------
+// ===================================================================
 void Transition::draw() const
 {
     if (phase == Phase::Idle) return;

@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+﻿// -------------------------------------------------------------------------- -
 // summer.cpp - Combined Summer Stages (Stage 1..4)
 // ---------------------------------------------------------------------------
 #include "summer.hpp"
@@ -58,9 +58,9 @@ namespace game {
     }
 
 
-    // -------------------------------------------------------------------
-    // Heat for summer
-    // -------------------------------------------------------------------
+    // ===================================================================
+    // Heat decay update (summer mechanic)
+    // ===================================================================
     void HeatUpdate(float dt)
     {
         gGame.player.heat -= 0.04f * dt;
@@ -69,6 +69,9 @@ namespace game {
             PlayerKill(gGame.player);
     }
 
+    // ===================================================================
+    // Heat bar HUD rendering
+    // ===================================================================
     void HeatDraw()
     {
         float oldCamX, oldCamY;
@@ -86,11 +89,11 @@ namespace game {
         sprite::getHeatBarUv(frame, u0, v0, u1, v1);
 
         const float hudCenterX = -700.0f;
-        const float hudBottom = 280.0f - 42.0f / 2.0f;  
+        const float hudBottom = 280.0f - 42.0f / 2.0f;
         const float gap = 6.0f;
         gfx::Vec2 hbSize{ 110.0f, 110.0f };
-        gfx::Vec2 hbPos{hudCenterX, hudBottom - gap - hbSize.y / 2.0f};
-     
+        gfx::Vec2 hbPos{ hudCenterX, hudBottom - gap - hbSize.y / 2.0f };
+
         AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
         AEGfxSetBlendMode(AE_GFX_BM_BLEND);
         gfx::drawSprite(hbTex, hbPos, 0.0f, hbSize, u0, v0, u1, v1);
@@ -113,6 +116,9 @@ namespace game {
         }
     }
 
+    // ===================================================================
+    // SummerS1 constructor / destructor
+    // ===================================================================
     SummerS1::SummerS1() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s1.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
@@ -122,6 +128,9 @@ namespace game {
     }
     SummerS1::~SummerS1() = default;
 
+    // ===================================================================
+    // SummerS1 reset
+    // ===================================================================
     void SummerS1::reset() {
         const bool loaded =
             level::loadTileMap("Assets/Levels/summer_s1.txt",
@@ -144,6 +153,9 @@ namespace game {
         ApplyCollectedMelonsToTileMap("SummerS1", gridRows, tileMap);
     }
 
+    // ===================================================================
+    // SummerS1 update
+    // ===================================================================
     int SummerS1::update(float dt) {
         if (gGame.player.justRespawned) {
             // basically reset the bottles
@@ -157,18 +169,21 @@ namespace game {
         {
             float gx, gy, cw, ch;
             gridToWorld(30, 19, gx, gy, cw, ch);
-            float zoneLeft  = gx;
+            float zoneLeft = gx;
             float zoneRight = gx + cw * 2.0f;
-            float zoneBot   = gy;
-            float zoneTop   = gy + ch;
-            if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-                gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+            float zoneBot = gy;
+            float zoneTop = gy + ch;
+            if (gGame.player.pos.x >= zoneLeft && gGame.player.pos.x <= zoneRight &&
+                gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
                 return 20;
         }
         sprite::updateAnimatedTiles(dt);
         return 0;
     }
 
+    // ===================================================================
+    // SummerS1 draw
+    // ===================================================================
     void SummerS1::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
         AEGfxTexture* bg = sprite::summerBackground();
@@ -201,13 +216,16 @@ namespace game {
                 float gx, gy, cw, ch;
                 gridToWorld(30 + c, 19, gx, gy, cw, ch);
                 gfx::Vec2 pp{ std::round(gx + cw * 0.5f), std::round(gy + ch * 0.5f) };
-                gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAAFFFFFFu); 
+                gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAAFFFFFFu);
             }
         }
         HeatDraw();
         PlayerDraw(gGame.player, gridVisible);
     }
 
+    // ===================================================================
+    // SummerS1 gridToWorld
+    // ===================================================================
     void SummerS1::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
         float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
@@ -217,6 +235,9 @@ namespace game {
         yWorld = minY + row * cellH;
     }
 
+    // ===================================================================
+    // SummerS1 drawTiles
+    // ===================================================================
     void SummerS1::drawTiles() const {
         auto isSolid = [&](int r, int c) -> bool {
             if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
@@ -268,7 +289,8 @@ namespace game {
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
                         if (tileType == 26) {
                             sp.x += (ss.x - size.x) * 0.5f;
-                        } else {
+                        }
+                        else {
                             sp.x -= (ss.x - size.x) * 0.5f;
                             u0 = 1.0f;
                             u1 = 0.0f;
@@ -291,7 +313,8 @@ namespace game {
                         if (tileType == 21) {
                             v0 = 0.0f;
                             v1 = 1.0f;
-                        } else {
+                        }
+                        else {
                             u0 = 1.0f;
                             u1 = 0.0f;
                         }
@@ -364,6 +387,9 @@ namespace game {
         }
     }
 
+    // ===================================================================
+    // SummerS1 drawGrid
+    // ===================================================================
     void SummerS1::drawGrid() const {
         const u32 gc = 0x80FFFFFFu;
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
@@ -385,6 +411,9 @@ namespace game {
         }
     }
 
+    // ===================================================================
+    // SummerS2 constructor / destructor
+    // ===================================================================
     SummerS2::SummerS2() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s2.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
@@ -392,6 +421,9 @@ namespace game {
     }
     SummerS2::~SummerS2() = default;
 
+    // ===================================================================
+    // SummerS2 reset
+    // ===================================================================
     void SummerS2::reset()
     {
         const bool loaded =
@@ -415,6 +447,9 @@ namespace game {
         ApplyCollectedMelonsToTileMap("SummerS2", gridRows, tileMap);
     }
 
+    // ===================================================================
+    // SummerS2 update
+    // ===================================================================
     int SummerS2::update(float dt) {
         if (gGame.player.justRespawned) {
             reset();
@@ -427,18 +462,21 @@ namespace game {
         {
             float gx, gy, cw, ch;
             gridToWorld(30, 0, gx, gy, cw, ch);
-            float zoneLeft  = gx;
+            float zoneLeft = gx;
             float zoneRight = gx + cw * 2.0f;
-            float zoneBot   = gy;
-            float zoneTop   = gy + ch;
-            if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-                gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+            float zoneBot = gy;
+            float zoneTop = gy + ch;
+            if (gGame.player.pos.x >= zoneLeft && gGame.player.pos.x <= zoneRight &&
+                gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
                 return 21;
         }
         sprite::updateAnimatedTiles(dt);
         return 0;
     }
 
+    // ===================================================================
+    // SummerS2 draw
+    // ===================================================================
     void SummerS2::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
         AEGfxTexture* bg = sprite::summerBackground();
@@ -470,6 +508,9 @@ namespace game {
         PlayerDraw(gGame.player, gridVisible);
     }
 
+    // ===================================================================
+    // SummerS2 gridToWorld
+    // ===================================================================
     void SummerS2::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         cellW = (maxX - minX) / static_cast<float>(gridCols);
@@ -477,6 +518,9 @@ namespace game {
         xWorld = minX + col * cellW; yWorld = minY + row * cellH;
     }
 
+    // ===================================================================
+    // SummerS2 drawTiles
+    // ===================================================================
     void SummerS2::drawTiles() const {
         auto isSolid = [&](int r, int c) -> bool {
             if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
@@ -611,6 +655,9 @@ namespace game {
         }
     }
 
+    // ===================================================================
+    // SummerS2 drawGrid
+    // ===================================================================
     void SummerS2::drawGrid() const {
         const u32 gc = 0x80FFFFFFu;
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
@@ -633,6 +680,9 @@ namespace game {
         }
     }
 
+    // ===================================================================
+    // SummerS3 constructor / destructor
+    // ===================================================================
     SummerS3::SummerS3() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s3.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
@@ -643,6 +693,9 @@ namespace game {
     }
     SummerS3::~SummerS3() = default;
 
+    // ===================================================================
+    // SummerS3 reset
+    // ===================================================================
     void SummerS3::reset()
     {
         const bool loaded =
@@ -683,6 +736,9 @@ namespace game {
         }
     }
 
+    // ===================================================================
+    // SummerS3 update
+    // ===================================================================
     int SummerS3::update(float dt) {
         if (gGame.player.justRespawned) {
             reset(); // reset the bottle
@@ -695,12 +751,12 @@ namespace game {
         {
             float gx, gy, cw, ch;
             gridToWorld(29, 19, gx, gy, cw, ch);
-            float zoneLeft  = gx;
+            float zoneLeft = gx;
             float zoneRight = gx + cw * 2.0f;
-            float zoneBot   = gy;
-            float zoneTop   = gy + ch;
-            if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-                gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+            float zoneBot = gy;
+            float zoneTop = gy + ch;
+            if (gGame.player.pos.x >= zoneLeft && gGame.player.pos.x <= zoneRight &&
+                gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
                 return 22;
         }
         for (auto& trigger : g_triggeredIceTiles)
@@ -719,6 +775,9 @@ namespace game {
         return 0;
     }
 
+    // ===================================================================
+    // SummerS3 draw
+    // ===================================================================
     void SummerS3::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
         AEGfxTexture* bg = sprite::summerBackground();
@@ -750,6 +809,9 @@ namespace game {
         PlayerDraw(gGame.player, gridVisible);
     }
 
+    // ===================================================================
+    // SummerS3 gridToWorld
+    // ===================================================================
     void SummerS3::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         cellW = (maxX - minX) / static_cast<float>(gridCols);
@@ -757,6 +819,9 @@ namespace game {
         xWorld = minX + col * cellW; yWorld = minY + row * cellH;
     }
 
+    // ===================================================================
+    // SummerS3 drawTiles
+    // ===================================================================
     void SummerS3::drawTiles() const {
         auto isSolid = [&](int r, int c) -> bool {
             if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
@@ -895,6 +960,9 @@ namespace game {
     }
     // SummerS4::drawTiles() is identical to S3 above — same body, different class name
 
+    // ===================================================================
+    // SummerS3 drawGrid
+    // ===================================================================
     void SummerS3::drawGrid() const {
         const u32 gc = 0x80FFFFFFu;
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
@@ -917,6 +985,9 @@ namespace game {
         }
     }
 
+    // ===================================================================
+    // SummerS4 constructor / destructor
+    // ===================================================================
     SummerS4::SummerS4() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s4.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
@@ -927,6 +998,9 @@ namespace game {
     }
     SummerS4::~SummerS4() = default;
 
+    // ===================================================================
+    // SummerS4 reset
+    // ===================================================================
     void SummerS4::reset()
     {
         const bool loaded =
@@ -967,7 +1041,9 @@ namespace game {
         }
     }
 
-
+    // ===================================================================
+    // SummerS4 update
+    // ===================================================================
     int SummerS4::update(float dt) {
         if (gGame.player.justRespawned)
         {
@@ -983,12 +1059,12 @@ namespace game {
         {
             float gx, gy, cw, ch;
             gridToWorld(31, 18, gx, gy, cw, ch);
-            float zoneLeft  = gx;
+            float zoneLeft = gx;
             float zoneRight = gx + cw;
-            float zoneBot   = gy;
-            float zoneTop   = gy + ch * 2.0f;
-            if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-                gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
+            float zoneBot = gy;
+            float zoneTop = gy + ch * 2.0f;
+            if (gGame.player.pos.x >= zoneLeft && gGame.player.pos.x <= zoneRight &&
+                gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
                 return 25; // -> SpringS1
         }
         sprite::updateAnimatedTiles(dt);
@@ -1007,6 +1083,9 @@ namespace game {
         return 0;
     }
 
+    // ===================================================================
+    // SummerS4 draw
+    // ===================================================================
     void SummerS4::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
         AEGfxTexture* bg = sprite::summerBackground();
@@ -1042,6 +1121,9 @@ namespace game {
         PlayerDraw(gGame.player, gridVisible);
     }
 
+    // ===================================================================
+    // SummerS4 gridToWorld
+    // ===================================================================
     void SummerS4::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         cellW = (maxX - minX) / static_cast<float>(gridCols);
@@ -1049,6 +1131,9 @@ namespace game {
         xWorld = minX + col * cellW; yWorld = minY + row * cellH;
     }
 
+    // ===================================================================
+    // SummerS4 drawTiles
+    // ===================================================================
     void SummerS4::drawTiles() const {
         auto isSolid = [&](int r, int c) -> bool {
             if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
@@ -1178,6 +1263,9 @@ namespace game {
     }
     // SummerS4::drawTiles() is identical to S3 above — same body, different class name
 
+    // ===================================================================
+    // SummerS4 drawGrid
+    // ===================================================================
     void SummerS4::drawGrid() const {
         const u32 gc = 0x80FFFFFFu;
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();

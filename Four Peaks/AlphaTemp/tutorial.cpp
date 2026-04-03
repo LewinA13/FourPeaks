@@ -15,6 +15,9 @@ extern s8 gFontId;
 
 namespace
 {
+    // ===================================================================
+    // Print text with scale and ARGB color
+    // ===================================================================
     static void printText(f32 x, f32 y, u32 argbColor, const char* text, f32 scale = 1.0f)
     {
         f32 a = ((argbColor >> 24) & 0xFF) / 255.0f;
@@ -24,6 +27,9 @@ namespace
         AEGfxPrint(gFontId, text, x, y, scale, r, g, b, a);
     }
 
+    // ===================================================================
+    // Get color for a specific tile type
+    // ===================================================================
     static u32 getTileColor(int tileType)
     {
         switch (tileType)
@@ -36,6 +42,9 @@ namespace
         }
     }
 
+    // ===================================================================
+    // Convert grid coordinates to world coordinates
+    // ===================================================================
     static void gridToWorld(int col, int row, int gridCols, int gridRows,
         float& xWorld, float& yWorld, float& cellW, float& cellH)
     {
@@ -49,6 +58,9 @@ namespace
         yWorld = minY + row * cellH;
     }
 
+    // ===================================================================
+    // Draw grid lines over the screen
+    // ===================================================================
     static void drawGridLines(int gridCols, int gridRows)
     {
         const u32 gridColor = 0x80FFFFFF;
@@ -280,6 +292,9 @@ namespace
         int action;
     };
 
+    // ===================================================================
+    // Get mouse position normalized to [-1,1] x [-1,1]
+    // ===================================================================
     static void getMouseNormalized(f32& nx, f32& ny)
     {
         s32 mx = 0, my = 0;
@@ -292,11 +307,17 @@ namespace
         ny = (h > 0.0f) ? (1.0f - (my / h) * 2.0f) : 0.0f;
     }
 
+    // ===================================================================
+    // Check if point is inside a UI button
+    // ===================================================================
     static bool pointInRect(f32 px, f32 py, const UiButton& b)
     {
         return (px >= b.x && px <= (b.x + b.w) && py >= b.y && py <= (b.y + b.h));
     }
 
+    // ===================================================================
+    // Tutorial navigation handling
+    // ===================================================================
     static int tutorialNavButtons(int currentTutorial)
     {
         UiButton buttons[] =
@@ -338,8 +359,14 @@ namespace game
         level::loadTileMap("Assets/Levels/tutorial_1.txt", 20, 32, &tileMap[0][0]);
     }
 
+    // ===================================================================
+    // Tutorial1::getTileMap
+    // ===================================================================
     int (*Tutorial1::getTileMap())[32] { return tileMap; }
 
+    // ===================================================================
+    // Tutorial1::update
+    // ===================================================================
     int Tutorial1::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
@@ -360,6 +387,9 @@ namespace game
         return 0;
     }
 
+    // ===================================================================
+    // Tutorial1::draw
+    // ===================================================================
     void Tutorial1::draw() const
     {
         AEGfxSetBackgroundColor(0, 0, 0);
@@ -393,8 +423,14 @@ namespace game
         level::loadTileMap("Assets/Levels/tutorial_2.txt", 20, 32, &tileMap[0][0]);
     }
 
+    // ===================================================================
+    // Tutorial2::getTileMap
+    // ===================================================================
     int (*Tutorial2::getTileMap())[32] { return tileMap; }
 
+    // ===================================================================
+    // Tutorial2::update
+    // ===================================================================
     int Tutorial2::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
@@ -415,6 +451,9 @@ namespace game
         return 0;
     }
 
+    // ===================================================================
+    // Tutorial2::draw
+    // ===================================================================
     void Tutorial2::draw() const
     {
         AEGfxSetBackgroundColor(0, 0, 0);
@@ -447,8 +486,14 @@ namespace game
         level::loadTileMap("Assets/Levels/tutorial_3.txt", 20, 32, &tileMap[0][0]);
     }
 
+    // ================================================================== =
+    // Tutorial3::getTileMap
+    // ===================================================================
     int (*Tutorial3::getTileMap())[32] { return tileMap; }
 
+    // ===================================================================
+    // Tutorial3::update
+    // ===================================================================
     int Tutorial3::update(float dt)
     {
         if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
@@ -469,6 +514,9 @@ namespace game
         return 0;
     }
 
+    // ===================================================================
+    // Tutorial3::draw
+    // ===================================================================
     void Tutorial3::draw() const
     {
         AEGfxSetBackgroundColor(0, 0, 0);
