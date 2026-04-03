@@ -1023,18 +1023,22 @@ namespace game {
         //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
         //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
-        if (!camera::isTransitioning()) {
-            // Teleporter visual: Summer S4 top-right indicator
-            // User-facing grid position: column 32, rows 19-20
-            // Internal zero-based grid position: column 31, rows 18-19
-            for (int r = 18; r <= 19; ++r) {
-                float gx, gy, cw, ch;
-                gridToWorld(31, r, gx, gy, cw, ch);
-                gfx::Vec2 pp{ std::round(gx + cw * 0.5f), std::round(gy + ch * 0.5f) };
-                gfx::drawRectangle(pp, 0.0f, { cw, ch }, 0xAAFFFFFFu);
+        HeatDraw();
+        // Teleporter visual: S4: col31 row18-19
+        {
+            float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+            float cw = (maxX - minX) / static_cast<float>(gridCols);
+            float ch = (maxY - minY) / static_cast<float>(gridRows);
+            {
+                gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 18 * ch + ch * 0.5f) };
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
+            }
+            {
+                gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + 19 * ch + ch * 0.5f) };
+                gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
             }
         }
-        HeatDraw();
         PlayerDraw(gGame.player, gridVisible);
     }
 
