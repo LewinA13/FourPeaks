@@ -1,30 +1,21 @@
-// ---------------------------------------------------------------------------
-// hud.cpp
-// implementation of hud.hpp functions. Code to draw the melon counter, death counter, run timer, and artifact icons on the screen.
-// ---------------------------------------------------------------------------
 #include "hud.hpp"
 #include "AEEngine.h"
 #include "graphics.hpp"
 #include "sprite.hpp"
+
 #include <string>
 #include <cstdint>
 
-// Type aliases 
 typedef uint32_t u32;
 
 // get external font already set
 extern s8 gFontId;
 
-// namespace for all hud related functions and variables. This keeps them organized and avoids name clashes with other parts of the codebase.
 namespace hud
 {
     namespace
     {
-   
-// ---------------------------------------------------------------------------
-// Print Text
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
+        // Small helper for HUD text.
         static void printText(f32 x, f32 y, u32 argbColor,
             const char* text, f32 scale = 1.0f)
         {
@@ -37,10 +28,6 @@ namespace hud
         }
     }
 
-// ---------------------------------------------------------------------------
-// Draw Melon Counter
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     void drawMelonCounter(int melonCount)
     {
         AEGfxTexture* melonTex = sprite::coin();
@@ -81,10 +68,6 @@ namespace hud
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
     }
 
-// ---------------------------------------------------------------------------
-// Draw Death Counter
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     void drawDeathCounter(int deathCount)
     {
         // save current gameplay camera position
@@ -101,10 +84,6 @@ namespace hud
         AEGfxSetCamPosition(oldCamX, oldCamY);
     }
 
-// ---------------------------------------------------------------------------
-// Draw Run Timer
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     void drawRunTimer(float totalSeconds)
     {
         // save current gameplay camera position.
@@ -133,10 +112,6 @@ namespace hud
         AEGfxSetCamPosition(oldCamX, oldCamY);
     }
 
-// ---------------------------------------------------------------------------
-// Draw Artifacts Hud
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     void drawArtifactsHud(const bool collected[4])
 {
     // save current gameplay camera

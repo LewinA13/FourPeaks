@@ -1,18 +1,11 @@
-// ----------------------------------------------------------------------------
-// Level Loader Implementation
-// This file implements the level loading functionality defined in level_loader.hpp.
-// ----------------------------------------------------------------------------
 #include "level_loader.hpp"
+
 #include <fstream>
 #include <string>
 #include <cctype>
 #include <cstdlib>
 
 // Small helper: treat comma as whitespace so >> works consistently.
-// ---------------------------------------------------------------------------
-// Replace Commas With Spaces
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 static void replaceCommasWithSpaces(std::string& s)
 {
     for (char& c : s)
@@ -24,10 +17,6 @@ static void replaceCommasWithSpaces(std::string& s)
 
 namespace level
 {
-// ---------------------------------------------------------------------------
-// Load Tile Map
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     bool loadTileMap(const char* filePath, int rows, int cols, int* outGrid)
     {
         if (!outGrid || rows <= 0 || cols <= 0)

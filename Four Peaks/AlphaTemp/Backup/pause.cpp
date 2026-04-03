@@ -1,7 +1,3 @@
-// ---------------------------------------------------------------------------
-// Pause System
-// Handles pause menu input and drawing
-// ---------------------------------------------------------------------------
 #include "pause.hpp"
 #include "AEEngine.h"
 #include "graphics.hpp"
@@ -14,10 +10,6 @@ extern s8 gFontId;
 
 namespace
 {
-// ---------------------------------------------------------------------------
-// Print Text
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static void printText(f32 x, f32 y, u32 argbColor, const char* text, f32 scale = 1.0f)
     {
         const f32 a = ((argbColor >> 24) & 0xFF) / 255.0f;
@@ -28,10 +20,6 @@ namespace
         AEGfxPrint(gFontId, text, x, y, scale, r, g, b, a);
     }
 
-// ---------------------------------------------------------------------------
-// Text Half Width
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static float textHalfWidth(const char* text, float scale = 1.0f)
     {
         float w = 0.0f;
@@ -40,10 +28,6 @@ namespace
         return w * 0.5f;
     }
 
-// ---------------------------------------------------------------------------
-// Print Centered
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static void printCentered(float y, u32 color, const char* text, float scale = 1.0f)
     {
         float x = -textHalfWidth(text, scale);
@@ -71,10 +55,6 @@ namespace
     // Tracks current fullscreen state; toggled alongside the actual window call
     static bool sIsFullscreen = false;
 
-// ---------------------------------------------------------------------------
-// Toggle Fullscreen
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static void toggleFullscreen()
     {
         sIsFullscreen = !sIsFullscreen;
@@ -82,10 +62,6 @@ namespace
         AESysSetFullScreen(sIsFullscreen);
     }
 
-// ---------------------------------------------------------------------------
-// Draw Outline Box
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static void drawOutlineBox(const gfx::Vec2& pos, const gfx::Vec2& size)
     {
         // box fill
@@ -107,10 +83,6 @@ namespace
 
 namespace pause
 {
-// ---------------------------------------------------------------------------
-// Update
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     Action update()
     {
         if (!gGame.pauseActive)
@@ -197,10 +169,6 @@ namespace pause
         return Action::None;
     }
 
-// ---------------------------------------------------------------------------
-// Draw
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     void draw()
     {
         if (!gGame.pauseActive)

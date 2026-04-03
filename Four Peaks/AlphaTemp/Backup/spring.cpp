@@ -1,8 +1,5 @@
-﻿// ---------------------------------------------------------------------------
-//spring.cpp
-// This file contains the implementation of the spring stage, including the dynamic wind system and its visual effects.
-// ---------------------------------------------------------------------------
-#include "spring.hpp"
+﻿#include "spring.hpp"
+
 #include "AEEngine.h"
 #include "graphics.hpp"
 #include "player.hpp"
@@ -10,6 +7,7 @@
 #include "sprite.hpp"
 #include "level_loader.hpp"
 #include "camera.hpp"
+
 #include <cstdint>
 #include <cmath>
 #include <vector>
@@ -22,10 +20,6 @@ namespace
     // ===================================================================
     // BACKGROUND
     // ===================================================================
-// ---------------------------------------------------------------------------
-// Draw Background
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static void drawBackground()
     {
         AEGfxTexture* bg = sprite::springBackground();
@@ -43,10 +37,6 @@ namespace
     // ===================================================================
     // GRID HELPERS
     // ===================================================================
-// ---------------------------------------------------------------------------
-// Grid To World Common
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static void gridToWorldCommon(int col, int row, int gridCols, int gridRows,
         float& xWorld, float& yWorld, float& cellW, float& cellH)
     {
@@ -60,10 +50,6 @@ namespace
         yWorld = minY + row * cellH;
     }
 
-// ---------------------------------------------------------------------------
-// Draw Grid Lines
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static void drawGridLines(int gridCols, int gridRows)
     {
         const u32 gridColor = 0x80FFFFFF;
@@ -90,10 +76,6 @@ namespace
     // ===================================================================
     // TILE COLOR FALLBACKS
     // ===================================================================
-// ---------------------------------------------------------------------------
-// Get Tile Color Common
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static u32 getTileColorCommon(int tileType)
     {
         switch (tileType)
@@ -111,10 +93,6 @@ namespace
     // ===================================================================
     // TILE DRAWING
     // ===================================================================
-// ---------------------------------------------------------------------------
-// Draw Tiles Common
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static void drawTilesCommon(int gridRows, int gridCols, int tileMap[][32], float stageBaseY = 0.0f)
     {
         auto isSolid = [&](int r, int c) -> bool {
@@ -312,19 +290,11 @@ namespace
         };
         static constexpr int COLOR_COUNT = 8;
 
-// ---------------------------------------------------------------------------
-// Rand F
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
         static float randF(float lo, float hi)
         {
             return lo + (hi - lo) * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
         }
 
-// ---------------------------------------------------------------------------
-// Init
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
         void init()
         {
             if (initialised) return;
@@ -333,10 +303,6 @@ namespace
         }
 
         // Returns 0..1 strength of the current gust
-// ---------------------------------------------------------------------------
-// Gust Strength
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
         float gustStrength() const
         {
             if (!gustActive) return 0.0f;
@@ -348,10 +314,6 @@ namespace
             return 1.0f - (fade / GUST_FADEOUT);
         }
 
-// ---------------------------------------------------------------------------
-// Spawn Particle
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
         void spawnParticle()
         {
             float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
@@ -385,10 +347,6 @@ namespace
 
         // Call this every frame from each stage's update().
         // Returns the horizontal force to apply to the player this frame.
-// ---------------------------------------------------------------------------
-// Update
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
         float update(float dt)
         {
             init();
@@ -459,10 +417,6 @@ namespace
         }
 
         // Draw streaking petal particles and a subtle wind-direction arrow UI
-// ---------------------------------------------------------------------------
-// Draw
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
         void draw() const
         {
             AEGfxSetRenderMode(AE_GFX_RM_COLOR);
@@ -515,10 +469,6 @@ namespace
             AEGfxSetBlendMode(AE_GFX_BM_NONE);
         }
 
-// ---------------------------------------------------------------------------
-// Reset
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
         void reset()
         {
             particles.clear();
@@ -540,10 +490,6 @@ namespace
 // ===================================================================
 // SpringS1  —  action codes: 40 -> SpringS2 | 2 -> MainMenu
 // ===================================================================
-// ---------------------------------------------------------------------------
-// Spring S1
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 game::SpringS1::SpringS1()
 {
     gridVisible = false;
@@ -551,10 +497,6 @@ game::SpringS1::SpringS1()
 }
 game::SpringS1::~SpringS1() = default;
 
-// ---------------------------------------------------------------------------
-// Update
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 int game::SpringS1::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
@@ -586,10 +528,6 @@ int game::SpringS1::update(float dt)
     return 0;
 }
 
-// ---------------------------------------------------------------------------
-// Draw
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS1::draw() const
 {
     AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
@@ -614,38 +552,18 @@ void game::SpringS1::draw() const
     g_windSystem.draw();
 }
 
-// ---------------------------------------------------------------------------
-// Get Tile Color
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 u32  game::SpringS1::getTileColor(int t) const { return getTileColorCommon(t); }
-// ---------------------------------------------------------------------------
-// Grid To World
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS1::gridToWorld(int col, int row, float& xW, float& yW, float& cW, float& cH) const
 {
     gridToWorldCommon(col, row, gridCols, gridRows, xW, yW, cW, cH);
 }
-// ---------------------------------------------------------------------------
-// Draw Grid
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS1::drawGrid()  const { drawGridLines(gridCols, gridRows); }
-// ---------------------------------------------------------------------------
-// Draw Tiles
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS1::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }
 
 
 // ===================================================================
 // SpringS2  —  action codes: 41 -> SpringS3
 // ===================================================================
-// ---------------------------------------------------------------------------
-// Spring S2
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 game::SpringS2::SpringS2()
 {
     gridVisible = false;
@@ -653,10 +571,6 @@ game::SpringS2::SpringS2()
 }
 game::SpringS2::~SpringS2() = default;
 
-// ---------------------------------------------------------------------------
-// Update
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 int game::SpringS2::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
@@ -687,10 +601,6 @@ int game::SpringS2::update(float dt)
     return 0;
 }
 
-// ---------------------------------------------------------------------------
-// Draw
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS2::draw() const
 {
     AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
@@ -715,38 +625,18 @@ void game::SpringS2::draw() const
     g_windSystem.draw();
 }
 
-// ---------------------------------------------------------------------------
-// Get Tile Color
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 u32  game::SpringS2::getTileColor(int t) const { return getTileColorCommon(t); }
-// ---------------------------------------------------------------------------
-// Grid To World
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS2::gridToWorld(int col, int row, float& xW, float& yW, float& cW, float& cH) const
 {
     gridToWorldCommon(col, row, gridCols, gridRows, xW, yW, cW, cH);
 }
-// ---------------------------------------------------------------------------
-// Draw Grid
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS2::drawGrid()  const { drawGridLines(gridCols, gridRows); }
-// ---------------------------------------------------------------------------
-// Draw Tiles
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS2::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }
 
 
 // ===================================================================
 // SpringS3  —  action codes: 42 -> SpringS4
 // ===================================================================
-// ---------------------------------------------------------------------------
-// Spring S3
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 game::SpringS3::SpringS3()
 {
     gridVisible = false;
@@ -754,10 +644,6 @@ game::SpringS3::SpringS3()
 }
 game::SpringS3::~SpringS3() = default;
 
-// ---------------------------------------------------------------------------
-// Update
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 int game::SpringS3::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
@@ -788,10 +674,6 @@ int game::SpringS3::update(float dt)
     return 0;
 }
 
-// ---------------------------------------------------------------------------
-// Draw
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS3::draw() const
 {
     AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
@@ -816,38 +698,18 @@ void game::SpringS3::draw() const
     g_windSystem.draw();
 }
 
-// ---------------------------------------------------------------------------
-// Get Tile Color
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 u32  game::SpringS3::getTileColor(int t) const { return getTileColorCommon(t); }
-// ---------------------------------------------------------------------------
-// Grid To World
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS3::gridToWorld(int col, int row, float& xW, float& yW, float& cW, float& cH) const
 {
     gridToWorldCommon(col, row, gridCols, gridRows, xW, yW, cW, cH);
 }
-// ---------------------------------------------------------------------------
-// Draw Grid
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS3::drawGrid()  const { drawGridLines(gridCols, gridRows); }
-// ---------------------------------------------------------------------------
-// Draw Tiles
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS3::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }
 
 
 // ===================================================================
 // SpringS4  —  action codes: 43 -> AutumnS1
 // ===================================================================
-// ---------------------------------------------------------------------------
-// Spring S4
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 game::SpringS4::SpringS4()
 {
     gridVisible = false;
@@ -855,10 +717,6 @@ game::SpringS4::SpringS4()
 }
 game::SpringS4::~SpringS4() = default;
 
-// ---------------------------------------------------------------------------
-// Update
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 int game::SpringS4::update(float dt)
 {
     if (AEInputCheckTriggered(AEVK_G))      gridVisible = !gridVisible;
@@ -891,10 +749,6 @@ int game::SpringS4::update(float dt)
     return 0;
 }
 
-// ---------------------------------------------------------------------------
-// Draw
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS4::draw() const
 {
     AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
@@ -920,26 +774,10 @@ void game::SpringS4::draw() const
     g_windSystem.draw();
 }
 
-// ---------------------------------------------------------------------------
-// Get Tile Color
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 u32  game::SpringS4::getTileColor(int t) const { return getTileColorCommon(t); }
-// ---------------------------------------------------------------------------
-// Grid To World
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS4::gridToWorld(int col, int row, float& xW, float& yW, float& cW, float& cH) const
 {
     gridToWorldCommon(col, row, gridCols, gridRows, xW, yW, cW, cH);
 }
-// ---------------------------------------------------------------------------
-// Draw Grid
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS4::drawGrid()  const { drawGridLines(gridCols, gridRows); }
-// ---------------------------------------------------------------------------
-// Draw Tiles
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void game::SpringS4::drawTiles() const { drawTilesCommon(gridRows, gridCols, (int(*)[32])tileMap, 0.0f); }

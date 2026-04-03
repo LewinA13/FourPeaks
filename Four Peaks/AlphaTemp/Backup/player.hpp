@@ -206,115 +206,35 @@ struct Player
 };
 
 // function declarations (NO function bodies here)
-// ---------------------------------------------------------------------------
-// Player Init
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void PlayerInit(Player& p);
-// ---------------------------------------------------------------------------
-// Player Update
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void PlayerUpdate(Player& p, float dt);
-// ---------------------------------------------------------------------------
-// Player Draw
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void PlayerDraw(Player& p, bool showCollider);
-// ---------------------------------------------------------------------------
-// Player Shutdown
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void PlayerShutdown(Player& p);
 
 // player kill and respawn
-// ---------------------------------------------------------------------------
-// Player Kill
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void PlayerKill(Player& p);
-// ---------------------------------------------------------------------------
-// Player Respawn
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void PlayerRespawn(Player& p);
-// ---------------------------------------------------------------------------
-// Player Damage
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void PlayerDamage(Player& p, int dmg);
-// ---------------------------------------------------------------------------
-// Player Set Respawn
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void PlayerSetRespawn(Player& p, gfx::Vec2 pos);
 
 // get coordinates of playerfeet
-// ---------------------------------------------------------------------------
-// Player Get Feet World
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 gfx::Vec2 PlayerGetFeetWorld(const Player& p);
-// ---------------------------------------------------------------------------
-// Player Set Feet World
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void      PlayerSetFeetWorld(Player& p, gfx::Vec2 feetWorld);
 
 // checkpoint helper functions
-// ---------------------------------------------------------------------------
-// Player Save Checkpoint
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 bool PlayerSaveCheckpoint(const Player& p, const char* filename);
-// ---------------------------------------------------------------------------
-// Player Load Checkpoint
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespawn);
 
-// ---------------------------------------------------------------------------
-// Player Delete Checkpoint
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 bool PlayerDeleteCheckpoint(const char* filename);
-// ---------------------------------------------------------------------------
-// Player Reset Progress
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void PlayerResetProgress(Player& p);
 
 //melon part 2
-// ---------------------------------------------------------------------------
-// Is Melon Collected
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 bool IsMelonCollected(const char* sceneName, int row, int col);
-// ---------------------------------------------------------------------------
-// Mark Melon Collected
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 bool MarkMelonCollected(const char* sceneName, int row, int col);
-// ---------------------------------------------------------------------------
-// Apply Collected Melons To Tile Map
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void ApplyCollectedMelonsToTileMap(const char* sceneName, int rows, int tileMap[][32]);
 
-// ---------------------------------------------------------------------------
-// Is Artifact Collected
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 bool IsArtifactCollected(int artifactIndex);
-// ---------------------------------------------------------------------------
-// Mark Artifact Collected
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 bool MarkArtifactCollected(int artifactIndex);
-// ---------------------------------------------------------------------------
-// Apply Collected Artifacts To Tile Map
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
 void ApplyCollectedArtifactsToTileMap(int rows, int tileMap[][32]);
 
 

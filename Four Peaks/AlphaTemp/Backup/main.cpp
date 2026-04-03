@@ -26,6 +26,7 @@
 #include "stageselection.hpp"
 #include "credit.hpp"
 #include "pause.hpp"
+#include "level_loader.hpp"
 
 
 // Global font handle used by all states
@@ -161,6 +162,15 @@ static void UnlockStage(SceneState s)
     int idx = UnlockIndex(s);
     if (idx >= 0)
         gGame.unlockedStages[idx] = true;
+}
+
+// cheat to unlock all stages for debugging
+static void UnlockAllStages()
+{
+    for (int i = 0; i < 16; ++i)
+    {
+        gGame.unlockedStages[i] = true;
+    }
 }
 
 //unlock the next stage in the fixed campaign order
@@ -416,6 +426,55 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     game::StageSelect& stageSelect = *stageSelectPtr;
     game::Credits& credit = *creditPtr;
 
+    auto reloadAllStageMaps = [&]()
+        {
+
+            level::loadTileMap("Assets/Levels/winter_s1.txt", game::WinterS1::gridRows, game::WinterS1::gridCols, &winterStage.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/winter_s2.txt", game::WinterS2::gridRows, game::WinterS2::gridCols, &winterStage2.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/winter_s3.txt", game::WinterS3::gridRows, game::WinterS3::gridCols, &winterStage3.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/winter_s4.txt", game::WinterS4::gridRows, game::WinterS4::gridCols, &winterStage4.getTileMap()[0][0]);
+
+            level::loadTileMap("Assets/Levels/summer_s1.txt", game::SummerS1::gridRows, game::SummerS1::gridCols, &summerStage.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/summer_s2.txt", game::SummerS2::gridRows, game::SummerS2::gridCols, &summerStage2.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/summer_s3.txt", game::SummerS3::gridRows, game::SummerS3::gridCols, &summerStage3.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/summer_s4.txt", game::SummerS4::gridRows, game::SummerS4::gridCols, &summerStage4.getTileMap()[0][0]);
+
+            level::loadTileMap("Assets/Levels/spring_s1.txt", game::SpringS1::gridRows, game::SpringS1::gridCols, &springStage.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/spring_s2.txt", game::SpringS2::gridRows, game::SpringS2::gridCols, &springStage2.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/spring_s3.txt", game::SpringS3::gridRows, game::SpringS3::gridCols, &springStage3.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/spring_s4.txt", game::SpringS4::gridRows, game::SpringS4::gridCols, &springStage4.getTileMap()[0][0]);
+
+            level::loadTileMap("Assets/Levels/autumn_s1.txt", game::AutumnS1::gridRows, game::AutumnS1::gridCols, &autumnStage.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/autumn_s2.txt", game::AutumnS2::gridRows, game::AutumnS2::gridCols, &autumnStage2.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/autumn_s3.txt", game::AutumnS3::gridRows, game::AutumnS3::gridCols, &autumnStage3.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/autumn_s4.txt", game::AutumnS4::gridRows, game::AutumnS4::gridCols, &autumnStage4.getTileMap()[0][0]);
+
+            ApplyCollectedMelonsToTileMap("WinterS1", game::WinterS1::gridRows, winterStage.getTileMap());
+            ApplyCollectedMelonsToTileMap("WinterS2", game::WinterS2::gridRows, winterStage2.getTileMap());
+            ApplyCollectedMelonsToTileMap("WinterS3", game::WinterS3::gridRows, winterStage3.getTileMap());
+            ApplyCollectedMelonsToTileMap("WinterS4", game::WinterS4::gridRows, winterStage4.getTileMap());
+
+            ApplyCollectedMelonsToTileMap("SummerS1", game::SummerS1::gridRows, summerStage.getTileMap());
+            ApplyCollectedMelonsToTileMap("SummerS2", game::SummerS2::gridRows, summerStage2.getTileMap());
+            ApplyCollectedMelonsToTileMap("SummerS3", game::SummerS3::gridRows, summerStage3.getTileMap());
+            ApplyCollectedMelonsToTileMap("SummerS4", game::SummerS4::gridRows, summerStage4.getTileMap());
+
+            ApplyCollectedMelonsToTileMap("SpringS1", game::SpringS1::gridRows, springStage.getTileMap());
+            ApplyCollectedMelonsToTileMap("SpringS2", game::SpringS2::gridRows, springStage2.getTileMap());
+            ApplyCollectedMelonsToTileMap("SpringS3", game::SpringS3::gridRows, springStage3.getTileMap());
+            ApplyCollectedMelonsToTileMap("SpringS4", game::SpringS4::gridRows, springStage4.getTileMap());
+
+            ApplyCollectedMelonsToTileMap("AutumnS1", game::AutumnS1::gridRows, autumnStage.getTileMap());
+            ApplyCollectedMelonsToTileMap("AutumnS2", game::AutumnS2::gridRows, autumnStage2.getTileMap());
+            ApplyCollectedMelonsToTileMap("AutumnS3", game::AutumnS3::gridRows, autumnStage3.getTileMap());
+            ApplyCollectedMelonsToTileMap("AutumnS4", game::AutumnS4::gridRows, autumnStage4.getTileMap());
+
+            ApplyCollectedArtifactsToTileMap(game::WinterS4::gridRows, winterStage4.getTileMap());
+            ApplyCollectedArtifactsToTileMap(game::SummerS4::gridRows, summerStage4.getTileMap());
+            ApplyCollectedArtifactsToTileMap(game::SpringS4::gridRows, springStage4.getTileMap());
+            ApplyCollectedArtifactsToTileMap(game::AutumnS4::gridRows, autumnStage4.getTileMap());
+        };
+
 
     // Start on the splash screen.
     SceneState currentState = SceneState::Splash;
@@ -426,32 +485,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     PlayerInit(gGame.player);
 
     // Apply saved melon removals to all stage maps after checkpoint is loaded.
-
-    ApplyCollectedMelonsToTileMap("WinterS1", game::WinterS1::gridRows, winterStage.getTileMap());
-    ApplyCollectedMelonsToTileMap("WinterS2", game::WinterS2::gridRows, winterStage2.getTileMap());
-    ApplyCollectedMelonsToTileMap("WinterS3", game::WinterS3::gridRows, winterStage3.getTileMap());
-    ApplyCollectedMelonsToTileMap("WinterS4", game::WinterS4::gridRows, winterStage4.getTileMap());
-
-    ApplyCollectedMelonsToTileMap("SummerS1", game::SummerS1::gridRows, summerStage.getTileMap());
-    ApplyCollectedMelonsToTileMap("SummerS2", game::SummerS2::gridRows, summerStage2.getTileMap());
-    ApplyCollectedMelonsToTileMap("SummerS3", game::SummerS3::gridRows, summerStage3.getTileMap());
-    ApplyCollectedMelonsToTileMap("SummerS4", game::SummerS4::gridRows, summerStage4.getTileMap());
-
-    ApplyCollectedMelonsToTileMap("SpringS1", game::SpringS1::gridRows, springStage.getTileMap());
-    ApplyCollectedMelonsToTileMap("SpringS2", game::SpringS2::gridRows, springStage2.getTileMap());
-    ApplyCollectedMelonsToTileMap("SpringS3", game::SpringS3::gridRows, springStage3.getTileMap());
-    ApplyCollectedMelonsToTileMap("SpringS4", game::SpringS4::gridRows, springStage4.getTileMap());
-
-    ApplyCollectedMelonsToTileMap("AutumnS1", game::AutumnS1::gridRows, autumnStage.getTileMap());
-    ApplyCollectedMelonsToTileMap("AutumnS2", game::AutumnS2::gridRows, autumnStage2.getTileMap());
-    ApplyCollectedMelonsToTileMap("AutumnS3", game::AutumnS3::gridRows, autumnStage3.getTileMap());
-    ApplyCollectedMelonsToTileMap("AutumnS4", game::AutumnS4::gridRows, autumnStage4.getTileMap());
-
-    // Apply picked up removals to all stage maps after checkpoint is loaded.
-    ApplyCollectedArtifactsToTileMap(game::WinterS4::gridRows, winterStage4.getTileMap());
-    ApplyCollectedArtifactsToTileMap(game::SummerS4::gridRows, summerStage4.getTileMap());
-    ApplyCollectedArtifactsToTileMap(game::SpringS4::gridRows, springStage4.getTileMap());
-    ApplyCollectedArtifactsToTileMap(game::AutumnS4::gridRows, autumnStage4.getTileMap());
+    reloadAllStageMaps();
 
     // gDialog
     UI::gDialog.initialize();
@@ -462,6 +496,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     while (gGameRunning)
     {
         g_currentScene = SceneToString(currentState);
+
+        if (gGame.reloadAllStageMaps)
+        {
+            reloadAllStageMaps();
+            gGame.reloadAllStageMaps = false;
+        }
+
         // =========================================================
         // Tutorial stage
         // =========================================================
@@ -560,11 +601,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         AESysFrameStart();
         f32 dt = (f32)AEFrameRateControllerGetFrameTime();
 
-        // only count time while the player is inside actual season stages.
-        // excludes splash screen, main menu, tutorial, and any future pause/settings states.
-        if (IsSeasonScene(currentState) && !gGame.pauseActive)
+        // count time while the player is in any playable stage, including tutorial.
+        // this makes the thank-you screen show the full run from tutorial to Autumn 4,
+        // while still working correctly if the player starts from a later unlocked stage.
+        if (IsGameplayScene(currentState) && !gGame.pauseActive)
         {
-            // timer only runs when not paused
             gGame.runTimeSeconds += dt;
         }
 
@@ -578,6 +619,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // Handle state changes (both transition-based and direct)
         if (currentState != lastState)
         {
+
+            switch (currentState)
+            {
+            case SceneState::WinterS3: winterStage3.resetBreakableIce(); break;
+            case SceneState::WinterS4: winterStage4.resetBreakableIce(); break;
+            case SceneState::AutumnS1: autumnStage.resetBreakableTile();  break;
+            case SceneState::AutumnS2: autumnStage2.resetBreakableTile(); break;
+            case SceneState::AutumnS3: autumnStage3.resetBreakableTile(); break;
+            case SceneState::AutumnS4: autumnStage4.resetBreakableTile(); break;
+            default: break;
+            }
+
+
             const float h = camera::screenHeight();
             const int idx = StageIndex(currentState);
 
@@ -680,8 +734,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
 
         // --------------------------------------------------------
-        // CHEATS: F11 toggles ALL cheats
+        // CHEATS
         // --------------------------------------------------------
+
+        // debug unlock all stages: left ctrl + left shift + u
+        if (!gGame.pauseActive &&
+            AEInputCheckCurr(AEVK_LCTRL) &&
+            AEInputCheckCurr(AEVK_LSHIFT) &&
+            AEInputCheckTriggered(AEVK_U))
+        {
+            UnlockAllStages();
+            PlayerSaveCheckpoint(gGame.player, "checkpoint.txt");
+        }
+
+        // F11 toggle all cheats
         if (!gGame.pauseActive && AEInputCheckTriggered(AEVK_F11))
         {
             gGame.cheatsOn = !gGame.cheatsOn;

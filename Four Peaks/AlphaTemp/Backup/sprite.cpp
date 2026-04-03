@@ -1,17 +1,10 @@
-// ---------------------------------------------------------------------------
-// Sprite.cpp
-// Manages loading and access to all textures used in the game.
-// Also manages shared animation state for animated tiles (coin, checkpoint, crack).
-// ---------------------------------------------------------------------------
 #include "sprite.hpp"
 #include <AEGraphics.h>
 #include "graphics.hpp"
 #include <cmath>
 
 
-// ---------------------------------------------------------------------------
-// namespace sprite that contains all texture pointers and related functions for loading, accessing, and animating sprites used in the game.
-// ---------------------------------------------------------------------------
+
 namespace sprite
 {
 
@@ -37,8 +30,8 @@ namespace sprite
         AEGfxTexture* tile02Tex{};
         AEGfxTexture* bottleTex{};
         AEGfxTexture* textboxTex{};
-        AEGfxTexture* winterCTex{};   
-        AEGfxTexture* winterTTex{};   
+        AEGfxTexture* winterCTex{};   // tile ID 4 -> WinterC.png
+        AEGfxTexture* winterTTex{};   // tile ID 6 -> WinterT.png
         AEGfxTexture* breakabletileTex{};
         AEGfxTexture* stgselectbgTex{};
         AEGfxTexture* centerframeTex{};
@@ -96,10 +89,6 @@ namespace sprite
         constexpr float inset = 1.0f;
 
         // Helper: get UVs from pixel coordinates in the tileset
-        // ---------------------------------------------------------------------------
-        // Uv From Pixels
-        // Explains what this function does and where its main work happens.
-        // ---------------------------------------------------------------------------
         void uvFromPixels(float px, float py, float pw, float ph,
             float& u0, float& v0, float& u1, float& v1)
         {
@@ -143,10 +132,6 @@ namespace sprite
 
     }
 
-// ---------------------------------------------------------------------------
-// Init
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     void init()
     {
         // Always (re)load these if missing
@@ -290,10 +275,6 @@ namespace sprite
     }
 
 
-// ---------------------------------------------------------------------------
-// Shutdown
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     void shutdown()
     {
         if (tilesetTex)
@@ -408,224 +389,92 @@ namespace sprite
         }
     }
 
-// ---------------------------------------------------------------------------
-// Tileset
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* tileset()
     {
         return tilesetTex;
     }
 
-// ---------------------------------------------------------------------------
-// Spikes
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* spikes()
     {
         return spikesTex;
     }
 
-// ---------------------------------------------------------------------------
-// Background
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* background()
     {
         return backgroundTex;
     }
 
-// ---------------------------------------------------------------------------
-// Summer Background
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* summerBackground()
     {
         return summerBgTex;
     }
 
-// ---------------------------------------------------------------------------
-// Mm Background
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* mmBackground()
     {
         return mmBackgroundTex;
     }
 
-// ---------------------------------------------------------------------------
-// Tutorial Background
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* tutorialBackground()
     {
         return tutorialBgTex;
     }
 
-// ---------------------------------------------------------------------------
-// Autumn Background
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* autumnBackground()
     {
         return autumnBgTex;
     }
 
-// ---------------------------------------------------------------------------
-// Spring Background
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* springBackground()
     {
         return springBgTex;
     }
 
-// ---------------------------------------------------------------------------
-// Coin
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* coin()
     {
         return coinTex;
     }
 
-// ---------------------------------------------------------------------------
-// Ice
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* ice()
     {
         return iceTex;
     }
 
-// ---------------------------------------------------------------------------
-// Checkpoint
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* checkpoint()
     {
         return checkpointTex;
     }
 
-// ---------------------------------------------------------------------------
-// Crack
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* crack()
     {
         return crackTex;
     }
 
-// ---------------------------------------------------------------------------
-// Sign
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* sign() { return signTex; }
-// ---------------------------------------------------------------------------
-// Tile12
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* tile12() { return tile12Tex; }
-// ---------------------------------------------------------------------------
-// Tile02
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* tile02() { return tile02Tex; }
-// ---------------------------------------------------------------------------
-// Bottle
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* bottle() { return bottleTex; }
-// ---------------------------------------------------------------------------
-// Textbox
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* textbox() { return textboxTex; }
 
-// ---------------------------------------------------------------------------
-// Breakabletile
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* breakabletile() { return breakabletileTex; }
-// ---------------------------------------------------------------------------
-// Stgselect Background
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* stgselectBackground() { return stgselectbgTex; }
-// ---------------------------------------------------------------------------
-// Centerframe
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* centerframe() { return centerframeTex; }
 
 
-// ---------------------------------------------------------------------------
-// Spring1
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* spring1() { return spring1Tex; }
-// ---------------------------------------------------------------------------
-// Spring2
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* spring2() { return spring2Tex; }
-// ---------------------------------------------------------------------------
-// Autumn1
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* autumn1() { return autumn1Tex; }
-// ---------------------------------------------------------------------------
-// Autumn2
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* autumn2() { return autumn2Tex; }
 
-// ---------------------------------------------------------------------------
-// Winter C
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* winterC() { return winterCTex; }
-// ---------------------------------------------------------------------------
-// Winter T
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* winterT() { return winterTTex; }
 
-// ---------------------------------------------------------------------------
-// Grass
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* grass() { return grassTex; }
-// ---------------------------------------------------------------------------
-// Fire Tex
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* fireTex() { return fireTex_; }
-// ---------------------------------------------------------------------------
-// Saw Tex
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* sawTex() { return sawTex_; }
 
-// ---------------------------------------------------------------------------
-// Winter Artifacts
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* winterArtifacts() { return winterArtifactsTex; }
-// ---------------------------------------------------------------------------
-// Summer Artifacts
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* summerArtifacts() { return summerArtifactsTex; }
-// ---------------------------------------------------------------------------
-// Spring Artifacts
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* springArtifacts() { return springArtifactsTex; }
-// ---------------------------------------------------------------------------
-// Autumn Artifacts
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* autumnArtifacts() { return autumnArtifactsTex; }
 
     // ----------------------------------------------------------------
@@ -638,40 +487,24 @@ namespace sprite
         return winterStageTex[stageIndex];
     }
 
-// ---------------------------------------------------------------------------
-// Summer Stage
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* summerStage(int stageIndex)
     {
         if (stageIndex < 0 || stageIndex > 3) return nullptr;
         return summerStageTex[stageIndex];
     }
 
-// ---------------------------------------------------------------------------
-// Spring Stage
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* springStage(int stageIndex)
     {
         if (stageIndex < 0 || stageIndex > 3) return nullptr;
         return springStageTex[stageIndex];
     }
 
-// ---------------------------------------------------------------------------
-// Autumn Stage
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* autumnStage(int stageIndex)
     {
         if (stageIndex < 0 || stageIndex > 3) return nullptr;
         return autumnStageTex[stageIndex];
     }
 
-// ---------------------------------------------------------------------------
-// Get Fire Uv
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     bool getFireUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
         if (frame < 0) frame = 0;
@@ -685,10 +518,6 @@ namespace sprite
         return true;
     }
 
-// ---------------------------------------------------------------------------
-// Get Saw Uv
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     bool getSawUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
         if (frame < 0) frame = 0;
@@ -704,10 +533,6 @@ namespace sprite
 
 
 
-// ---------------------------------------------------------------------------
-// Get Coin Uv
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     bool getCoinUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
         // Melon.png = 544x32
@@ -740,10 +565,6 @@ namespace sprite
     }
 
 
-// ---------------------------------------------------------------------------
-// Get Checkpoint Uv
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     bool getCheckpointUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
         // Checkpoint.png = 320x32 (10 frames, each 32x32 laid horizontally)
@@ -774,10 +595,6 @@ namespace sprite
         return true;
     }
 
-// ---------------------------------------------------------------------------
-// Get Crack Uv
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     bool getCrackUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
         constexpr int frameCount = 7;
@@ -808,10 +625,6 @@ namespace sprite
     }
 
 
-// ---------------------------------------------------------------------------
-// Update Animated Tiles
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     void updateAnimatedTiles(f32 dt)
     {
         // coin
@@ -850,10 +663,6 @@ namespace sprite
         bottleFloatTimer += dt;
     }
 
-// ---------------------------------------------------------------------------
-// Draw Animated Tile
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     bool drawAnimatedTile(int tileType, gfx::Vec2 pos, gfx::Vec2 size)
     {
         if (tileType == 8)
@@ -915,10 +724,6 @@ namespace sprite
     }
 
 
-// ---------------------------------------------------------------------------
-// Get Tile Uv
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     bool getTileUv(int tileType, float& u0, float& v0, float& u1, float& v1)
     {
         switch (tileType)
@@ -932,16 +737,8 @@ namespace sprite
         return false;
     }
 
-// ---------------------------------------------------------------------------
-// Heatbar
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     AEGfxTexture* heatbar() { return heatbarTex; }
 
-// ---------------------------------------------------------------------------
-// Get Heat Bar Uv
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     bool getHeatBarUv(int frame, float& u0, float& v0, float& u1, float& v1)
     {
         if (frame < 0 || frame > 5) return false;

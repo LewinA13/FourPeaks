@@ -1,6 +1,10 @@
 // ---------------------------------------------------------------------------
 // mainmenu.cpp
-// implementation of mainmenu.hpp functions. This state shows the animated background and menu options, and routes to other states based on player input.
+// ---------------------------------------------------------------------------
+//
+// Very simple text-based menu with three options.
+// Navigation: Up / Down arrows, confirm with Enter or Space.
+// Uses normalized coordinates (-1..1) for AEGfxPrint.
 // ---------------------------------------------------------------------------
 
 #include "mainmenu.hpp"
@@ -14,7 +18,6 @@
 #include "graphics.hpp"
 #include "player.hpp"
 
-// Type aliases
 extern s8 gFontId;
 extern s8 gFontTitle;
 static bool gIsFullscreen = false;
@@ -65,10 +68,6 @@ namespace game
     }
 
     // Dynamic centered print — x shifts based on actual string length
-// ---------------------------------------------------------------------------
-// Print Centered
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static void printCentered(f32 y, u32 color,
         const char* text, f32 scale = 1.0f)
     {
@@ -77,10 +76,6 @@ namespace game
         printText(x, y, color, text, scale);
     }
 
-// ---------------------------------------------------------------------------
-// Print Title Centered
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     static void printTitleCentered(f32 y, u32 color, const char* text, f32 scale = 1.0f)
     {
         f32 w = 0.f, h = 0.f;
@@ -120,10 +115,6 @@ namespace game
 
     static constexpr const char* kSettingsFile = "Assets/settings.txt";
 
-// ---------------------------------------------------------------------------
-// Save Volume Settings
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     void SaveVolumeSettings()
     {
         std::ofstream out(kSettingsFile);
@@ -134,10 +125,6 @@ namespace game
         }
     }
 
-// ---------------------------------------------------------------------------
-// Load Volume Settings
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     void LoadVolumeSettings()
     {
         std::ifstream in(kSettingsFile);
@@ -158,10 +145,6 @@ namespace game
     // Settings state
 
 
-// ---------------------------------------------------------------------------
-// Main Menu
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
     MainMenu::MainMenu()
         : selectedIndex(0)
         , showHowTo(false)

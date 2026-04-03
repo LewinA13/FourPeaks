@@ -9,10 +9,8 @@
 
 namespace level
 {
-// ---------------------------------------------------------------------------
-// Load Tile Map
-// Explains what this function does and where its main work happens.
-// ---------------------------------------------------------------------------
+    // Returns true if file was read successfully AND exactly rows*cols integers were found.
+    // On failure, outGrid is still filled with whatever was parsed so far; caller can decide to fallback.
     bool loadTileMap(const char* filePath, int rows, int cols, int* outGrid);
 }
 
