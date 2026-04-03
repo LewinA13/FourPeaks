@@ -1,11 +1,12 @@
 // ---------------------------------------------------------------------------
-// includes
+// main.cpp
+// Entry point and main game loop. Initializes the engine, manages scene transitions, and routes update/draw calls to the current scene.
 // ---------------------------------------------------------------------------
 
 #include <crtdbg.h>        // To check for memory leaks
-#include <memory>           // std::make_unique
+#include <memory>          // std::make_unique
 #include "AEEngine.h"
-#include "graphics.hpp"    // Graphics helper for shapes and initialization
+#include "graphics.hpp"    
 #include "player.hpp"
 #include "gamestate.hpp"
 #include "sprite.hpp"
@@ -32,9 +33,9 @@
 // Global font handle used by all states
 s8 gFontId = -1;
 s8 gFontTitle = -1;
-
 UI::Dialog UI::gDialog;
 
+// Global game state
 enum class SceneState
 {
     Splash,
@@ -73,7 +74,7 @@ SceneState lastState = SceneState::Exit;
 Transition      gTransition;
 SceneState      transitionTarget = SceneState::MainMenu;
 
-
+// For tracking which stages have been unlocked in the stage select screen.
 enum StateID {
     MENU = 0,
     WINTER_S1 = 1,
@@ -84,6 +85,10 @@ enum StateID {
 
 
 //checkpoint saving
+// ---------------------------------------------------------------------------
+// Scene To String
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 static std::string SceneToString(SceneState s)
 {
     switch (s)
@@ -114,6 +119,10 @@ static std::string SceneToString(SceneState s)
 }
 
 // save what stage number we are in, regardless of season
+// ---------------------------------------------------------------------------
+// Stage Index
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 static int StageIndex(SceneState s)
 {
     switch (s)
@@ -128,6 +137,10 @@ static int StageIndex(SceneState s)
 
 // Convert a seasonal gameplay scene into unlock array index
 // Returns -1 for non season scenes like tutorials/menu
+// ---------------------------------------------------------------------------
+// Unlock Index
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 static int UnlockIndex(SceneState s)
 {
     switch (s)
@@ -157,6 +170,10 @@ static int UnlockIndex(SceneState s)
 }
 
 // marks one seasonal stage as unlocked
+// ---------------------------------------------------------------------------
+// Unlock Stage
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 static void UnlockStage(SceneState s)
 {
     int idx = UnlockIndex(s);
@@ -165,6 +182,10 @@ static void UnlockStage(SceneState s)
 }
 
 // cheat to unlock all stages for debugging
+// ---------------------------------------------------------------------------
+// Unlock All Stages
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 static void UnlockAllStages()
 {
     for (int i = 0; i < 16; ++i)
@@ -174,6 +195,10 @@ static void UnlockAllStages()
 }
 
 //unlock the next stage in the fixed campaign order
+// ---------------------------------------------------------------------------
+// Unlock Next Stage
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 static void UnlockNextStage(SceneState clearedScene)
 {
     switch (clearedScene)
@@ -203,6 +228,10 @@ static void UnlockNextStage(SceneState clearedScene)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Grid To World
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 static gfx::Vec2 GridToWorld(int gridX, int gridY, float screenYOffset)
 {
     // Use constant screen half-dimensions instead of AEGfxGetWinMin/Max,
@@ -223,6 +252,10 @@ static gfx::Vec2 GridToWorld(int gridX, int gridY, float screenYOffset)
 }
 
 
+// ---------------------------------------------------------------------------
+// Audio Get Desired Bgm Type
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 static BgmType Audio_GetDesiredBgmType(SceneState state)
 {
     // main menu related screens
@@ -264,6 +297,10 @@ static BgmType Audio_GetDesiredBgmType(SceneState state)
 }
 
 //helper function for hud
+// ---------------------------------------------------------------------------
+// Is Gameplay Scene
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 static bool IsGameplayScene(SceneState s)
 {
     switch (s)
@@ -295,6 +332,10 @@ static bool IsGameplayScene(SceneState s)
 }
 
 // new one specifically for game run time, because we dont want to count tutorial
+// ---------------------------------------------------------------------------
+// Is Season Scene
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 static bool IsSeasonScene(SceneState s)
 {
     switch (s)
@@ -322,6 +363,10 @@ static bool IsSeasonScene(SceneState s)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Reset Pause State
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 static void ResetPauseState()
 {
     gGame.pauseActive = false;
@@ -334,6 +379,9 @@ static void ResetPauseState()
 // main
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// W Win Main
+// ---------------------------------------------------------------------------
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
     _In_ LPWSTR lpCmdLine,
@@ -764,6 +812,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
         }
 
+		// N key: toggle no-clip (only if cheats enabled, and only during gameplay)
         if (!gGame.pauseActive && gGame.cheatsOn && AEInputCheckTriggered(AEVK_F10))
         {
             gGame.noClip = !gGame.noClip;
@@ -785,27 +834,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // Run current state.
         int action = 0;
 
-        // Helper: start a PokemonWipe transition to a target scene.
-        // Call this instead of setting currentState directly for level switches.
-        // Always reset and start a new transition. This avoids situations where
-        // back-to-back teleports happen before the previous transition has
-        // finished (for example, quickly chaining Winter S2->S3->S4). In such
-        // cases, ignoring the second trigger would cause the scene switch to
-        // occur without the wipe effect. By resetting and starting a new
-        // transition whenever a teleport is requested we ensure the wipe
-        // animation always plays.
+        // Helper: start a transition to a target scene.
         auto triggerTransition = [&](SceneState target)
             {
                 // Ignore re-trigger if transition already running.
                 // Prevents the fade restarting every frame when the player
-                // stands still inside the teleport zone.
                 if (gTransition.isActive()) return;
                 gTransition.start();
                 transitionTarget = target;
             };
-
+        
+		// Update dialog state based on player proximity to signboards in the current stage.
         UI::gDialog.playerNearSignBoard(false);
 
+		// Check if player is near a signboard in the current stage and update dialog state accordingly.
         if (gGame.pauseActive)
         {
             pause::Action pauseAction = pause::update();
@@ -826,7 +868,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
         }
 
-        // ?? Transition: fire scene switch at mid-point, draw overlay on top ??
+        // Transition: fire scene switch at mid-point, draw overlay on top 
         gTransition.update(dt);
         if (gTransition.isReadyToSwitch())
         {
@@ -835,6 +877,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             gTransition.notifySwitch();
         }
 
+		// Draw current scene
         switch (currentState)
         {
         case SceneState::Splash:
@@ -937,7 +980,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             break;
         }
 
-
+		// --------------------------------------------------------
+		// STAGE SELECT
+		// action codes from stage_select.cpp:
+		// --------------------------------------------------------
         case SceneState::StageSelect:
         {
             action = stageSelect.update(dt);

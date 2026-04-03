@@ -20,15 +20,35 @@
 namespace game
 {
 
+// ---------------------------------------------------------------------------
+// Save Volume Settings
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
     void SaveVolumeSettings();
+// ---------------------------------------------------------------------------
+// Load Volume Settings
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
     void LoadVolumeSettings();
 
     class MainMenu
     {
     public:
+// ---------------------------------------------------------------------------
+// Main Menu
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
         MainMenu();
 
+// ---------------------------------------------------------------------------
+// Update
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
         int update();   // handle input
+// ---------------------------------------------------------------------------
+// Draw
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
         void draw() const; // draw menu each frame
 
     private:
@@ -39,7 +59,15 @@ namespace game
         bool confirmDeleteSave;
         bool deleteSaveResult;
 
+// ---------------------------------------------------------------------------
+// Draw How To Play
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
         void drawHowToPlay() const;
+// ---------------------------------------------------------------------------
+// Draw Settings
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
         void drawSettings() const;
     };
 }

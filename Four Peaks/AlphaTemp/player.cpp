@@ -1,4 +1,8 @@
-﻿#include "player.hpp"
+﻿// ---------------------------------------------------------------------------
+// player.cpp
+// This file contains the implementation of the Player struct and related functions.
+// ---------------------------------------------------------------------------
+#include "player.hpp"
 #include "graphics.hpp"
 #include "collision.hpp"
 #include <fstream>
@@ -8,7 +12,6 @@
 #include "gamestate.hpp"
 #include "audio.hpp"
 #include "dialogue.hpp"
-
 #include <iostream>
 
 
@@ -16,12 +19,20 @@
 // HELPER FUNCTIONS (RESPAWN DIE)
 // =========================================================
 
+// ---------------------------------------------------------------------------
+// Player Get Feet World
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 gfx::Vec2 PlayerGetFeetWorld(const Player& p)
 {
     // feet point directly under collider center
     return { p.pos.x, p.pos.y - (p.colliderSize.y * 0.5f) };
 }
 
+// ---------------------------------------------------------------------------
+// Player Set Feet World
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void PlayerSetFeetWorld(Player& p, gfx::Vec2 feetWorld)
 {
     // place collider so its bottom sits on feetWorld
@@ -29,11 +40,19 @@ void PlayerSetFeetWorld(Player& p, gfx::Vec2 feetWorld)
     p.pos.y = feetWorld.y + (p.colliderSize.y * 0.5f);
 }
 
+// ---------------------------------------------------------------------------
+// Player Set Respawn
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void PlayerSetRespawn(Player& p, gfx::Vec2 pos) // PlayerSetRespawn(gGame.p, gfx::Vec2 pos)
 {
     p.respawnPos = pos;
 }
 
+// ---------------------------------------------------------------------------
+// Player Save Checkpoint
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 bool PlayerSaveCheckpoint(const Player& p, const char* filename)
 {
     if (filename == nullptr || filename[0] == '\0')
@@ -81,6 +100,10 @@ bool PlayerSaveCheckpoint(const Player& p, const char* filename)
     return out.good();
 }
 
+// ---------------------------------------------------------------------------
+// Player Load Checkpoint
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespawn)
 {
     if (filename == nullptr || filename[0] == '\0')
@@ -287,6 +310,10 @@ bool PlayerLoadCheckpoint(Player& p, const char* filename, bool teleportToRespaw
     return true;
 }
 
+// ---------------------------------------------------------------------------
+// Player Delete Checkpoint
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 bool PlayerDeleteCheckpoint(const char* filename)
 {
     if (filename == nullptr || filename[0] == '\0')
@@ -296,6 +323,10 @@ bool PlayerDeleteCheckpoint(const char* filename)
     return std::remove(filename) == 0;
 }
 
+// ---------------------------------------------------------------------------
+// Player Reset Progress
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void PlayerResetProgress(Player& p)
 {
     // reset player 
@@ -333,6 +364,10 @@ void PlayerResetProgress(Player& p)
     p.dashCount = p.maxDashCount;
 }
 
+// ---------------------------------------------------------------------------
+// Is Melon Collected
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 bool IsMelonCollected(const char* sceneName, int row, int col)
 {
     if (!sceneName) return false;
@@ -346,6 +381,10 @@ bool IsMelonCollected(const char* sceneName, int row, int col)
     return false;
 }
 
+// ---------------------------------------------------------------------------
+// Mark Melon Collected
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 bool MarkMelonCollected(const char* sceneName, int row, int col)
 {
     if (!sceneName) return false;
@@ -362,6 +401,10 @@ bool MarkMelonCollected(const char* sceneName, int row, int col)
     return true;
 }
 
+// ---------------------------------------------------------------------------
+// Apply Collected Melons To Tile Map
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void ApplyCollectedMelonsToTileMap(const char* sceneName, int rows, int tileMap[][32])
 {
     if (!sceneName || !tileMap) return;
@@ -382,6 +425,10 @@ void ApplyCollectedMelonsToTileMap(const char* sceneName, int rows, int tileMap[
     }
 }
 
+// ---------------------------------------------------------------------------
+// Is Artifact Collected
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 bool IsArtifactCollected(int artifactIndex)
 {
     if (artifactIndex < 0 || artifactIndex >= 4)
@@ -390,6 +437,10 @@ bool IsArtifactCollected(int artifactIndex)
     return gGame.collectedArtifacts[artifactIndex];
 }
 
+// ---------------------------------------------------------------------------
+// Mark Artifact Collected
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 bool MarkArtifactCollected(int artifactIndex)
 {
     if (artifactIndex < 0 || artifactIndex >= 4)
@@ -402,6 +453,10 @@ bool MarkArtifactCollected(int artifactIndex)
     return true;
 }
 
+// ---------------------------------------------------------------------------
+// Apply Collected Artifacts To Tile Map
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void ApplyCollectedArtifactsToTileMap(int rows, int tileMap[][32])
 {
     if (!tileMap) return;
@@ -424,6 +479,10 @@ void ApplyCollectedArtifactsToTileMap(int rows, int tileMap[][32])
     }
 }
 
+// ---------------------------------------------------------------------------
+// Player Respawn
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void PlayerRespawn(Player& p)
 {
     // Restore core life state
@@ -472,6 +531,10 @@ void PlayerRespawn(Player& p)
     audio::play_sfx(SfxType::Respawn);
 }
 
+// ---------------------------------------------------------------------------
+// Player Kill
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void PlayerKill(Player& p) // PlayerKill(gGame.player)
 {
     if (p.dead) return;
@@ -509,6 +572,10 @@ void PlayerKill(Player& p) // PlayerKill(gGame.player)
     audio::play_sfx(SfxType::Death);
 }
 
+// ---------------------------------------------------------------------------
+// Player Damage
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void PlayerDamage(Player& p, int dmg)
 {
     if (p.dead) return;
@@ -523,6 +590,10 @@ void PlayerDamage(Player& p, int dmg)
 }
 
 
+// ---------------------------------------------------------------------------
+// Player Init
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void PlayerInit(Player& p)
 {
     p.pos = { 100.0f, 100.0f };
@@ -687,6 +758,10 @@ void PlayerInit(Player& p)
 
 
 
+// ---------------------------------------------------------------------------
+// Player Update
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void PlayerUpdate(Player& p, float dt)
 {
     printf("player velY: %f\n", p.velY);
@@ -1270,6 +1345,10 @@ void PlayerUpdate(Player& p, float dt)
 
 
 
+// ---------------------------------------------------------------------------
+// Player Draw
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void PlayerDraw(Player& p, bool showCollider)
 {
 
@@ -1449,6 +1528,10 @@ void PlayerDraw(Player& p, bool showCollider)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Player Shutdown
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
 void PlayerShutdown(Player& p)
 {
     if (p.wallSlideTex)

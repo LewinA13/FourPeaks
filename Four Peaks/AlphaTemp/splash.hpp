@@ -20,10 +20,26 @@ namespace game
     class SplashScreen
     {
     public:
+// ---------------------------------------------------------------------------
+// Splash Screen
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
         SplashScreen();
+// ---------------------------------------------------------------------------
+// Splash Screen
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
         ~SplashScreen();
 
+// ---------------------------------------------------------------------------
+// Update
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
         int  update();
+// ---------------------------------------------------------------------------
+// Draw
+// Explains what this function does and where its main work happens.
+// ---------------------------------------------------------------------------
         void draw() const;
 
     private:
