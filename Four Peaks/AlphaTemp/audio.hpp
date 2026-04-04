@@ -1,6 +1,10 @@
 #ifndef AUDIO_HPP
 #define AUDIO_HPP
 
+// -------------------------------------------------------------------------
+// Identifies which background music track should be playing.
+// Pass BgmType::None to silence all music.
+// -------------------------------------------------------------------------
 enum class BgmType
 {
     None,
@@ -12,6 +16,9 @@ enum class BgmType
     Tutorial
 };
 
+// -------------------------------------------------------------------------
+// Identifies a one-shot sound effect.
+// -------------------------------------------------------------------------
 enum class SfxType
 {
     Jump,
@@ -21,6 +28,11 @@ enum class SfxType
     WinterStep
 };
 
+// -------------------------------------------------------------------------
+// Initialises the audio engine, creates the music and SFX mixer groups,
+// loads all audio assets from disk, and applies the initial volume settings
+// from the global GameState. Must be called once before any other audio function.
+// -------------------------------------------------------------------------
 namespace audio
 {
     // Start audio system + create groups + load all audio assets.

@@ -152,7 +152,13 @@ bool checkMapCollision(TileRange box, int levelLayout[][mapColm], float playerHe
 }
 
 
-// helper function for damage tile
+// -------------------------------------------------------------------------
+// Sets the player's current ground type to the appropriate damage type when
+// they overlap a hazard tile. The overlap logic differs per tile:
+//   case 2 / 24 — floor spikes / fire: lethal when feet are below the safe zone.
+//   case 9      — ceiling spikes: lethal when head is above the safe zone.
+//   case 25     — saw blade: only lethal when the horizontal overlap exceeds 60 %.
+// -------------------------------------------------------------------------
 static void resolveDamageTile(Player& player, int r, int c, TileRange box, int tileCase)
 {
     switch (tileCase)
@@ -216,7 +222,6 @@ static void resolveDamageTile(Player& player, int r, int c, TileRange box, int t
    
 
 
-// testing hongyang
     }
 }
 
@@ -394,6 +399,10 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
     }
 }
 
+// -------------------------------------------------------------------------
+// Convenience wrapper that builds a TileRange at the given world-space position
+// and tests it against g_currentMap. Returns true if any solid tile overlaps.
+// -------------------------------------------------------------------------
 static bool checkAABBCollisionAt(float x, float y, float w, float h)
 {
     TileRange box = calTileRange(x, y, w, h);
@@ -553,6 +562,12 @@ void applyGroundPhysics(Player& player)
     }
 }
 
+// -------------------------------------------------------------------------
+// Main per-frame collision driver. Resets the ground type to Normal, runs the
+// tile overlap resolution, probes 2 px below the player for surface detection,
+// and applies ground-type physics modifiers. Also restores normal air physics
+// when the player is airborne.
+// -------------------------------------------------------------------------
 void CollisionUpdate(Player& player, f32 dt)
 {
 
@@ -573,6 +588,10 @@ void CollisionUpdate(Player& player, f32 dt)
     }
 }
 
+// -------------------------------------------------------------------------
+// Tests 2 px probes on either side of the player and updates the boolean wall
+// flags used by the wall-slide and wall-jump logic in the player system.
+// -------------------------------------------------------------------------
 void CollisionUpdateWallFlags(Player& player)
 {
     const float PROBE = 2.0f;
@@ -604,6 +623,11 @@ void CheckPathForCheckpoint(Player& player, gfx::Vec2 startPos, gfx::Vec2 endPos
     }
 }
 
+// -------------------------------------------------------------------------
+// Returns true only when solid tiles are detected simultaneously beneath both
+// the left and right foot probe positions. This stricter test distinguishes a
+// fully supported landing from a single-foot ledge contact.
+// -------------------------------------------------------------------------
 bool OnGroundExactly(Player& player)
 {
     const float PROBE_Y = 2.0f;

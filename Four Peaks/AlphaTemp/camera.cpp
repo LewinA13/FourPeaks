@@ -48,6 +48,10 @@ namespace camera {
         }
     }
 
+   // -------------------------------------------------------------------------
+   // Public API
+   // -------------------------------------------------------------------------
+
     void init() {
         screenH = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
         screenW = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
@@ -113,10 +117,18 @@ namespace camera {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Writes the final camera position (base + shake offset) to the renderer.
+    // -------------------------------------------------------------------------
+
     void apply() {
         AEGfxSetCamPosition(camX + shakeOffsetX, camY + shakeOffsetY);
     }
 
+    // -------------------------------------------------------------------------
+    // Teleports the camera to the given vertical world-space coordinate and
+    // cancels any active transition.
+    // -------------------------------------------------------------------------
     void setY(float y) {
         camY = y;
         targetCamY = y;
@@ -124,18 +136,31 @@ namespace camera {
         justFinished = false;
     }
 
+    // -------------------------------------------------------------------------
+    // Returns the camera's current vertical world-space position.
+    // -------------------------------------------------------------------------
     float getY() {
         return camY;
     }
 
+    // -------------------------------------------------------------------------
+    // Returns the cached screen height in pixels.
+    // -------------------------------------------------------------------------
     float screenHeight() {
         return screenH;
     }
 
+    // -------------------------------------------------------------------------
+    // Returns the cached screen width in pixels.
+    // -------------------------------------------------------------------------
     float screenWidth() {
         return screenW;
     }
 
+    // -------------------------------------------------------------------------
+    // Stores the new follow target. update() will smoothly move the camera
+    // toward this position on subsequent frames while follow mode is active.
+    // -------------------------------------------------------------------------
     void followPlayer(float playerX, float playerY, float dt) {
         (void)dt;
         if (!followMode) return;
@@ -150,6 +175,10 @@ namespace camera {
         // targetCamY = std::max(minY, std::min(maxY, targetCamY));
     }
 
+    // -------------------------------------------------------------------------
+    // Toggles smooth-follow mode. Enabling it initialises the internal target
+    // to the current camera position so there is no jump on the first frame.
+    // -------------------------------------------------------------------------
     void setFollowMode(bool enabled) {
         followMode = enabled;
         if (enabled) {
@@ -159,10 +188,18 @@ namespace camera {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Returns true if smooth-follow mode is currently enabled.
+    // -------------------------------------------------------------------------
     bool isFollowMode() {
         return followMode;
     }
 
+    // -------------------------------------------------------------------------
+    // Starts a smooth vertical scroll from newFromY to newToY over durationSec.
+    // Disables follow mode for the duration.
+    // Returns false without doing anything if a transition is already running.
+    // -------------------------------------------------------------------------
     bool startTransitionY(float newFromY, float newToY, float durationSec) {
         if (transitioning)
             return false;
@@ -181,22 +218,36 @@ namespace camera {
         return true;
     }
 
+    // -------------------------------------------------------------------------
+    // Returns true while a vertical scroll transition is in progress.
+    // -------------------------------------------------------------------------
     bool isTransitioning() {
         return transitioning;
     }
 
+    // -------------------------------------------------------------------------
+    // Returns normalised progress of the active transition in [0, 1].
+    // Returns 0 if no transition is running.
+    // -------------------------------------------------------------------------
     float transitionProgress() {
         if (!transitioning) return 0.0f;
         return clamp01(timer / duration);
     }
 
+    // -------------------------------------------------------------------------
+    // One-shot query: returns true on the first call after a transition ends,
+    // then resets so subsequent calls return false.
+    // -------------------------------------------------------------------------
     bool consumeJustFinished() {
         bool v = justFinished;
         justFinished = false;
         return v;
     }
 
-    //screenshake
+    // -------------------------------------------------------------------------
+    // Begins a new screen shake. The shake fades linearly from full magnitude
+    // to zero over durationSec seconds, oscillating at frequencyHz.
+    // -------------------------------------------------------------------------
     void startShake(float magnitude, float durationSec, float frequencyHz) {
         if (magnitude <= 0.0f || durationSec <= 0.0f) {
             stopShake();
@@ -209,6 +260,9 @@ namespace camera {
         shakePhase = 0.0f;
     }
 
+    // -------------------------------------------------------------------------
+    // Immediately zeroes all shake state and offsets.
+    // -------------------------------------------------------------------------
     void stopShake() {
         shakeOffsetX = shakeOffsetY = 0.0f;
         shakeTimeLeft = shakeDuration = 0.0f;
@@ -216,6 +270,9 @@ namespace camera {
         shakePhase = 0.0f;
     }
 
+    // -------------------------------------------------------------------------
+    // Returns true while a screen shake effect has remaining time.
+    // -------------------------------------------------------------------------
     bool isShaking() {
         return shakeTimeLeft > 0.0f;
     }
