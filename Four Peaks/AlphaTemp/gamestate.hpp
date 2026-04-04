@@ -4,51 +4,87 @@
 #include "player.hpp"
 #include <vector>
 #include <string>
-#include "AEAudio.h"   // audio types (AEAudio, AEAudioGroup)
+#include "AEAudio.h"
 
+// -------------------------------------------------------------------------
+// Records a single melon the player has picked up. Melons are identified by
+// the scene they belong to and their row/column in that scene's tile map,
+// so the same melon is never awarded twice across play sessions.
+// -------------------------------------------------------------------------
 struct CollectedMelon
 {
-    std::string scene;
-    int row = 0;
-    int col = 0;
+    std::string scene; // Scene name matching g_currentScene
+    int row = 0;       // Tile grid row of the melon
+    int col = 0;       // Tile grid column of the melon
 };
 
+// -------------------------------------------------------------------------
+// Central game state object. One global instance (gGame) is shared across
+// all systems — audio, collision, dialogue, UI, and the pause menu all read
+// from or write to this struct rather than maintaining their own duplicates.
+// -------------------------------------------------------------------------
 struct GameState
 {
+    // -------------------------------------------------------------------------
+    // The single controllable character.
+    // -------------------------------------------------------------------------
     Player player;
 
-    // volume settings
+    // -------------------------------------------------------------------------
+    // Volume settings (range 0.0 - 1.0).
+    // -------------------------------------------------------------------------
     float musicVol = 0.6f;
     float sfxVol = 0.9f;
 
-    bool cheatsOn = false;
-    bool noClip = false;
+    // -------------------------------------------------------------------------
+    // Debug / cheat flags.
+    // -------------------------------------------------------------------------
+    bool cheatsOn = false; // Master toggle for all cheat shortcuts
+    bool noClip = false; // If true, the player passes through all solid tiles
 
-    // total game run time
+    // -------------------------------------------------------------------------
+    // Total seconds elapsed since the current run began.
+    // -------------------------------------------------------------------------
     float runTimeSeconds = 0.0f;
 
-    // stage unlock flags
+    // -------------------------------------------------------------------------
+    // Stage progression flags indexed 0-15. Each true entry means that stage
+    // has been cleared and the next stage in the sequence is accessible.
+    // -------------------------------------------------------------------------
     bool unlockedStages[16] = {};
 
-    // collected melon data
+    // -------------------------------------------------------------------------
+    // List of every melon collected this run. Used for the "all melons"
+    // achievement check and to prevent double-collection on re-entry.
+    // -------------------------------------------------------------------------
     std::vector<CollectedMelon> collectedMelons;
 
-    // seasonal artifact progress
+    // -------------------------------------------------------------------------
+    // Seasonal artifact progress indexed 0-3 (Winter, Summer, Spring, Autumn).
+    // Set to true when the corresponding relic is obtained.
+    // -------------------------------------------------------------------------
     bool collectedArtifacts[4] = {};
-    bool allArtifactsAchievementShown = false;
-    bool allMelonsAchievementShown = false;
+    bool allArtifactsAchievementShown = false; // Prevents the achievement dialog repeating
+    bool allMelonsAchievementShown = false; // Prevents the melon achievement repeating
 
-    // request a full in-memory stage reload after deleting save
+    // -------------------------------------------------------------------------
+    // When true, the main loop should reload all stage tile maps from disk on
+    // the next frame (set after the player deletes their save file).
+    // -------------------------------------------------------------------------
     bool reloadAllStageMaps = false;
 
-    // pause menu state
-    bool pauseActive = false;
-    bool pauseShowSettings = false;
-    int pauseSelectedIndex = 0;
-    int pauseSettingsRow = 0;
+    // -------------------------------------------------------------------------
+    // Pause menu state.
+    // -------------------------------------------------------------------------
+    bool pauseActive = false; // Is the pause overlay currently visible?
+    bool pauseShowSettings = false; // Is the settings sub-panel open?
+    int  pauseSelectedIndex = 0;     // Currently highlighted menu item index
+    int  pauseSettingsRow = 0;     // Currently highlighted row in the settings panel
 };
 
-// one global world object
+// -------------------------------------------------------------------------
+// The one global game state instance. Defined in gamestate.cpp.
+// -------------------------------------------------------------------------
 extern GameState gGame;
 
 #endif // GAME_STATE_HPP

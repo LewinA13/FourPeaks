@@ -55,12 +55,19 @@ void audio::init()
     s_currentBgm = BgmType::None;
 }
 
+// -------------------------------------------------------------------------
+// Immediately stops all music and resets the current BGM tracker.
+// -------------------------------------------------------------------------
 void audio::stop_music()
 {
     AEAudioStopGroup(s_musicGroup);
     s_currentBgm = BgmType::None;
 }
 
+// -------------------------------------------------------------------------
+// Stops any currently playing music and starts the track that corresponds
+// to the given BgmType. All tracks loop indefinitely (loop count = -1).
+// -------------------------------------------------------------------------
 static void PlayBgm_Internal(BgmType type)
 {
     // Always stop whatever was playing before starting a new track
@@ -99,6 +106,11 @@ static void PlayBgm_Internal(BgmType type)
     }
 }
 
+
+// -------------------------------------------------------------------------
+// Ticks the audio engine, syncs group volumes to the current game state,
+// and switches the BGM track if desiredBgm has changed since the last frame.
+// -------------------------------------------------------------------------
 void audio::update(BgmType desiredBgm)
 {
     AEAudioUpdate();
@@ -114,6 +126,10 @@ void audio::update(BgmType desiredBgm)
     }
 }
 
+// -------------------------------------------------------------------------
+// Plays a one-shot SFX from the SFX group. Each effect plays once at the
+// default pitch and volume, without looping (loop count = 0).
+// -------------------------------------------------------------------------
 void audio::play_sfx(SfxType sfx)
 {
     switch (sfx)
@@ -143,6 +159,10 @@ void audio::play_sfx(SfxType sfx)
     }
 }
 
+// -------------------------------------------------------------------------
+// Stops all audio, unloads every asset and mixer group, then shuts down
+// the audio engine. Safe to call only once during application teardown.
+// -------------------------------------------------------------------------
 void audio::shutdown()
 {
     // Stop music first
