@@ -26,7 +26,7 @@ namespace game
         , splashMesh(nullptr)
     {
         splashTex1 = AEGfxTextureLoad("Assets/Splash/DigiPen_Singapore_WEB_RED.png");
-        splashTex2 = AEGfxTextureLoad("Assets/FourPeaksLogo.png"); // your game logo
+        splashTex2 = AEGfxTextureLoad("Assets/Splash/FourPeaksLogo.png"); // your game logo
 
         AEGfxMeshStart();
         AEGfxTriAdd(-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f,

@@ -171,7 +171,7 @@ namespace sprite
             if (!autumnBgTex) autumnBgTex = AEGfxTextureLoad("autumnbg.jpg");
         }
         if (!springBgTex) {
-            springBgTex = AEGfxTextureLoad("Assets/springBG2.jpg");
+            springBgTex = AEGfxTextureLoad("Assets/Spring/springBG2.jpg");
             if (!springBgTex) springBgTex = AEGfxTextureLoad("springBG2.jpg");
         }
         if (!tilesetTex) {
@@ -183,7 +183,7 @@ namespace sprite
             if (!spikesTex) spikesTex = AEGfxTextureLoad("idle.png");
         }
         if (!coinTex) {
-            coinTex = AEGfxTextureLoad("Assets/Melon.png");
+            coinTex = AEGfxTextureLoad("Assets/Collectibles/Melon.png");
             if (!coinTex) coinTex = AEGfxTextureLoad("Melon.png");
         }
         if (!iceTex) {
@@ -195,7 +195,7 @@ namespace sprite
             if (!checkpointTex) checkpointTex = AEGfxTextureLoad("Checkpoint.png");
         }
         if (!crackTex) {
-            crackTex = AEGfxTextureLoad("Assets/b_ice.jpg");
+            crackTex = AEGfxTextureLoad("Assets/Winter/b_ice.jpg");
             if (!crackTex) crackTex = AEGfxTextureLoad("b_ice.jpg");
         }
         if (!heatbarTex) {
@@ -228,7 +228,7 @@ namespace sprite
         }
      
         if (!breakabletileTex) {
-            breakabletileTex = AEGfxTextureLoad("Assets/breakabletile.png");
+            breakabletileTex = AEGfxTextureLoad("Assets/Autumn/breakabletile.png");
             if (!breakabletileTex) breakabletileTex = AEGfxTextureLoad("breakabletile.jpg");
         }
 
@@ -247,20 +247,20 @@ namespace sprite
         if (!winterTTex) winterTTex = AEGfxTextureLoad("Assets/Winter/WinterT.png");
 
         // Seasonal tile textures (standalone images)
-        if (!spring1Tex) spring1Tex = AEGfxTextureLoad("Assets/spring1.png");
-        if (!spring2Tex) spring2Tex = AEGfxTextureLoad("Assets/spring2.png");
+        if (!spring1Tex) spring1Tex = AEGfxTextureLoad("Assets/Spring/spring1.png");
+        if (!spring2Tex) spring2Tex = AEGfxTextureLoad("Assets/Spring/spring2.png");
         if (!autumn1Tex) autumn1Tex = AEGfxTextureLoad("Assets/Autumn/autumn1.png");
         if (!autumn2Tex) autumn2Tex = AEGfxTextureLoad("Assets/Autumn/autumn2.png");
 
         // New tile textures
-        if (!grassTex)  grassTex = AEGfxTextureLoad("Assets/grasss.png");
+        if (!grassTex)  grassTex = AEGfxTextureLoad("Assets/Autumn/grasss.png");
         if (!fireTex_)  fireTex_ = AEGfxTextureLoad("Assets/fire.png");
         if (!sawTex_)   sawTex_ = AEGfxTextureLoad("Assets/saw.png");
 
         // artifacts 
         if (!winterArtifactsTex)  winterArtifactsTex = AEGfxTextureLoad("Assets/Winter/winterArtifacts.png");
         if (!summerArtifactsTex)  summerArtifactsTex = AEGfxTextureLoad("Assets/Summer/summerArtifacts.png");
-        if (!springArtifactsTex)  springArtifactsTex = AEGfxTextureLoad("Assets/springArtifacts.png");
+        if (!springArtifactsTex)  springArtifactsTex = AEGfxTextureLoad("Assets/Spring/springArtifacts.png");
         if (!autumnArtifactsTex)  autumnArtifactsTex = AEGfxTextureLoad("Assets/Autumn/autumnArtifacts.png");
 
         // ----------------------------------------------------------------
@@ -278,10 +278,10 @@ namespace sprite
         if (!summerStageTex[2]) summerStageTex[2] = AEGfxTextureLoad("Assets/Summer/summer_stage3.png");
         if (!summerStageTex[3]) summerStageTex[3] = AEGfxTextureLoad("Assets/Summer/summer_stage4.png");
 
-        if (!springStageTex[0]) springStageTex[0] = AEGfxTextureLoad("Assets/spring_stage1.png");
-        if (!springStageTex[1]) springStageTex[1] = AEGfxTextureLoad("Assets/spring_stage2.png");
-        if (!springStageTex[2]) springStageTex[2] = AEGfxTextureLoad("Assets/spring_stage3.png");
-        if (!springStageTex[3]) springStageTex[3] = AEGfxTextureLoad("Assets/spring_stage4.png");
+        if (!springStageTex[0]) springStageTex[0] = AEGfxTextureLoad("Assets/Spring/spring_stage1.png");
+        if (!springStageTex[1]) springStageTex[1] = AEGfxTextureLoad("Assets/Spring/spring_stage2.png");
+        if (!springStageTex[2]) springStageTex[2] = AEGfxTextureLoad("Assets/Spring/spring_stage3.png");
+        if (!springStageTex[3]) springStageTex[3] = AEGfxTextureLoad("Assets/Spring/spring_stage4.png");
 
         if (!autumnStageTex[0]) autumnStageTex[0] = AEGfxTextureLoad("Assets/Autumn/autumn_stage1.png");
         if (!autumnStageTex[1]) autumnStageTex[1] = AEGfxTextureLoad("Assets/Autumn/autumn_stage2.png");
