@@ -1,54 +1,174 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="audio.cpp" />
-    <ClCompile Include="autumn.cpp" />
-    <ClCompile Include="camera.cpp" />
-    <ClCompile Include="collision.cpp" />
-    <ClCompile Include="dialogue.cpp" />
-    <ClCompile Include="gamestate.cpp" />
-    <ClCompile Include="graphics.cpp" />
-    <ClCompile Include="level_loader.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="mainmenu.cpp" />
-    <ClCompile Include="player.cpp" />
-    <ClCompile Include="spring.cpp" />
-    <ClCompile Include="sprite.cpp" />
-    <ClCompile Include="summer.cpp" />
-    <ClCompile Include="tutorial.cpp" />
-    <ClCompile Include="winter.cpp" />
-    <ClCompile Include="hud.cpp" />
-    <ClCompile Include="stageselection.cpp" />
-    <ClCompile Include="thankyou.cpp" />
-    <ClCompile Include="transition.cpp" />
-    <ClCompile Include="credit.cpp" />
-    <ClCompile Include="pause.cpp" />
-    <ClCompile Include="splash.cpp" />
+    <ClInclude Include="include\core\gamestate.hpp">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\level_loader.hpp">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\transition.hpp">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\engine\audio.hpp">
+      <Filter>include\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\engine\camera.hpp">
+      <Filter>include\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\engine\collision.hpp">
+      <Filter>include\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\engine\graphics.hpp">
+      <Filter>include\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\engine\sprite.hpp">
+      <Filter>include\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gameplay\hud.hpp">
+      <Filter>include\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gameplay\dialogue.hpp">
+      <Filter>include\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gameplay\player.hpp">
+      <Filter>include\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\autumn.hpp">
+      <Filter>include\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\credit.hpp">
+      <Filter>include\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\mainmenu.hpp">
+      <Filter>include\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\pause.hpp">
+      <Filter>include\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\splash.hpp">
+      <Filter>include\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\spring.hpp">
+      <Filter>include\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\stageselection.hpp">
+      <Filter>include\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\summer.hpp">
+      <Filter>include\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\thankyou.hpp">
+      <Filter>include\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\tutorial.hpp">
+      <Filter>include\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\winter.hpp">
+      <Filter>include\scenes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="audio.hpp" />
-    <ClInclude Include="autumn.hpp" />
-    <ClInclude Include="camera.hpp" />
-    <ClInclude Include="collision.hpp" />
-    <ClInclude Include="dialogue.hpp" />
-    <ClInclude Include="gamestate.hpp" />
-    <ClInclude Include="graphics.hpp" />
-    <ClInclude Include="level_loader.hpp" />
-    <ClInclude Include="mainmenu.hpp" />
-    <ClInclude Include="player.hpp" />
-    <ClInclude Include="spring.hpp" />
-    <ClInclude Include="sprite.hpp" />
-    <ClInclude Include="summer.hpp" />
-    <ClInclude Include="tutorial.hpp" />
-    <ClInclude Include="winter.hpp" />
-    <ClInclude Include="stageselection.hpp" />
-    <ClInclude Include="thankyou.hpp" />
-    <ClInclude Include="transition.hpp" />
-    <ClInclude Include="credit.hpp" />
-    <ClInclude Include="pause.hpp" />
-    <ClInclude Include="splash.hpp" />
+    <Filter Include="include">
+      <UniqueIdentifier>{5677d7be-d347-49bd-ac2b-ee68145f9b26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{a15efc3c-17ff-47da-aad6-5fde4aaf15d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core">
+      <UniqueIdentifier>{efe6ab82-0204-49c9-80de-34c69d084586}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\engine">
+      <UniqueIdentifier>{9ca29ac5-3015-4494-bd3e-517424099e02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gameplay">
+      <UniqueIdentifier>{4f62d63b-4c6c-42ac-8985-6da6aa189ceb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\scenes">
+      <UniqueIdentifier>{c1b7983c-3f63-4255-a4ec-17dd6974a81b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\core">
+      <UniqueIdentifier>{dc0c343b-ead4-4d50-bc31-d2815018f919}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\engine">
+      <UniqueIdentifier>{883b5bf7-9d58-4046-acef-15f3e3310bbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\gameplay">
+      <UniqueIdentifier>{d3855038-f770-4e34-a0de-237aa2c48016}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\scenes">
+      <UniqueIdentifier>{36d14bff-6187-47f2-a628-ed744874c3bb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="hud.hpp" />
+    <ClCompile Include="src\core\transition.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\gamestate.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\level_loader.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\audio.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\camera.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\collision.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\graphics.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\sprite.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\dialogue.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\hud.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\player.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\autumn.cpp">
+      <Filter>src\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\credit.cpp">
+      <Filter>src\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\mainmenu.cpp">
+      <Filter>src\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\pause.cpp">
+      <Filter>src\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\splash.cpp">
+      <Filter>src\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\spring.cpp">
+      <Filter>src\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\stageselection.cpp">
+      <Filter>src\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\summer.cpp">
+      <Filter>src\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\thankyou.cpp">
+      <Filter>src\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\tutorial.cpp">
+      <Filter>src\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\winter.cpp">
+      <Filter>src\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
