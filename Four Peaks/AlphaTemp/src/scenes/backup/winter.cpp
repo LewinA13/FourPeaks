@@ -42,78 +42,6 @@ extern s8 gFontId;
 
 namespace game {
 
-    static AEGfxTexture* portalTexture()
-    {
-        static AEGfxTexture* tex = []() -> AEGfxTexture*
-        {
-            AEGfxTexture* loaded = AEGfxTextureLoad("Assets/objects_/portal.png");
-            if (!loaded) loaded = AEGfxTextureLoad("Assets/objects/portal.png");
-            if (!loaded) loaded = AEGfxTextureLoad("Assets/portal.png");
-            if (!loaded) loaded = AEGfxTextureLoad("portal.png");
-            return loaded;
-        }();
-        return tex;
-    }
-
-    static void drawPortalIndicatorRect(float centerX, float centerY, float areaW, float areaH)
-    {
-        static float portalAnimTime = 0.0f;
-        portalAnimTime += 1.0f / 60.0f;
-
-        const bool horizontal = areaW > areaH;
-        const float pulse = 0.94f + 0.06f * std::sin(portalAnimTime * 3.5f);
-
-        auto maxf = [](float a, float b) { return (a > b) ? a : b; };
-
-        AEGfxTexture* portalTex = portalTexture();
-        if (portalTex)
-        {
-            constexpr int frameCount = 8;
-            const int frame = static_cast<int>(portalAnimTime * 12.0f) % frameCount;
-            const float u0 = static_cast<float>(frame) / static_cast<float>(frameCount);
-            const float u1 = static_cast<float>(frame + 1) / static_cast<float>(frameCount);
-
-            // Match the spring vertical portal proportions exactly.
-            // For horizontal portals, keep the same tall portal shape and rotate it 90 degrees.
-            const float baseWidth = maxf(areaW * 1.10f, areaH * 0.50f);
-            const float baseHeight = maxf(areaH * 1.10f, areaW * 2.00f);
-
-            gfx::Vec2 portalSize = horizontal
-                ? gfx::Vec2{ baseHeight, baseWidth }
-                : gfx::Vec2{ baseWidth, baseHeight };
-
-            const float rotation = horizontal ? 1.57079632679f : 0.0f;
-            gfx::drawSprite(portalTex, { centerX, centerY }, rotation,
-                { portalSize.x * pulse, portalSize.y * pulse },
-                u0, 0.0f, u1, 1.0f, 1.0f);
-        }
-        else
-        {
-            gfx::drawRectangle({ centerX, centerY }, 0.0f,
-                { areaW * (horizontal ? 1.00f : 0.80f), areaH * (horizontal ? 0.80f : 1.00f) },
-                0xAA66CCFFu);
-        }
-    }
-
-    static void drawPortalIndicatorCells(int startCol, int endCol, int startRow, int endRow,
-        int gridCols = 32, int gridRows = 20)
-    {
-        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
-        const float cellW = (maxX - minX) / static_cast<float>(gridCols);
-        const float cellH = (maxY - minY) / static_cast<float>(gridRows);
-
-        const float left = minX + startCol * cellW;
-        const float right = minX + (endCol + 1) * cellW;
-        const float bottom = minY + startRow * cellH;
-        const float top = minY + (endRow + 1) * cellH;
-
-        drawPortalIndicatorRect(std::round((left + right) * 0.5f),
-            std::round((bottom + top) * 0.5f),
-            right - left, top - bottom);
-    }
-
-
     // -------------------------------------------------------------------
     // Helper function - shared by both stages
     // -------------------------------------------------------------------
@@ -324,7 +252,25 @@ namespace game {
         // Draw teleport indicator (2x1 cells)
         if (!camera::isTransitioning())
         {
-            drawPortalIndicatorCells(28, 29, 19, 19, gridCols, gridRows);
+            int teleportCol = 28;
+            int teleportRow = 19;
+
+            for (int c = 0; c < 2; c++)
+            {
+                int col = teleportCol + c;
+                if (col < gridCols)
+                {
+                    float gridWorldX, gridWorldY, cellW, cellH;
+                    gridToWorld(col, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
+
+                    gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
+                    portalPos.x = std::round(portalPos.x);
+                    portalPos.y = std::round(portalPos.y);
+
+                    gfx::Vec2 portalSize{ cellW, cellH };
+                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu); // Cyan
+                }
+            }
         }
 
         PlayerDraw(gGame.player, gridVisible);
@@ -762,7 +708,21 @@ namespace game {
         // Draw teleport indicator (1x2 cells at column 31, rows 18-19)
         if (!camera::isTransitioning())
         {
-            drawPortalIndicatorCells(31, 31, 18, 19, gridCols, gridRows);
+            int teleportCol = 31;
+            for (int r = 0; r < 2; r++)
+            {
+                int row = 18 + r; // Rows 18 and 19
+                if (row < gridRows)
+                {
+                    float gridWorldX, gridWorldY, cellW, cellH;
+                    gridToWorld(teleportCol, row, gridWorldX, gridWorldY, cellW, cellH);
+                    gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
+                    portalPos.x = std::round(portalPos.x);
+                    portalPos.y = std::round(portalPos.y);
+                    gfx::Vec2 portalSize{ cellW, cellH };
+                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu); // Green portal
+                }
+            }
         }
 
         PlayerDraw(gGame.player, gridVisible);
@@ -1255,22 +1215,41 @@ namespace game {
         if (!camera::isTransitioning())
         {
             int teleportRow = 19;
-            int startCol = gridCols;
-            int endCol = -1;
+            bool drewAny = false;
 
             for (int col = 0; col < gridCols; ++col)
             {
                 if (tileMap[teleportRow][col] == 3)
                 {
-                    if (col < startCol) startCol = col;
-                    if (col > endCol) endCol = col;
+                    float gridWorldX, gridWorldY, cellW, cellH;
+                    gridToWorld(col, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
+                    gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
+                    portalPos.x = std::round(portalPos.x);
+                    portalPos.y = std::round(portalPos.y);
+                    gfx::Vec2 portalSize{ cellW, cellH };
+                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu);
+                    drewAny = true;
                 }
             }
 
-            if (endCol >= startCol)
-                drawPortalIndicatorCells(startCol, endCol, teleportRow, teleportRow, gridCols, gridRows);
-            else
-                drawPortalIndicatorCells(1, 2, teleportRow, teleportRow, gridCols, gridRows);
+            // Fallback: draw at cols 1-2 if no portal tile found in tilemap
+            if (!drewAny)
+            {
+                for (int c = 0; c < 2; ++c)
+                {
+                    int col = 1 + c;
+                    if (col < gridCols)
+                    {
+                        float gridWorldX, gridWorldY, cellW, cellH;
+                        gridToWorld(col, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
+                        gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
+                        portalPos.x = std::round(portalPos.x);
+                        portalPos.y = std::round(portalPos.y);
+                        gfx::Vec2 portalSize{ cellW, cellH };
+                        gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu);
+                    }
+                }
+            }
         }
 
         PlayerDraw(gGame.player, gridVisible);
@@ -1757,7 +1736,17 @@ namespace game {
         // Draw teleport indicator to Summer Stage 1 (2 cells at col 1-2, row 19)
         if (!camera::isTransitioning())
         {
-            drawPortalIndicatorCells(29, 30, 19, 19, gridCols, gridRows);
+            for (int c = 0; c < 30; c++)
+            {
+                int col = 29 + c;
+                float gridWorldX, gridWorldY, cellW, cellH;
+                gridToWorld(col, 19, gridWorldX, gridWorldY, cellW, cellH);
+                gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
+                portalPos.x = std::round(portalPos.x);
+                portalPos.y = std::round(portalPos.y);
+                gfx::Vec2 portalSize{ cellW, cellH };
+                gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu); // Orange = leads to Summer
+            }
         }
 
         PlayerDraw(gGame.player, gridVisible);

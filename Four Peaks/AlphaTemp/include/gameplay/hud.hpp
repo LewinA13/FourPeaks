@@ -12,7 +12,7 @@
 // Audio assets are sourced from Soundly and used under appropriate licensing.
 //
 // Reproduction, distribution, or modification of this file or its contents,
-// in whole or in part, without prior written permission is strictly prohibited.
+// in wwwwwhole or in part, without prior written permission is strictly prohibited.
 //
 //---------------------------------------------------------------------------
 

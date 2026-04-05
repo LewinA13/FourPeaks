@@ -70,79 +70,6 @@ namespace
         yWorld = minY + row * cellH;
     }
 
-
-
-    static AEGfxTexture* portalTexture()
-    {
-        static AEGfxTexture* tex = []() -> AEGfxTexture*
-        {
-            AEGfxTexture* loaded = AEGfxTextureLoad("Assets/objects_/portal.png");
-            if (!loaded) loaded = AEGfxTextureLoad("Assets/objects/portal.png");
-            if (!loaded) loaded = AEGfxTextureLoad("Assets/portal.png");
-            if (!loaded) loaded = AEGfxTextureLoad("portal.png");
-            return loaded;
-        }();
-        return tex;
-    }
-
-    static void drawPortalIndicatorRect(float centerX, float centerY, float areaW, float areaH)
-    {
-        static float portalAnimTime = 0.0f;
-        portalAnimTime += 1.0f / 60.0f;
-
-        const bool horizontal = areaW > areaH;
-        const float pulse = 0.94f + 0.06f * std::sin(portalAnimTime * 3.5f);
-
-        auto maxf = [](float a, float b) { return (a > b) ? a : b; };
-
-        AEGfxTexture* portalTex = portalTexture();
-        if (portalTex)
-        {
-            constexpr int frameCount = 8;
-            const int frame = static_cast<int>(portalAnimTime * 12.0f) % frameCount;
-            const float u0 = static_cast<float>(frame) / static_cast<float>(frameCount);
-            const float u1 = static_cast<float>(frame + 1) / static_cast<float>(frameCount);
-
-            // Match the spring vertical portal proportions exactly.
-            // For horizontal portals, keep the same tall portal shape and rotate it 90 degrees.
-            const float baseWidth = maxf(areaW * 1.10f, areaH * 0.50f);
-            const float baseHeight = maxf(areaH * 1.10f, areaW * 2.00f);
-
-            gfx::Vec2 portalSize = horizontal
-                ? gfx::Vec2{ baseHeight, baseWidth }
-                : gfx::Vec2{ baseWidth, baseHeight };
-
-            const float rotation = horizontal ? 1.57079632679f : 0.0f;
-            gfx::drawSprite(portalTex, { centerX, centerY }, rotation,
-                { portalSize.x * pulse, portalSize.y * pulse },
-                u0, 0.0f, u1, 1.0f, 1.0f);
-        }
-        else
-        {
-            gfx::drawRectangle({ centerX, centerY }, 0.0f,
-                { areaW * (horizontal ? 1.00f : 0.80f), areaH * (horizontal ? 0.80f : 1.00f) },
-                0xAA66CCFFu);
-        }
-    }
-
-    static void drawPortalIndicatorCells(int startCol, int endCol, int startRow, int endRow,
-        int gridCols = 32, int gridRows = 20)
-    {
-        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
-        const float cellW = (maxX - minX) / static_cast<float>(gridCols);
-        const float cellH = (maxY - minY) / static_cast<float>(gridRows);
-
-        const float left = minX + startCol * cellW;
-        const float right = minX + (endCol + 1) * cellW;
-        const float bottom = minY + startRow * cellH;
-        const float top = minY + (endRow + 1) * cellH;
-
-        drawPortalIndicatorRect(std::round((left + right) * 0.5f),
-            std::round((bottom + top) * 0.5f),
-            right - left, top - bottom);
-    }
-
     static void drawGridLines(int gridCols, int gridRows)
     {
         const u32 gridColor = 0x80FFFFFF;
@@ -676,7 +603,17 @@ void game::AutumnS1::draw() const
     drawTiles();
     if (gridVisible) drawGrid();
 
-    drawPortalIndicatorCells(31, 31, 7, 9, gridCols, gridRows);
+    {
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        for (int row : { 7, 8, 9 })
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
+        }
+    }
 
     PlayerDraw(gGame.player, gridVisible);
     g_leafSystem.draw();
@@ -783,7 +720,17 @@ void game::AutumnS2::draw() const
     drawTiles();
     if (gridVisible) drawGrid();
 
-    drawPortalIndicatorCells(31, 31, 17, 19, gridCols, gridRows);
+    {
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        for (int row : { 17, 18, 19 })
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
+        }
+    }
 
     PlayerDraw(gGame.player, gridVisible);
     g_leafSystem.draw();
@@ -889,7 +836,17 @@ void game::AutumnS3::draw() const
     drawTiles();
     if (gridVisible) drawGrid();
 
-    drawPortalIndicatorCells(31, 31, 1, 3, gridCols, gridRows);
+    {
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        for (int row : { 1, 2, 3 })
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
+        }
+    }
 
     PlayerDraw(gGame.player, gridVisible);
     g_leafSystem.draw();
@@ -998,7 +955,17 @@ void game::AutumnS4::draw() const
     drawTiles();
     if (gridVisible) drawGrid();
 
-    drawPortalIndicatorCells(31, 31, 18, 19, gridCols, gridRows);
+    {
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float cw = (maxX - minX) / static_cast<float>(gridCols);
+        float ch = (maxY - minY) / static_cast<float>(gridRows);
+        for (int row : { 18, 19 })
+        {
+            gfx::Vec2 p{ std::round(minX + 31 * cw + cw * 0.5f), std::round(minY + row * ch + ch * 0.5f) };
+            gfx::drawRectangle(p, 0.0f, { cw, ch }, 0xAAFFFFFFu);
+        }
+    }
 
     PlayerDraw(gGame.player, gridVisible);
     g_leafSystem.draw();
