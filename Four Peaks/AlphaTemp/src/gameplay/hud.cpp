@@ -1,3 +1,7 @@
+// ----------------------------------------------------------------------------
+// Done By: Justin
+// ----------------------------------------------------------------------------
+
 // ---------------------------------------------------------------------------
 // hud.cpp
 // implementation of hud.hpp functions. Code to draw the melon counter, death counter, run timer, and artifact icons on the screen.

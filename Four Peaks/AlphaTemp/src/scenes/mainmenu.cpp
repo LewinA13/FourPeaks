@@ -1,3 +1,7 @@
+// ----------------------------------------------------------------------------
+// Done By: Skyler, Arun
+// ----------------------------------------------------------------------------
+
 // ---------------------------------------------------------------------------
 // mainmenu.cpp
 // implementation of mainmenu.hpp functions. This state shows the animated background and menu options, and routes to other states based on player input.

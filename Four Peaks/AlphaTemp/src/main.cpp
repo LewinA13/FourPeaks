@@ -1,3 +1,7 @@
+// ----------------------------------------------------------------------------
+// Done By: Hong Yang, Arun, Skyler, Justin
+// ----------------------------------------------------------------------------
+
 // ---------------------------------------------------------------------------
 // main.cpp
 // Entry point and main game loop. Initializes the engine, manages scene transitions, and routes update/draw calls to the current scene.

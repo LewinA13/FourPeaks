@@ -1,4 +1,8 @@
-﻿#include "scenes/winter.hpp"
+﻿// ----------------------------------------------------------------------------
+// Done By: Hong Yang
+// ----------------------------------------------------------------------------
+
+#include "scenes/winter.hpp"
 #include "gameplay/player.hpp"
 #include <iostream>
 #include "engine/collision.hpp"

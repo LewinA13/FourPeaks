@@ -1,4 +1,8 @@
-﻿#include "scenes/autumn.hpp"
+﻿// ----------------------------------------------------------------------------
+// Done By: Hong Yang, Skyler, Arun, Justin
+// ----------------------------------------------------------------------------
+
+#include "scenes/autumn.hpp"
 
 #include "AEEngine.h"
 #include "engine/graphics.hpp"

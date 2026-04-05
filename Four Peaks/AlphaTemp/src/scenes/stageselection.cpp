@@ -1,4 +1,8 @@
-﻿#include "scenes/stageselection.hpp"
+﻿// ----------------------------------------------------------------------------
+// Done By: Hong Yang, Justin
+// ----------------------------------------------------------------------------
+
+#include "scenes/stageselection.hpp"
 #include "AEEngine.h"
 #include "engine/sprite.hpp"
 #include "core/gamestate.hpp"

@@ -1,3 +1,7 @@
+// ----------------------------------------------------------------------------
+// Done By: Hong Yang
+// ----------------------------------------------------------------------------
+
 #include "gameplay/dialogue.hpp"
 #include "engine/graphics.hpp"
 #include "engine/sprite.hpp"
