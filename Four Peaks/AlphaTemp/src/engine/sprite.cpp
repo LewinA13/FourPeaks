@@ -254,7 +254,7 @@ namespace sprite
 
         // New tile textures
         if (!grassTex)  grassTex = AEGfxTextureLoad("Assets/Autumn/grasss.png");
-        if (!fireTex_)  fireTex_ = AEGfxTextureLoad("Assets/fire.png");
+        if (!fireTex_)  fireTex_ = AEGfxTextureLoad("Assets/Summer/fire.png");
         if (!sawTex_)   sawTex_ = AEGfxTextureLoad("Assets/saw.png");
 
         // artifacts 
