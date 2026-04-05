@@ -477,25 +477,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     auto reloadAllStageMaps = [&]()
         {
 
-            level::loadTileMap("Assets/Levels/winter_s1.txt", game::WinterS1::gridRows, game::WinterS1::gridCols, &winterStage.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/winter_s2.txt", game::WinterS2::gridRows, game::WinterS2::gridCols, &winterStage2.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/winter_s3.txt", game::WinterS3::gridRows, game::WinterS3::gridCols, &winterStage3.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/winter_s4.txt", game::WinterS4::gridRows, game::WinterS4::gridCols, &winterStage4.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/winter_s1.csv", game::WinterS1::gridRows, game::WinterS1::gridCols, &winterStage.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/winter_s2.csv", game::WinterS2::gridRows, game::WinterS2::gridCols, &winterStage2.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/winter_s3.csv", game::WinterS3::gridRows, game::WinterS3::gridCols, &winterStage3.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/winter_s4.csv", game::WinterS4::gridRows, game::WinterS4::gridCols, &winterStage4.getTileMap()[0][0]);
 
-            level::loadTileMap("Assets/Levels/summer_s1.txt", game::SummerS1::gridRows, game::SummerS1::gridCols, &summerStage.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/summer_s2.txt", game::SummerS2::gridRows, game::SummerS2::gridCols, &summerStage2.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/summer_s3.txt", game::SummerS3::gridRows, game::SummerS3::gridCols, &summerStage3.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/summer_s4.txt", game::SummerS4::gridRows, game::SummerS4::gridCols, &summerStage4.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/summer_s1.csv", game::SummerS1::gridRows, game::SummerS1::gridCols, &summerStage.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/summer_s2.csv", game::SummerS2::gridRows, game::SummerS2::gridCols, &summerStage2.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/summer_s3.csv", game::SummerS3::gridRows, game::SummerS3::gridCols, &summerStage3.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/summer_s4.csv", game::SummerS4::gridRows, game::SummerS4::gridCols, &summerStage4.getTileMap()[0][0]);
 
-            level::loadTileMap("Assets/Levels/spring_s1.txt", game::SpringS1::gridRows, game::SpringS1::gridCols, &springStage.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/spring_s2.txt", game::SpringS2::gridRows, game::SpringS2::gridCols, &springStage2.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/spring_s3.txt", game::SpringS3::gridRows, game::SpringS3::gridCols, &springStage3.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/spring_s4.txt", game::SpringS4::gridRows, game::SpringS4::gridCols, &springStage4.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/spring_s1.csv", game::SpringS1::gridRows, game::SpringS1::gridCols, &springStage.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/spring_s2.csv", game::SpringS2::gridRows, game::SpringS2::gridCols, &springStage2.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/spring_s3.csv", game::SpringS3::gridRows, game::SpringS3::gridCols, &springStage3.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/spring_s4.csv", game::SpringS4::gridRows, game::SpringS4::gridCols, &springStage4.getTileMap()[0][0]);
 
-            level::loadTileMap("Assets/Levels/autumn_s1.txt", game::AutumnS1::gridRows, game::AutumnS1::gridCols, &autumnStage.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/autumn_s2.txt", game::AutumnS2::gridRows, game::AutumnS2::gridCols, &autumnStage2.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/autumn_s3.txt", game::AutumnS3::gridRows, game::AutumnS3::gridCols, &autumnStage3.getTileMap()[0][0]);
-            level::loadTileMap("Assets/Levels/autumn_s4.txt", game::AutumnS4::gridRows, game::AutumnS4::gridCols, &autumnStage4.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/autumn_s1.csv", game::AutumnS1::gridRows, game::AutumnS1::gridCols, &autumnStage.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/autumn_s2.csv", game::AutumnS2::gridRows, game::AutumnS2::gridCols, &autumnStage2.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/autumn_s3.csv", game::AutumnS3::gridRows, game::AutumnS3::gridCols, &autumnStage3.getTileMap()[0][0]);
+            level::loadTileMap("Assets/Levels/autumn_s4.csv", game::AutumnS4::gridRows, game::AutumnS4::gridCols, &autumnStage4.getTileMap()[0][0]);
 
             ApplyCollectedMelonsToTileMap("WinterS1", game::WinterS1::gridRows, winterStage.getTileMap());
             ApplyCollectedMelonsToTileMap("WinterS2", game::WinterS2::gridRows, winterStage2.getTileMap());

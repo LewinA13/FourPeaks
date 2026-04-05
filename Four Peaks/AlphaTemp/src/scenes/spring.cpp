@@ -547,7 +547,7 @@ namespace
 game::SpringS1::SpringS1()
 {
     gridVisible = false;
-    level::loadTileMap("Assets/Levels/spring_s1.txt", gridRows, gridCols, &tileMap[0][0]);
+    level::loadTileMap("Assets/Levels/spring_s1.csv", gridRows, gridCols, &tileMap[0][0]);
 }
 game::SpringS1::~SpringS1() = default;
 
