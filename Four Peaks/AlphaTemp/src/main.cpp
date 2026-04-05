@@ -730,6 +730,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 break;
             }
 
+            // Reset heat when entering any Summer stage
+            if (currentState == SceneState::SummerS1 ||
+                currentState == SceneState::SummerS2 ||
+                currentState == SceneState::SummerS3 ||
+                currentState == SceneState::SummerS4)
+            {
+                gGame.player.heat = 1.0f;  
+            }
+
             // Prefer using your helper so feet align nicely with tiles
             PlayerSetFeetWorld(gGame.player, spawn);
 

@@ -151,7 +151,7 @@ namespace sprite
     {
         // Always (re)load these if missing
         if (!backgroundTex) {
-            backgroundTex = AEGfxTextureLoad("Assets/BG.png");
+            backgroundTex = AEGfxTextureLoad("Assets/Winter/BG.png");
             if (!backgroundTex) backgroundTex = AEGfxTextureLoad("BG.png");
         }
         if (!mmBackgroundTex) {
@@ -163,7 +163,7 @@ namespace sprite
             if (!summerBgTex) summerBgTex = AEGfxTextureLoad("summerbg.jpg");
         }
         if (!tutorialBgTex) {
-            tutorialBgTex = AEGfxTextureLoad("Assets/bg_tutorial.png");
+            tutorialBgTex = AEGfxTextureLoad("Assets/background_/bg_tutorial.png");
             if (!tutorialBgTex) tutorialBgTex = AEGfxTextureLoad("bg_tutorial.png");
         }
         if (!autumnBgTex) {
@@ -179,7 +179,7 @@ namespace sprite
             if (!tilesetTex) tilesetTex = AEGfxTextureLoad("winter_.png");
         }
         if (!spikesTex) {
-            spikesTex = AEGfxTextureLoad("Assets/idle.png");
+            spikesTex = AEGfxTextureLoad("Assets/objects_/idle.png");
             if (!spikesTex) spikesTex = AEGfxTextureLoad("idle.png");
         }
         if (!coinTex) {
@@ -187,11 +187,11 @@ namespace sprite
             if (!coinTex) coinTex = AEGfxTextureLoad("Melon.png");
         }
         if (!iceTex) {
-            iceTex = AEGfxTextureLoad("Assets/IceBox.png");
+            iceTex = AEGfxTextureLoad("Assets/Winter/IceBox.png");
             if (!iceTex) iceTex = AEGfxTextureLoad("IceBox.png");
         }
         if (!checkpointTex) {
-            checkpointTex = AEGfxTextureLoad("Assets/Checkpoint.png");
+            checkpointTex = AEGfxTextureLoad("Assets/objects_/Checkpoint.png");
             if (!checkpointTex) checkpointTex = AEGfxTextureLoad("Checkpoint.png");
         }
         if (!crackTex) {
@@ -203,17 +203,17 @@ namespace sprite
             if (!heatbarTex) heatbarTex = AEGfxTextureLoad("heatbar.png");
         }
         if (!signTex) {
-            signTex = AEGfxTextureLoad("Assets/sign.png");
+            signTex = AEGfxTextureLoad("Assets/UI/sign.png");
             if (!signTex) signTex = AEGfxTextureLoad("sign.jpg");
         }
         if (!tile12Tex) {
-            tile12Tex = AEGfxTextureLoad("Assets/center.png");
+            tile12Tex = AEGfxTextureLoad("Assets/Summer/center.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Assets/center.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Tile_12.png");
             if (!tile12Tex) tile12Tex = AEGfxTextureLoad("Tile_12.jpg");
         }
         if (!tile02Tex) {
-            tile02Tex = AEGfxTextureLoad("Assets/top1.png");
+            tile02Tex = AEGfxTextureLoad("Assets/Summer/top1.png");
             if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Assets/top1.png");
             if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Tile_02.png");
             if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Tile_02.jpg");
@@ -223,7 +223,7 @@ namespace sprite
             if (!bottleTex) bottleTex = AEGfxTextureLoad("bottle.jpg");
         }
         if (!textboxTex) {
-            textboxTex = AEGfxTextureLoad("Assets/textbox.png");
+            textboxTex = AEGfxTextureLoad("Assets/UI/textbox.png");
             if (!textboxTex) textboxTex = AEGfxTextureLoad("textbox.jpg");
         }
      
@@ -233,7 +233,7 @@ namespace sprite
         }
 
         if (!stgselectbgTex) {
-            stgselectbgTex = AEGfxTextureLoad("Assets/stgselectbg.png");
+            stgselectbgTex = AEGfxTextureLoad("Assets/UI/stgselectbg.png");
             if (!stgselectbgTex) stgselectbgTex = AEGfxTextureLoad("stgselectbg.jpg");
         }
 
@@ -255,7 +255,7 @@ namespace sprite
         // New tile textures
         if (!grassTex)  grassTex = AEGfxTextureLoad("Assets/Autumn/grasss.png");
         if (!fireTex_)  fireTex_ = AEGfxTextureLoad("Assets/Summer/fire.png");
-        if (!sawTex_)   sawTex_ = AEGfxTextureLoad("Assets/saw.png");
+        if (!sawTex_)   sawTex_ = AEGfxTextureLoad("Assets/objects_/saw.png");
 
         // artifacts 
         if (!winterArtifactsTex)  winterArtifactsTex = AEGfxTextureLoad("Assets/Winter/winterArtifacts.png");
@@ -953,3 +953,5 @@ namespace sprite
         return true;
     }
 }
+
+
