@@ -1,7 +1,7 @@
 #ifndef GAME_STATE_HPP
 #define GAME_STATE_HPP
 
-#include "../gameplay/player.hpp"
+#include "gameplay/player.hpp"
 #include <vector>
 #include <string>
 #include "AEAudio.h"

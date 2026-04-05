@@ -1,19 +1,19 @@
 ﻿// -------------------------------------------------------------------------- -
 // summer.cpp - Combined Summer Stages (Stage 1..4)
 // ---------------------------------------------------------------------------
-#include "../scenes/summer.hpp"
+#include "scenes/summer.hpp"
 #include "AEEngine.h"
-#include "../engine/graphics.hpp"
-#include "../gameplay/player.hpp"
-#include "../core/gamestate.hpp"
-#include "../engine/sprite.hpp"
-#include "../engine/camera.hpp"
-#include "../core/level_loader.hpp"
+#include "engine/graphics.hpp"
+#include "gameplay/player.hpp"
+#include "core/gamestate.hpp"
+#include "engine/sprite.hpp"
+#include "engine/camera.hpp"
+#include "core/level_loader.hpp"
 #include <cmath>
 #include <sstream>
 #include <string>
 #include <vector>
-#include "../engine/collision.hpp"
+#include "engine/collision.hpp"
 
 typedef uint32_t u32;
 extern s8 gFontId;

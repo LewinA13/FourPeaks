@@ -3,9 +3,9 @@
 // Manages loading and access to all textures used in the game.
 // Also manages shared animation state for animated tiles (coin, checkpoint, crack).
 // ---------------------------------------------------------------------------
-#include "../engine/sprite.hpp"
+#include "engine/sprite.hpp"
 #include <AEGraphics.h>
-#include "../engine/graphics.hpp"
+#include "engine/graphics.hpp"
 #include <cmath>
 
 
@@ -159,7 +159,7 @@ namespace sprite
             if (!mmBackgroundTex) mmBackgroundTex = AEGfxTextureLoad("Assets/mmf1.png");
         }
         if (!summerBgTex) {
-            summerBgTex = AEGfxTextureLoad("Assets/summerbg.png");
+            summerBgTex = AEGfxTextureLoad("Assets/Summer/summerbg.png");
             if (!summerBgTex) summerBgTex = AEGfxTextureLoad("summerbg.jpg");
         }
         if (!tutorialBgTex) {
@@ -167,7 +167,7 @@ namespace sprite
             if (!tutorialBgTex) tutorialBgTex = AEGfxTextureLoad("bg_tutorial.png");
         }
         if (!autumnBgTex) {
-            autumnBgTex = AEGfxTextureLoad("Assets/autumnbg.jpg");
+            autumnBgTex = AEGfxTextureLoad("Assets/Autumn/autumnbg.jpg");
             if (!autumnBgTex) autumnBgTex = AEGfxTextureLoad("autumnbg.jpg");
         }
         if (!springBgTex) {
@@ -175,7 +175,7 @@ namespace sprite
             if (!springBgTex) springBgTex = AEGfxTextureLoad("springBG2.jpg");
         }
         if (!tilesetTex) {
-            tilesetTex = AEGfxTextureLoad("Assets/winter_.png");
+            tilesetTex = AEGfxTextureLoad("Assets/Winter/winter_.png");
             if (!tilesetTex) tilesetTex = AEGfxTextureLoad("winter_.png");
         }
         if (!spikesTex) {
@@ -219,7 +219,7 @@ namespace sprite
             if (!tile02Tex) tile02Tex = AEGfxTextureLoad("Tile_02.jpg");
         }
         if (!bottleTex) {
-            bottleTex = AEGfxTextureLoad("Assets/bottle.png");
+            bottleTex = AEGfxTextureLoad("Assets/Collectibles/bottle.png");
             if (!bottleTex) bottleTex = AEGfxTextureLoad("bottle.jpg");
         }
         if (!textboxTex) {
@@ -243,14 +243,14 @@ namespace sprite
         }
 
         // Winter tile overrides (standalone images)
-        if (!winterCTex) winterCTex = AEGfxTextureLoad("Assets/WinterC.png");
-        if (!winterTTex) winterTTex = AEGfxTextureLoad("Assets/WinterT.png");
+        if (!winterCTex) winterCTex = AEGfxTextureLoad("Assets/Winter/WinterC.png");
+        if (!winterTTex) winterTTex = AEGfxTextureLoad("Assets/Winter/WinterT.png");
 
         // Seasonal tile textures (standalone images)
         if (!spring1Tex) spring1Tex = AEGfxTextureLoad("Assets/spring1.png");
         if (!spring2Tex) spring2Tex = AEGfxTextureLoad("Assets/spring2.png");
-        if (!autumn1Tex) autumn1Tex = AEGfxTextureLoad("Assets/autumn1.png");
-        if (!autumn2Tex) autumn2Tex = AEGfxTextureLoad("Assets/autumn2.png");
+        if (!autumn1Tex) autumn1Tex = AEGfxTextureLoad("Assets/Autumn/autumn1.png");
+        if (!autumn2Tex) autumn2Tex = AEGfxTextureLoad("Assets/Autumn/autumn2.png");
 
         // New tile textures
         if (!grassTex)  grassTex = AEGfxTextureLoad("Assets/grasss.png");
@@ -258,35 +258,35 @@ namespace sprite
         if (!sawTex_)   sawTex_ = AEGfxTextureLoad("Assets/saw.png");
 
         // artifacts 
-        if (!winterArtifactsTex)  winterArtifactsTex = AEGfxTextureLoad("Assets/winterArtifacts.png");
-        if (!summerArtifactsTex)  summerArtifactsTex = AEGfxTextureLoad("Assets/summerArtifacts.png");
+        if (!winterArtifactsTex)  winterArtifactsTex = AEGfxTextureLoad("Assets/Winter/winterArtifacts.png");
+        if (!summerArtifactsTex)  summerArtifactsTex = AEGfxTextureLoad("Assets/Summer/summerArtifacts.png");
         if (!springArtifactsTex)  springArtifactsTex = AEGfxTextureLoad("Assets/springArtifacts.png");
-        if (!autumnArtifactsTex)  autumnArtifactsTex = AEGfxTextureLoad("Assets/autumnArtifacts.png");
+        if (!autumnArtifactsTex)  autumnArtifactsTex = AEGfxTextureLoad("Assets/Autumn/autumnArtifacts.png");
 
         // ----------------------------------------------------------------
         // Stage preview textures — loaded here so they are ready before the
         // stage selection screen is first drawn.
         // Update the file paths below to match your actual asset filenames.
         // ----------------------------------------------------------------
-        if (!winterStageTex[0]) winterStageTex[0] = AEGfxTextureLoad("Assets/winter_stage1.png");
-        if (!winterStageTex[1]) winterStageTex[1] = AEGfxTextureLoad("Assets/winter_stage2.png");
-        if (!winterStageTex[2]) winterStageTex[2] = AEGfxTextureLoad("Assets/winter_stage3.png");
-        if (!winterStageTex[3]) winterStageTex[3] = AEGfxTextureLoad("Assets/winter_stage4.png");
+        if (!winterStageTex[0]) winterStageTex[0] = AEGfxTextureLoad("Assets/Winter/winter_stage1.png");
+        if (!winterStageTex[1]) winterStageTex[1] = AEGfxTextureLoad("Assets/Winter/winter_stage2.png");
+        if (!winterStageTex[2]) winterStageTex[2] = AEGfxTextureLoad("Assets/Winter/winter_stage3.png");
+        if (!winterStageTex[3]) winterStageTex[3] = AEGfxTextureLoad("Assets/Winter/winter_stage4.png");
 
-        if (!summerStageTex[0]) summerStageTex[0] = AEGfxTextureLoad("Assets/summer_stage1.png");
-        if (!summerStageTex[1]) summerStageTex[1] = AEGfxTextureLoad("Assets/summer_stage2.png");
-        if (!summerStageTex[2]) summerStageTex[2] = AEGfxTextureLoad("Assets/summer_stage3.png");
-        if (!summerStageTex[3]) summerStageTex[3] = AEGfxTextureLoad("Assets/summer_stage4.png");
+        if (!summerStageTex[0]) summerStageTex[0] = AEGfxTextureLoad("Assets/Summer/summer_stage1.png");
+        if (!summerStageTex[1]) summerStageTex[1] = AEGfxTextureLoad("Assets/Summer/summer_stage2.png");
+        if (!summerStageTex[2]) summerStageTex[2] = AEGfxTextureLoad("Assets/Summer/summer_stage3.png");
+        if (!summerStageTex[3]) summerStageTex[3] = AEGfxTextureLoad("Assets/Summer/summer_stage4.png");
 
         if (!springStageTex[0]) springStageTex[0] = AEGfxTextureLoad("Assets/spring_stage1.png");
         if (!springStageTex[1]) springStageTex[1] = AEGfxTextureLoad("Assets/spring_stage2.png");
         if (!springStageTex[2]) springStageTex[2] = AEGfxTextureLoad("Assets/spring_stage3.png");
         if (!springStageTex[3]) springStageTex[3] = AEGfxTextureLoad("Assets/spring_stage4.png");
 
-        if (!autumnStageTex[0]) autumnStageTex[0] = AEGfxTextureLoad("Assets/autumn_stage1.png");
-        if (!autumnStageTex[1]) autumnStageTex[1] = AEGfxTextureLoad("Assets/autumn_stage2.png");
-        if (!autumnStageTex[2]) autumnStageTex[2] = AEGfxTextureLoad("Assets/autumn_stage3.png");
-        if (!autumnStageTex[3]) autumnStageTex[3] = AEGfxTextureLoad("Assets/autumn_stage4.png");
+        if (!autumnStageTex[0]) autumnStageTex[0] = AEGfxTextureLoad("Assets/Autumn/autumn_stage1.png");
+        if (!autumnStageTex[1]) autumnStageTex[1] = AEGfxTextureLoad("Assets/Autumn/autumn_stage2.png");
+        if (!autumnStageTex[2]) autumnStageTex[2] = AEGfxTextureLoad("Assets/Autumn/autumn_stage3.png");
+        if (!autumnStageTex[3]) autumnStageTex[3] = AEGfxTextureLoad("Assets/Autumn/autumn_stage4.png");
     }
 
 

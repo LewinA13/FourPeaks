@@ -4,10 +4,10 @@
 // "Thank You for Playing" end screen shown after Autumn Stage 4.
 // ---------------------------------------------------------------------------
 
-#include "../scenes/thankyou.hpp"
+#include "scenes/thankyou.hpp"
 #include "AEEngine.h"
-#include "../engine/graphics.hpp"
-#include "../core/gamestate.hpp"
+#include "engine/graphics.hpp"
+#include "core/gamestate.hpp"
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>

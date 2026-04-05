@@ -13,9 +13,9 @@
 // ---------------------------------------------------------------------------
 
 #define NOMINMAX
-#include "../core/transition.hpp"
-#include "../engine/camera.hpp"
-#include "../engine/graphics.hpp"
+#include "core/transition.hpp"
+#include "engine/camera.hpp"
+#include "engine/graphics.hpp"
 #include "AEEngine.h"
 #include <cstdint>
 #include <algorithm>

@@ -2,7 +2,7 @@
 // Level Loader Implementation
 // Handles loading tile maps from text-based level files into a fixed-size grid.
 // ----------------------------------------------------------------------------
-#include "../core/level_loader.hpp"
+#include "core/level_loader.hpp"
 #include <fstream>
 #include <string>
 #include <cctype>

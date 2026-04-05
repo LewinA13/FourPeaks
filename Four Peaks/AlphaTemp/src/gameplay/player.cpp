@@ -2,16 +2,16 @@
 // player.cpp
 // This file contains the implementation of the Player struct and related functions.
 // ---------------------------------------------------------------------------
-#include "../gameplay/player.hpp"
-#include "../engine/graphics.hpp"
-#include "../engine/collision.hpp"
+#include "gameplay/player.hpp"
+#include "engine/graphics.hpp"
+#include "engine/collision.hpp"
 #include <fstream>
 #include <iomanip>
 #include <string>
-#include "../engine/camera.hpp"
-#include "../core/gamestate.hpp"
-#include "../engine/audio.hpp"
-#include "../gameplay/dialogue.hpp"
+#include "engine/camera.hpp"
+#include "core/gamestate.hpp"
+#include "engine/audio.hpp"
+#include "gameplay/dialogue.hpp"
 #include <iostream>
 
 

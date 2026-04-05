@@ -1,7 +1,7 @@
-#include "../gameplay/dialogue.hpp"
-#include "../engine/graphics.hpp"
-#include "../engine/sprite.hpp"
-#include "../core/gamestate.hpp"
+#include "gameplay/dialogue.hpp"
+#include "engine/graphics.hpp"
+#include "engine/sprite.hpp"
+#include "core/gamestate.hpp"
 extern s8 gFontId;
 
 namespace UI {

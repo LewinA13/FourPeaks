@@ -1,5 +1,5 @@
 #pragma once
-#include "../gameplay/player.hpp"
+#include "gameplay/player.hpp"
 #include <vector>
 #include <string>
 

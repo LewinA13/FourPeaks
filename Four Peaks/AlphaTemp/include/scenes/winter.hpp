@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <array>
-#include "../engine/sprite.hpp"
+#include "engine/sprite.hpp"
 
 typedef uint32_t u32;
 

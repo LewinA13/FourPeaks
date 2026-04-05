@@ -1,4 +1,4 @@
-#include "../core/gamestate.hpp"
+#include "core/gamestate.hpp"
 
 // -------------------------------------------------------------------------
 // The one and only storage for the global game state.

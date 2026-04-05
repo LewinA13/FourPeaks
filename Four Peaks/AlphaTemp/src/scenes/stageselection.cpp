@@ -1,7 +1,7 @@
-﻿#include "../scenes/stageselection.hpp"
+﻿#include "scenes/stageselection.hpp"
 #include "AEEngine.h"
-#include "../engine/sprite.hpp"
-#include "../core/gamestate.hpp"
+#include "engine/sprite.hpp"
+#include "core/gamestate.hpp"
 
 extern s8 gFontId;      // Font handle created in main.cpp
 

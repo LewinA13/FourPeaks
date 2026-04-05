@@ -2,13 +2,13 @@
 // Pause System
 // Handles pause menu input and drawing
 // ---------------------------------------------------------------------------
-#include "../scenes/pause.hpp"
+#include "scenes/pause.hpp"
 #include "AEEngine.h"
-#include "../engine/graphics.hpp"
-#include "../core/gamestate.hpp"
-#include "../engine/camera.hpp"
+#include "engine/graphics.hpp"
+#include "core/gamestate.hpp"
+#include "engine/camera.hpp"
 #include <cstdio>
-#include "../scenes/mainmenu.hpp"
+#include "scenes/mainmenu.hpp"
 
 extern s8 gFontId;
 

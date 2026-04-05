@@ -1,7 +1,7 @@
 // audio.cpp
-#include "../engine/audio.hpp"
+#include "engine/audio.hpp"
 #include "AEAudio.h"
-#include "../core/gamestate.hpp"
+#include "core/gamestate.hpp"
 
 // Groups
 static AEAudioGroup s_musicGroup{};

@@ -1,11 +1,11 @@
-﻿#include "../scenes/winter.hpp"
-#include "../gameplay/player.hpp"
+﻿#include "scenes/winter.hpp"
+#include "gameplay/player.hpp"
 #include <iostream>
-#include "../engine/collision.hpp"
-#include "../engine/audio.hpp"
-#include "../gameplay/dialogue.hpp"
-#include "../engine/graphics.hpp"
-#include "../core/gamestate.hpp"
+#include "engine/collision.hpp"
+#include "engine/audio.hpp"
+#include "gameplay/dialogue.hpp"
+#include "engine/graphics.hpp"
+#include "core/gamestate.hpp"
 
 // ---------------------------------------------------------------------------
 // Globals

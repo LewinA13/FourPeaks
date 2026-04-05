@@ -1,5 +1,5 @@
-#include "../scenes/credit.hpp"
-#include "../engine/graphics.hpp"
+#include "scenes/credit.hpp"
+#include "engine/graphics.hpp"
 #include "AEEngine.h"
 #include <stdio.h>
 

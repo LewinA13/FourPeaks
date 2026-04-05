@@ -3,16 +3,16 @@
 // implementation of mainmenu.hpp functions. This state shows the animated background and menu options, and routes to other states based on player input.
 // ---------------------------------------------------------------------------
 
-#include "../scenes/mainmenu.hpp"
+#include "scenes/mainmenu.hpp"
 #include "AEEngine.h"
 #include "AEFrameRateController.h"
-#include "../engine/sprite.hpp"
-#include "../core/gamestate.hpp"
+#include "engine/sprite.hpp"
+#include "core/gamestate.hpp"
 #include <cstdint>
 #include <cstring>
 #include <fstream>
-#include "../engine/graphics.hpp"
-#include "../gameplay/player.hpp"
+#include "engine/graphics.hpp"
+#include "gameplay/player.hpp"
 
 // Type aliases
 extern s8 gFontId;

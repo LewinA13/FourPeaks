@@ -2,7 +2,7 @@
 #define AUTUMN_HPP
 
 #include <cstdint>
-#include "../engine/sprite.hpp"
+#include "engine/sprite.hpp"
 #include <vector>
 
 typedef uint32_t u32;

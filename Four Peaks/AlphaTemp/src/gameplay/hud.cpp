@@ -2,10 +2,10 @@
 // hud.cpp
 // implementation of hud.hpp functions. Code to draw the melon counter, death counter, run timer, and artifact icons on the screen.
 // ---------------------------------------------------------------------------
-#include "../gameplay/hud.hpp"
+#include "gameplay/hud.hpp"
 #include "AEEngine.h"
-#include "../engine/graphics.hpp"
-#include "../engine/sprite.hpp"
+#include "engine/graphics.hpp"
+#include "engine/sprite.hpp"
 #include <string>
 #include <cstdint>
 

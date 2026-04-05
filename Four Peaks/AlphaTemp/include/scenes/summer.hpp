@@ -3,8 +3,8 @@
 
 #include <cstdint>
 #include <vector>
-#include "../engine/sprite.hpp"
-#include "../scenes/winter.hpp"   // IceTileState is defined here — don't redefine it
+#include "engine/sprite.hpp"
+#include "scenes/winter.hpp"   // IceTileState is defined here — don't redefine it
 
 typedef uint32_t u32;
 

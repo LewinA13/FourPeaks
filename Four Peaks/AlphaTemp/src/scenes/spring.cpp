@@ -2,14 +2,14 @@
 //spring.cpp
 // This file contains the implementation of the spring stage, including the dynamic wind system and its visual effects.
 // ---------------------------------------------------------------------------
-#include "../scenes/spring.hpp"
+#include "scenes/spring.hpp"
 #include "AEEngine.h"
-#include "../engine/graphics.hpp"
-#include "../gameplay/player.hpp"
-#include "../core/gamestate.hpp"
-#include "../engine/sprite.hpp"
-#include "../core/level_loader.hpp"
-#include "../engine/camera.hpp"
+#include "engine/graphics.hpp"
+#include "gameplay/player.hpp"
+#include "core/gamestate.hpp"
+#include "engine/sprite.hpp"
+#include "core/level_loader.hpp"
+#include "engine/camera.hpp"
 #include <cstdint>
 #include <cmath>
 #include <vector>

@@ -2,7 +2,7 @@
 #define SPRING_HPP
 
 #include <cstdint>
-#include "../engine/sprite.hpp"
+#include "engine/sprite.hpp"
 
 typedef uint32_t u32;
 

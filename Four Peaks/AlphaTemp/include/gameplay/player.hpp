@@ -1,7 +1,7 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
-#include "../engine/graphics.hpp"
+#include "engine/graphics.hpp"
 #include "AEEngine.h"
 #include <string>
 #include <cstdio>

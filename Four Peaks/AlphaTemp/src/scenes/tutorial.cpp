@@ -1,11 +1,11 @@
-﻿#include "../scenes/tutorial.hpp"
+﻿#include "scenes/tutorial.hpp"
 #include "AEEngine.h"
-#include "../engine/graphics.hpp"
-#include "../gameplay/player.hpp"
-#include "../core/gamestate.hpp"
-#include "../engine/sprite.hpp"
-#include "../core/level_loader.hpp"
-#include "../engine/camera.hpp"
+#include "engine/graphics.hpp"
+#include "gameplay/player.hpp"
+#include "core/gamestate.hpp"
+#include "engine/sprite.hpp"
+#include "core/level_loader.hpp"
+#include "engine/camera.hpp"
 
 #include <cstdint>
 #include <cmath>

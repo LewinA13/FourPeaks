@@ -1,7 +1,7 @@
 ﻿// -------------------------------------------------------------------------
 // Only the .cpp includes AEGraphics.h
 // -------------------------------------------------------------------------
-#include "../engine/graphics.hpp"
+#include "engine/graphics.hpp"
 #include "AEEngine.h"
 #include <cmath>
 #include <cstdint>

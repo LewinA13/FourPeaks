@@ -7,7 +7,7 @@
 // Skippable: pressing ENTER, SPACE, or ESCAPE jumps straight to the menu.
 // ---------------------------------------------------------------------------
 
-#include "../scenes/splash.hpp"
+#include "scenes/splash.hpp"
 #include "AEEngine.h"
 #include "AEFrameRateController.h"
 

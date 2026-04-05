@@ -1,19 +1,19 @@
-﻿#include "../scenes/autumn.hpp"
+﻿#include "scenes/autumn.hpp"
 
 #include "AEEngine.h"
-#include "../engine/graphics.hpp"
-#include "../gameplay/player.hpp"
-#include "../core/gamestate.hpp"
-#include "../engine/sprite.hpp"
-#include "../core/level_loader.hpp"
-#include "../engine/camera.hpp"
+#include "engine/graphics.hpp"
+#include "gameplay/player.hpp"
+#include "core/gamestate.hpp"
+#include "engine/sprite.hpp"
+#include "core/level_loader.hpp"
+#include "engine/camera.hpp"
 
 #include <cstdint>
 #include <cmath>
 #include <vector>
 #include <cstdlib>
 
-#include "../engine/collision.hpp"
+#include "engine/collision.hpp"
 
 namespace
 {
