@@ -415,7 +415,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
     // Initialize the Alpha Engine.
-    AESysInit(hInstance, nCmdShow, 1600, 900, 1, 60, false, NULL);
+    AESysInit(hInstance, nCmdShow, 1600, 900, 0, 60, false, NULL);
 
     // Window title.
     AESysSetWindowTitle("Four Peaks Alpha");
@@ -746,6 +746,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             default:
                 spawn = GridToWorld(2, 2, h * idx);
                 break;
+            }
+
+            // Reset heat when entering any Summer stage
+            if (currentState == SceneState::SummerS1 ||
+                currentState == SceneState::SummerS2 ||
+                currentState == SceneState::SummerS3 ||
+                currentState == SceneState::SummerS4)
+            {
+                gGame.player.heat = 1.0f;  
             }
 
             // Prefer using your helper so feet align nicely with tiles
