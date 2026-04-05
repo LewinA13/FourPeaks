@@ -428,8 +428,6 @@ namespace game
             }
         }
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Tutorial 1");
-        printText(-0.95f, 0.8f, 0xFFFFFFFFu, "G: grid   ESC: menu");
         PlayerDraw(gGame.player, gridVisible);
     }
 
@@ -492,7 +490,7 @@ namespace game
             }
         }
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Tutorial 2");
+
         PlayerDraw(gGame.player, gridVisible);
     }
 
@@ -555,7 +553,6 @@ namespace game
             }
         }
 
-        printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Tutorial 3");
         PlayerDraw(gGame.player, gridVisible);
     }
 
