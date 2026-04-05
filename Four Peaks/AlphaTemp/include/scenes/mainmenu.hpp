@@ -58,6 +58,8 @@ namespace game
 // ---------------------------------------------------------------------------
         MainMenu();
 
+        ~MainMenu();
+
 // ---------------------------------------------------------------------------
 // Update
 // Explains what this function does and where its main work happens.

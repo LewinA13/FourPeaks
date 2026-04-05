@@ -224,6 +224,18 @@ namespace game
         LoadVolumeSettings();
     }
 
+    MainMenu::~MainMenu()
+    {
+        // Free the animated background textures
+        for (int i = 0; i < BG_FRAME_COUNT; ++i)
+        {
+            if (bgFrames[i]) { AEGfxTextureUnload(bgFrames[i]); bgFrames[i] = nullptr; }
+        }
+
+        // Free the background mesh
+        if (bgMesh) { AEGfxMeshFree(bgMesh); bgMesh = nullptr; }
+    }
+
     // -------------------------------------------------------------------------
     // Fullscreen toggle
     // -------------------------------------------------------------------------

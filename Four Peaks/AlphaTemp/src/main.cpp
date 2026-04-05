@@ -1434,6 +1434,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             AEGfxDestroyFont(gFontId);
             gFontId = -1;
         }
+        if (gFontTitle >= 0)          
+        {
+            AEGfxDestroyFont(gFontTitle);
+            gFontTitle = -1;
+        }
+
+        // Shut Down player helper.
+        PlayerShutdown(gGame.player);
 
         // Shut down sprite helper.
         sprite::shutdown();
