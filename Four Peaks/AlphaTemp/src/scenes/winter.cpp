@@ -42,40 +42,43 @@ extern s8 gFontId;
 
 namespace game {
 
-    // -------------------------------------------------------------------
-    // Helper function - shared by both stages
-    // -------------------------------------------------------------------
-    // -------------------------------------------------------------------
-    // Snow particle helpers - shared by all winter stages
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Marks every particle in the array as inactive so they spawn in gradually
+    // during the first few update calls rather than all appearing at once.
+    // -------------------------------------------------------------------------
     static void initSnow(std::array<SnowParticle, MAX_SNOW>& particles)
     {
         for (auto& p : particles)
         {
-            p.active = false;  // all start inactive — they spawn in gradually
+            p.active = false;
         }
     }
 
-    static void updateSnow(std::array<SnowParticle, MAX_SNOW>& particles, float& spawnTimer, float dt)
+    // -------------------------------------------------------------------------
+    // Spawns one new snowflake every 0.08 seconds at a random X position along
+    // the top of the viewport, then moves all active flakes downward each frame.
+    // Flakes that fall below the bottom edge are deactivated for reuse.
+    // Flakes that drift off the left or right edge wrap to the opposite side.
+    // -------------------------------------------------------------------------
+    static void updateSnow(std::array<SnowParticle, MAX_SNOW>& particles,
+        float& spawnTimer, float dt)
     {
         float minX = AEGfxGetWinMinX();
         float maxX = AEGfxGetWinMaxX();
         float minY = AEGfxGetWinMinY();
         float maxY = AEGfxGetWinMaxY();
 
-        // Spawn a new flake every 0.08 seconds
         spawnTimer += dt;
         const float spawnInterval = 0.08f;
         if (spawnTimer >= spawnInterval)
         {
             spawnTimer = 0.0f;
-            // Find the first inactive particle and activate it
             for (auto& p : particles)
             {
                 if (!p.active)
                 {
                     p.x = minX + (static_cast<float>(rand()) / RAND_MAX) * (maxX - minX);
-                    p.y = maxY; // spawn at the top
+                    p.y = maxY;
                     p.velX = -20.0f + (static_cast<float>(rand()) / RAND_MAX) * 40.0f;
                     p.velY = -(30.0f + (static_cast<float>(rand()) / RAND_MAX) * 60.0f);
                     p.size = 4.0f + (static_cast<float>(rand()) / RAND_MAX) * 6.0f;
@@ -86,7 +89,6 @@ namespace game {
             }
         }
 
-        // Move active particles; recycle ones that fall off screen
         for (auto& p : particles)
         {
             if (!p.active) continue;
@@ -94,18 +96,18 @@ namespace game {
             p.x += p.velX * dt;
             p.y += p.velY * dt;
 
-            // Wrap horizontally
             if (p.x < minX) p.x = maxX;
             if (p.x > maxX) p.x = minX;
 
-            // When fallen off the bottom, deactivate so it can be respawned at the top
             if (p.y < minY)
-            {
                 p.active = false;
-            }
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Renders every active snowflake as a small white rectangle with per-particle
+    // alpha. Temporarily switches to blended colour mode and restores it after.
+    // -------------------------------------------------------------------------
     static void drawSnow(const std::array<SnowParticle, MAX_SNOW>& particles)
     {
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
@@ -113,10 +115,10 @@ namespace game {
         for (const auto& p : particles)
         {
             if (!p.active) continue;
-			//This is to convert the particle's alpha (0.0 to 1.0) into an 8-bit integer (0 to 255) for the ARGB color format.
+            // Convert the particle's alpha (0.0-1.0) to an 8-bit value for the
+            // ARGB colour format, then build a white colour with variable alpha.
             u32 alpha8 = static_cast<u32>(p.alpha * 255.0f) & 0xFF;
-			//This make the snow white with the variable alpha for transparency, by placing the alpha in the highest byte and setting RGB to 255.
-            u32 snowColor = (alpha8 << 24) | 0x00FFFFFF; // white with variable alpha
+            u32 snowColor = (alpha8 << 24) | 0x00FFFFFF;
             gfx::Vec2 pos{ p.x, p.y };
             gfx::Vec2 size{ p.size, p.size };
             gfx::drawRectangle(pos, 0.0f, size, snowColor);
@@ -125,54 +127,54 @@ namespace game {
     }
 
 
-    // ===================================================================
-    // WINTER STAGE 1 IMPLEMENTATION
-    // ===================================================================
+    // =========================================================================
+    // WinterS1
+    // =========================================================================
 
+    // -------------------------------------------------------------------------
+    // Returns the debug-draw fallback colour for a given tile type ID.
+    // -------------------------------------------------------------------------
     u32 WinterS1::getTileColor(int tileType) const {
         switch (tileType) {
-        case 1: return 0xFF224B94u;
-        case 2: return 0xFFA3B013u; // Spikes: red
-        case 3: return 0xFF808080u; // Wall: gray
+        case 1:  return 0xFF224B94u;
+        case 2:  return 0xFFA3B013u;
+        case 3:  return 0xFF808080u;
         default: return 0x00000000u;
         }
     }
 
-    // -------------------------------------------------------------------
-    // WinterS1 Constructor
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Loads the tile map from Assets/Levels/winter_s1.txt (32 cols x 20 rows).
+    // Clears the map to zero if loading fails.
+    // -------------------------------------------------------------------------
     WinterS1::WinterS1()
         : gridVisible(false)
         , tileMap{}
         , snowInitialized(false)
     {
-        // LEVEL DESIGN: 0 = empty, 1 = solid block
-        // 32 columns wide, 20 rows tall
-        // Bottom row = Row 0, Top row = Row 19
-        const bool loaded = level::loadTileMap("Assets/Levels/winter_s1.txt", gridRows, gridCols, &tileMap[0][0]);
-
-
+        const bool loaded = level::loadTileMap("Assets/Levels/winter_s1.txt",
+            gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
         {
-            // (Check that Assets/Levels/winter_s1.txt exists and has 20 rows x 32 cols.)
             for (int r = 0; r < gridRows; ++r)
                 for (int c = 0; c < gridCols; ++c)
                     tileMap[r][c] = 0;
         }
-
     }
 
-    // -------------------------------------------------------------------
-    // WinterS1 Destructor
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Default destructor — no dynamic resources to release beyond the tile map.
+    // -------------------------------------------------------------------------
     WinterS1::~WinterS1() = default;
 
-    // -------------------------------------------------------------------
-    // WinterS1 update
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Advances stage logic: initialises snow on the first call, toggles the
+    // debug grid, updates the player, checks the teleport zone, advances
+    // animated tiles, and updates snow particles.
+    // Returns 20 to transition to WinterS2, or 0 to remain in this stage.
+    // -------------------------------------------------------------------------
     int WinterS1::update(float dt)
     {
-        // Initialize snow on first update (window is guaranteed ready here)
         if (!snowInitialized)
         {
             initSnow(snowParticles);
@@ -180,62 +182,48 @@ namespace game {
         }
 
         if (AEInputCheckTriggered(AEVK_G))
-        {
             gridVisible = !gridVisible;
-        }
-
 
         if (!camera::isTransitioning())
-        {
             PlayerUpdate(gGame.player, dt);
-        }
 
-        // Teleport zone: matches visual indicator (col 28-29, row 19)
+        // Teleport zone: cols 28-29, row 19
         {
             float gx, gy, cw, ch;
             gridToWorld(28, 19, gx, gy, cw, ch);
-            // AABB: left=col28, right=col29+1, bottom=row19, top=row19+1
-            float zoneLeft  = gx;
+            float zoneLeft = gx;
             float zoneRight = gx + cw * 2.0f;
-            float zoneBot   = gy;
-            float zoneTop   = gy + ch;
-            if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-                gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
-            {
-                return 20; // Signal teleport to Stage 2
-            }
+            float zoneBot = gy;
+            float zoneTop = gy + ch;
+            if (gGame.player.pos.x >= zoneLeft && gGame.player.pos.x <= zoneRight &&
+                gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
+                return 20;
         }
 
         sprite::updateAnimatedTiles(dt);
-
-        // Update snow particles
         updateSnow(snowParticles, snowSpawnTimer, dt);
 
         return 0;
     }
 
-    // -------------------------------------------------------------------
-    // WinterS1 draw
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Renders the background, all tiles, the optional debug grid, the teleport
+    // zone indicator, the player, and the snow particle layer.
+    // -------------------------------------------------------------------------
     void WinterS1::draw() const
     {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 
-        // ---- DRAW BACKGROUND ----
         AEGfxTexture* bg = sprite::background();
         if (bg)
         {
-            float minX = AEGfxGetWinMinX();
-            float maxX = AEGfxGetWinMaxX();
-            float minY = AEGfxGetWinMinY();
-            float maxY = AEGfxGetWinMaxY();
-
+            float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
             gfx::Vec2 center{ (minX + maxX) * 0.5f, (minY + maxY) * 0.5f };
-            gfx::Vec2 size{ (maxX - minX), (maxY - minY) };
+            gfx::Vec2 size{ (maxX - minX),         (maxY - minY) };
             gfx::drawSprite(bg, center, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
         }
 
-        // ---- DRAW LEVEL ----
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
 
@@ -244,17 +232,10 @@ namespace game {
         if (gridVisible)
             drawGrid();
 
-        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 1 - 32x20 Grid");
-        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
-
-        // Draw teleport indicator (2x1 cells - 2 columns, 1 row)
-        // Draw teleport indicator (2x1 cells)
         if (!camera::isTransitioning())
         {
             int teleportCol = 28;
             int teleportRow = 19;
-
             for (int c = 0; c < 2; c++)
             {
                 int col = teleportCol + c;
@@ -262,52 +243,45 @@ namespace game {
                 {
                     float gridWorldX, gridWorldY, cellW, cellH;
                     gridToWorld(col, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
-
                     gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
                     portalPos.x = std::round(portalPos.x);
                     portalPos.y = std::round(portalPos.y);
-
-                    gfx::Vec2 portalSize{ cellW, cellH };
-                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu); // Cyan
+                    gfx::drawRectangle(portalPos, 0.0f, { cellW, cellH }, 0xAAFFFFFFu);
                 }
             }
         }
 
         PlayerDraw(gGame.player, gridVisible);
-
-        // ---- DRAW SNOW (on top of everything) ----
         drawSnow(snowParticles);
     }
 
-    // -------------------------------------------------------------------
-    // WinterS1 gridToWorld
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Converts a tile (col, row) index to world-space top-left position and
+    // cell dimensions, accounting for the current viewport bounds.
+    // -------------------------------------------------------------------------
     void WinterS1::gridToWorld(int col, int row,
         float& xWorld, float& yWorld,
         float& cellW, float& cellH) const
     {
-        float minX = AEGfxGetWinMinX();
-        float maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY();
-        float maxY = AEGfxGetWinMaxY();
-
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         cellW = (maxX - minX) / static_cast<f32>(gridCols);
         cellH = (maxY - minY) / static_cast<f32>(gridRows);
-
         xWorld = minX + col * cellW;
         yWorld = minY + row * cellH;
     }
 
-    // -------------------------------------------------------------------
-    // WinterS1 drawTiles
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Iterates every tile in the map and draws the appropriate sprite or colour.
+    // Spike tiles are offset and scaled to close the visible gap at their bases.
+    // Side-facing spikes (21/22/26/27) are drawn with adjusted UV coordinates.
+    // Border lines are drawn on the exposed edges of solid tiles only.
+    // -------------------------------------------------------------------------
     void WinterS1::drawTiles() const
     {
         auto isSolid = [&](int r, int c) -> bool
             {
-                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols)
-                    return false;
-
+                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
                 int t = tileMap[r][c];
                 return (t == 4 || t == 6 || t == 1);
             };
@@ -324,39 +298,32 @@ namespace game {
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
                 gfx::Vec2 size{ cellW, cellH };
-
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
 
                 float border = (cellW < cellH ? cellW : cellH) * 0.05f;
-                u32 borderColor = 0xFF000000;
-
-                // -------------------------
-                // 1. Draw Tile First
-                // -------------------------
+                u32   borderColor = 0xFF000000;
 
                 // Melon (animated, type 8)
                 if (tileType == 8)
                 {
-
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(8, pos, size);
                     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                     AEGfxSetBlendMode(AE_GFX_BM_NONE);
-                    continue; // Not solid, skip border drawing
+                    continue;
                 }
 
                 // Checkpoint (animated, type 10)
                 if (tileType == 10)
                 {
-
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(10, pos, size);
                     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                     AEGfxSetBlendMode(AE_GFX_BM_NONE);
-                    continue; // Not solid, skip border drawing
+                    continue;
                 }
 
                 if (tileType == 19)
@@ -367,7 +334,6 @@ namespace game {
                     if (tex) gfx::drawSprite(tex, signPos, 0.0f, signSize, 0.0f, 0.0f, 1.0f, 1.0f);
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
                 }
-
 
                 if (tileType == 12)
                 {
@@ -381,19 +347,19 @@ namespace game {
                         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                         AEGfxSetBlendMode(AE_GFX_BM_NONE);
                     }
-                    continue; // Not solid, skip border drawing
+                    continue;
                 }
 
-                // Ice tile
+                // Ice tile (type 11 or 1)
                 if (tileType == 11 || tileType == 1)
                 {
                     AEGfxTexture* iceTex = sprite::ice();
-                    if (iceTex)
-                        gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
-                    else
-                        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
+                    if (iceTex) gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
+                    else        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
                 }
-                // Spikes tile
+
+                // Vertical spikes: type 2 points up, type 9 points down.
+                // Sunk ~12% into the tile to close the gap at the base.
                 if (tileType == 9 || tileType == 2)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
@@ -401,35 +367,22 @@ namespace game {
                     {
                         float heightScale = 1.5f;
                         gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
-
                         gfx::Vec2 spikePos = pos;
                         if (tileType == 2) {
-                            // UP-facing: anchor base to cell bottom, sink slightly to close gap
                             spikePos.y += (spikeSize.y - size.y) * 0.5f;
                             spikePos.y -= size.y * 0.12f;
                         }
                         else {
-                            // DOWN-facing: anchor to cell top, sink slightly to close gap
                             spikePos.y -= (spikeSize.y - size.y) * 0.5f;
                             spikePos.y += size.y * 0.12f;
                         }
-
-                        float u0 = 0.0f;
-                        float v0 = 0.0f;
-                        float u1 = 1.0f;
-                        float v1 = 1.0f;
-
-                        if (tileType == 9)
-                        {
-                            v0 = 1.0f;
-                            v1 = 0.0f;
-                        }
-
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 9) { v0 = 1.0f; v1 = 0.0f; }
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
                     continue;
                 }
-                // Left-facing spike (26) and right-facing spike (27)
+                // Horizontal spikes: type 26 faces right, type 27 faces left.
                 else if (tileType == 26 || tileType == 27)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
@@ -443,29 +396,29 @@ namespace game {
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
-                // Cell-fit left spike (21) and right spike (22)
+                // Cell-fit side spikes: type 21 points right, type 22 points left.
+                // Drawn with swapped width/height so the portrait sprite lies sideways.
                 else if (tileType == 21 || tileType == 22)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
-                        // Draw sideways: swap width/height so portrait spike lies on side
                         gfx::Vec2 ss{ size.y, size.x };
                         gfx::Vec2 sp = pos;
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
-                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }
+                        else { u0 = 1.0f; u1 = 0.0f; }
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
-                // Grass tile (ID 23)
+                // Grass tile (type 23)
                 else if (tileType == 23)
                 {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                 }
-                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                // Winter corner tile (type 4)
                 else if (tileType == 4)
                 {
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -476,6 +429,7 @@ namespace game {
                     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                     AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
+                // Winter top tile (type 6)
                 else if (tileType == 6)
                 {
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -491,147 +445,108 @@ namespace game {
                 {
                     // handled
                 }
-                // Normal tiles
+                // Remaining tiles: look up UV from the tileset atlas, or fall back to colour
                 else
                 {
                     float u0{}, v0{}, u1{}, v1{};
                     AEGfxTexture* tex = sprite::tileset();
                     if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                    {
                         gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                    }
                     else
-                    {
-                        u32 tileColor = getTileColor(tileType);
-                        gfx::drawRectangle(pos, 0.0f, size, tileColor);
-                    }
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                 }
 
-                // -------------------------
-                // 2. Draw Borders LAST (Only Solid Tiles)
-                // -------------------------
+                // ---- Borders (solid tiles only) ----
+                if (!isSolid(row, col)) continue;
 
-                if (!isSolid(row, col))
-                    continue;
-
-                // TOP
                 if (!isSolid(row + 1, col))
-                {
-                    gfx::Vec2 topPos{ pos.x, pos.y + size.y * 0.5f - border * 0.5f };
-                    gfx::Vec2 topSize{ size.x, border };
-                    gfx::drawRectangle(topPos, 0.0f, topSize, borderColor);
-                }
-
-                // BOTTOM
+                    gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
                 if (!isSolid(row - 1, col))
-                {
-                    gfx::Vec2 bottomPos{ pos.x, pos.y - size.y * 0.5f + border * 0.5f };
-                    gfx::Vec2 bottomSize{ size.x, border };
-                    gfx::drawRectangle(bottomPos, 0.0f, bottomSize, borderColor);
-                }
-
-                // LEFT
+                    gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
                 if (!isSolid(row, col - 1))
-                {
-                    gfx::Vec2 leftPos{ pos.x - size.x * 0.5f + border * 0.5f, pos.y };
-                    gfx::Vec2 leftSize{ border, size.y };
-                    gfx::drawRectangle(leftPos, 0.0f, leftSize, borderColor);
-                }
-
-                // RIGHT
+                    gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
                 if (!isSolid(row, col + 1))
-                {
-                    gfx::Vec2 rightPos{ pos.x + size.x * 0.5f - border * 0.5f, pos.y };
-                    gfx::Vec2 rightSize{ border, size.y };
-                    gfx::drawRectangle(rightPos, 0.0f, rightSize, borderColor);
-                }
+                    gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
             }
         }
     }
 
-    // -------------------------------------------------------------------
-    // WinterS1 drawGrid
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Draws the debug grid overlay as thin rectangles aligned to tile cell
+    // boundaries across the full viewport.
+    // -------------------------------------------------------------------------
     void WinterS1::drawGrid() const
     {
         const u32 gridColor = 0x80FFFFFF;
 
-        float minX = AEGfxGetWinMinX();
-        float maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY();
-        float maxY = AEGfxGetWinMaxY();
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
 
         float cellW = (maxX - minX) / static_cast<f32>(gridCols);
         float cellH = (maxY - minY) / static_cast<f32>(gridRows);
         float thickness = (cellW < cellH ? cellW : cellH) * 0.04f;
 
-        // Vertical lines
         for (int col = 0; col <= gridCols; ++col)
         {
             float x = minX + col * cellW;
-            gfx::Vec2 pos{ x, (minY + maxY) * 0.5f };
-            gfx::Vec2 size{ thickness, maxY - minY };
-            gfx::drawRectangle(pos, 0.0f, size, gridColor);
+            gfx::drawRectangle({ x, (minY + maxY) * 0.5f }, 0.0f, { thickness, maxY - minY }, gridColor);
         }
-
-        // Horizontal lines
         for (int row = 0; row <= gridRows; ++row)
         {
             float y = minY + row * cellH;
-            gfx::Vec2 pos{ (minX + maxX) * 0.5f, y };
-            gfx::Vec2 size{ maxX - minX, thickness };
-            gfx::drawRectangle(pos, 0.0f, size, gridColor);
+            gfx::drawRectangle({ (minX + maxX) * 0.5f, y }, 0.0f, { maxX - minX, thickness }, gridColor);
         }
     }
 
-    // ===================================================================
-    // WINTER STAGE 2 IMPLEMENTATION
-    // ===================================================================
 
+    // =========================================================================
+    // WinterS2
+    // =========================================================================
+
+    // -------------------------------------------------------------------------
+    // Returns the debug-draw fallback colour for a given tile type ID.
+    // -------------------------------------------------------------------------
     u32 WinterS2::getTileColor(int tileType) const {
         switch (tileType) {
-        case 1: return 0xFF224B94u;
-        case 2: return 0xFFA3B013u; // Spikes: red
-        case 3: return 0xFF808080u; // Wall: gray
+        case 1:  return 0xFF224B94u;
+        case 2:  return 0xFFA3B013u;
+        case 3:  return 0xFF808080u;
         default: return 0x00000000u;
         }
     }
 
-    // -------------------------------------------------------------------
-    // WinterS2 Constructor
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Loads the tile map from Assets/Levels/winter_s2.txt (32 cols x 20 rows).
+    // Clears the map to zero if loading fails.
+    // -------------------------------------------------------------------------
     WinterS2::WinterS2()
         : gridVisible(false)
         , tileMap{}
         , snowInitialized(false)
     {
-        // LEVEL DESIGN: 0 = empty, 1 = solid block
-        // 32 columns wide, 20 rows tall
-        // Bottom row = Row 0, Top row = Row 19
-        const bool loaded = level::loadTileMap("Assets/Levels/winter_s2.txt", gridRows, gridCols, &tileMap[0][0]);
-
-
+        const bool loaded = level::loadTileMap("Assets/Levels/winter_s2.txt",
+            gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
         {
-            // (Check that Assets/Levels/winter_s2.txt exists and has 20 rows x 32 cols.)
             for (int r = 0; r < gridRows; ++r)
                 for (int c = 0; c < gridCols; ++c)
                     tileMap[r][c] = 0;
         }
-
     }
 
-    // -------------------------------------------------------------------
-    // WinterS1 Destructor
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Default destructor — no dynamic resources to release beyond the tile map.
+    // -------------------------------------------------------------------------
     WinterS2::~WinterS2() = default;
 
-    // -------------------------------------------------------------------
-    // WinterS2 update
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Advances stage logic: initialises snow on the first call, toggles the
+    // debug grid, updates the player, checks the teleport zone, advances
+    // animated tiles, and updates snow particles.
+    // Returns 21 to transition to WinterS3, or 0 to remain in this stage.
+    // -------------------------------------------------------------------------
     int WinterS2::update(float dt)
     {
-        // Initialize snow on first update (window is guaranteed ready here)
         if (!snowInitialized)
         {
             initSnow(snowParticles);
@@ -639,79 +554,59 @@ namespace game {
         }
 
         if (AEInputCheckTriggered(AEVK_G))
-        {
             gridVisible = !gridVisible;
-        }
 
-
-        // Only update player when NOT transitioning
         if (!camera::isTransitioning())
-        {
             PlayerUpdate(gGame.player, dt);
-        }
 
-        // Teleport zone: matches visual indicator (col 31, rows 18-19)
+        // Teleport zone: col 31, rows 18-19
         {
             float gx, gy, cw, ch;
             gridToWorld(31, 18, gx, gy, cw, ch);
-            float zoneLeft  = gx;
+            float zoneLeft = gx;
             float zoneRight = gx + cw;
-            float zoneBot   = gy;
-            float zoneTop   = gy + ch * 2.0f;
-            if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-                gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
-            {
-                return 21; // Signal teleport to Stage 3
-            }
+            float zoneBot = gy;
+            float zoneTop = gy + ch * 2.0f;
+            if (gGame.player.pos.x >= zoneLeft && gGame.player.pos.x <= zoneRight &&
+                gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
+                return 21;
         }
 
         sprite::updateAnimatedTiles(dt);
-
-        // Update snow particles
         updateSnow(snowParticles, snowSpawnTimer, dt);
 
         return 0;
     }
 
-
-    // -------------------------------------------------------------------
-    // WinterS2 draw
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Renders the background, all tiles, the optional debug grid, the teleport
+    // zone indicator, the player, and the snow particle layer.
+    // -------------------------------------------------------------------------
     void WinterS2::draw() const
     {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 
-        // ---- DRAW BACKGROUND ----
         AEGfxTexture* bg = sprite::background();
         if (bg)
         {
-            float minX = AEGfxGetWinMinX();
-            float maxX = AEGfxGetWinMaxX();
-            float minY = AEGfxGetWinMinY();
-            float maxY = AEGfxGetWinMaxY();
+            float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
             gfx::Vec2 center{ (minX + maxX) * 0.5f, (minY + maxY) * 0.5f };
-            gfx::Vec2 size{ (maxX - minX), (maxY - minY) };
+            gfx::Vec2 size{ (maxX - minX),         (maxY - minY) };
             gfx::drawSprite(bg, center, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
         }
 
-        // ---- DRAW LEVEL ----
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
         drawTiles();
-        if (gridVisible)
-            drawGrid();
+        if (gridVisible) drawGrid();
 
-        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 2 - 32x20 Grid");
-        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
-
-        // Draw teleport indicator (1x2 cells at column 31, rows 18-19)
         if (!camera::isTransitioning())
         {
             int teleportCol = 31;
             for (int r = 0; r < 2; r++)
             {
-                int row = 18 + r; // Rows 18 and 19
+                int row = 18 + r;
                 if (row < gridRows)
                 {
                     float gridWorldX, gridWorldY, cellW, cellH;
@@ -719,48 +614,42 @@ namespace game {
                     gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
                     portalPos.x = std::round(portalPos.x);
                     portalPos.y = std::round(portalPos.y);
-                    gfx::Vec2 portalSize{ cellW, cellH };
-                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu); // Green portal
+                    gfx::drawRectangle(portalPos, 0.0f, { cellW, cellH }, 0xAAFFFFFFu);
                 }
             }
         }
 
         PlayerDraw(gGame.player, gridVisible);
-
-        // ---- DRAW SNOW (on top of everything) ----
         drawSnow(snowParticles);
     }
 
-
-    // -------------------------------------------------------------------
-    // WinterS2 gridToWorld
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Converts a tile (col, row) index to world-space top-left position and
+    // cell dimensions, accounting for the current viewport bounds.
+    // -------------------------------------------------------------------------
     void WinterS2::gridToWorld(int col, int row,
         float& xWorld, float& yWorld,
         float& cellW, float& cellH) const
     {
-        float minX = AEGfxGetWinMinX();
-        float maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY();
-        float maxY = AEGfxGetWinMaxY();
-
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         cellW = (maxX - minX) / static_cast<f32>(gridCols);
         cellH = (maxY - minY) / static_cast<f32>(gridRows);
-
         xWorld = minX + col * cellW;
         yWorld = minY + row * cellH;
     }
 
-    // -------------------------------------------------------------------
-    // WinterS2 drawTiles
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Iterates every tile in the map and draws the appropriate sprite or colour.
+    // Spike tiles are offset and scaled to close the visible gap at their bases.
+    // Side-facing spikes (21/22/26/27) are drawn with adjusted UV coordinates.
+    // Border lines are drawn on the exposed edges of solid tiles only.
+    // -------------------------------------------------------------------------
     void WinterS2::drawTiles() const
     {
         auto isSolid = [&](int r, int c) -> bool
             {
-                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols)
-                    return false;
-
+                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
                 int t = tileMap[r][c];
                 return (t == 4 || t == 6 || t == 1);
             };
@@ -777,20 +666,15 @@ namespace game {
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
                 gfx::Vec2 size{ cellW, cellH };
-
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
 
                 float border = (cellW < cellH ? cellW : cellH) * 0.05f;
-                u32 borderColor = 0xFF000000;
+                u32   borderColor = 0xFF000000;
 
-                // -------------------------
-                // 1. Draw Tile First
-                // -------------------------
-
+                // Melon (animated, type 8)
                 if (tileType == 8)
                 {
-
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(8, pos, size);
@@ -802,7 +686,6 @@ namespace game {
                 // Checkpoint (animated, type 10)
                 if (tileType == 10)
                 {
-
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(10, pos, size);
@@ -820,16 +703,16 @@ namespace game {
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
                 }
 
-                // Ice tile
+                // Ice tile (type 11 or 1)
                 if (tileType == 11 || tileType == 1)
                 {
                     AEGfxTexture* iceTex = sprite::ice();
-                    if (iceTex)
-                        gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
-                    else
-                        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
+                    if (iceTex) gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
+                    else        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
                 }
-                // Spikes tile
+
+                // Vertical spikes: type 2 points up, type 9 points down.
+                // Sunk ~12% into the tile to close the gap at the base.
                 if (tileType == 9 || tileType == 2)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
@@ -837,35 +720,22 @@ namespace game {
                     {
                         float heightScale = 1.5f;
                         gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
-
                         gfx::Vec2 spikePos = pos;
                         if (tileType == 2) {
-                            // UP-facing: anchor base to cell bottom, sink slightly to close gap
                             spikePos.y += (spikeSize.y - size.y) * 0.5f;
                             spikePos.y -= size.y * 0.12f;
                         }
                         else {
-                            // DOWN-facing: anchor to cell top, sink slightly to close gap
                             spikePos.y -= (spikeSize.y - size.y) * 0.5f;
                             spikePos.y += size.y * 0.12f;
                         }
-
-                        float u0 = 0.0f;
-                        float v0 = 0.0f;
-                        float u1 = 1.0f;
-                        float v1 = 1.0f;
-
-                        if (tileType == 9)
-                        {
-                            v0 = 1.0f;
-                            v1 = 0.0f;
-                        }
-
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 9) { v0 = 1.0f; v1 = 0.0f; }
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
                     continue;
                 }
-                // Left-facing spike (26) and right-facing spike (27)
+                // Horizontal spikes: type 26 faces right, type 27 faces left.
                 else if (tileType == 26 || tileType == 27)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
@@ -879,29 +749,29 @@ namespace game {
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
-                // Cell-fit left spike (21) and right spike (22)
+                // Cell-fit side spikes: type 21 points right, type 22 points left.
+                // Drawn with swapped width/height so the portrait sprite lies sideways.
                 else if (tileType == 21 || tileType == 22)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
-                        // Draw sideways: swap width/height so portrait spike lies on side
                         gfx::Vec2 ss{ size.y, size.x };
                         gfx::Vec2 sp = pos;
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
-                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }
+                        else { u0 = 1.0f; u1 = 0.0f; }
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
-                // Grass tile (ID 23)
+                // Grass tile (type 23)
                 else if (tileType == 23)
                 {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                 }
-                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                // Winter corner tile (type 4)
                 else if (tileType == 4)
                 {
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -912,6 +782,7 @@ namespace game {
                     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                     AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
+                // Winter top tile (type 6)
                 else if (tileType == 6)
                 {
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -927,76 +798,42 @@ namespace game {
                 {
                     // handled
                 }
-                // Normal tiles
+                // Remaining tiles: look up UV from the tileset atlas, or fall back to colour
                 else
                 {
                     float u0{}, v0{}, u1{}, v1{};
                     AEGfxTexture* tex = sprite::tileset();
                     if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                    {
                         gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                    }
                     else
-                    {
-                        u32 tileColor = getTileColor(tileType);
-                        gfx::drawRectangle(pos, 0.0f, size, tileColor);
-                    }
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                 }
 
-                // -------------------------
-                // 2. Draw Borders LAST (Only Solid Tiles)
-                // -------------------------
+                // ---- Borders (solid tiles only) ----
+                if (!isSolid(row, col)) continue;
 
-                if (!isSolid(row, col))
-                    continue;
-
-                // TOP
                 if (!isSolid(row + 1, col))
-                {
-                    gfx::Vec2 topPos{ pos.x, pos.y + size.y * 0.5f - border * 0.5f };
-                    gfx::Vec2 topSize{ size.x, border };
-                    gfx::drawRectangle(topPos, 0.0f, topSize, borderColor);
-                }
-
-                // BOTTOM
+                    gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
                 if (!isSolid(row - 1, col))
-                {
-                    gfx::Vec2 bottomPos{ pos.x, pos.y - size.y * 0.5f + border * 0.5f };
-                    gfx::Vec2 bottomSize{ size.x, border };
-                    gfx::drawRectangle(bottomPos, 0.0f, bottomSize, borderColor);
-                }
-
-                // LEFT
+                    gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
                 if (!isSolid(row, col - 1))
-                {
-                    gfx::Vec2 leftPos{ pos.x - size.x * 0.5f + border * 0.5f, pos.y };
-                    gfx::Vec2 leftSize{ border, size.y };
-                    gfx::drawRectangle(leftPos, 0.0f, leftSize, borderColor);
-                }
-
-                // RIGHT
+                    gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
                 if (!isSolid(row, col + 1))
-                {
-                    gfx::Vec2 rightPos{ pos.x + size.x * 0.5f - border * 0.5f, pos.y };
-                    gfx::Vec2 rightSize{ border, size.y };
-                    gfx::drawRectangle(rightPos, 0.0f, rightSize, borderColor);
-                }
+                    gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
             }
         }
     }
 
-    // -------------------------------------------------------------------
-    // WinterS2 drawGrid
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Draws the debug grid overlay as thin rectangles aligned to tile cell
+    // boundaries across the full viewport.
+    // -------------------------------------------------------------------------
     void WinterS2::drawGrid() const
     {
         const u32 gridColor = 0x80FFFFFF;
 
-        float minX = AEGfxGetWinMinX();
-        float maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY();
-        float maxY = AEGfxGetWinMaxY();
-
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         float screenW = (maxX - minX);
         float screenH = (maxY - minY);
 
@@ -1004,68 +841,69 @@ namespace game {
         float cellH = screenH / static_cast<float>(gridRows);
         float thickness = (cellW < cellH ? cellW : cellH) * 0.04f;
 
-        // Vertical lines
         for (int col = 0; col <= gridCols; ++col)
         {
             float x = minX + col * cellW;
-            float centerY = (minY + maxY) * 0.5f;
-            gfx::Vec2 pos{ x, centerY };
-            gfx::Vec2 size{ thickness, screenH };
-            gfx::drawRectangle(pos, 0.0f, size, gridColor);
+            gfx::drawRectangle({ x, (minY + maxY) * 0.5f }, 0.0f, { thickness, screenH }, gridColor);
         }
-
-        // Horizontal lines
         for (int row = 0; row <= gridRows; ++row)
         {
             float y = minY + row * cellH;
-            gfx::Vec2 pos{ (minX + maxX) * 0.5f, y };
-            gfx::Vec2 size{ screenW, thickness };
-            gfx::drawRectangle(pos, 0.0f, size, gridColor);
+            gfx::drawRectangle({ (minX + maxX) * 0.5f, y }, 0.0f, { screenW, thickness }, gridColor);
         }
     }
 
-    // ===================================================================
-    // WINTER STAGE 3 IMPLEMENTATION
-    // ===================================================================
 
+    // =========================================================================
+    // WinterS3
+    // =========================================================================
+
+    // -------------------------------------------------------------------------
+    // Returns the debug-draw fallback colour for a given tile type ID.
+    // -------------------------------------------------------------------------
     u32 WinterS3::getTileColor(int tileType) const {
         switch (tileType) {
-        case 1: return 0xFF224B94u;
-        case 2: return 0xFFA3B013u;
-        case 3: return 0xFF808080u;
+        case 1:  return 0xFF224B94u;
+        case 2:  return 0xFFA3B013u;
+        case 3:  return 0xFF808080u;
         default: return 0x00000000u;
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Loads the tile map from Assets/Levels/winter_s3.txt (32 cols x 20 rows),
+    // then scans it to build the initial iceTiles list for every type-1
+    // (breakable ice) cell found. Clears the map to zero if loading fails.
+    // -------------------------------------------------------------------------
     WinterS3::WinterS3()
         : gridVisible(false)
         , tileMap{}
         , snowInitialized(false)
     {
-        const bool loaded = level::loadTileMap("Assets/Levels/winter_s3.txt", gridRows, gridCols, &tileMap[0][0]);
-
-
+        const bool loaded = level::loadTileMap("Assets/Levels/winter_s3.txt",
+            gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
         {
-            // (Check that Assets/Levels/winter_s3.txt exists and has 20 rows x 32 cols.)
             for (int r = 0; r < gridRows; ++r)
                 for (int c = 0; c < gridCols; ++c)
                     tileMap[r][c] = 0;
         }
 
         for (int row = 0; row < gridRows; ++row)
-            for (int col = 0; col < gridCols; ++col) {
-                //! all breaking ice will be store in vector "iceTiles" and type will be struct "IceTileState"
+            for (int col = 0; col < gridCols; ++col)
                 if (tileMap[row][col] == 1) {
                     IceTileState ice;
                     ice.row = row;
                     ice.col = col;
                     iceTiles.push_back(ice);
                 }
-            }
     }
 
-    // reset function for breakable ice
+    // -------------------------------------------------------------------------
+    // Resets all IceTileState entries to their initial untriggered values and
+    // restores each tile in the map to type 1.
+    // Call this before transitioning back into the stage from another scene.
+    // -------------------------------------------------------------------------
     void WinterS3::resetBreakableIce()
     {
         for (auto& ice : iceTiles) {
@@ -1077,14 +915,20 @@ namespace game {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Default destructor — no dynamic resources to release beyond iceTiles.
+    // -------------------------------------------------------------------------
     WinterS3::~WinterS3() = default;
 
-    // -------------------------------------------------------------------
-    // WinterS3 update
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Advances stage logic: initialises snow on the first call, toggles the
+    // debug grid, updates the player, checks the teleport zone, processes ice
+    // tile crack timers and tile removal, resets ice on player respawn, advances
+    // animated tiles, and updates snow particles.
+    // Returns 22 to transition to WinterS4, or 0 to remain in this stage.
+    // -------------------------------------------------------------------------
     int WinterS3::update(float dt)
     {
-        // Initialize snow on first update (window is guaranteed ready here)
         if (!snowInitialized)
         {
             initSnow(snowParticles);
@@ -1092,20 +936,15 @@ namespace game {
         }
 
         if (AEInputCheckTriggered(AEVK_G))
-        {
             gridVisible = !gridVisible;
-        }
-
 
         if (!camera::isTransitioning())
-        {
             PlayerUpdate(gGame.player, dt);
-        }
 
-        // Teleport zone: scan row 19 for tile-type-3 portal tiles (AABB per cell)
+        // Teleport zone: scan row 19 for type-3 portal tiles; fallback to cols 1-2
         {
             bool triggered = false;
-            int teleportRow = 19;
+            int  teleportRow = 19;
             for (int c = 0; c < gridCols && !triggered; ++c)
             {
                 if (tileMap[teleportRow][c] == 3)
@@ -1117,7 +956,6 @@ namespace game {
                         triggered = true;
                 }
             }
-            // Fallback: hardcoded cols 1-2, row 19
             if (!triggered)
             {
                 float gx, gy, cw, ch;
@@ -1126,30 +964,21 @@ namespace game {
                     gGame.player.pos.y >= gy && gGame.player.pos.y <= gy + ch)
                     triggered = true;
             }
-            if (triggered)
-                return 22; // Signal teleport to Stage 4
+            if (triggered) return 22;
         }
 
-
-        for (auto& trigger : g_triggeredIceTiles) {
-            for (auto& ice : iceTiles) {
-                //! check the ice pos whether equal and never set state before
-                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) {
+        // Consume the collision system's trigger list and mark matching ice tiles
+        for (auto& trigger : g_triggeredIceTiles)
+            for (auto& ice : iceTiles)
+                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered)
                     ice.triggered = true;
-                }
-            }
-        }
-
-        //! clear the list to save the memory
         g_triggeredIceTiles.clear();
 
-        //! check only if breakingIce is triggered but havent being destroyed
+        // Advance crack animation; destroy tile once the final frame is reached
         for (auto& ice : iceTiles) {
             if (ice.triggered && !ice.destroyed) {
                 ice.timer += dt;
-                //! update the frame
                 int newFrame = static_cast<int>(ice.timer / sprite::crackFrameTime);
-                //! if reach end of the craking frame, then set to 0(destroyed) and set the state
                 if (newFrame >= sprite::crackFrameCount - 1) {
                     tileMap[ice.row][ice.col] = 0;
                     ice.destroyed = true;
@@ -1160,8 +989,7 @@ namespace game {
             }
         }
 
-
-        //! if player dead and respawning, reset all ice states 
+        // Reset all ice states when the player respawns
         if (gGame.player.respawning) {
             for (auto& ice : iceTiles) {
                 tileMap[ice.row][ice.col] = 1;
@@ -1172,18 +1000,17 @@ namespace game {
             }
         }
 
-        // Update animated tiles (melon, checkpoint, fire, saw)
         sprite::updateAnimatedTiles(dt);
-
-        // Update snow particles
         updateSnow(snowParticles, snowSpawnTimer, dt);
 
         return 0;
     }
 
-    // -------------------------------------------------------------------
-    // WinterS3 draw
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Renders the background, all tiles (including cracking ice frames), the
+    // optional debug grid, the teleport zone indicator, the player, and the
+    // snow particle layer.
+    // -------------------------------------------------------------------------
     void WinterS3::draw() const
     {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
@@ -1191,30 +1018,22 @@ namespace game {
         AEGfxTexture* bg = sprite::background();
         if (bg)
         {
-            float minX = AEGfxGetWinMinX();
-            float maxX = AEGfxGetWinMaxX();
-            float minY = AEGfxGetWinMinY();
-            float maxY = AEGfxGetWinMaxY();
+            float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
             gfx::Vec2 center{ (minX + maxX) * 0.5f, (minY + maxY) * 0.5f };
-            gfx::Vec2 size{ (maxX - minX), (maxY - minY) };
+            gfx::Vec2 size{ (maxX - minX),         (maxY - minY) };
             gfx::drawSprite(bg, center, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
         }
 
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
         drawTiles();
-        if (gridVisible)
-            drawGrid();
+        if (gridVisible) drawGrid();
 
-        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Winter Stage 3 - 32x20 Grid");
-        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
-
-        // Draw teleport indicator: highlight all portal tiles (type 3) in the top row.
-        // Falls back to cols 1-2 if no type-3 tile is found, matching the detection logic.
+        // Highlight all type-3 portal tiles in row 19; fall back to cols 1-2
         if (!camera::isTransitioning())
         {
-            int teleportRow = 19;
+            int  teleportRow = 19;
             bool drewAny = false;
 
             for (int col = 0; col < gridCols; ++col)
@@ -1223,16 +1042,13 @@ namespace game {
                 {
                     float gridWorldX, gridWorldY, cellW, cellH;
                     gridToWorld(col, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
-                    gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
-                    portalPos.x = std::round(portalPos.x);
-                    portalPos.y = std::round(portalPos.y);
-                    gfx::Vec2 portalSize{ cellW, cellH };
-                    gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu);
+                    gfx::Vec2 portalPos{ std::round(gridWorldX + cellW * 0.5f),
+                                         std::round(gridWorldY + cellH * 0.5f) };
+                    gfx::drawRectangle(portalPos, 0.0f, { cellW, cellH }, 0xAAFFFFFFu);
                     drewAny = true;
                 }
             }
 
-            // Fallback: draw at cols 1-2 if no portal tile found in tilemap
             if (!drewAny)
             {
                 for (int c = 0; c < 2; ++c)
@@ -1242,47 +1058,47 @@ namespace game {
                     {
                         float gridWorldX, gridWorldY, cellW, cellH;
                         gridToWorld(col, teleportRow, gridWorldX, gridWorldY, cellW, cellH);
-                        gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
-                        portalPos.x = std::round(portalPos.x);
-                        portalPos.y = std::round(portalPos.y);
-                        gfx::Vec2 portalSize{ cellW, cellH };
-                        gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu);
+                        gfx::Vec2 portalPos{ std::round(gridWorldX + cellW * 0.5f),
+                                             std::round(gridWorldY + cellH * 0.5f) };
+                        gfx::drawRectangle(portalPos, 0.0f, { cellW, cellH }, 0xAAFFFFFFu);
                     }
                 }
             }
         }
 
         PlayerDraw(gGame.player, gridVisible);
-
-        // ---- DRAW SNOW (on top of everything) ----
         drawSnow(snowParticles);
     }
 
-    // -------------------------------------------------------------------
-    // WinterS3 gridToWorld
-    // -------------------------------------------------------------------
-    void WinterS3::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
+    // -------------------------------------------------------------------------
+    // Converts a tile (col, row) index to world-space top-left position and
+    // cell dimensions, accounting for the current viewport bounds.
+    // -------------------------------------------------------------------------
+    void WinterS3::gridToWorld(int col, int row,
+        float& xWorld, float& yWorld,
+        float& cellW, float& cellH) const
     {
-        float minX = AEGfxGetWinMinX();
-        float maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY();
-        float maxY = AEGfxGetWinMaxY();
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         cellW = (maxX - minX) / static_cast<float>(gridCols);
         cellH = (maxY - minY) / static_cast<float>(gridRows);
         xWorld = minX + col * cellW;
         yWorld = minY + row * cellH;
     }
 
-    // -------------------------------------------------------------------
-    // WinterS3 drawTiles
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Iterates every tile in the map and draws the appropriate sprite or colour.
+    // Ice tiles (type 1) look up their per-tile crack frame from iceTiles and
+    // select the matching UV region from the crack sprite sheet, then skip
+    // the border pass since cracking ice is not treated as solid.
+    // Spike tiles are offset and scaled to close the visible gap at their bases.
+    // Border lines are drawn on the exposed edges of remaining solid tiles.
+    // -------------------------------------------------------------------------
     void WinterS3::drawTiles() const
     {
         auto isSolid = [&](int r, int c) -> bool
             {
-                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols)
-                    return false;
-
+                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
                 int t = tileMap[r][c];
                 return (t == 4 || t == 6 || t == 1);
             };
@@ -1299,20 +1115,15 @@ namespace game {
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
                 gfx::Vec2 size{ cellW, cellH };
-
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
 
                 float border = (cellW < cellH ? cellW : cellH) * 0.05f;
-                u32 borderColor = 0xFF000000;
+                u32   borderColor = 0xFF000000;
 
-                // -------------------------
-                // 1. Draw Tile First
-                // -------------------------
-
+                // Melon (animated, type 8)
                 if (tileType == 8)
                 {
-
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(8, pos, size);
@@ -1324,7 +1135,6 @@ namespace game {
                 // Checkpoint (animated, type 10)
                 if (tileType == 10)
                 {
-
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(10, pos, size);
@@ -1342,18 +1152,15 @@ namespace game {
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
                 }
 
-
-                // Ice tile
+                // Non-breakable ice tile (type 11)
                 if (tileType == 11)
                 {
                     AEGfxTexture* iceTex = sprite::ice();
-                    if (iceTex)
-                        gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
-                    else
-                        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
+                    if (iceTex) gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
+                    else        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
                 }
 
-                //Breaking Ice tile (type 1)
+                // Breakable ice tile (type 1): look up per-tile crack frame
                 if (tileType == 1)
                 {
                     AEGfxTexture* crackTex = sprite::crack();
@@ -1366,7 +1173,6 @@ namespace game {
                                 break;
                             }
                         }
-
                         float u0{}, v0{}, u1{}, v1{};
                         sprite::getCrackUv(thisCrackFrame, u0, v0, u1, v1);
                         AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -1378,7 +1184,8 @@ namespace game {
                     continue;
                 }
 
-                // Spikes tile
+                // Vertical spikes: type 2 points up, type 9 points down.
+                // Sunk ~12% into the tile to close the gap at the base.
                 if (tileType == 9 || tileType == 2)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
@@ -1386,35 +1193,22 @@ namespace game {
                     {
                         float heightScale = 1.5f;
                         gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
-
                         gfx::Vec2 spikePos = pos;
                         if (tileType == 2) {
-                            // UP-facing: anchor base to cell bottom, sink slightly to close gap
                             spikePos.y += (spikeSize.y - size.y) * 0.5f;
                             spikePos.y -= size.y * 0.12f;
                         }
                         else {
-                            // DOWN-facing: anchor to cell top, sink slightly to close gap
                             spikePos.y -= (spikeSize.y - size.y) * 0.5f;
                             spikePos.y += size.y * 0.12f;
                         }
-
-                        float u0 = 0.0f;
-                        float v0 = 0.0f;
-                        float u1 = 1.0f;
-                        float v1 = 1.0f;
-
-                        if (tileType == 9)
-                        {
-                            v0 = 1.0f;
-                            v1 = 0.0f;
-                        }
-
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 9) { v0 = 1.0f; v1 = 0.0f; }
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
                     continue;
                 }
-                // Left-facing spike (26) and right-facing spike (27)
+                // Horizontal spikes: type 26 faces right, type 27 faces left.
                 else if (tileType == 26 || tileType == 27)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
@@ -1428,29 +1222,29 @@ namespace game {
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
-                // Cell-fit left spike (21) and right spike (22)
+                // Cell-fit side spikes: type 21 points right, type 22 points left.
+                // Drawn with swapped width/height so the portrait sprite lies sideways.
                 else if (tileType == 21 || tileType == 22)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
-                        // Draw sideways: swap width/height so portrait spike lies on side
                         gfx::Vec2 ss{ size.y, size.x };
                         gfx::Vec2 sp = pos;
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
-                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }
+                        else { u0 = 1.0f; u1 = 0.0f; }
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
-                // Grass tile (ID 23)
+                // Grass tile (type 23)
                 else if (tileType == 23)
                 {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                 }
-                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                // Winter corner tile (type 4)
                 else if (tileType == 4)
                 {
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -1461,6 +1255,7 @@ namespace game {
                     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                     AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
+                // Winter top tile (type 6)
                 else if (tileType == 6)
                 {
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -1476,76 +1271,42 @@ namespace game {
                 {
                     // handled
                 }
-                // Normal tiles
+                // Remaining tiles: look up UV from the tileset atlas, or fall back to colour
                 else
                 {
                     float u0{}, v0{}, u1{}, v1{};
                     AEGfxTexture* tex = sprite::tileset();
                     if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                    {
                         gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                    }
                     else
-                    {
-                        u32 tileColor = getTileColor(tileType);
-                        gfx::drawRectangle(pos, 0.0f, size, tileColor);
-                    }
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                 }
 
-                // -------------------------
-                // 2. Draw Borders LAST (Only Solid Tiles)
-                // -------------------------
+                // ---- Borders (solid tiles only) ----
+                if (!isSolid(row, col)) continue;
 
-                if (!isSolid(row, col))
-                    continue;
-
-                // TOP
                 if (!isSolid(row + 1, col))
-                {
-                    gfx::Vec2 topPos{ pos.x, pos.y + size.y * 0.5f - border * 0.5f };
-                    gfx::Vec2 topSize{ size.x, border };
-                    gfx::drawRectangle(topPos, 0.0f, topSize, borderColor);
-                }
-
-                // BOTTOM
+                    gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
                 if (!isSolid(row - 1, col))
-                {
-                    gfx::Vec2 bottomPos{ pos.x, pos.y - size.y * 0.5f + border * 0.5f };
-                    gfx::Vec2 bottomSize{ size.x, border };
-                    gfx::drawRectangle(bottomPos, 0.0f, bottomSize, borderColor);
-                }
-
-                // LEFT
+                    gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
                 if (!isSolid(row, col - 1))
-                {
-                    gfx::Vec2 leftPos{ pos.x - size.x * 0.5f + border * 0.5f, pos.y };
-                    gfx::Vec2 leftSize{ border, size.y };
-                    gfx::drawRectangle(leftPos, 0.0f, leftSize, borderColor);
-                }
-
-                // RIGHT
+                    gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
                 if (!isSolid(row, col + 1))
-                {
-                    gfx::Vec2 rightPos{ pos.x + size.x * 0.5f - border * 0.5f, pos.y };
-                    gfx::Vec2 rightSize{ border, size.y };
-                    gfx::drawRectangle(rightPos, 0.0f, rightSize, borderColor);
-                }
+                    gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
             }
         }
     }
 
-    // -------------------------------------------------------------------
-    // WinterS3 drawGrid
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Draws the debug grid overlay as thin rectangles aligned to tile cell
+    // boundaries across the full viewport.
+    // -------------------------------------------------------------------------
     void WinterS3::drawGrid() const
     {
         const u32 gridColor = 0x80FFFFFF;
-        float minX = AEGfxGetWinMinX();
-        float maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY();
-        float maxY = AEGfxGetWinMaxY();
-        float screenW = (maxX - minX);
-        float screenH = (maxY - minY);
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float screenW = (maxX - minX), screenH = (maxY - minY);
         float cellW = screenW / static_cast<float>(gridCols);
         float cellH = screenH / static_cast<float>(gridRows);
         float thickness = (cellW < cellH ? cellW : cellH) * 0.04f;
@@ -1553,68 +1314,66 @@ namespace game {
         for (int col = 0; col <= gridCols; ++col)
         {
             float x = minX + col * cellW;
-            float centerY = (minY + maxY) * 0.5f;
-            gfx::Vec2 pos{ x, centerY };
-            gfx::Vec2 size{ thickness, screenH };
-            gfx::drawRectangle(pos, 0.0f, size, gridColor);
+            gfx::drawRectangle({ x, (minY + maxY) * 0.5f }, 0.0f, { thickness, screenH }, gridColor);
         }
-
         for (int row = 0; row <= gridRows; ++row)
         {
             float y = minY + row * cellH;
-            gfx::Vec2 pos{ (minX + maxX) * 0.5f, y };
-            gfx::Vec2 size{ screenW, thickness };
-            gfx::drawRectangle(pos, 0.0f, size, gridColor);
+            gfx::drawRectangle({ (minX + maxX) * 0.5f, y }, 0.0f, { screenW, thickness }, gridColor);
         }
     }
 
-    // ===================================================================
-    // WINTER STAGE 4 IMPLEMENTATION
-    // ===================================================================
 
+    // =========================================================================
+    // WinterS4
+    // =========================================================================
+
+    // -------------------------------------------------------------------------
+    // Returns the debug-draw fallback colour for a given tile type ID.
+    // -------------------------------------------------------------------------
     u32 WinterS4::getTileColor(int tileType) const {
         switch (tileType) {
-        case 1: return 0xFF224B94u;
-        case 2: return 0xFFA3B013u;
-        case 3: return 0xFF808080u;
+        case 1:  return 0xFF224B94u;
+        case 2:  return 0xFFA3B013u;
+        case 3:  return 0xFF808080u;
         default: return 0x00000000u;
         }
     }
 
-    // -------------------------------------------------------------------
-    // WinterS4 Constructor
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Loads the tile map from Assets/Levels/winter_s4.txt (32 cols x 20 rows),
+    // then scans it to build the initial iceTiles list for every type-1
+    // (breakable ice) cell found. Clears the map to zero if loading fails.
+    // -------------------------------------------------------------------------
     WinterS4::WinterS4()
         : gridVisible(false)
         , tileMap{}
         , snowInitialized(false)
     {
-        const bool loaded = level::loadTileMap("Assets/Levels/winter_s4.txt", gridRows, gridCols, &tileMap[0][0]);
-
-
+        const bool loaded = level::loadTileMap("Assets/Levels/winter_s4.txt",
+            gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
         {
-            // (Check that Assets/Levels/winter_s4.txt exists and has 20 rows x 32 cols.)
             for (int r = 0; r < gridRows; ++r)
                 for (int c = 0; c < gridCols; ++c)
                     tileMap[r][c] = 0;
         }
 
         for (int row = 0; row < gridRows; ++row)
-            for (int col = 0; col < gridCols; ++col) {
-
-                //! all breaking ice will be store in vector "iceTiles" and type will be struct "IceTileState"
+            for (int col = 0; col < gridCols; ++col)
                 if (tileMap[row][col] == 1) {
                     IceTileState ice;
                     ice.row = row;
                     ice.col = col;
                     iceTiles.push_back(ice);
                 }
-            }
-
     }
 
-    // reset function for breakable ice
+    // -------------------------------------------------------------------------
+    // Resets all IceTileState entries to their initial untriggered values and
+    // restores each tile in the map to type 1.
+    // Call this before transitioning back into the stage from another scene.
+    // -------------------------------------------------------------------------
     void WinterS4::resetBreakableIce()
     {
         for (auto& ice : iceTiles) {
@@ -1626,14 +1385,20 @@ namespace game {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Default destructor — no dynamic resources to release beyond iceTiles.
+    // -------------------------------------------------------------------------
     WinterS4::~WinterS4() = default;
 
-    // -------------------------------------------------------------------
-    // WinterS4 update
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Advances stage logic: initialises snow on the first call, toggles the
+    // debug grid, updates the player, advances animated tiles, processes ice
+    // tile crack timers and tile removal, resets ice on player respawn, checks
+    // the teleport zone, and updates snow particles.
+    // Returns 23 to transition to SummerS1, or 0 to remain in this stage.
+    // -------------------------------------------------------------------------
     int WinterS4::update(float dt)
     {
-        // Initialize snow on first update (window is guaranteed ready here)
         if (!snowInitialized)
         {
             initSnow(snowParticles);
@@ -1641,27 +1406,21 @@ namespace game {
         }
 
         if (AEInputCheckTriggered(AEVK_G))
-        {
             gridVisible = !gridVisible;
-        }
-
 
         if (!camera::isTransitioning())
-        {
             PlayerUpdate(gGame.player, dt);
-        }
 
         sprite::updateAnimatedTiles(dt);
 
-
+        // Consume the collision system's trigger list and mark matching ice tiles
         for (auto& trigger : g_triggeredIceTiles)
             for (auto& ice : iceTiles)
-                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) ice.triggered = true;
-
-        //! clear the list to save the memory
+                if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered)
+                    ice.triggered = true;
         g_triggeredIceTiles.clear();
 
-        //! handle ice have been triggered but tileType havent change to 0(destroyed)
+        // Advance crack animation; destroy tile once the final frame is reached
         for (auto& ice : iceTiles) {
             if (ice.triggered && !ice.destroyed) {
                 ice.timer += dt;
@@ -1676,7 +1435,7 @@ namespace game {
             }
         }
 
-        //! if player dead and respawning, reset all ice states 
+        // Reset all ice states when the player respawns
         if (gGame.player.respawning) {
             for (auto& ice : iceTiles) {
                 tileMap[ice.row][ice.col] = 1;
@@ -1687,28 +1446,29 @@ namespace game {
             }
         }
 
-
-        // Teleport zone: matches visual indicator (col 29 to end of screen, row 19)
+        // Teleport zone: col 29 to the right screen edge, row 19
         {
             float gx, gy, cw, ch;
             gridToWorld(29, 19, gx, gy, cw, ch);
-            float zoneLeft  = gx;
-            float zoneRight = AEGfxGetWinMaxX(); // visual spans to edge
-            float zoneBot   = gy;
-            float zoneTop   = gy + ch;
-            if (gGame.player.pos.x >= zoneLeft  && gGame.player.pos.x <= zoneRight &&
-                gGame.player.pos.y >= zoneBot   && gGame.player.pos.y <= zoneTop)
-                return 23; // Signal teleport to Summer Stage 1
+            float zoneLeft = gx;
+            float zoneRight = AEGfxGetWinMaxX();
+            float zoneBot = gy;
+            float zoneTop = gy + ch;
+            if (gGame.player.pos.x >= zoneLeft && gGame.player.pos.x <= zoneRight &&
+                gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
+                return 23;
         }
-        // Update snow particles
+
         updateSnow(snowParticles, snowSpawnTimer, dt);
 
         return 0;
     }
 
-    // -------------------------------------------------------------------
-    // WinterS4 draw
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Renders the background, all tiles (including cracking ice frames), the
+    // optional debug grid, the teleport zone indicator, the player, and the
+    // snow particle layer.
+    // -------------------------------------------------------------------------
     void WinterS4::draw() const
     {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
@@ -1716,24 +1476,19 @@ namespace game {
         AEGfxTexture* bg = sprite::background();
         if (bg)
         {
-            float minX = AEGfxGetWinMinX();
-            float maxX = AEGfxGetWinMaxX();
-            float minY = AEGfxGetWinMinY();
-            float maxY = AEGfxGetWinMaxY();
+            float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+            float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
             gfx::Vec2 center{ (minX + maxX) * 0.5f, (minY + maxY) * 0.5f };
-            gfx::Vec2 size{ (maxX - minX), (maxY - minY) };
+            gfx::Vec2 size{ (maxX - minX),         (maxY - minY) };
             gfx::drawSprite(bg, center, 0.0f, size, 0.0f, 0.0f, 1.0f, 1.0f);
         }
 
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
         drawTiles();
-        if (gridVisible)
-            drawGrid();
+        if (gridVisible) drawGrid();
 
-
-
-        // Draw teleport indicator to Summer Stage 1 (2 cells at col 1-2, row 19)
+        // Teleport indicator: cols 29 onwards, row 19
         if (!camera::isTransitioning())
         {
             for (int c = 0; c < 30; c++)
@@ -1741,45 +1496,46 @@ namespace game {
                 int col = 29 + c;
                 float gridWorldX, gridWorldY, cellW, cellH;
                 gridToWorld(col, 19, gridWorldX, gridWorldY, cellW, cellH);
-                gfx::Vec2 portalPos{ gridWorldX + cellW * 0.5f, gridWorldY + cellH * 0.5f };
-                portalPos.x = std::round(portalPos.x);
-                portalPos.y = std::round(portalPos.y);
-                gfx::Vec2 portalSize{ cellW, cellH };
-                gfx::drawRectangle(portalPos, 0.0f, portalSize, 0xAAFFFFFFu); // Orange = leads to Summer
+                gfx::Vec2 portalPos{ std::round(gridWorldX + cellW * 0.5f),
+                                     std::round(gridWorldY + cellH * 0.5f) };
+                gfx::drawRectangle(portalPos, 0.0f, { cellW, cellH }, 0xAAFFFFFFu);
             }
         }
 
         PlayerDraw(gGame.player, gridVisible);
-
-        // ---- DRAW SNOW (on top of everything) ----
         drawSnow(snowParticles);
     }
 
-    // -------------------------------------------------------------------
-    // WinterS4 gridToWorld
-    // -------------------------------------------------------------------
-    void WinterS4::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const
+    // -------------------------------------------------------------------------
+    // Converts a tile (col, row) index to world-space top-left position and
+    // cell dimensions, accounting for the current viewport bounds.
+    // -------------------------------------------------------------------------
+    void WinterS4::gridToWorld(int col, int row,
+        float& xWorld, float& yWorld,
+        float& cellW, float& cellH) const
     {
-        float minX = AEGfxGetWinMinX();
-        float maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY();
-        float maxY = AEGfxGetWinMaxY();
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         cellW = (maxX - minX) / static_cast<float>(gridCols);
         cellH = (maxY - minY) / static_cast<float>(gridRows);
         xWorld = minX + col * cellW;
         yWorld = minY + row * cellH;
     }
 
-    // -------------------------------------------------------------------
-    // WinterS4 drawTiles
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Iterates every tile in the map and draws the appropriate sprite or colour.
+    // Ice tiles (type 1) look up their per-tile crack frame from iceTiles and
+    // select the matching UV region from the crack sprite sheet, then skip
+    // the border pass since cracking ice is not treated as solid.
+    // The winter artifact (type 34) bobs vertically using a sine wave offset.
+    // Spike tiles are offset and scaled to close the visible gap at their bases.
+    // Border lines are drawn on the exposed edges of remaining solid tiles.
+    // -------------------------------------------------------------------------
     void WinterS4::drawTiles() const
     {
         auto isSolid = [&](int r, int c) -> bool
             {
-                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols)
-                    return false;
-
+                if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
                 int t = tileMap[r][c];
                 return (t == 4 || t == 6 || t == 1);
             };
@@ -1796,20 +1552,15 @@ namespace game {
 
                 gfx::Vec2 pos{ xWorld + cellW * 0.5f, yWorld + cellH * 0.5f };
                 gfx::Vec2 size{ cellW, cellH };
-
                 pos.x = std::round(pos.x);
                 pos.y = std::round(pos.y);
 
                 float border = (cellW < cellH ? cellW : cellH) * 0.05f;
-                u32 borderColor = 0xFF000000;
+                u32   borderColor = 0xFF000000;
 
-                // -------------------------
-                // 1. Draw Tile First
-                // -------------------------
-
+                // Melon (animated, type 8)
                 if (tileType == 8)
                 {
-
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(8, pos, size);
@@ -1821,7 +1572,6 @@ namespace game {
                 // Checkpoint (animated, type 10)
                 if (tileType == 10)
                 {
-
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
                     sprite::drawAnimatedTile(10, pos, size);
@@ -1839,7 +1589,7 @@ namespace game {
                     else     gfx::drawRectangle(signPos, 0.0f, signSize, 0xFF88FF88u);
                 }
 
-                //Breaking Ice tile (type 1)
+                // Breakable ice tile (type 1): look up per-tile crack frame
                 if (tileType == 1)
                 {
                     AEGfxTexture* crackTex = sprite::crack();
@@ -1852,7 +1602,6 @@ namespace game {
                                 break;
                             }
                         }
-
                         float u0{}, v0{}, u1{}, v1{};
                         sprite::getCrackUv(thisCrackFrame, u0, v0, u1, v1);
                         AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -1864,16 +1613,16 @@ namespace game {
                     continue;
                 }
 
-                // Ice tile
+                // Non-breakable ice tile (type 11)
                 if (tileType == 11)
                 {
                     AEGfxTexture* iceTex = sprite::ice();
-                    if (iceTex)
-                        gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
-                    else
-                        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
+                    if (iceTex) gfx::drawSprite(iceTex, pos, 0.0f, size, 0, 0, 1, 1);
+                    else        gfx::drawRectangle(pos, 0.0f, size, 0xFFAADDFF);
                 }
-                // Spikes tile
+
+                // Vertical spikes: type 2 points up, type 9 points down.
+                // Sunk ~12% into the tile to close the gap at the base.
                 if (tileType == 9 || tileType == 2)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
@@ -1881,35 +1630,22 @@ namespace game {
                     {
                         float heightScale = 1.5f;
                         gfx::Vec2 spikeSize{ size.x, size.y * heightScale };
-
                         gfx::Vec2 spikePos = pos;
                         if (tileType == 2) {
-                            // UP-facing: anchor base to cell bottom, sink slightly to close gap
                             spikePos.y += (spikeSize.y - size.y) * 0.5f;
                             spikePos.y -= size.y * 0.12f;
                         }
                         else {
-                            // DOWN-facing: anchor to cell top, sink slightly to close gap
                             spikePos.y -= (spikeSize.y - size.y) * 0.5f;
                             spikePos.y += size.y * 0.12f;
                         }
-
-                        float u0 = 0.0f;
-                        float v0 = 0.0f;
-                        float u1 = 1.0f;
-                        float v1 = 1.0f;
-
-                        if (tileType == 9)
-                        {
-                            v0 = 1.0f;
-                            v1 = 0.0f;
-                        }
-
+                        float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
+                        if (tileType == 9) { v0 = 1.0f; v1 = 0.0f; }
                         gfx::drawSprite(spikeTex, spikePos, 0.0f, spikeSize, u0, v0, u1, v1);
                     }
                     continue;
                 }
-                // Left-facing spike (26) and right-facing spike (27)
+                // Horizontal spikes: type 26 faces right, type 27 faces left.
                 else if (tileType == 26 || tileType == 27)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
@@ -1923,38 +1659,38 @@ namespace game {
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
-                // Cell-fit left spike (21) and right spike (22)
+                // Cell-fit side spikes: type 21 points right, type 22 points left.
+                // Drawn with swapped width/height so the portrait sprite lies sideways.
                 else if (tileType == 21 || tileType == 22)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
-                        // Draw sideways: swap width/height so portrait spike lies on side
                         gfx::Vec2 ss{ size.y, size.x };
                         gfx::Vec2 sp = pos;
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }       // left: spike points right
-                        else { u0 = 1.0f; u1 = 0.0f; }                       // right: mirrored, points left
+                        if (tileType == 21) { v0 = 0.0f; v1 = 1.0f; }
+                        else { u0 = 1.0f; u1 = 0.0f; }
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
                     }
                 }
-                // Grass tile (ID 23)
+                // Grass tile (type 23)
                 else if (tileType == 23)
                 {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                 }
-                // artifacts
+                // Winter artifact (type 34): bobs vertically using a sine wave offset
                 else if (tileType == 34) {
                     AEGfxTexture* winterArtifactsTex = sprite::winterArtifacts();
                     float bobOffset = sinf((float)AEGetTime(nullptr) * 2.0f) * (cellH * 0.08f);
                     gfx::Vec2 artifactsPos{ pos.x, pos.y + bobOffset };
                     gfx::Vec2 artifactsSize{ size.x * 0.9f, size.y * 0.9f };
                     if (winterArtifactsTex) gfx::drawSprite(winterArtifactsTex, artifactsPos, 0.0f, artifactsSize, 0, 0, 1, 1);
-                    else   gfx::drawRectangle(artifactsPos, 0.0f, size, 0xFF00AA00u);
+                    else                    gfx::drawRectangle(artifactsPos, 0.0f, size, 0xFF00AA00u);
                 }
-                // WinterC (ID 4) and WinterT (ID 6) standalone textures
+                // Winter corner tile (type 4)
                 else if (tileType == 4)
                 {
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -1965,6 +1701,7 @@ namespace game {
                     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                     AEGfxSetBlendMode(AE_GFX_BM_NONE);
                 }
+                // Winter top tile (type 6)
                 else if (tileType == 6)
                 {
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -1980,76 +1717,42 @@ namespace game {
                 {
                     // handled
                 }
-                // Normal tiles
+                // Remaining tiles: look up UV from the tileset atlas, or fall back to colour
                 else
                 {
                     float u0{}, v0{}, u1{}, v1{};
                     AEGfxTexture* tex = sprite::tileset();
                     if (tex && sprite::getTileUv(tileType, u0, v0, u1, v1))
-                    {
                         gfx::drawSprite(tex, pos, 0.0f, size, u0, v0, u1, v1);
-                    }
                     else
-                    {
-                        u32 tileColor = getTileColor(tileType);
-                        gfx::drawRectangle(pos, 0.0f, size, tileColor);
-                    }
+                        gfx::drawRectangle(pos, 0.0f, size, getTileColor(tileType));
                 }
 
-                // -------------------------
-                // 2. Draw Borders LAST (Only Solid Tiles)
-                // -------------------------
+                // ---- Borders (solid tiles only) ----
+                if (!isSolid(row, col)) continue;
 
-                if (!isSolid(row, col))
-                    continue;
-
-                // TOP
                 if (!isSolid(row + 1, col))
-                {
-                    gfx::Vec2 topPos{ pos.x, pos.y + size.y * 0.5f - border * 0.5f };
-                    gfx::Vec2 topSize{ size.x, border };
-                    gfx::drawRectangle(topPos, 0.0f, topSize, borderColor);
-                }
-
-                // BOTTOM
+                    gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
                 if (!isSolid(row - 1, col))
-                {
-                    gfx::Vec2 bottomPos{ pos.x, pos.y - size.y * 0.5f + border * 0.5f };
-                    gfx::Vec2 bottomSize{ size.x, border };
-                    gfx::drawRectangle(bottomPos, 0.0f, bottomSize, borderColor);
-                }
-
-                // LEFT
+                    gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
                 if (!isSolid(row, col - 1))
-                {
-                    gfx::Vec2 leftPos{ pos.x - size.x * 0.5f + border * 0.5f, pos.y };
-                    gfx::Vec2 leftSize{ border, size.y };
-                    gfx::drawRectangle(leftPos, 0.0f, leftSize, borderColor);
-                }
-
-                // RIGHT
+                    gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
                 if (!isSolid(row, col + 1))
-                {
-                    gfx::Vec2 rightPos{ pos.x + size.x * 0.5f - border * 0.5f, pos.y };
-                    gfx::Vec2 rightSize{ border, size.y };
-                    gfx::drawRectangle(rightPos, 0.0f, rightSize, borderColor);
-                }
+                    gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
             }
         }
     }
 
-    // -------------------------------------------------------------------
-    // WinterS4 drawGrid
-    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Draws the debug grid overlay as thin rectangles aligned to tile cell
+    // boundaries across the full viewport.
+    // -------------------------------------------------------------------------
     void WinterS4::drawGrid() const
     {
         const u32 gridColor = 0x80FFFFFF;
-        float minX = AEGfxGetWinMinX();
-        float maxX = AEGfxGetWinMaxX();
-        float minY = AEGfxGetWinMinY();
-        float maxY = AEGfxGetWinMaxY();
-        float screenW = (maxX - minX);
-        float screenH = (maxY - minY);
+        float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
+        float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
+        float screenW = (maxX - minX), screenH = (maxY - minY);
         float cellW = screenW / static_cast<float>(gridCols);
         float cellH = screenH / static_cast<float>(gridRows);
         float thickness = (cellW < cellH ? cellW : cellH) * 0.04f;
@@ -2057,18 +1760,12 @@ namespace game {
         for (int col = 0; col <= gridCols; ++col)
         {
             float x = minX + col * cellW;
-            float centerY = (minY + maxY) * 0.5f;
-            gfx::Vec2 pos{ x, centerY };
-            gfx::Vec2 size{ thickness, screenH };
-            gfx::drawRectangle(pos, 0.0f, size, gridColor);
+            gfx::drawRectangle({ x, (minY + maxY) * 0.5f }, 0.0f, { thickness, screenH }, gridColor);
         }
-
         for (int row = 0; row <= gridRows; ++row)
         {
             float y = minY + row * cellH;
-            gfx::Vec2 pos{ (minX + maxX) * 0.5f, y };
-            gfx::Vec2 size{ screenW, thickness };
-            gfx::drawRectangle(pos, 0.0f, size, gridColor);
+            gfx::drawRectangle({ (minX + maxX) * 0.5f, y }, 0.0f, { screenW, thickness }, gridColor);
         }
     }
 

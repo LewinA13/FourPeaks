@@ -286,14 +286,16 @@ void checkGroundType(Player& player, TileRange box, int levelLayout[][mapColm])
                 break;
 
             case 23: // grass
-                if (player.currGroundType != Player::GroundType::Saw) // specific check, dont allow grass overlap saw
+                if (player.currGroundType != Player::GroundType::Saw && 
+                    player.currGroundType != Player::GroundType::Spikes) // specific check, dont allow grass overlap saw and spikes
                 {
                     player.currGroundType = Player::GroundType::Grass;
                 }
                 break;
 
             case 4: case 5: case 6: case 7: case 30: // normal solid tiles
-                if (player.currGroundType != Player::GroundType::Saw) // specific check, dont allow normal tiles overlap saw
+                if (player.currGroundType != Player::GroundType::Saw && 
+                    player.currGroundType != Player::GroundType::Spikes) // specific check, dont allow normal tiles overlap saw and spikes
                 {
                     player.currGroundType = Player::GroundType::Normal;
                 }

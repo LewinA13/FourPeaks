@@ -1,25 +1,4 @@
-﻿// ----------------------------------------------------------------------------
-// Done By: Hong Yang, Arun, Skyler, Justin
-// ----------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// Copyright (C) 2026 Team Game++ (Four Peaks)
-// All rights reserved.
-//
-// This file is part of the Four Peaks project. All code, design, and original
-// assets are the work of LewinA and team members unless otherwise stated.
-//
-// Audio assets are sourced from Soundly and used under appropriate licensing.
-//
-// Reproduction, distribution, or modification of this file or its contents,
-// in whole or in part, without prior written permission is strictly prohibited.
-//
-//---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// summer.cpp - Combined Summer Stages (Stage 1..4)
-// ---------------------------------------------------------------------------
-#include "scenes/summer.hpp"
+﻿#include "scenes/summer.hpp"
 #include "AEEngine.h"
 #include "engine/graphics.hpp"
 #include "gameplay/player.hpp"
@@ -38,12 +17,13 @@ extern s8 gFontId;
 
 namespace game {
 
-    // ===================================================================
-    // HELPER: Draw tiles 16-19 (shared logic, inlined per stage)
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Draws special tile types 16-19 that are shared across all summer stages.
+    // Returns true if the tile was handled so the caller can skip further checks.
+    // -------------------------------------------------------------------------
     static bool drawSpecialTile(int tileType, gfx::Vec2& pos, gfx::Vec2& size)
     {
-        // Tile ID mapping (as per your request):
+        // Tile ID mapping:
         // 16 = Tile_02, 17 = Tile_12, 18 = bottle, 19 = sign
         if (tileType == 16) {
             AEGfxTexture* tex = sprite::tile02();
@@ -75,10 +55,10 @@ namespace game {
         return false;
     }
 
-
-    // ===================================================================
-    // Heat decay update (summer mechanic)
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Decays the player's heat by a fixed rate each frame.
+    // Kills the player once heat reaches zero.
+    // -------------------------------------------------------------------------
     void HeatUpdate(float dt)
     {
         gGame.player.heat -= 0.04f * dt;
@@ -87,9 +67,11 @@ namespace game {
             PlayerKill(gGame.player);
     }
 
-    // ===================================================================
-    // Heat bar HUD rendering
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Renders the heat bar sprite in screen space using the current heat value
+    // to select the correct UV frame from the heat bar sprite sheet.
+    // Temporarily resets the camera to screen space for correct HUD placement.
+    // -------------------------------------------------------------------------
     void HeatDraw()
     {
         float oldCamX, oldCamY;
@@ -99,7 +81,7 @@ namespace game {
         AEGfxTexture* hbTex = sprite::heatbar();
         if (!hbTex) return;
 
-        int frame = (int)((1.0f - gGame.player.heat) * 5.0f);  // was 11.0f
+        int frame = (int)((1.0f - gGame.player.heat) * 5.0f);
         if (frame < 0) frame = 0;
         if (frame > 5) frame = 5;
 
@@ -122,9 +104,13 @@ namespace game {
     }
 
 
-    // ===================================================================
-    // SUMMER STAGE 1
-    // ===================================================================
+    // =========================================================================
+    // SummerS1
+    // =========================================================================
+
+    // -------------------------------------------------------------------------
+    // Returns the debug-draw fallback colour for a given tile type ID.
+    // -------------------------------------------------------------------------
     u32 SummerS1::getTileColor(int tileType) const {
         switch (tileType) {
         case 1:  return 0xFF224B94u;
@@ -134,9 +120,9 @@ namespace game {
         }
     }
 
-    // ===================================================================
-    // SummerS1 constructor / destructor
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Loads the stage tile map from disk. Clears the map to zero if loading fails.
+    // -------------------------------------------------------------------------
     SummerS1::SummerS1() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s1.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
@@ -146,43 +132,38 @@ namespace game {
     }
     SummerS1::~SummerS1() = default;
 
-    // ===================================================================
-    // SummerS1 reset
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Reloads the tile map from disk and re-removes any already-collected melons.
+    // Called on player death before re-entering the stage.
+    // -------------------------------------------------------------------------
     void SummerS1::reset() {
         const bool loaded =
             level::loadTileMap("Assets/Levels/summer_s1.txt",
                 gridRows, gridCols,
                 &tileMap[0][0]);
 
-        // Reload the original map; if loading fails, clear it safely
         if (!loaded)
-        {
             for (int r = 0; r < gridRows; ++r)
-            {
                 for (int c = 0; c < gridCols; ++c)
-                {
                     tileMap[r][c] = 0;
-                }
-            }
-        }
 
-        // Re-remove melons that were already collected and saved
         ApplyCollectedMelonsToTileMap("SummerS1", gridRows, tileMap);
     }
 
-    // ===================================================================
-    // SummerS1 update
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Runs one frame of stage logic: handles respawn reset, player input,
+    // heat decay, animated tile updates, and teleport zone detection.
+    // Returns 20 to advance to the next stage, or 0 to remain here.
+    // -------------------------------------------------------------------------
     int SummerS1::update(float dt) {
         if (gGame.player.justRespawned) {
-            // basically reset the bottles
             reset();
             gGame.player.justRespawned = false;
         }
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
         if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
         if (!camera::isTransitioning()) HeatUpdate(dt);
+
         // Teleport zone: matches visual indicator (col 30-31, row 19)
         {
             float gx, gy, cw, ch;
@@ -199,9 +180,10 @@ namespace game {
         return 0;
     }
 
-    // ===================================================================
-    // SummerS1 draw
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Renders the summer background, all tiles, the debug grid if enabled,
+    // the teleport zone indicator rectangles, the heat bar HUD, and the player.
+    // -------------------------------------------------------------------------
     void SummerS1::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
         AEGfxTexture* bg = sprite::summerBackground();
@@ -215,10 +197,6 @@ namespace game {
         drawTiles();
         if (gridVisible) drawGrid();
 
-        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 1 - 32x20 Grid");
-        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
-
         if (!camera::isTransitioning()) {
             for (int c = 0; c < 2; c++) {
                 int col = 30 + c;
@@ -229,21 +207,15 @@ namespace game {
                     gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAAFFFFFFu);
                 }
             }
-            // Draw back-teleport to WinterS4 indicator (col 1-2, row 2)
-            for (int c = 0; c < 2; c++) {
-                float gx, gy, cw, ch;
-                gridToWorld(30 + c, 19, gx, gy, cw, ch);
-                gfx::Vec2 pp{ std::round(gx + cw * 0.5f), std::round(gy + ch * 0.5f) };
-                gfx::drawRectangle(pp, 0.0f, { cw,ch }, 0xAAFFFFFFu);
-            }
         }
         HeatDraw();
         PlayerDraw(gGame.player, gridVisible);
     }
 
-    // ===================================================================
-    // SummerS1 gridToWorld
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Converts a tile (col, row) index to world-space centre position and cell
+    // dimensions, accounting for the current viewport bounds.
+    // -------------------------------------------------------------------------
     void SummerS1::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX();
         float minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
@@ -253,9 +225,12 @@ namespace game {
         yWorld = minY + row * cellH;
     }
 
-    // ===================================================================
-    // SummerS1 drawTiles
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Iterates every tile in the map and draws the appropriate sprite or colour.
+    // Spike tiles are offset and scaled to avoid visible gaps at their bases.
+    // Side-facing spikes (21/22) are drawn with swapped width/height.
+    // Border lines are drawn on the exposed edges of solid tiles.
+    // -------------------------------------------------------------------------
     void SummerS1::drawTiles() const {
         auto isSolid = [&](int r, int c) -> bool {
             if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
@@ -318,21 +293,17 @@ namespace game {
                     continue;
                 }
 
-                // Cell-fit left spike (21) and right spike (22)
+                // Cell-fit left spike (21) and right spike (22): drawn sideways
+                // by swapping width/height so the portrait spike lies on its side
                 if (tileType == 21 || tileType == 22)
                 {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex)
                     {
-                        // Draw sideways: swap width/height so portrait spike lies on side
                         gfx::Vec2 ss{ size.y, size.x };
                         gfx::Vec2 sp = pos;
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                        if (tileType == 21) {
-                            v0 = 0.0f;
-                            v1 = 1.0f;
-                        }
-                        else {
+                        if (tileType == 22) {
                             u0 = 1.0f;
                             u1 = 0.0f;
                         }
@@ -346,7 +317,7 @@ namespace game {
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                 }
-                else if (drawSpecialTile(tileType, pos, size)) { /* drawn */ }
+                else if (drawSpecialTile(tileType, pos, size)) { /* handled */ }
                 else if (tileType == 1) {
                     AEGfxTexture* t = sprite::spring1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
@@ -389,25 +360,22 @@ namespace game {
                 // ---- Borders (solid tiles only) ----
                 if (!isSolid(row, col)) continue;
 
-                if (!isSolid(row + 1, col)) {
+                if (!isSolid(row + 1, col))
                     gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
-                }
-                if (!isSolid(row - 1, col)) {
+                if (!isSolid(row - 1, col))
                     gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
-                }
-                if (!isSolid(row, col - 1)) {
+                if (!isSolid(row, col - 1))
                     gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
-                }
-                if (!isSolid(row, col + 1)) {
+                if (!isSolid(row, col + 1))
                     gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
-                }
             }
         }
     }
 
-    // ===================================================================
-    // SummerS1 drawGrid
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Draws the debug grid overlay as a series of thin rectangles aligned to
+    // the tile cell boundaries across the full viewport.
+    // -------------------------------------------------------------------------
     void SummerS1::drawGrid() const {
         const u32 gc = 0x80FFFFFFu;
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
@@ -417,9 +385,14 @@ namespace game {
         for (int r = 0; r <= gridRows; ++r) gfx::drawRectangle({ (minX + maxX) * 0.5f,minY + r * ch }, 0.0f, { maxX - minX,t }, gc);
     }
 
-    // ===================================================================
-    // SUMMER STAGE 2
-    // ===================================================================
+
+    // =========================================================================
+    // SummerS2
+    // =========================================================================
+
+    // -------------------------------------------------------------------------
+    // Returns the debug-draw fallback colour for a given tile type ID.
+    // -------------------------------------------------------------------------
     u32 SummerS2::getTileColor(int tileType) const {
         switch (tileType) {
         case 1:  return 0xFF224B94u;
@@ -429,9 +402,9 @@ namespace game {
         }
     }
 
-    // ===================================================================
-    // SummerS2 constructor / destructor
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Loads the stage tile map from disk. Clears the map to zero if loading fails.
+    // -------------------------------------------------------------------------
     SummerS2::SummerS2() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s2.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
@@ -439,9 +412,10 @@ namespace game {
     }
     SummerS2::~SummerS2() = default;
 
-    // ===================================================================
-    // SummerS2 reset
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Reloads the tile map from disk and re-removes any already-collected melons.
+    // Called on player death before re-entering the stage.
+    // -------------------------------------------------------------------------
     void SummerS2::reset()
     {
         const bool loaded =
@@ -449,25 +423,19 @@ namespace game {
                 gridRows, gridCols,
                 &tileMap[0][0]);
 
-        // Reload the original map. if loading fails, clear it safely
         if (!loaded)
-        {
             for (int r = 0; r < gridRows; ++r)
-            {
                 for (int c = 0; c < gridCols; ++c)
-                {
                     tileMap[r][c] = 0;
-                }
-            }
-        }
 
-        // Re-remove melons that were already collected and saved.
         ApplyCollectedMelonsToTileMap("SummerS2", gridRows, tileMap);
     }
 
-    // ===================================================================
-    // SummerS2 update
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Runs one frame of stage logic: handles respawn reset, player input,
+    // heat decay, animated tile updates, and teleport zone detection.
+    // Returns 21 to advance to the next stage, or 0 to remain here.
+    // -------------------------------------------------------------------------
     int SummerS2::update(float dt) {
         if (gGame.player.justRespawned) {
             reset();
@@ -476,6 +444,7 @@ namespace game {
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
         if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
         if (!camera::isTransitioning()) HeatUpdate(dt);
+
         // Teleport zone: matches visual indicator (col 30-31, row 0)
         {
             float gx, gy, cw, ch;
@@ -492,9 +461,10 @@ namespace game {
         return 0;
     }
 
-    // ===================================================================
-    // SummerS2 draw
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Renders the summer background, all tiles, the debug grid if enabled,
+    // the teleport zone indicator rectangles, the heat bar HUD, and the player.
+    // -------------------------------------------------------------------------
     void SummerS2::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
         AEGfxTexture* bg = sprite::summerBackground();
@@ -506,10 +476,6 @@ namespace game {
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
         drawTiles();
         if (gridVisible) drawGrid();
-
-        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 2 - 32x20 Grid");
-        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
         if (!camera::isTransitioning()) {
             for (int c = 0; c < 2; c++) {
@@ -526,9 +492,10 @@ namespace game {
         PlayerDraw(gGame.player, gridVisible);
     }
 
-    // ===================================================================
-    // SummerS2 gridToWorld
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Converts a tile (col, row) index to world-space centre position and cell
+    // dimensions, accounting for the current viewport bounds.
+    // -------------------------------------------------------------------------
     void SummerS2::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         cellW = (maxX - minX) / static_cast<float>(gridCols);
@@ -536,9 +503,12 @@ namespace game {
         xWorld = minX + col * cellW; yWorld = minY + row * cellH;
     }
 
-    // ===================================================================
-    // SummerS2 drawTiles
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Iterates every tile in the map and draws the appropriate sprite or colour.
+    // Vertical spikes (2/9) are sunk ~12% into the tile to close the base gap;
+    // V coordinates are mirrored for downward-facing spikes.
+    // Border lines are drawn on the exposed edges of solid tiles.
+    // -------------------------------------------------------------------------
     void SummerS2::drawTiles() const {
         auto isSolid = [&](int r, int c) -> bool {
             if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
@@ -560,11 +530,9 @@ namespace game {
 
                 if (sprite::drawAnimatedTile(tileType, pos, size)) continue;
 
-                // Vertical spikes. Type 2 points up; type 9 points down. Use a
-                // slight offset to sink the sprite into the tile by ~12% of
-                // its height. Without this offset the spike base would float
-                // slightly above the tile, leaving a visible gap. Mirroring
-                // the V coordinates flips the sprite for downward spikes.
+                // Vertical spikes: type 2 points up, type 9 points down.
+                // Sink the sprite ~12% into the tile to avoid a visible gap
+                // at the base. Mirroring V coordinates flips the downward spike.
                 if (tileType == 2 || tileType == 9) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
@@ -572,20 +540,15 @@ namespace game {
                         gfx::Vec2 ss{ size.x, size.y * heightScale };
                         gfx::Vec2 sp = pos;
                         if (tileType == 2) {
-                            // Up-facing: anchor base to cell bottom then sink
                             sp.y += (ss.y - size.y) * 0.5f;
                             sp.y -= size.y * 0.12f;
                         }
                         else {
-                            // Down-facing: anchor base to cell top then sink
                             sp.y -= (ss.y - size.y) * 0.5f;
                             sp.y += size.y * 0.12f;
                         }
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                        if (tileType == 9) {
-                            v0 = 1.0f; v1 = 0.0f;
-                        }
-                        // Round to avoid sub-pixel gaps
+                        if (tileType == 9) { v0 = 1.0f; v1 = 0.0f; }
                         sp.x = std::round(sp.x);
                         sp.y = std::round(sp.y);
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
@@ -614,7 +577,7 @@ namespace game {
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
                 }
-                else if (drawSpecialTile(tileType, pos, size)) { /* drawn */ }
+                else if (drawSpecialTile(tileType, pos, size)) { /* handled */ }
                 else if (tileType == 1) {
                     AEGfxTexture* t = sprite::spring1();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
@@ -657,25 +620,22 @@ namespace game {
                 // ---- Borders (solid tiles only) ----
                 if (!isSolid(row, col)) continue;
 
-                if (!isSolid(row + 1, col)) {
+                if (!isSolid(row + 1, col))
                     gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
-                }
-                if (!isSolid(row - 1, col)) {
+                if (!isSolid(row - 1, col))
                     gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
-                }
-                if (!isSolid(row, col - 1)) {
+                if (!isSolid(row, col - 1))
                     gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
-                }
-                if (!isSolid(row, col + 1)) {
+                if (!isSolid(row, col + 1))
                     gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
-                }
             }
         }
     }
 
-    // ===================================================================
-    // SummerS2 drawGrid
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Draws the debug grid overlay as a series of thin rectangles aligned to
+    // the tile cell boundaries across the full viewport.
+    // -------------------------------------------------------------------------
     void SummerS2::drawGrid() const {
         const u32 gc = 0x80FFFFFFu;
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
@@ -686,9 +646,14 @@ namespace game {
         for (int r = 0; r <= gridRows; ++r) gfx::drawRectangle({ (minX + maxX) * 0.5f,minY + r * ch }, 0.0f, { sw,t }, gc);
     }
 
-    // ===================================================================
-    // SUMMER STAGE 3
-    // ===================================================================
+
+    // =========================================================================
+    // SummerS3
+    // =========================================================================
+
+    // -------------------------------------------------------------------------
+    // Returns the debug-draw fallback colour for a given tile type ID.
+    // -------------------------------------------------------------------------
     u32 SummerS3::getTileColor(int tileType) const {
         switch (tileType) {
         case 1:  return 0xFF224B94u;
@@ -698,9 +663,10 @@ namespace game {
         }
     }
 
-    // ===================================================================
-    // SummerS3 constructor / destructor
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Loads the tile map from disk, then scans it to build the initial iceTiles
+    // list for every type-1 (breakable ice) cell found.
+    // -------------------------------------------------------------------------
     SummerS3::SummerS3() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s3.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
@@ -711,9 +677,11 @@ namespace game {
     }
     SummerS3::~SummerS3() = default;
 
-    // ===================================================================
-    // SummerS3 reset
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Reloads the tile map, re-removes collected melons, then clears and
+    // rebuilds the iceTiles list from the freshly loaded map.
+    // Called on player death before re-entering the stage.
+    // -------------------------------------------------------------------------
     void SummerS3::reset()
     {
         const bool loaded =
@@ -721,28 +689,17 @@ namespace game {
                 gridRows, gridCols,
                 &tileMap[0][0]);
 
-        // Reload the original map; if loading fails, clear it safely.
         if (!loaded)
-        {
             for (int r = 0; r < gridRows; ++r)
-            {
                 for (int c = 0; c < gridCols; ++c)
-                {
                     tileMap[r][c] = 0;
-                }
-            }
-        }
 
-        // Re-remove melons that were already collected and saved.
         ApplyCollectedMelonsToTileMap("SummerS3", gridRows, tileMap);
 
         iceTiles.clear();
 
-        // Rebuild breakable ice data from the updated tile map.
         for (int r = 0; r < gridRows; ++r)
-        {
             for (int c = 0; c < gridCols; ++c)
-            {
                 if (tileMap[r][c] == 1)
                 {
                     IceTileState ice;
@@ -750,21 +707,23 @@ namespace game {
                     ice.col = c;
                     iceTiles.push_back(ice);
                 }
-            }
-        }
     }
 
-    // ===================================================================
-    // SummerS3 update
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Runs one frame of stage logic: handles respawn reset, player input, heat
+    // decay, teleport zone detection, ice tile crack timers, and tile removal
+    // once the final crack frame is reached.
+    // Returns 22 to advance to the next stage, or 0 to remain here.
+    // -------------------------------------------------------------------------
     int SummerS3::update(float dt) {
         if (gGame.player.justRespawned) {
-            reset(); // reset the bottle
+            reset();
             gGame.player.justRespawned = false;
         }
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
         if (!camera::isTransitioning()) PlayerUpdate(gGame.player, dt);
         if (!camera::isTransitioning()) HeatUpdate(dt);
+
         // Teleport zone: matches visual indicator (col 29-30, row 19)
         {
             float gx, gy, cw, ch;
@@ -777,10 +736,14 @@ namespace game {
                 gGame.player.pos.y >= zoneBot && gGame.player.pos.y <= zoneTop)
                 return 22;
         }
+
+        // Consume the collision system's trigger list and mark matching ice tiles
         for (auto& trigger : g_triggeredIceTiles)
             for (auto& ice : iceTiles)
                 if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) ice.triggered = true;
         g_triggeredIceTiles.clear();
+
+        // Advance crack animation; destroy tile once the final frame is reached
         for (auto& ice : iceTiles) {
             if (ice.triggered && !ice.destroyed) {
                 ice.timer += dt;
@@ -793,9 +756,11 @@ namespace game {
         return 0;
     }
 
-    // ===================================================================
-    // SummerS3 draw
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Renders the summer background, all tiles (including cracking ice frames),
+    // the debug grid if enabled, the teleport zone indicator rectangles,
+    // the heat bar HUD, and the player.
+    // -------------------------------------------------------------------------
     void SummerS3::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
         AEGfxTexture* bg = sprite::summerBackground();
@@ -807,10 +772,6 @@ namespace game {
         AEGfxSetBlendMode(AE_GFX_BM_NONE);
         drawTiles();
         if (gridVisible) drawGrid();
-
-        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 3 - 32x20 Grid");
-        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
 
         if (!camera::isTransitioning()) {
             for (int c = 0; c < 2; c++) {
@@ -827,9 +788,10 @@ namespace game {
         PlayerDraw(gGame.player, gridVisible);
     }
 
-    // ===================================================================
-    // SummerS3 gridToWorld
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Converts a tile (col, row) index to world-space centre position and cell
+    // dimensions, accounting for the current viewport bounds.
+    // -------------------------------------------------------------------------
     void SummerS3::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         cellW = (maxX - minX) / static_cast<float>(gridCols);
@@ -837,9 +799,14 @@ namespace game {
         xWorld = minX + col * cellW; yWorld = minY + row * cellH;
     }
 
-    // ===================================================================
-    // SummerS3 drawTiles
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Iterates every tile in the map and draws the appropriate sprite or colour.
+    // Ice tiles (type 1) look up their per-tile crack frame from iceTiles and
+    // select the matching UV region from the crack sprite sheet, then skip
+    // the border pass since cracking ice is not treated as solid.
+    // Vertical spikes are sunk into the tile to close the base gap.
+    // Border lines are drawn on the exposed edges of remaining solid tiles.
+    // -------------------------------------------------------------------------
     void SummerS3::drawTiles() const {
         auto isSolid = [&](int r, int c) -> bool {
             if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
@@ -860,8 +827,8 @@ namespace game {
                 float border = (cellW < cellH ? cellW : cellH) * 0.05f;
                 u32 borderColor = 0xFF000000;
 
-                // Vertical spikes. Type 2 points up; type 9 points down. Sink
-                // them slightly into the tile so there is no visible gap.
+                // Vertical spikes: type 2 points up, type 9 points down.
+                // Sink slightly into the tile to close the gap at the base.
                 if (tileType == 2 || tileType == 9) {
                     AEGfxTexture* spikeTex = sprite::spikes();
                     if (spikeTex) {
@@ -869,20 +836,15 @@ namespace game {
                         gfx::Vec2 ss{ size.x, size.y * heightScale };
                         gfx::Vec2 sp = pos;
                         if (tileType == 2) {
-                            // Up-facing: anchor base then sink by ~12%
                             sp.y += (ss.y - size.y) * 0.5f;
                             sp.y -= size.y * 0.12f;
                         }
                         else {
-                            // Down-facing: anchor base then sink by ~12%
                             sp.y -= (ss.y - size.y) * 0.5f;
                             sp.y += size.y * 0.12f;
                         }
                         float u0 = 0.0f, v0 = 0.0f, u1 = 1.0f, v1 = 1.0f;
-                        if (tileType == 9) {
-                            v0 = 1.0f; v1 = 0.0f;
-                        }
-                        // Round to integral pixels to avoid sub-pixel gaps
+                        if (tileType == 9) { v0 = 1.0f; v1 = 0.0f; }
                         sp.x = std::round(sp.x);
                         sp.y = std::round(sp.y);
                         gfx::drawSprite(spikeTex, sp, 0.0f, ss, u0, v0, u1, v1);
@@ -907,10 +869,10 @@ namespace game {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
-                    // falls through to border pass (grass IS solid)
                 }
                 else if (tileType == 1) {
-                    // Cracking ice — per-tile frame
+                    // Cracking ice: look up the per-tile crack frame and select
+                    // the matching UV region from the crack sprite sheet
                     AEGfxTexture* crackTex = sprite::crack();
                     if (crackTex) {
                         int frameToUse = 0;
@@ -923,7 +885,7 @@ namespace game {
                     continue; // not in isSolid, skip borders
                 }
                 else if (sprite::drawAnimatedTile(tileType, pos, size)) { continue; }
-                else if (drawSpecialTile(tileType, pos, size)) { /* drawn */ }
+                else if (drawSpecialTile(tileType, pos, size)) { /* handled */ }
                 else if (tileType == 3) {
                     AEGfxTexture* t = sprite::spring2();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
@@ -961,26 +923,22 @@ namespace game {
                 // ---- Borders (solid tiles only) ----
                 if (!isSolid(row, col)) continue;
 
-                if (!isSolid(row + 1, col)) {
+                if (!isSolid(row + 1, col))
                     gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
-                }
-                if (!isSolid(row - 1, col)) {
+                if (!isSolid(row - 1, col))
                     gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
-                }
-                if (!isSolid(row, col - 1)) {
+                if (!isSolid(row, col - 1))
                     gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
-                }
-                if (!isSolid(row, col + 1)) {
+                if (!isSolid(row, col + 1))
                     gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
-                }
             }
         }
     }
-    // SummerS4::drawTiles() is identical to S3 above — same body, different class name
 
-    // ===================================================================
-    // SummerS3 drawGrid
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Draws the debug grid overlay as a series of thin rectangles aligned to
+    // the tile cell boundaries across the full viewport.
+    // -------------------------------------------------------------------------
     void SummerS3::drawGrid() const {
         const u32 gc = 0x80FFFFFFu;
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
@@ -991,9 +949,14 @@ namespace game {
         for (int r = 0; r <= gridRows; ++r) gfx::drawRectangle({ (minX + maxX) * 0.5f,minY + r * ch }, 0.0f, { sw,t }, gc);
     }
 
-    // ===================================================================
-    // SUMMER STAGE 4
-    // ===================================================================
+
+    // =========================================================================
+    // SummerS4
+    // =========================================================================
+
+    // -------------------------------------------------------------------------
+    // Returns the debug-draw fallback colour for a given tile type ID.
+    // -------------------------------------------------------------------------
     u32 SummerS4::getTileColor(int tileType) const {
         switch (tileType) {
         case 1:  return 0xFF224B94u;
@@ -1003,9 +966,10 @@ namespace game {
         }
     }
 
-    // ===================================================================
-    // SummerS4 constructor / destructor
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Loads the tile map from disk, then scans it to build the initial iceTiles
+    // list for every type-1 (breakable ice) cell found.
+    // -------------------------------------------------------------------------
     SummerS4::SummerS4() : gridVisible(false), tileMap{} {
         const bool loaded = level::loadTileMap("Assets/Levels/summer_s4.txt", gridRows, gridCols, &tileMap[0][0]);
         if (!loaded)
@@ -1016,9 +980,11 @@ namespace game {
     }
     SummerS4::~SummerS4() = default;
 
-    // ===================================================================
-    // SummerS4 reset
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Reloads the tile map, re-removes collected melons, then clears and
+    // rebuilds the iceTiles list from the freshly loaded map.
+    // Called on player death before re-entering the stage.
+    // -------------------------------------------------------------------------
     void SummerS4::reset()
     {
         const bool loaded =
@@ -1026,28 +992,17 @@ namespace game {
                 gridRows, gridCols,
                 &tileMap[0][0]);
 
-        // Reload the original map; if loading fails, clear it safely
         if (!loaded)
-        {
             for (int r = 0; r < gridRows; ++r)
-            {
                 for (int c = 0; c < gridCols; ++c)
-                {
                     tileMap[r][c] = 0;
-                }
-            }
-        }
 
-        // Re-remove melons that were already collected and saved
         ApplyCollectedMelonsToTileMap("SummerS4", gridRows, tileMap);
 
         iceTiles.clear();
 
-        // Rebuild breakable ice data from the updated tile map
         for (int r = 0; r < gridRows; ++r)
-        {
             for (int c = 0; c < gridCols; ++c)
-            {
                 if (tileMap[r][c] == 1)
                 {
                     IceTileState ice;
@@ -1055,17 +1010,18 @@ namespace game {
                     ice.col = c;
                     iceTiles.push_back(ice);
                 }
-            }
-        }
     }
 
-    // ===================================================================
-    // SummerS4 update
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Runs one frame of stage logic: handles respawn reset, player input, heat
+    // decay, teleport zone detection, animated tile updates, ice tile crack
+    // timers, and tile removal once the final crack frame is reached.
+    // Returns 25 to transition to SpringS1, or 0 to remain here.
+    // -------------------------------------------------------------------------
     int SummerS4::update(float dt) {
         if (gGame.player.justRespawned)
         {
-            reset(); // reset the spawning of bottle
+            reset();
             gGame.player.justRespawned = false;
         }
         if (AEInputCheckTriggered(AEVK_G)) gridVisible = !gridVisible;
@@ -1073,6 +1029,7 @@ namespace game {
             PlayerUpdate(gGame.player, dt);
             HeatUpdate(dt);
         }
+
         // Teleport zone: matches visual indicator (col 31, rows 18-19)
         {
             float gx, gy, cw, ch;
@@ -1086,10 +1043,14 @@ namespace game {
                 return 25; // -> SpringS1
         }
         sprite::updateAnimatedTiles(dt);
+
+        // Consume the collision system's trigger list and mark matching ice tiles
         for (auto& trigger : g_triggeredIceTiles)
             for (auto& ice : iceTiles)
                 if (ice.row == trigger.row && ice.col == trigger.col && !ice.triggered) ice.triggered = true;
         g_triggeredIceTiles.clear();
+
+        // Advance crack animation; destroy tile once the final frame is reached
         for (auto& ice : iceTiles) {
             if (ice.triggered && !ice.destroyed) {
                 ice.timer += dt;
@@ -1101,9 +1062,11 @@ namespace game {
         return 0;
     }
 
-    // ===================================================================
-    // SummerS4 draw
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Renders the summer background, all tiles (including cracking ice frames),
+    // the debug grid if enabled, the teleport zone indicator rectangles,
+    // the heat bar HUD, and the player.
+    // -------------------------------------------------------------------------
     void SummerS4::draw() const {
         AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
         AEGfxTexture* bg = sprite::summerBackground();
@@ -1116,14 +1079,8 @@ namespace game {
         drawTiles();
         if (gridVisible) drawGrid();
 
-        //printText(-0.95f, 0.9f, 0xFFFFFFFFu, "Summer Stage 4 - 32x20 Grid");
-        //printText(-0.95f, 0.7f, 0xFFFFFFFFu, "Press G to toggle grid");
-        //printText(-0.95f, 0.5f, 0xFFFFFFFFu, "Press ESC to return to menu");
-
         if (!camera::isTransitioning()) {
-            // Teleporter visual: Summer S4 top-right indicator
-            // User-facing grid position: column 32, rows 19-20
-            // Internal zero-based grid position: column 31, rows 18-19
+            // Teleporter visual: column 32, rows 19-20 (zero-based: col 31, rows 18-19)
             for (int r = 18; r <= 19; ++r) {
                 float gx, gy, cw, ch;
                 gridToWorld(31, r, gx, gy, cw, ch);
@@ -1135,9 +1092,10 @@ namespace game {
         PlayerDraw(gGame.player, gridVisible);
     }
 
-    // ===================================================================
-    // SummerS4 gridToWorld
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Converts a tile (col, row) index to world-space centre position and cell
+    // dimensions, accounting for the current viewport bounds.
+    // -------------------------------------------------------------------------
     void SummerS4::gridToWorld(int col, int row, float& xWorld, float& yWorld, float& cellW, float& cellH) const {
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();
         cellW = (maxX - minX) / static_cast<float>(gridCols);
@@ -1145,9 +1103,14 @@ namespace game {
         xWorld = minX + col * cellW; yWorld = minY + row * cellH;
     }
 
-    // ===================================================================
-    // SummerS4 drawTiles
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Iterates every tile in the map and draws the appropriate sprite or colour.
+    // Ice tiles (type 1) look up their per-tile crack frame from iceTiles and
+    // select the matching UV region from the crack sprite sheet, then skip
+    // the border pass since cracking ice is not treated as solid.
+    // The summer artifact (type 31) bobs vertically using a sine wave offset.
+    // Border lines are drawn on the exposed edges of remaining solid tiles.
+    // -------------------------------------------------------------------------
     void SummerS4::drawTiles() const {
         auto isSolid = [&](int r, int c) -> bool {
             if (r < 0 || r >= gridRows || c < 0 || c >= gridCols) return false;
@@ -1198,10 +1161,10 @@ namespace game {
                     AEGfxTexture* t = sprite::grass();
                     if (t) gfx::drawSprite(t, pos, 0.0f, size, 0, 0, 1, 1);
                     else   gfx::drawRectangle(pos, 0.0f, size, 0xFF00AA00u);
-                    // falls through to border pass (grass IS solid)
                 }
                 else if (tileType == 1) {
-                    // Cracking ice — per-tile frame
+                    // Cracking ice: look up the per-tile crack frame and select
+                    // the matching UV region from the crack sprite sheet
                     AEGfxTexture* crackTex = sprite::crack();
                     if (crackTex) {
                         int frameToUse = 0;
@@ -1214,8 +1177,9 @@ namespace game {
                     continue; // not in isSolid, skip borders
                 }
                 else if (sprite::drawAnimatedTile(tileType, pos, size)) { continue; }
-                else if (drawSpecialTile(tileType, pos, size)) { /* drawn */ }
+                else if (drawSpecialTile(tileType, pos, size)) { /* handled */ }
                 else if (tileType == 31) {
+                    // Summer artifact: bob up and down using a sine wave offset
                     AEGfxTexture* summerArtifactsTex = sprite::summerArtifacts();
                     float bobOffset = sinf((float)AEGetTime(nullptr) * 2.0f) * (size.y * 0.08f);
                     gfx::Vec2 artifactsPos{ pos.x, pos.y + bobOffset };
@@ -1260,26 +1224,22 @@ namespace game {
                 // ---- Borders (solid tiles only) ----
                 if (!isSolid(row, col)) continue;
 
-                if (!isSolid(row + 1, col)) {
+                if (!isSolid(row + 1, col))
                     gfx::drawRectangle({ pos.x, pos.y + size.y * 0.5f - border * 0.5f }, 0.0f, { size.x, border }, borderColor);
-                }
-                if (!isSolid(row - 1, col)) {
+                if (!isSolid(row - 1, col))
                     gfx::drawRectangle({ pos.x, pos.y - size.y * 0.5f + border * 0.5f }, 0.0f, { size.x, border }, borderColor);
-                }
-                if (!isSolid(row, col - 1)) {
+                if (!isSolid(row, col - 1))
                     gfx::drawRectangle({ pos.x - size.x * 0.5f + border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
-                }
-                if (!isSolid(row, col + 1)) {
+                if (!isSolid(row, col + 1))
                     gfx::drawRectangle({ pos.x + size.x * 0.5f - border * 0.5f, pos.y }, 0.0f, { border, size.y }, borderColor);
-                }
             }
         }
     }
-    // SummerS4::drawTiles() is identical to S3 above — same body, different class name
 
-    // ===================================================================
-    // SummerS4 drawGrid
-    // ===================================================================
+    // -------------------------------------------------------------------------
+    // Draws the debug grid overlay as a series of thin rectangles aligned to
+    // the tile cell boundaries across the full viewport.
+    // -------------------------------------------------------------------------
     void SummerS4::drawGrid() const {
         const u32 gc = 0x80FFFFFFu;
         float minX = AEGfxGetWinMinX(), maxX = AEGfxGetWinMaxX(), minY = AEGfxGetWinMinY(), maxY = AEGfxGetWinMaxY();

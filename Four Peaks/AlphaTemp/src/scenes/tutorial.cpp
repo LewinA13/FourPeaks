@@ -383,7 +383,7 @@ namespace game
     int (*Tutorial1::getTileMap())[32] { return tileMap; }
 
     // ===================================================================
-    // Tutorial1::update
+    // Handles input, player update, animation update, and teleporter trigger.
     // ===================================================================
     int Tutorial1::update(float dt)
     {
@@ -406,7 +406,7 @@ namespace game
     }
 
     // ===================================================================
-    // Tutorial1::draw
+    // background → tiles → grid → teleporter → player
     // ===================================================================
     void Tutorial1::draw() const
     {
@@ -445,7 +445,7 @@ namespace game
     int (*Tutorial2::getTileMap())[32] { return tileMap; }
 
     // ===================================================================
-    // Tutorial2::update
+    // Handles input, player update, animation update, and teleporter trigger.
     // ===================================================================
     int Tutorial2::update(float dt)
     {
@@ -468,7 +468,7 @@ namespace game
     }
 
     // ===================================================================
-    // Tutorial2::draw
+    // background → tiles → grid → teleporter → player
     // ===================================================================
     void Tutorial2::draw() const
     {
@@ -508,7 +508,7 @@ namespace game
     int (*Tutorial3::getTileMap())[32] { return tileMap; }
 
     // ===================================================================
-    // Tutorial3::update
+    // Handles input, player update, animation update, and teleporter trigger.
     // ===================================================================
     int Tutorial3::update(float dt)
     {
@@ -531,7 +531,7 @@ namespace game
     }
 
     // ===================================================================
-    // Tutorial3::draw
+    // background → tiles → grid → teleporter → player
     // ===================================================================
     void Tutorial3::draw() const
     {
