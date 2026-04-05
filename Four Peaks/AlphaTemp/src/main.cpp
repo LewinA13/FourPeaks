@@ -397,7 +397,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
     // Initialize the Alpha Engine.
-    AESysInit(hInstance, nCmdShow, 1600, 900, 1, 60, false, NULL);
+    AESysInit(hInstance, nCmdShow, 1600, 900, 0, 60, false, NULL);
 
     // Window title.
     AESysSetWindowTitle("Four Peaks Alpha");
